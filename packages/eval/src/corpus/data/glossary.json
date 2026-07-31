@@ -1,0 +1,89 @@
+[
+  {
+    "term": "GitHub",
+    "translations": {
+      "de": "GitHub",
+      "ja": "GitHub",
+      "es": "GitHub",
+      "ar": "GitHub",
+      "pt-BR": "GitHub"
+    }
+  },
+  {
+    "term": "OAuth",
+    "translations": {
+      "de": "OAuth",
+      "ja": "OAuth",
+      "es": "OAuth",
+      "pt-BR": "OAuth"
+    }
+  },
+  {
+    "term": "SSH",
+    "translations": {
+      "de": "SSH",
+      "ja": "SSH",
+      "es": "SSH",
+      "pt-BR": "SSH"
+    }
+  },
+  {
+    "term": "Markdown",
+    "translations": {
+      "de": "Markdown"
+    }
+  },
+  {
+    "term": "API",
+    "translations": {
+      "de": "API",
+      "ja": "API",
+      "es": "API",
+      "ar": "API",
+      "pt-BR": "API"
+    }
+  },
+  {
+    "term": "URL",
+    "translations": {
+      "de": "URL",
+      "ja": "URL",
+      "es": "URL",
+      "pt-BR": "URL"
+    }
+  },
+  {
+    "term": "Excalidraw",
+    "translations": {
+      "de": "Excalidraw",
+      "ja": "Excalidraw",
+      "es": "Excalidraw",
+      "ar": "Excalidraw",
+      "pt-BR": "Excalidraw"
+    }
+  },
+  {
+    "term": "Gitea",
+    "translations": {
+      "de": "Gitea",
+      "ja": "Gitea",
+      "es": "Gitea",
+      "pt-BR": "Gitea"
+    }
+  },
+  {
+    "term": "Zulip",
+    "translations": {
+      "de": "Zulip",
+      "ja": "Zulip",
+      "es": "Zulip"
+    }
+  },
+  {
+    "term": "webhook",
+    "translations": {
+      "es": "webhook",
+      "pt-BR": "webhook"
+    }
+  }
+]
