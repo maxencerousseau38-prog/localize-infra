@@ -1,0 +1,27 @@
+{
+  "name": "@localize-infra/eval",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "corpus:build": "tsx src/corpus/build.ts",
+    "translate:run": "tsx src/conditions/translate.ts",
+    "human-eval:generate": "tsx src/human-eval/export.ts",
+    "report:build": "tsx src/report/build.ts"
+  },
+  "dependencies": {
+    "@formatjs/icu-messageformat-parser": "^2.9.4",
+    "@localize-infra/schemas": "workspace:*",
+    "gettext-parser": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/gettext-parser": "^4.0.4",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
