@@ -11,6 +11,14 @@ payer de référence humaine.
 | [excalidraw](https://github.com/excalidraw/excalidraw) | MIT | JSON (`packages/excalidraw/locales/*.json`) | de, ja, es, ar, pt-BR |
 | [gitea](https://github.com/go-gitea/gitea) | MIT | JSON (`options/locale/locale_*.json`) | de, ja, es, pt-BR |
 | [zulip](https://github.com/zulip/zulip) | Apache-2.0 | gettext `.po` (`locale/*/LC_MESSAGES/django.po`) | de, ja, es, ar |
+| [syncthing](https://github.com/syncthing/syncthing) | MPL-2.0 | JSON (`gui/default/assets/lang/lang-*.json`) | de, ja, es, ar, pt-BR |
+| [wekan](https://github.com/wekan/wekan) | MIT | JSON (`imports/i18n/data/*.i18n.json`) | de, ja, es, ar, pt-BR |
+
+`syncthing` et `wekan` ont été ajoutés (Task 12) pour rééquilibrer `ar` et `pt-BR`, qui n'avaient
+que 2 sources contributrices chacune (contre 3 pour `de`/`ja`/`es`) avec les seules 3 sources
+pilotes ci-dessus. Les deux nouvelles sources couvrent les 5 locales cibles, y compris `ar` et
+`pt-BR` — vérifié via `gh api .../contents/<dossier-locale>` avant ajout, pas supposé depuis la
+réputation du projet.
 
 Chaque `CorpusEntry` conserve `sourceRepoUrl` et `sourceCommit` pour l'attribution et la reproductibilité.
 
@@ -22,7 +30,7 @@ pnpm --filter @localize-infra/eval run corpus:build
 
 Écrit `data/entries.json` et `data/glossary.json`. Les deux fichiers sont committés — le CI ne dépend jamais d'un accès réseau à ces dépôts externes.
 
-L'extraction brute des 3 sources produit environ 21 500 entrées ; `build.ts` en tire un échantillon stratifié d'environ 400 (`TARGET_CORPUS_SIZE`), réparti aussi équitablement que possible entre chaque combinaison (projet, locale) présente dans les données brutes, pour respecter la cible de 300-500 entrées de la spec §5. Le glossaire (`glossary.json`), lui, reste dérivé du corpus brut complet — pas de l'échantillon — car `deriveGlossary` s'appuie sur un seuil d'occurrences (`MIN_OCCURRENCES`) qui est plus fiable sur davantage de données.
+L'extraction brute des 5 sources produit environ 35 900 entrées ; `build.ts` en tire un échantillon stratifié d'environ 400 (`TARGET_CORPUS_SIZE`), réparti aussi équitablement que possible entre chaque combinaison (projet, locale) présente dans les données brutes, pour respecter la cible de 300-500 entrées de la spec §5. Le glossaire (`glossary.json`), lui, reste dérivé du corpus brut complet — pas de l'échantillon — car `deriveGlossary` s'appuie sur un seuil d'occurrences (`MIN_OCCURRENCES`) qui est plus fiable sur davantage de données.
 
 ## Simplifications assumées (Sprint 0)
 
