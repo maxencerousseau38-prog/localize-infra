@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { CorpusEntry, GlossaryEntry } from '@localize-infra/schemas'
 import type { Provider } from '../router/types.js'
 import { runTranslationPipeline } from './translate.js'
@@ -53,5 +53,19 @@ describe('runTranslationPipeline', () => {
     const failed = results.find((r) => r.provider === 'anthropic')
     expect(failed?.error).toBe('rate limited')
     expect(failed?.text).toBe('')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('routes every call through anthropic when EVAL_FORCE_PROVIDER=anthropic is set', async () => {
+    vi.stubEnv('EVAL_FORCE_PROVIDER', 'anthropic')
+    const results = await runTranslationPipeline(entries, glossary, {
+      anthropic: fakeProvider('anthropic'),
+      openai: fakeProvider('openai'),
+    })
+    expect(results).toHaveLength(2)
+    expect(results.every((r) => r.provider === 'anthropic')).toBe(true)
   })
 })

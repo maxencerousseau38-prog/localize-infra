@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { CorpusEntrySchema, GlossaryEntrySchema, type CorpusEntry, type GlossaryEntry, type TranslationResult } from '@localize-infra/schemas'
 import { getProvider, pickProvider } from '../router/index.js'
@@ -20,7 +20,8 @@ async function translateOne(
   glossary: GlossaryEntry[],
   providers: Providers,
 ): Promise<TranslationResult> {
-  const providerName = pickProvider(`${entry.id}-${condition}`)
+  const forcedProvider = process.env.EVAL_FORCE_PROVIDER
+  const providerName = forcedProvider === 'anthropic' || forcedProvider === 'openai' ? forcedProvider : pickProvider(`${entry.id}-${condition}`)
   const provider = providers[providerName]
   const modelId = providerName === 'anthropic' ? ANTHROPIC_MODEL : OPENAI_MODEL
   const request = condition === 'A' ? buildConditionAPrompt(entry) : buildConditionBPrompt(entry, glossary)
@@ -61,15 +62,51 @@ async function main(): Promise<void> {
   const glossary = (JSON.parse(readFileSync(join(DATA_DIR, 'glossary.json'), 'utf-8')) as unknown[]).map((g) =>
     GlossaryEntrySchema.parse(g),
   )
-  const results = await runTranslationPipeline(entries, glossary, {
-    anthropic: getProvider('anthropic'),
-    openai: getProvider('openai'),
-  })
-  writeFileSync(join(DATA_DIR, 'translations.json'), JSON.stringify(results, null, 2))
+  const providers: Providers = { anthropic: getProvider('anthropic'), openai: getProvider('openai') }
+  const outPath = join(DATA_DIR, 'translations.json')
+
+  // Operational note: this run is resumable across process invocations. The live corpus is
+  // large enough (403 entries x 2 conditions) that a single invocation can be interrupted
+  // (e.g. an external timeout) before completion. Re-running this script picks up exactly
+  // where the last run left off — already-recorded (corpusEntryId, condition) pairs are
+  // skipped rather than re-called and re-billed — and checkpoints to disk after every call so
+  // no completed work is ever lost. This does not change runTranslationPipeline's behavior or
+  // its exported signature (still covered by its existing unit tests); it only affects the CLI
+  // entrypoint below.
+  const results: TranslationResult[] = existsSync(outPath)
+    ? (JSON.parse(readFileSync(outPath, 'utf-8')) as TranslationResult[])
+    : []
+  const completed = new Set(results.map((r) => `${r.corpusEntryId}:${r.condition}`))
+
+  for (const entry of entries) {
+    for (const condition of ['A', 'B'] as const) {
+      const key = `${entry.id}:${condition}`
+      if (completed.has(key)) continue
+      const result = await translateOne(entry, condition, glossary, providers)
+      results.push(result)
+      completed.add(key)
+      // Checkpoint write, with a couple of short retries: on Windows this file is written
+      // once per API call (hundreds of times per run) and can occasionally hit a transient
+      // "file busy" error from antivirus/indexing. Losing the whole run to that would be far
+      // more wasteful (re-billed API calls on next resume) than a brief retry here.
+      for (let attempt = 0; ; attempt++) {
+        try {
+          writeFileSync(outPath, JSON.stringify(results, null, 2))
+          break
+        } catch (err) {
+          if (attempt >= 3) throw err
+          await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)))
+        }
+      }
+    }
+  }
+
   const failures = results.filter((r) => r.error !== null)
   console.log(`${results.length} translations written, ${failures.length} failed`)
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')) {
+const invokedPath = process.argv[1]?.replace(/\\/g, '/')
+const modulePath = new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')
+if (invokedPath === modulePath) {
   main()
 }
