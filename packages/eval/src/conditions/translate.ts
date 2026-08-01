@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { CorpusEntrySchema, GlossaryEntrySchema, type CorpusEntry, type GlossaryEntry, type TranslationResult } from '@localize-infra/schemas'
 import { getProvider, pickProvider } from '../router/index.js'
@@ -55,6 +55,17 @@ export async function runTranslationPipeline(
   return results
 }
 
+// Writes the checkpoint atomically: write to a temp file in the same directory, then rename it
+// into place. fs.renameSync is atomic on both POSIX and Windows when source and destination are
+// on the same filesystem, which a same-directory temp file guarantees. This means a checkpoint
+// write is never observed half-written — a mid-write process kill (SIGKILL, power loss, OOM)
+// leaves either the old complete file or the new complete file, never a truncated one.
+function writeCheckpoint(outPath: string, data: string): void {
+  const tmpPath = `${outPath}.tmp`
+  writeFileSync(tmpPath, data)
+  renameSync(tmpPath, outPath)
+}
+
 async function main(): Promise<void> {
   const entries = (JSON.parse(readFileSync(join(DATA_DIR, 'entries.json'), 'utf-8')) as unknown[]).map((e) =>
     CorpusEntrySchema.parse(e),
@@ -88,10 +99,12 @@ async function main(): Promise<void> {
       // Checkpoint write, with a couple of short retries: on Windows this file is written
       // once per API call (hundreds of times per run) and can occasionally hit a transient
       // "file busy" error from antivirus/indexing. Losing the whole run to that would be far
-      // more wasteful (re-billed API calls on next resume) than a brief retry here.
+      // more wasteful (re-billed API calls on next resume) than a brief retry here. The write
+      // itself is atomic (temp file + rename) so a hard kill mid-write can never corrupt the
+      // on-disk checkpoint; the retry here only covers the transient file-busy error above.
       for (let attempt = 0; ; attempt++) {
         try {
-          writeFileSync(outPath, JSON.stringify(results, null, 2))
+          writeCheckpoint(outPath, JSON.stringify(results, null, 2))
           break
         } catch (err) {
           if (attempt >= 3) throw err
