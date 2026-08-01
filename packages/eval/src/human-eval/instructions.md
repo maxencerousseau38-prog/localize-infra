@@ -14,16 +14,18 @@ de référence. Ne cherchez pas à deviner — jugez uniquement la qualité.
 
 ## Rendu attendu
 
-Un fichier `judgments.json`, un objet par tâche :
+Un fichier `judgments.json` contenant un **tableau JSON** (`[...]`), un objet par tâche :
 
 ```json
-{
-  "taskId": "excalidraw-labels.paste-de-A_vs_C",
-  "evaluatorId": "votre-identifiant",
-  "preferred": "left",
-  "errorTags": ["registre"],
-  "notes": "Ton trop formel pour un bouton"
-}
+[
+  {
+    "taskId": "excalidraw-labels.paste-de-A_vs_C",
+    "evaluatorId": "votre-identifiant",
+    "preferred": "left",
+    "errorTags": ["registre"],
+    "notes": "Ton trop formel pour un bouton"
+  }
+]
 ```
 
 `taskId` doit correspondre exactement au champ `id` de `tasks.csv`/`tasks.json`.

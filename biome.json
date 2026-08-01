@@ -3,5 +3,12 @@
   "organizeImports": { "enabled": true },
   "linter": { "enabled": true, "rules": { "recommended": true } },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2 },
-  "javascript": { "formatter": { "quoteStyle": "single" } }
+  "javascript": { "formatter": { "quoteStyle": "single" } },
+  "files": {
+    "ignore": [
+      "packages/eval/src/corpus/data/**",
+      "packages/eval/src/human-eval/export/**",
+      "**/dist/**"
+    ]
+  }
 }

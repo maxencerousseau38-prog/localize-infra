@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import type { CorpusEntry } from '@localize-infra/schemas'
-import { deriveGlossary } from './glossary.js'
+import type { CorpusEntry } from '@localize-infra/schemas';
+import { describe, expect, it } from 'vitest';
+import { deriveGlossary } from './glossary.js';
 
 function entry(overrides: Partial<CorpusEntry>): CorpusEntry {
   return {
@@ -18,7 +18,7 @@ function entry(overrides: Partial<CorpusEntry>): CorpusEntry {
     humanReference: 'Mit GitHub anmelden',
     maxLength: null,
     ...overrides,
-  }
+  };
 }
 
 describe('deriveGlossary', () => {
@@ -27,12 +27,16 @@ describe('deriveGlossary', () => {
       entry({ id: '1' }),
       entry({ id: '2' }),
       entry({ id: '3' }),
-      entry({ id: '4', sourceText: 'Connect GitHub account', humanReference: 'GitHub-Konto verbinden' }),
-    ]
-    const glossary = deriveGlossary(entries)
-    const github = glossary.find((g) => g.term === 'GitHub')
-    expect(github?.translations.de).toBe('GitHub')
-  })
+      entry({
+        id: '4',
+        sourceText: 'Connect GitHub account',
+        humanReference: 'GitHub-Konto verbinden',
+      }),
+    ];
+    const glossary = deriveGlossary(entries);
+    const github = glossary.find((g) => g.term === 'GitHub');
+    expect(github?.translations.de).toBe('GitHub');
+  });
 
   it('drops a term for a locale below the 80% verbatim threshold', () => {
     const entries = [
@@ -41,14 +45,14 @@ describe('deriveGlossary', () => {
       entry({ id: '3' }),
       entry({ id: '4', humanReference: 'Übersetzt ohne den Begriff' }),
       entry({ id: '5', humanReference: 'Auch ohne den Begriff' }),
-    ]
-    const glossary = deriveGlossary(entries)
-    expect(glossary.find((g) => g.term === 'GitHub')).toBeUndefined()
-  })
+    ];
+    const glossary = deriveGlossary(entries);
+    expect(glossary.find((g) => g.term === 'GitHub')).toBeUndefined();
+  });
 
   it('drops a term seen fewer than 3 times for a locale', () => {
-    const entries = [entry({ id: '1' }), entry({ id: '2' })]
-    const glossary = deriveGlossary(entries)
-    expect(glossary.find((g) => g.term === 'GitHub')).toBeUndefined()
-  })
-})
+    const entries = [entry({ id: '1' }), entry({ id: '2' })];
+    const glossary = deriveGlossary(entries);
+    expect(glossary.find((g) => g.term === 'GitHub')).toBeUndefined();
+  });
+});

@@ -1,6 +1,10 @@
-import { describe, expect, it } from 'vitest'
-import type { CorpusEntry, GlossaryEntry, TranslationResult } from '@localize-infra/schemas'
-import { scoreTranslation } from './score.js'
+import type {
+  CorpusEntry,
+  GlossaryEntry,
+  TranslationResult,
+} from '@localize-infra/schemas';
+import { describe, expect, it } from 'vitest';
+import { scoreTranslation } from './score.js';
 
 const entry: CorpusEntry = {
   id: 'x',
@@ -16,9 +20,11 @@ const entry: CorpusEntry = {
   targetLocale: 'de',
   humanReference: '{{count}} Element(e) von GitHub löschen?',
   maxLength: 60,
-}
+};
 
-const glossary: GlossaryEntry[] = [{ term: 'GitHub', translations: { de: 'GitHub' } }]
+const glossary: GlossaryEntry[] = [
+  { term: 'GitHub', translations: { de: 'GitHub' } },
+];
 
 function result(overrides: Partial<TranslationResult>): TranslationResult {
   return {
@@ -30,7 +36,7 @@ function result(overrides: Partial<TranslationResult>): TranslationResult {
     text: '{{count}} Element(e) von GitHub löschen?',
     error: null,
     ...overrides,
-  }
+  };
 }
 
 describe('scoreTranslation', () => {
@@ -43,16 +49,24 @@ describe('scoreTranslation', () => {
       pluralCategoriesCorrect: null,
       lengthOverflow: false,
       glossaryHits: [{ term: 'GitHub', respected: true }],
-    })
-  })
+    });
+  });
 
   it('flags a dropped placeholder', () => {
-    const score = scoreTranslation(entry, result({ text: 'Element von GitHub löschen?' }), glossary)
-    expect(score.placeholderIntact).toBe(false)
-  })
+    const score = scoreTranslation(
+      entry,
+      result({ text: 'Element von GitHub löschen?' }),
+      glossary,
+    );
+    expect(score.placeholderIntact).toBe(false);
+  });
 
   it('flags a length overflow against the entry maxLength', () => {
-    const score = scoreTranslation(entry, result({ text: '{{count}} '.repeat(20) + 'GitHub' }), glossary)
-    expect(score.lengthOverflow).toBe(true)
-  })
-})
+    const score = scoreTranslation(
+      entry,
+      result({ text: `${'{{count}} '.repeat(20)}GitHub` }),
+      glossary,
+    );
+    expect(score.lengthOverflow).toBe(true);
+  });
+});

@@ -1,7 +1,7 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
-export const TARGET_LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'] as const
-export type TargetLocale = (typeof TARGET_LOCALES)[number]
+export const TARGET_LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'] as const;
+export type TargetLocale = (typeof TARGET_LOCALES)[number];
 
 export const ERROR_TAGS = [
   'terminologie',
@@ -10,8 +10,8 @@ export const ERROR_TAGS = [
   'troncature',
   'placeholder_corrompu',
   'contresens',
-] as const
-export type ErrorTag = (typeof ERROR_TAGS)[number]
+] as const;
+export type ErrorTag = (typeof ERROR_TAGS)[number];
 
 export const CorpusEntrySchema = z.object({
   id: z.string().min(1),
@@ -27,8 +27,8 @@ export const CorpusEntrySchema = z.object({
   targetLocale: z.enum(TARGET_LOCALES),
   humanReference: z.string().min(1),
   maxLength: z.number().int().positive().nullable(),
-})
-export type CorpusEntry = z.infer<typeof CorpusEntrySchema>
+});
+export type CorpusEntry = z.infer<typeof CorpusEntrySchema>;
 
 export const TranslationResultSchema = z.object({
   corpusEntryId: z.string().min(1),
@@ -38,13 +38,13 @@ export const TranslationResultSchema = z.object({
   modelId: z.string().min(1),
   text: z.string(),
   error: z.string().nullable(),
-})
-export type TranslationResult = z.infer<typeof TranslationResultSchema>
+});
+export type TranslationResult = z.infer<typeof TranslationResultSchema>;
 
 export const GlossaryHitSchema = z.object({
   term: z.string().min(1),
   respected: z.boolean(),
-})
+});
 
 export const DeterministicScoreSchema = z.object({
   corpusEntryId: z.string().min(1),
@@ -54,14 +54,14 @@ export const DeterministicScoreSchema = z.object({
   pluralCategoriesCorrect: z.boolean().nullable(),
   lengthOverflow: z.boolean(),
   glossaryHits: z.array(GlossaryHitSchema),
-})
-export type DeterministicScore = z.infer<typeof DeterministicScoreSchema>
+});
+export type DeterministicScore = z.infer<typeof DeterministicScoreSchema>;
 
 export const GlossaryEntrySchema = z.object({
   term: z.string().min(1),
   translations: z.record(z.string()),
-})
-export type GlossaryEntry = z.infer<typeof GlossaryEntrySchema>
+});
+export type GlossaryEntry = z.infer<typeof GlossaryEntrySchema>;
 
 export const ComparisonTaskSchema = z.object({
   id: z.string().min(1),
@@ -72,8 +72,8 @@ export const ComparisonTaskSchema = z.object({
   right: z.string(),
   leftIsCondition: z.enum(['A', 'B', 'C']),
   rightIsCondition: z.enum(['A', 'B', 'C']),
-})
-export type ComparisonTask = z.infer<typeof ComparisonTaskSchema>
+});
+export type ComparisonTask = z.infer<typeof ComparisonTaskSchema>;
 
 export const ComparisonJudgmentSchema = z.object({
   taskId: z.string().min(1),
@@ -81,5 +81,5 @@ export const ComparisonJudgmentSchema = z.object({
   preferred: z.enum(['left', 'right', 'equivalent']),
   errorTags: z.array(z.enum(ERROR_TAGS)),
   notes: z.string().nullable(),
-})
-export type ComparisonJudgment = z.infer<typeof ComparisonJudgmentSchema>
+});
+export type ComparisonJudgment = z.infer<typeof ComparisonJudgmentSchema>;

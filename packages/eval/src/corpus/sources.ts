@@ -1,28 +1,28 @@
-export type LocaleFormat = 'json' | 'po'
+export type LocaleFormat = 'json' | 'po';
 
 export interface JsonSource {
-  project: string
-  license: string
-  repoUrl: string
-  commit: string
-  format: 'json'
-  sourceFilePath: string
-  localeFilePath: (locale: string) => string
-  locales: Partial<Record<'de' | 'ja' | 'es' | 'ar' | 'pt-BR', string>>
+  project: string;
+  license: string;
+  repoUrl: string;
+  commit: string;
+  format: 'json';
+  sourceFilePath: string;
+  localeFilePath: (locale: string) => string;
+  locales: Partial<Record<'de' | 'ja' | 'es' | 'ar' | 'pt-BR', string>>;
 }
 
 export interface PoSource {
-  project: string
-  license: string
-  repoUrl: string
-  commit: string
-  format: 'po'
-  sourceFilePath: (locale: string) => string
-  localeFilePath: (locale: string) => string
-  locales: Partial<Record<'de' | 'ja' | 'es' | 'ar' | 'pt-BR', string>>
+  project: string;
+  license: string;
+  repoUrl: string;
+  commit: string;
+  format: 'po';
+  sourceFilePath: (locale: string) => string;
+  localeFilePath: (locale: string) => string;
+  locales: Partial<Record<'de' | 'ja' | 'es' | 'ar' | 'pt-BR', string>>;
 }
 
-export type CorpusSource = JsonSource | PoSource
+export type CorpusSource = JsonSource | PoSource;
 
 export const CORPUS_SOURCES: CorpusSource[] = [
   {
@@ -32,8 +32,15 @@ export const CORPUS_SOURCES: CorpusSource[] = [
     commit: '786ab266ff3a9cfffaed16804cf9132b44bc08ae',
     format: 'json',
     sourceFilePath: 'packages/excalidraw/locales/en.json',
-    localeFilePath: (fileLocale) => `packages/excalidraw/locales/${fileLocale}.json`,
-    locales: { de: 'de-DE', ja: 'ja-JP', es: 'es-ES', ar: 'ar-SA', 'pt-BR': 'pt-BR' },
+    localeFilePath: (fileLocale) =>
+      `packages/excalidraw/locales/${fileLocale}.json`,
+    locales: {
+      de: 'de-DE',
+      ja: 'ja-JP',
+      es: 'es-ES',
+      ar: 'ar-SA',
+      'pt-BR': 'pt-BR',
+    },
   },
   {
     project: 'gitea',
@@ -51,8 +58,10 @@ export const CORPUS_SOURCES: CorpusSource[] = [
     repoUrl: 'https://github.com/zulip/zulip',
     commit: '83cdbfd28c14bb950d67e578893a062add8af633',
     format: 'po',
-    sourceFilePath: (fileLocale) => `locale/${fileLocale}/LC_MESSAGES/django.po`,
-    localeFilePath: (fileLocale) => `locale/${fileLocale}/LC_MESSAGES/django.po`,
+    sourceFilePath: (fileLocale) =>
+      `locale/${fileLocale}/LC_MESSAGES/django.po`,
+    localeFilePath: (fileLocale) =>
+      `locale/${fileLocale}/LC_MESSAGES/django.po`,
     locales: { de: 'de', ja: 'ja', es: 'es', ar: 'ar' },
   },
   {
@@ -62,7 +71,8 @@ export const CORPUS_SOURCES: CorpusSource[] = [
     commit: 'bcef5c5bc68dddfb68a3d341f41fad44c11fb52e',
     format: 'json',
     sourceFilePath: 'gui/default/assets/lang/lang-en.json',
-    localeFilePath: (fileLocale) => `gui/default/assets/lang/lang-${fileLocale}.json`,
+    localeFilePath: (fileLocale) =>
+      `gui/default/assets/lang/lang-${fileLocale}.json`,
     locales: { de: 'de', ja: 'ja', es: 'es', ar: 'ar', 'pt-BR': 'pt-BR' },
   },
   {
@@ -75,4 +85,4 @@ export const CORPUS_SOURCES: CorpusSource[] = [
     localeFilePath: (fileLocale) => `imports/i18n/data/${fileLocale}.i18n.json`,
     locales: { de: 'de', ja: 'ja', es: 'es', ar: 'ar', 'pt-BR': 'pt-BR' },
   },
-]
+];
