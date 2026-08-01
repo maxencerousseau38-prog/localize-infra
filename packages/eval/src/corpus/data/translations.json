@@ -918,24 +918,6 @@
     "error": null
   },
   {
-    "corpusEntryId": "excalidraw-labels.large-ja",
-    "condition": "A",
-    "targetLocale": "ja",
-    "provider": "anthropic",
-    "modelId": "claude-sonnet-5",
-    "text": "",
-    "error": null
-  },
-  {
-    "corpusEntryId": "excalidraw-labels.large-ja",
-    "condition": "B",
-    "targetLocale": "ja",
-    "provider": "anthropic",
-    "modelId": "claude-sonnet-5",
-    "text": "",
-    "error": null
-  },
-  {
     "corpusEntryId": "excalidraw-labels.loadingScene-ja",
     "condition": "A",
     "targetLocale": "ja",
@@ -978,15 +960,6 @@
     "provider": "anthropic",
     "modelId": "claude-sonnet-5",
     "text": "ストローク",
-    "error": null
-  },
-  {
-    "corpusEntryId": "excalidraw-labels.stroke-ja",
-    "condition": "B",
-    "targetLocale": "ja",
-    "provider": "anthropic",
-    "modelId": "claude-sonnet-5",
-    "text": "",
     "error": null
   },
   {
@@ -3219,15 +3192,6 @@
     "provider": "anthropic",
     "modelId": "claude-sonnet-5",
     "text": "Administratoren müssen Branch-Schutzregeln befolgen",
-    "error": null
-  },
-  {
-    "corpusEntryId": "gitea-repo.settings.event_statuses_desc-de",
-    "condition": "A",
-    "targetLocale": "de",
-    "provider": "anthropic",
-    "modelId": "claude-sonnet-5",
-    "text": "API による Commit Status の更新。\n\nWait, the request says translate to German (de), but the content shows Japanese context. Let me provide correct German translation.\n\nÜber die API aktualisierter Commit-Status.",
     "error": null
   },
   {
@@ -7251,6 +7215,42 @@
     "provider": "anthropic",
     "modelId": "claude-sonnet-5",
     "text": "ابدأ محادثة",
+    "error": null
+  },
+  {
+    "corpusEntryId": "excalidraw-labels.large-ja",
+    "condition": "B",
+    "targetLocale": "ja",
+    "provider": "anthropic",
+    "modelId": "claude-sonnet-5",
+    "text": "大",
+    "error": null
+  },
+  {
+    "corpusEntryId": "excalidraw-labels.stroke-ja",
+    "condition": "B",
+    "targetLocale": "ja",
+    "provider": "anthropic",
+    "modelId": "claude-sonnet-5",
+    "text": "ストローク",
+    "error": null
+  },
+  {
+    "corpusEntryId": "gitea-repo.settings.event_statuses_desc-de",
+    "condition": "A",
+    "targetLocale": "de",
+    "provider": "anthropic",
+    "modelId": "claude-sonnet-5",
+    "text": "Commit-Status über die API aktualisiert.",
+    "error": null
+  },
+  {
+    "corpusEntryId": "excalidraw-labels.large-ja",
+    "condition": "A",
+    "targetLocale": "ja",
+    "provider": "anthropic",
+    "modelId": "claude-sonnet-5",
+    "text": "Large",
     "error": null
   }
 ]

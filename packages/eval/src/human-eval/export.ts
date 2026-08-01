@@ -7,7 +7,7 @@ const DATA_DIR = join(process.cwd(), 'src/corpus/data')
 const EXPORT_DIR = join(process.cwd(), 'src/human-eval/export')
 
 function csvField(value: string): string {
-  if (value.includes(',') || value.includes('"')) {
+  if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
     return `"${value.replace(/"/g, '""')}"`
   }
   return value

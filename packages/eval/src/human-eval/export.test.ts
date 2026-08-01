@@ -22,4 +22,21 @@ describe('tasksToCsv', () => {
     expect(lines[0]).toBe('id,targetLocale,pairType,left,right')
     expect(lines[1]).toBe('x-A_vs_C,de,A_vs_C,A-text,"Einfügen, mit ""Komma"""')
   })
+
+  it('quotes a field containing an embedded newline per RFC4180', () => {
+    const tasksWithNewline: ComparisonTask[] = [
+      {
+        id: 'y-A_vs_C',
+        corpusEntryId: 'y',
+        targetLocale: 'de',
+        pairType: 'A_vs_C',
+        left: 'line one\nline two',
+        right: 'plain',
+        leftIsCondition: 'A',
+        rightIsCondition: 'C',
+      },
+    ]
+    const csv = tasksToCsv(tasksWithNewline)
+    expect(csv).toBe('id,targetLocale,pairType,left,right\ny-A_vs_C,de,A_vs_C,"line one\nline two",plain\n')
+  })
 })

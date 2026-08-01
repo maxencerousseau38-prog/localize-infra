@@ -1024,7 +1024,7 @@
     "corpusEntryId": "excalidraw-labels.large-ja",
     "targetLocale": "ja",
     "pairType": "A_vs_C",
-    "left": "",
+    "left": "Large",
     "right": "大",
     "leftIsCondition": "A",
     "rightIsCondition": "C"
@@ -1035,7 +1035,7 @@
     "targetLocale": "ja",
     "pairType": "B_vs_C",
     "left": "大",
-    "right": "",
+    "right": "大",
     "leftIsCondition": "C",
     "rightIsCondition": "B"
   },
@@ -1094,7 +1094,7 @@
     "corpusEntryId": "excalidraw-labels.stroke-ja",
     "targetLocale": "ja",
     "pairType": "B_vs_C",
-    "left": "",
+    "left": "ストローク",
     "right": "線",
     "leftIsCondition": "B",
     "rightIsCondition": "C"
@@ -3584,7 +3584,7 @@
     "corpusEntryId": "gitea-repo.settings.event_statuses_desc-de",
     "targetLocale": "de",
     "pairType": "A_vs_C",
-    "left": "API による Commit Status の更新。\n\nWait, the request says translate to German (de), but the content shows Japanese context. Let me provide correct German translation.\n\nÜber die API aktualisierter Commit-Status.",
+    "left": "Commit-Status über die API aktualisiert.",
     "right": "Commit-Status von der API aktualisiert.",
     "leftIsCondition": "A",
     "rightIsCondition": "C"

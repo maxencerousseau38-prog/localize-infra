@@ -101,14 +101,14 @@ excalidraw-labels.copyElementLink-ja-A_vs_C,ja,A_vs_C,オブジェクトへの�
 excalidraw-labels.copyElementLink-ja-B_vs_C,ja,B_vs_C,オブジェクトへのリンクをコピー,オブジェクトへのリンクをコピー
 excalidraw-labels.elementLock.unlockAll-ja-A_vs_C,ja,A_vs_C,すべてのロックを解除,すべてロック解除
 excalidraw-labels.elementLock.unlockAll-ja-B_vs_C,ja,B_vs_C,すべて解除,すべてのロックを解除
-excalidraw-labels.large-ja-A_vs_C,ja,A_vs_C,,大
-excalidraw-labels.large-ja-B_vs_C,ja,B_vs_C,大,
+excalidraw-labels.large-ja-A_vs_C,ja,A_vs_C,Large,大
+excalidraw-labels.large-ja-B_vs_C,ja,B_vs_C,大,大
 excalidraw-labels.loadingScene-ja-A_vs_C,ja,A_vs_C,シーンを読み込み中…,シーンを読み込んでいます…
 excalidraw-labels.loadingScene-ja-B_vs_C,ja,B_vs_C,シーン読み込み中…,シーンを読み込み中…
 excalidraw-labels.removeFromLibrary-ja-A_vs_C,ja,A_vs_C,ライブラリから削除,ライブラリから削除
 excalidraw-labels.removeFromLibrary-ja-B_vs_C,ja,B_vs_C,ライブラリから削除,ライブラリから削除
 excalidraw-labels.stroke-ja-A_vs_C,ja,A_vs_C,線,ストローク
-excalidraw-labels.stroke-ja-B_vs_C,ja,B_vs_C,,線
+excalidraw-labels.stroke-ja-B_vs_C,ja,B_vs_C,ストローク,線
 excalidraw-labels.viewMode-ja-A_vs_C,ja,A_vs_C,閲覧モード,ビューモード
 excalidraw-labels.viewMode-ja-B_vs_C,ja,B_vs_C,モード表示,閲覧モード
 excalidraw-mermaid.syntax-ja-A_vs_C,ja,A_vs_C,Mermaid構文,Mermaid 構文
@@ -183,12 +183,12 @@ excalidraw-roomDialog.desc_intro-es-A_vs_C,es,A_vs_C,Invita a personas a colabor
 excalidraw-roomDialog.desc_intro-es-B_vs_C,es,B_vs_C,Invita a gente a colaborar en tu dibujo.,Invita a otras personas a colaborar en tu dibujo.
 excalidraw-stats.scene-es-A_vs_C,es,A_vs_C,Escena,Escena
 excalidraw-stats.scene-es-B_vs_C,es,B_vs_C,Escena,Escena
-excalidraw-toast.copyToClipboardAsSvg-es-A_vs_C,es,A_vs_C,Copiado {{exportSelection}} al portapapeles como SVG
-({{exportColorScheme}}),Copiado {{exportSelection}} al portapapeles como PNG
-({{exportColorScheme}})
-excalidraw-toast.copyToClipboardAsSvg-es-B_vs_C,es,B_vs_C,Copiado {{exportSelection}} al portapapeles como PNG
-({{exportColorScheme}}),{{exportSelection}} copiado al portapapeles como SVG
-({{exportColorScheme}})
+excalidraw-toast.copyToClipboardAsSvg-es-A_vs_C,es,A_vs_C,"Copiado {{exportSelection}} al portapapeles como SVG
+({{exportColorScheme}})","Copiado {{exportSelection}} al portapapeles como PNG
+({{exportColorScheme}})"
+excalidraw-toast.copyToClipboardAsSvg-es-B_vs_C,es,B_vs_C,"Copiado {{exportSelection}} al portapapeles como PNG
+({{exportColorScheme}})","{{exportSelection}} copiado al portapapeles como SVG
+({{exportColorScheme}})"
 excalidraw-alerts.cannotExportEmptyCanvas-ar-A_vs_C,ar,A_vs_C,لا يمكن تصدير لوحة فارغة.,لا يمكن تصدير لوحة رسم فارغة.
 excalidraw-alerts.cannotExportEmptyCanvas-ar-B_vs_C,ar,B_vs_C,لا يمكن تصدير لوحة فارغة.,لا يمكن تصدير لوحة فارغة.
 excalidraw-alerts.invalidEncryptionKey-ar-A_vs_C,ar,A_vs_C,يجب أن يتكون مفتاح التشفير من 22 حرفًا. التعاون المباشر معطّل.,مفتاح التشفير يجب أن يكون من 22 حرفًا. التعاون المباشر معطل.
@@ -361,11 +361,7 @@ gitea-repo.pulls.upstream_diverging_merge_confirm-de-A_vs_C,de,A_vs_C,Möchtest 
 gitea-repo.pulls.upstream_diverging_merge_confirm-de-B_vs_C,de,B_vs_C,"Möchtest du ""%[1]s"" mit ""%[2]s"" zusammenführen?",Möchtest du „%[1]s“ in „%[2]s“ mergen?
 gitea-repo.settings.block_admin_merge_override-de-A_vs_C,de,A_vs_C,Administratoren müssen die Regeln zum Schutz von Branches befolgen,Administratoren müssen die Schutzregeln für Branches befolgen
 gitea-repo.settings.block_admin_merge_override-de-B_vs_C,de,B_vs_C,Administratoren müssen die Schutzregeln für Branches befolgen,Administratoren müssen Branch-Schutzregeln befolgen
-gitea-repo.settings.event_statuses_desc-de-A_vs_C,de,A_vs_C,"API による Commit Status の更新。
-
-Wait, the request says translate to German (de), but the content shows Japanese context. Let me provide correct German translation.
-
-Über die API aktualisierter Commit-Status.",Commit-Status von der API aktualisiert.
+gitea-repo.settings.event_statuses_desc-de-A_vs_C,de,A_vs_C,Commit-Status über die API aktualisiert.,Commit-Status von der API aktualisiert.
 gitea-repo.settings.event_statuses_desc-de-B_vs_C,de,B_vs_C,Commit-Status von der API aktualisiert.,Commit-Status über die API aktualisiert.
 gitea-repo.settings.protect_merge_whitelist_committers_desc-de-A_vs_C,de,A_vs_C,Erlaube Nutzern oder Teams auf der Genehmigungsliste Pull-Requests in diesen Branch zu mergen.,"Nur Benutzern oder Teams, die auf der Positivliste stehen, erlauben, Pull Requests in diesen Branch zusammenzuführen."
 gitea-repo.settings.protect_merge_whitelist_committers_desc-de-B_vs_C,de,B_vs_C,Nur zugelassene Benutzer oder Teams dürfen Pull-Requests in diesen Branch mergen.,Erlaube Nutzern oder Teams auf der Genehmigungsliste Pull-Requests in diesen Branch zu mergen.
@@ -565,9 +561,9 @@ gitea-settings.openid_deletion_success-pt-BR-A_vs_C,pt-BR,A_vs_C,O endereço de 
 gitea-settings.openid_deletion_success-pt-BR-B_vs_C,pt-BR,B_vs_C,O endereço OpenID foi removido.,O endereço de OpenID foi removido.
 gitea-settings.update_profile_success-pt-BR-A_vs_C,pt-BR,A_vs_C,Seu perfil foi atualizado.,Seu perfil foi atualizado.
 gitea-settings.update_profile_success-pt-BR-B_vs_C,pt-BR,B_vs_C,Seu perfil foi atualizado.,Seu perfil foi atualizado.
-zulip-Cjpwb2ludF9yaWdodDogIFVz-de-A_vs_C,de,A_vs_C,
+zulip-Cjpwb2ludF9yaWdodDogIFVz-de-A_vs_C,de,A_vs_C,"
 :point_right:  Verwende dieses Thema um [Zulips Nachrichtenfunktionen]({format_message_help_url}) auszuprobieren.
-,":point_right: Nutze dieses Thema, um die [Nachrichtenfunktionen von Zulip]({format_message_help_url}) auszuprobieren."
+",":point_right: Nutze dieses Thema, um die [Nachrichtenfunktionen von Zulip]({format_message_help_url}) auszuprobieren."
 zulip-JShyZWZlcnJlcl9mdWxsX25h-de-A_vs_C,de,A_vs_C,"%(referrer_full_name)s (%(referrer_email)s) möchte, dass du dich bei Zulip anmeldest – dem Team-Kommunikationstool, das für Produktivität entwickelt wurde.","%(referrer_full_name)s (%(referrer_email)s) hat dich zu Zulip eingeladen &mdash; dem Team-Kommunikationstool, das für Produktivität entworfen wurde."
 zulip-JShyZWZlcnJlcl9mdWxsX25h-de-B_vs_C,de,B_vs_C,"%(referrer_full_name)s (%(referrer_email)s) hat dich zu Zulip eingeladen &mdash; dem Team-Kommunikationstool, das für Produktivität entworfen wurde.","%(referrer_full_name)s (%(referrer_email)s) möchte, dass Sie sich bei Zulip anschließen -- dem für Produktivität entwickelten Team-Kommunikationstool."
 zulip-Q29uZmlybWF0aW9uIGxpbmsg-de-A_vs_C,de,A_vs_C,Der Bestätigungslink ist abgelaufen oder wurde deaktiviert,Bestätigungslink abgelaufen oder deaktiviert
@@ -628,12 +624,12 @@ zulip-WnVsaXAgZ3VpZGUgZm9yIGNv-de-A_vs_C,de,A_vs_C,Zulip-Leitfaden für Communit
 zulip-WnVsaXAgZ3VpZGUgZm9yIGNv-de-B_vs_C,de,B_vs_C,Zulip-Leitfaden für Gemeinschaften,Zulip-Leitfaden für Communities
 zulip-e2tleV9uYW1lfSBrZXkgaXMg-de-A_vs_C,de,A_vs_C,Der Key {key_name} fehlt in {var_name},`{key_name}`-Schlüssel fehlt in `{var_name}`
 zulip-e2tleV9uYW1lfSBrZXkgaXMg-de-B_vs_C,de,B_vs_C,Schlüssel {key_name} fehlt in {var_name},Der Key {key_name} fehlt in {var_name}
-zulip-Cjpwb2ludF9yaWdodDogIFVz-ja-A_vs_C,ja,A_vs_C,
+zulip-Cjpwb2ludF9yaWdodDogIFVz-ja-A_vs_C,ja,A_vs_C,"
 :point_right: このトピックを使って、[Zulipのメッセージ機能]({format_message_help_url})を試してみましょう。
-,:point_right: この機能を試すには、[Zulipのメッセージ機能]({format_message_help_url})を使ってください。
-zulip-Cjpwb2ludF9yaWdodDogIFVz-ja-B_vs_C,ja,B_vs_C,:point_right:  このトピックで[Zulipのメッセージ機能]({format_message_help_url})を試してみましょう。,
+",:point_right: この機能を試すには、[Zulipのメッセージ機能]({format_message_help_url})を使ってください。
+zulip-Cjpwb2ludF9yaWdodDogIFVz-ja-B_vs_C,ja,B_vs_C,:point_right:  このトピックで[Zulipのメッセージ機能]({format_message_help_url})を試してみましょう。,"
 :point_right: このトピックを使って、[Zulipのメッセージ機能]({format_message_help_url})を試してみましょう。
-
+"
 zulip-PGEgaHJlZj0ibWFpbHRvOiUo-ja-A_vs_C,ja,A_vs_C,"<a href=""mailto:%(support_email)s"">このサーバーの管理者に連絡する</a>にはこちらへ。","サポートについては、<a href=""mailto:%(support_email)s"">このサーバーの管理者にお問い合わせください</a>。"
 zulip-PGEgaHJlZj0ibWFpbHRvOiUo-ja-B_vs_C,ja,B_vs_C,"サポートについては、<a href=""mailto:%(support_email)s"">このサーバーの管理者にお問い合わせください</a>。","サポートが必要な場合は<a href=""mailto:%(support_email)s"">このサーバーの管理者に連絡</a>してください。"
 zulip-Q29udHJpYnV0aW5nIGd1aWRl-ja-A_vs_C,ja,A_vs_C,コントリビューションガイド,貢献ガイド
@@ -689,23 +685,23 @@ zulip-W0EgbWVzc2FnZV0oe21lc3Nh-ja-B_vs_C,ja,B_vs_C,{user}が[1件のメッセー
 zulip-WW91IGRvIG5vdCBoYXZlIHBl-ja-A_vs_C,ja,A_vs_C,このチャンネルに送信する権限がありません。,課金とプランを管理する権限がありません。
 zulip-WW91IGRvIG5vdCBoYXZlIHBl-ja-B_vs_C,ja,B_vs_C,プランと請求を管理する権限がありません。,このチャンネルに送信する権限がありません。
 zulip-WW91ciBlbWFpbCBhZGRyZXNz-ja-A_vs_C,ja,A_vs_C,あなたのメールアドレス（{email}）は、この組織でアカウント登録が許可されているドメインには含まれていません。,あなたのメールアドレス {email} はこの組織のアカウントに登録できるドメインではありません。
-zulip-WW91ciBlbWFpbCBhZGRyZXNz-ja-B_vs_C,ja,B_vs_C,あなたのメールアドレス {email} はこの組織のアカウントに登録できるドメインではありません。,```
+zulip-WW91ciBlbWFpbCBhZGRyZXNz-ja-B_vs_C,ja,B_vs_C,あなたのメールアドレス {email} はこの組織のアカウントに登録できるドメインではありません。,"```
 あなたのメールアドレス{email}は、この組織でのアカウント登録が許可されているドメインに含まれていません。
-```
+```"
 zulip-Y2hhbm5lbCBldmVudHM-ja-A_vs_C,ja,A_vs_C,チャンネルイベント,チャンネルイベント
 zulip-Y2hhbm5lbCBldmVudHM-ja-B_vs_C,ja,B_vs_C,チャンネルイベント,チャンネルイベント
 zulip-e3VzZXJ9IGpvaW5lZCB0aGlz-ja-A_vs_C,ja,A_vs_C,{user}がこの組織に参加しました。,{user}さんがこの組織に参加しました。
 zulip-e3VzZXJ9IGpvaW5lZCB0aGlz-ja-B_vs_C,ja,B_vs_C,{user}さんが組織に参加しました。,{user}がこの組織に参加しました。
-zulip-Ci0gKipPbGQge2ZpZWxkX25h-es-A_vs_C,es,A_vs_C,
+zulip-Ci0gKipPbGQge2ZpZWxkX25h-es-A_vs_C,es,A_vs_C,"
 - **Antiguo {field_name}:** {old_value}
 - **Nuevo {field_name}:** {new_value}
-,- **{field_name} anterior:** {old_value}
-- **Nuevo {field_name}:** {new_value}
-zulip-Ci0gKipPbGQge2ZpZWxkX25h-es-B_vs_C,es,B_vs_C,- **{field_name} anterior:** {old_value}
-- **Nuevo {field_name}:** {new_value},
+","- **{field_name} anterior:** {old_value}
+- **Nuevo {field_name}:** {new_value}"
+zulip-Ci0gKipPbGQge2ZpZWxkX25h-es-B_vs_C,es,B_vs_C,"- **{field_name} anterior:** {old_value}
+- **Nuevo {field_name}:** {new_value}","
 - **Antiguo {field_name}:** {old_value}
 - **Nuevo {field_name}:** {new_value}
-
+"
 zulip-JShyZWFsbV9uYW1lKXMgb24g-es-A_vs_C,es,A_vs_C,%(realm_name)s en Zulip: Los detalles de tu nueva cuenta,%(realm_name)s en Zulip: Detalles de tu nueva cuenta
 zulip-JShyZWFsbV9uYW1lKXMgb24g-es-B_vs_C,es,B_vs_C,%(realm_name)s en Zulip: Detalles de tu nueva cuenta,%(realm_name)s en Zulip: los detalles de tu nueva cuenta
 zulip-Q29uZmlybWF0aW9uIGxpbmsg-es-A_vs_C,es,A_vs_C,El enlace de confirmación ha caducado o ha sido desactivado,El enlace de confirmación ha expirado o ha sido desactivado

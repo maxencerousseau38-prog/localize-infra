@@ -23,7 +23,7 @@ export function createAnthropicProvider(apiKey: string): Provider {
       }
       const body = (await response.json()) as { content: { type: string; text: string }[] }
       const textBlock = body.content.find((block) => block.type === 'text')
-      if (!textBlock) throw new Error('Anthropic response had no text content block')
+      if (!textBlock || !textBlock.text.trim()) throw new Error('Anthropic response had no text content block')
       return textBlock.text.trim()
     },
   }
