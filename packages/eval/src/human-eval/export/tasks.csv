@@ -1,0 +1,828 @@
+id,targetLocale,pairType,left,right
+excalidraw-alerts.cannotExportEmptyCanvas-de-A_vs_C,de,A_vs_C,Leere Zeichenfläche kann nicht exportiert werden.,Leere Zeichenfläche kann nicht exportiert werden.
+excalidraw-alerts.cannotExportEmptyCanvas-de-B_vs_C,de,B_vs_C,Leere Zeichenfläche exportieren?,Leere Zeichenfläche kann nicht exportiert werden.
+excalidraw-alerts.invalidEncryptionKey-de-A_vs_C,de,A_vs_C,Der Verschlüsselungsschlüssel muss aus 22 Zeichen bestehen. Die Live-Zusammenarbeit ist deaktiviert.,Verschlüsselungsschlüssel muss 22 Zeichen lang sein. Die Live-Zusammenarbeit ist deaktiviert.
+excalidraw-alerts.invalidEncryptionKey-de-B_vs_C,de,B_vs_C,Verschlüsselungsschlüssel muss 22 Zeichen lang sein. Die Live-Zusammenarbeit ist deaktiviert.,Der Verschlüsselungsschlüssel muss 22 Zeichen lang sein. Live-Kollaboration ist deaktiviert.
+excalidraw-buttons.done-de-A_vs_C,de,A_vs_C,Fertig,Fertig
+excalidraw-buttons.done-de-B_vs_C,de,B_vs_C,Fertig,Fertig
+excalidraw-buttons.remove-de-A_vs_C,de,A_vs_C,Entfernen,Entfernen
+excalidraw-buttons.remove-de-B_vs_C,de,B_vs_C,Entfernen,Entfernen
+excalidraw-canvasError.canvasTooBigTip-de-A_vs_C,de,A_vs_C,Tipp: Schiebe die am weitesten entfernten Elemente ein wenig näher zusammen.,"Tipp: Versuchen Sie, die am weitesten entfernten Elemente etwas näher zusammenzubringen."
+excalidraw-canvasError.canvasTooBigTip-de-B_vs_C,de,B_vs_C,Tipp: Verschieben Sie die am weitesten entfernten Elemente näher zusammen.,Tipp: Schiebe die am weitesten entfernten Elemente ein wenig näher zusammen.
+excalidraw-colors.orange-de-A_vs_C,de,A_vs_C,Orange,Orange
+excalidraw-colors.orange-de-B_vs_C,de,B_vs_C,Orange,Orange
+excalidraw-commandPalette.shortcuts.select-de-A_vs_C,de,A_vs_C,Auswählen,Auswählen
+excalidraw-commandPalette.shortcuts.select-de-B_vs_C,de,B_vs_C,Auswählen,Auswählen
+excalidraw-element.rectangle-de-A_vs_C,de,A_vs_C,Rechteck,Rechteck
+excalidraw-element.rectangle-de-B_vs_C,de,B_vs_C,Rechteck,Rechteck
+excalidraw-errors.asyncPasteFailedOnParse-de-A_vs_C,de,A_vs_C,Einfügen fehlgeschlagen.,Einfügen nicht möglich.
+excalidraw-errors.asyncPasteFailedOnParse-de-B_vs_C,de,B_vs_C,Fehler beim Einfügen,Einfügen fehlgeschlagen.
+excalidraw-errors.libraryElementTypeError.embeddable-de-A_vs_C,de,A_vs_C,Einbettbare Elemente können der Bibliothek nicht hinzugefügt werden.,Eingebettete Elemente können nicht zur Bibliothek hinzugefügt werden.
+excalidraw-errors.libraryElementTypeError.embeddable-de-B_vs_C,de,B_vs_C,Einbettbare Elemente können nicht zur Bibliothek hinzugefügt werden.,Einbettbare Elemente können der Bibliothek nicht hinzugefügt werden.
+excalidraw-fontList.availableFonts-de-A_vs_C,de,A_vs_C,Verfügbare Schriftarten,Verfügbare Schriftarten
+excalidraw-fontList.availableFonts-de-B_vs_C,de,B_vs_C,Verfügbare Schriftarten,Verfügbare Fonts
+excalidraw-helpDialog.deepSelect-de-A_vs_C,de,A_vs_C,Auswahl innerhalb der Gruppe,Tiefe Auswahl
+excalidraw-helpDialog.deepSelect-de-B_vs_C,de,B_vs_C,Tiefe Auswahl,Auswahl innerhalb der Gruppe
+excalidraw-helpDialog.textFinish-de-A_vs_C,de,A_vs_C,Bearbeitung beenden (Texteditor),Bearbeitung beenden (Texteditor)
+excalidraw-helpDialog.textFinish-de-B_vs_C,de,B_vs_C,Bearbeitung beenden (Texteditor),Bearbeitung beenden (Texteditor)
+excalidraw-imageExportDialog.button.exportToPng-de-A_vs_C,de,A_vs_C,PNG,PNG
+excalidraw-imageExportDialog.button.exportToPng-de-B_vs_C,de,B_vs_C,PNG,PNG
+excalidraw-keys.mmb-de-A_vs_C,de,A_vs_C,Mausrad,Mausrad
+excalidraw-keys.mmb-de-B_vs_C,de,B_vs_C,Mausrad,Mausrad
+excalidraw-labels.arrowhead_crowfoot_many-de-A_vs_C,de,A_vs_C,Krähenfuß (viele),Krähenfuß (viele)
+excalidraw-labels.arrowhead_crowfoot_many-de-B_vs_C,de,B_vs_C,Krähenfuß (viele),Krähenfuß (viele)
+excalidraw-labels.background-de-A_vs_C,de,A_vs_C,Hintergrund,Hintergrund
+excalidraw-labels.background-de-B_vs_C,de,B_vs_C,Hintergrund,Hintergrund
+excalidraw-labels.collaborators-de-A_vs_C,de,A_vs_C,Mitarbeiter,Mitarbeitende
+excalidraw-labels.collaborators-de-B_vs_C,de,B_vs_C,Mitarbeitende,Mitbearbeiter
+excalidraw-labels.discordChat-de-A_vs_C,de,A_vs_C,Discord-Chat,Discord-Chat
+excalidraw-labels.discordChat-de-B_vs_C,de,B_vs_C,Discord-Chat,Discord-Chat
+excalidraw-labels.flipHorizontal-de-A_vs_C,de,A_vs_C,Horizontal spiegeln,Horizontal spiegeln
+excalidraw-labels.flipHorizontal-de-B_vs_C,de,B_vs_C,Horizontal spiegeln,Horizontal spiegeln
+excalidraw-labels.libraries-de-A_vs_C,de,A_vs_C,Bibliotheken durchsuchen,Bibliotheken durchsuchen
+excalidraw-labels.libraries-de-B_vs_C,de,B_vs_C,Bibliotheken durchsuchen,Bibliotheken ansehen
+excalidraw-labels.loadingScene-de-A_vs_C,de,A_vs_C,Lade Zeichnung…,Szene wird geladen …
+excalidraw-labels.loadingScene-de-B_vs_C,de,B_vs_C,Szene wird geladen…,Lade Zeichnung…
+excalidraw-labels.removeAllElementsFromFrame-de-A_vs_C,de,A_vs_C,Alle Elemente aus dem Frame entfernen,Alle Elemente aus dem Rahmen entfernen
+excalidraw-labels.removeAllElementsFromFrame-de-B_vs_C,de,B_vs_C,Alle Elemente aus dem Rahmen entfernen,Alle Elemente aus Frame entfernen
+excalidraw-labels.small-de-A_vs_C,de,A_vs_C,Klein,Klein
+excalidraw-labels.small-de-B_vs_C,de,B_vs_C,Klein,Klein
+excalidraw-labels.unCroppedDimension-de-A_vs_C,de,A_vs_C,Nicht zugeschnittene Dimension,Ungeschnittene Abmessung
+excalidraw-labels.unCroppedDimension-de-B_vs_C,de,B_vs_C,Unbeschnittene Größe,Nicht zugeschnittene Dimension
+excalidraw-mermaid.button-de-A_vs_C,de,A_vs_C,Einfügen,Einfügen
+excalidraw-mermaid.button-de-B_vs_C,de,B_vs_C,Einfügen,Einfügen
+excalidraw-overwriteConfirm.modal.loadFromFile.title-de-A_vs_C,de,A_vs_C,Aus Datei laden,Aus Datei laden
+excalidraw-overwriteConfirm.modal.loadFromFile.title-de-B_vs_C,de,B_vs_C,Aus Datei laden,Aus Datei laden
+excalidraw-publishDialog.noteLicense-de-A_vs_C,de,A_vs_C,"Mit dem Absenden stimmen Sie zu, dass die Bibliothek unter der <link>MIT-Lizenz</link> veröffentlicht wird, was kurz gesagt bedeutet, dass jeder sie ohne Einschränkungen nutzen kann.","Mit dem Absenden stimmst du zu, dass die Bibliothek unter der <link>MIT-Lizenz, </link>die zusammengefasst beinhaltet, dass jeder sie ohne Einschränkungen nutzen kann."
+excalidraw-publishDialog.noteLicense-de-B_vs_C,de,B_vs_C,"Mit dem Absenden stimmst du zu, dass die Bibliothek unter der <link>MIT-Lizenz, </link>die zusammengefasst beinhaltet, dass jeder sie ohne Einschränkungen nutzen kann.","Mit dem Absenden stimmen Sie zu, dass die Bibliothek unter der <link>MIT-Lizenz</link> veröffentlicht wird, wodurch sie uneingeschränkt nutzbar ist."
+excalidraw-roomDialog.button_stopSession-de-A_vs_C,de,A_vs_C,Sitzung beenden,Sitzung beenden
+excalidraw-roomDialog.button_stopSession-de-B_vs_C,de,B_vs_C,Sitzung beenden,Sitzung beenden
+excalidraw-stats.elementProperties-de-A_vs_C,de,A_vs_C,Formeigenschaften,Formeigenschaften
+excalidraw-stats.elementProperties-de-B_vs_C,de,B_vs_C,Formeigenschaften,Formeigenschaften
+excalidraw-toast.canvas-de-A_vs_C,de,A_vs_C,Zeichenfläche,Leinwand
+excalidraw-toast.canvas-de-B_vs_C,de,B_vs_C,Leinwand,Zeichenfläche
+excalidraw-alerts.cannotExportEmptyCanvas-ja-A_vs_C,ja,A_vs_C,空のキャンバスはエクスポートできません。,空のキャンバスはエクスポートできません。
+excalidraw-alerts.cannotExportEmptyCanvas-ja-B_vs_C,ja,B_vs_C,空のキャンバスはエクスポートできません。,空のキャンバスはエクスポートできません。
+excalidraw-alerts.localStorageQuotaExceeded-ja-A_vs_C,ja,A_vs_C,ブラウザのストレージ容量を超えました。変更内容は保存されません。,ブラウザーのストレージ容量を超えました。変更は保存されません。
+excalidraw-alerts.localStorageQuotaExceeded-ja-B_vs_C,ja,B_vs_C,ブラウザーのストレージ容量を超えました。変更は保存されません。,ブラウザのストレージ容量を超過しました。変更は保存されません。
+excalidraw-buttons.export-ja-A_vs_C,ja,A_vs_C,名前を付けて保存...,保存先...
+excalidraw-buttons.export-ja-B_vs_C,ja,B_vs_C,保存先...,名前を付けて保存...
+excalidraw-buttons.selectLanguage-ja-A_vs_C,ja,A_vs_C,言語の選択,言語を選択
+excalidraw-buttons.selectLanguage-ja-B_vs_C,ja,B_vs_C,言語を選択,言語の選択
+excalidraw-chat.errors.promptTooLong-ja-A_vs_C,ja,A_vs_C,プロンプトが長すぎます ({{max}} 文字以下),プロンプトが長すぎます(最大{{max}}文字)
+excalidraw-chat.errors.promptTooLong-ja-B_vs_C,ja,B_vs_C,プロンプトが長すぎます(最大{{max}}文字),プロンプトが長すぎます ({{max}} 文字以下)
+excalidraw-chat.retry-ja-A_vs_C,ja,A_vs_C,再試行,再試行
+excalidraw-chat.retry-ja-B_vs_C,ja,B_vs_C,再試行,再試行
+excalidraw-colors.gray-ja-A_vs_C,ja,A_vs_C,灰色,グレー
+excalidraw-colors.gray-ja-B_vs_C,ja,B_vs_C,グレー,灰色
+excalidraw-commandPalette.title-ja-A_vs_C,ja,A_vs_C,コマンドパレット,コマンドパレット
+excalidraw-commandPalette.title-ja-B_vs_C,ja,B_vs_C,コマンドパレット,コマンドパレット
+excalidraw-elementLink.notFound-ja-A_vs_C,ja,A_vs_C,リンクされたオブジェクトがキャンバス上に見つかりませんでした。,キャンバス上にリンクされたオブジェクトが見つかりませんでした。
+excalidraw-elementLink.notFound-ja-B_vs_C,ja,B_vs_C,リンク先のオブジェクトが見つかりません,リンクされたオブジェクトがキャンバス上に見つかりませんでした。
+excalidraw-errors.collabSaveFailed-ja-A_vs_C,ja,A_vs_C,バックエンドデータベースに保存できませんでした。問題が解決しない場合は、作業内容が失われないようにファイルをローカルに保存してください。,バックエンドデータベースに保存できませんでした。問題が解決しない場合は、作業を失わないようにローカルにファイルを保存してください。
+excalidraw-errors.collabSaveFailed-ja-B_vs_C,ja,B_vs_C,バックエンドデータベースに保存できませんでした。問題が解決しない場合は、作業を失わないようにローカルにファイルを保存してください。,バックエンドデータベースへの保存に失敗しました。問題が続く場合は、作業内容を失わないようファイルをローカルに保存してください。
+excalidraw-exportDialog.excalidrawplus_description-ja-A_vs_C,ja,A_vs_C,Excalidraw+ ワークスペースにシーンを保存します。,Excalidraw+ ワークスペースにシーンを保存します。
+excalidraw-exportDialog.excalidrawplus_description-ja-B_vs_C,ja,B_vs_C,シーンをExcalidraw+ワークスペースに保存します。,Excalidraw+ ワークスペースにシーンを保存します。
+excalidraw-helpDialog.curvedLine-ja-A_vs_C,ja,A_vs_C,曲線,曲線
+excalidraw-helpDialog.curvedLine-ja-B_vs_C,ja,B_vs_C,曲線,曲線
+excalidraw-helpDialog.textNewLine-ja-A_vs_C,ja,A_vs_C,新しい行を追加(テキストエディタ),新しい行を追加 (テキスト)
+excalidraw-helpDialog.textNewLine-ja-B_vs_C,ja,B_vs_C,新しい行を追加 (テキスト),改行を追加(テキストエディタ)
+excalidraw-hints.firefox_clipboard_write-ja-A_vs_C,ja,A_vs_C,この機能は、「dom.events.asyncClipboard.clipboardItem」フラグを「true」に設定することで有効にできる可能性があります。Firefoxでブラウザフラグを変更するには、「about:config」ページにアクセスしてください。,"この機能は、""dom.events.asyncClipboard.clipboardItem"" フラグを ""true"" に設定することで有効になる可能性があります。Firefox でブラウザーの設定を変更するには、""about:config"" ページを参照してください。"
+excalidraw-hints.firefox_clipboard_write-ja-B_vs_C,ja,B_vs_C,"この機能は、""dom.events.asyncClipboard.clipboardItem"" フラグを ""true"" に設定することで有効になる可能性があります。Firefox でブラウザーの設定を変更するには、""about:config"" ページを参照してください。","""dom.events.asyncClipboard.clipboardItem"" フラグを ""true"" に設定すると、この機能が有効になる可能性があります。Firefoxのブラウザフラグを変更するには、""about:config"" ページにアクセスしてください。"
+excalidraw-imageExportDialog.button.exportToPng-ja-A_vs_C,ja,A_vs_C,PNG,It looks like an image was provided instead of a text string. Could you please provide the actual UI text you'd like translated into Japanese?
+excalidraw-imageExportDialog.button.exportToPng-ja-B_vs_C,ja,B_vs_C,PNG,PNG
+excalidraw-keys.escape-ja-A_vs_C,ja,A_vs_C,Esc,Esc
+excalidraw-keys.escape-ja-B_vs_C,ja,B_vs_C,Esc,Esc
+excalidraw-labels.arrowhead_crowfoot_many-ja-A_vs_C,ja,A_vs_C,鳥の足(多),カラスの足 (*)
+excalidraw-labels.arrowhead_crowfoot_many-ja-B_vs_C,ja,B_vs_C,カラスの足 (*),鳥の足(多)
+excalidraw-labels.bringForward-ja-A_vs_C,ja,A_vs_C,前面へ移動,前面に移動
+excalidraw-labels.bringForward-ja-B_vs_C,ja,B_vs_C,前面に移動,前面へ移動
+excalidraw-labels.copyElementLink-ja-A_vs_C,ja,A_vs_C,オブジェクトへのリンクをコピー,オブジェクトへのリンクをコピー
+excalidraw-labels.copyElementLink-ja-B_vs_C,ja,B_vs_C,オブジェクトへのリンクをコピー,オブジェクトへのリンクをコピー
+excalidraw-labels.elementLock.unlockAll-ja-A_vs_C,ja,A_vs_C,すべてのロックを解除,すべてロック解除
+excalidraw-labels.elementLock.unlockAll-ja-B_vs_C,ja,B_vs_C,すべて解除,すべてのロックを解除
+excalidraw-labels.large-ja-A_vs_C,ja,A_vs_C,,大
+excalidraw-labels.large-ja-B_vs_C,ja,B_vs_C,大,
+excalidraw-labels.loadingScene-ja-A_vs_C,ja,A_vs_C,シーンを読み込み中…,シーンを読み込んでいます…
+excalidraw-labels.loadingScene-ja-B_vs_C,ja,B_vs_C,シーン読み込み中…,シーンを読み込み中…
+excalidraw-labels.removeFromLibrary-ja-A_vs_C,ja,A_vs_C,ライブラリから削除,ライブラリから削除
+excalidraw-labels.removeFromLibrary-ja-B_vs_C,ja,B_vs_C,ライブラリから削除,ライブラリから削除
+excalidraw-labels.stroke-ja-A_vs_C,ja,A_vs_C,線,ストローク
+excalidraw-labels.stroke-ja-B_vs_C,ja,B_vs_C,,線
+excalidraw-labels.viewMode-ja-A_vs_C,ja,A_vs_C,閲覧モード,ビューモード
+excalidraw-labels.viewMode-ja-B_vs_C,ja,B_vs_C,モード表示,閲覧モード
+excalidraw-mermaid.syntax-ja-A_vs_C,ja,A_vs_C,Mermaid構文,Mermaid 構文
+excalidraw-mermaid.syntax-ja-B_vs_C,ja,B_vs_C,Mermaid 構文,Mermaid構文
+excalidraw-publishDialog.authorName-ja-A_vs_C,ja,A_vs_C,作成者名,作成者名
+excalidraw-publishDialog.authorName-ja-B_vs_C,ja,B_vs_C,作成者名,作成者名
+excalidraw-publishDialog.title-ja-A_vs_C,ja,A_vs_C,ライブラリを公開,ライブラリを公開
+excalidraw-publishDialog.title-ja-B_vs_C,ja,B_vs_C,ライブラリを公開,ライブラリを公開
+excalidraw-search.singleResult-ja-A_vs_C,ja,A_vs_C,件,result
+excalidraw-search.singleResult-ja-B_vs_C,ja,B_vs_C,件,件
+excalidraw-stats.width-ja-A_vs_C,ja,A_vs_C,幅,幅
+excalidraw-stats.width-ja-B_vs_C,ja,B_vs_C,幅,幅
+excalidraw-toolBar.embeddable-ja-A_vs_C,ja,A_vs_C,Webエンベッド,Web埋め込み
+excalidraw-toolBar.embeddable-ja-B_vs_C,ja,B_vs_C,Web埋め込み,ウェブ埋め込み
+excalidraw-alerts.cannotExportEmptyCanvas-es-A_vs_C,es,A_vs_C,No se puede exportar un lienzo vacío.,No se puede exportar un lienzo vació
+excalidraw-alerts.cannotExportEmptyCanvas-es-B_vs_C,es,B_vs_C,No se puede exportar un lienzo vació,No se puede exportar lienzo vacío.
+excalidraw-alerts.invalidEncryptionKey-es-A_vs_C,es,A_vs_C,La clave de cifrado debe tener 22 caracteres. La colaboración en vivo está deshabilitada.,La clave de cifrado debe tener 22 caracteres. La colaboración en vivo está deshabilitada.
+excalidraw-alerts.invalidEncryptionKey-es-B_vs_C,es,B_vs_C,La clave de cifrado debe tener 22 caracteres. Colaboración en vivo desactivada.,La clave de cifrado debe tener 22 caracteres. La colaboración en vivo está deshabilitada.
+excalidraw-buttons.done-es-A_vs_C,es,A_vs_C,Listo,Hecho
+excalidraw-buttons.done-es-B_vs_C,es,B_vs_C,Hecho,Hecho
+excalidraw-buttons.remove-es-A_vs_C,es,A_vs_C,Eliminar,Eliminar
+excalidraw-buttons.remove-es-B_vs_C,es,B_vs_C,Eliminar,Quitar
+excalidraw-canvasError.canvasTooBigTip-es-A_vs_C,es,A_vs_C,Consejo: intenta acercar un poco más los elementos que están más alejados.,Sugerencia: intenta acercar un poco más los elementos más lejanos.
+excalidraw-canvasError.canvasTooBigTip-es-B_vs_C,es,B_vs_C,Sugerencia: intenta acercar un poco más los elementos más lejanos.,Consejo: intenta acercar un poco más los elementos más lejanos.
+excalidraw-colors.pink-es-A_vs_C,es,A_vs_C,Rosa,Rosa
+excalidraw-colors.pink-es-B_vs_C,es,B_vs_C,Rosa,Rosa
+excalidraw-commandPalette.title-es-A_vs_C,es,A_vs_C,Paleta de comandos,Paleta de comandos
+excalidraw-commandPalette.title-es-B_vs_C,es,B_vs_C,Paleta de comandos,Paleta de comandos
+excalidraw-element.selection-es-A_vs_C,es,A_vs_C,Selección,Selección
+excalidraw-element.selection-es-B_vs_C,es,B_vs_C,Selección,Selección
+excalidraw-errors.asyncPasteFailedOnRead-es-A_vs_C,es,A_vs_C,No se pudo pegar (no se pudo leer desde el portapapeles del sistema).,No se pudo pegar (no se pudo leer del portapapeles del sistema).
+excalidraw-errors.asyncPasteFailedOnRead-es-B_vs_C,es,B_vs_C,No se pudo pegar (error al leer el portapapeles).,No se pudo pegar (no se pudo leer desde el portapapeles del sistema).
+excalidraw-errors.libraryElementTypeError.iframe-es-A_vs_C,es,A_vs_C,Los elementos IFrame no se pueden agregar a la biblioteca.,No se pueden agregar elementos IFrame a la biblioteca.
+excalidraw-errors.libraryElementTypeError.iframe-es-B_vs_C,es,B_vs_C,Los elementos IFrame no se pueden añadir a la biblioteca.,Los elementos IFrame no se pueden agregar a la biblioteca.
+excalidraw-fontList.badge.old-es-A_vs_C,es,A_vs_C,antiguo,viejo
+excalidraw-fontList.badge.old-es-B_vs_C,es,B_vs_C,viejo,viejo
+excalidraw-helpDialog.documentation-es-A_vs_C,es,A_vs_C,Documentación,Documentación
+excalidraw-helpDialog.documentation-es-B_vs_C,es,B_vs_C,Documentación,Documentación
+excalidraw-helpDialog.textNewLine-es-A_vs_C,es,A_vs_C,Añadir nueva linea (editor de texto),Agregar nueva línea (editor de texto)
+excalidraw-helpDialog.textNewLine-es-B_vs_C,es,B_vs_C,Nueva línea (editor de texto),Añadir nueva linea (editor de texto)
+excalidraw-imageExportDialog.button.exportToSvg-es-A_vs_C,es,A_vs_C,SVG,SVG
+excalidraw-imageExportDialog.button.exportToSvg-es-B_vs_C,es,B_vs_C,SVG,SVG
+excalidraw-labels.addWatermark-es-A_vs_C,es,A_vs_C,"Agregar ""Hecho con Excalidraw""","""Creado con Excalidraw"""
+excalidraw-labels.addWatermark-es-B_vs_C,es,B_vs_C,"Añadir ""Hecho con Excalidraw""","Agregar ""Hecho con Excalidraw"""
+excalidraw-labels.arrowhead_diamond_outline-es-A_vs_C,es,A_vs_C,Diamante (contorno),Diamante (contorno)
+excalidraw-labels.arrowhead_diamond_outline-es-B_vs_C,es,B_vs_C,Rombo (contorno),Diamante (contorno)
+excalidraw-labels.bringToFront-es-A_vs_C,es,A_vs_C,Traer al frente,Traer al frente
+excalidraw-labels.bringToFront-es-B_vs_C,es,B_vs_C,Traer al frente,Traer al frente
+excalidraw-labels.copyAsPng-es-A_vs_C,es,A_vs_C,Copiar al portapapeles como PNG,Copiar al portapapeles como PNG
+excalidraw-labels.copyAsPng-es-B_vs_C,es,B_vs_C,Copiar al portapapeles como PNG,Copiar al portapapeles como PNG
+excalidraw-labels.duplicateSelection-es-A_vs_C,es,A_vs_C,Duplicar,Duplicar
+excalidraw-labels.duplicateSelection-es-B_vs_C,es,B_vs_C,Duplicar,Duplicar
+excalidraw-labels.fontSize-es-A_vs_C,es,A_vs_C,Tamaño de fuente,Tamaño de la fuente
+excalidraw-labels.fontSize-es-B_vs_C,es,B_vs_C,Tamaño de la fuente,Tamaño fuente
+excalidraw-labels.link.create-es-A_vs_C,es,A_vs_C,Agregar enlace,Añadir enlace
+excalidraw-labels.link.create-es-B_vs_C,es,B_vs_C,Añadir enlace,Añadir link
+excalidraw-labels.moveCanvas-es-A_vs_C,es,A_vs_C,Mover el lienzo,Mover lienzo
+excalidraw-labels.moveCanvas-es-B_vs_C,es,B_vs_C,Mover lienzo,Mover el lienzo
+excalidraw-labels.round-es-A_vs_C,es,A_vs_C,Ronda,Redondo
+excalidraw-labels.round-es-B_vs_C,es,B_vs_C,Redondo,Redonda
+excalidraw-labels.stroke-es-A_vs_C,es,A_vs_C,Trazo,Trazo
+excalidraw-labels.stroke-es-B_vs_C,es,B_vs_C,Trazo,Trazo
+excalidraw-labels.untitled-es-A_vs_C,es,A_vs_C,Sin título,Sin título
+excalidraw-labels.untitled-es-B_vs_C,es,B_vs_C,Sin título,Sin título
+excalidraw-mermaid.title-es-A_vs_C,es,A_vs_C,Mermaid a Excalidraw,Mermaid a Excalidraw
+excalidraw-mermaid.title-es-B_vs_C,es,B_vs_C,Mermaid a Excalidraw,Mermaid a Excalidraw
+excalidraw-overwriteConfirm.modal.shareableLink.title-es-A_vs_C,es,A_vs_C,Cargar desde enlace,Cargar desde un enlace
+excalidraw-overwriteConfirm.modal.shareableLink.title-es-B_vs_C,es,B_vs_C,Cargar desde un enlace,Cargar desde enlace
+excalidraw-publishDialog.placeholder.libraryDesc-es-A_vs_C,es,A_vs_C,Descripción de su biblioteca para ayudar a la gente a entender su uso,Descripción de tu biblioteca para ayudar a las personas a entender su uso
+excalidraw-publishDialog.placeholder.libraryDesc-es-B_vs_C,es,B_vs_C,Descripción de tu librería para ayudar a la gente a entender su uso,Descripción de su biblioteca para ayudar a la gente a entender su uso
+excalidraw-roomDialog.desc_intro-es-A_vs_C,es,A_vs_C,Invita a personas a colaborar en tu dibujo.,Invita a gente a colaborar en tu dibujo.
+excalidraw-roomDialog.desc_intro-es-B_vs_C,es,B_vs_C,Invita a gente a colaborar en tu dibujo.,Invita a otras personas a colaborar en tu dibujo.
+excalidraw-stats.scene-es-A_vs_C,es,A_vs_C,Escena,Escena
+excalidraw-stats.scene-es-B_vs_C,es,B_vs_C,Escena,Escena
+excalidraw-toast.copyToClipboardAsSvg-es-A_vs_C,es,A_vs_C,Copiado {{exportSelection}} al portapapeles como SVG
+({{exportColorScheme}}),Copiado {{exportSelection}} al portapapeles como PNG
+({{exportColorScheme}})
+excalidraw-toast.copyToClipboardAsSvg-es-B_vs_C,es,B_vs_C,Copiado {{exportSelection}} al portapapeles como PNG
+({{exportColorScheme}}),{{exportSelection}} copiado al portapapeles como SVG
+({{exportColorScheme}})
+excalidraw-alerts.cannotExportEmptyCanvas-ar-A_vs_C,ar,A_vs_C,لا يمكن تصدير لوحة فارغة.,لا يمكن تصدير لوحة رسم فارغة.
+excalidraw-alerts.cannotExportEmptyCanvas-ar-B_vs_C,ar,B_vs_C,لا يمكن تصدير لوحة فارغة.,لا يمكن تصدير لوحة فارغة.
+excalidraw-alerts.invalidEncryptionKey-ar-A_vs_C,ar,A_vs_C,يجب أن يتكون مفتاح التشفير من 22 حرفًا. التعاون المباشر معطّل.,مفتاح التشفير يجب أن يكون من 22 حرفًا. التعاون المباشر معطل.
+excalidraw-alerts.invalidEncryptionKey-ar-B_vs_C,ar,B_vs_C,مفتاح التشفير يجب أن يكون من 22 حرفًا. التعاون المباشر معطل.,يجب أن يتكون مفتاح التشفير من 22 حرفًا. تم تعطيل التعاون المباشر.
+excalidraw-buttons.done-ar-A_vs_C,ar,A_vs_C,تم,تم
+excalidraw-buttons.done-ar-B_vs_C,ar,B_vs_C,تم,تم
+excalidraw-buttons.remove-ar-A_vs_C,ar,A_vs_C,إزالة,إزالة
+excalidraw-buttons.remove-ar-B_vs_C,ar,B_vs_C,حذف,إزالة
+excalidraw-canvasError.canvasTooBigTip-ar-A_vs_C,ar,A_vs_C,نصيحة: حاول تحريك العناصر البعيدة بشكل أقرب قليلاً.,نصيحة: جرّب تقريب العناصر الأبعد قليلًا من بعضها البعض.
+excalidraw-canvasError.canvasTooBigTip-ar-B_vs_C,ar,B_vs_C,نصيحة: حاول تقريب العناصر الأبعد قليلاً من بعضها البعض.,نصيحة: حاول تحريك العناصر البعيدة بشكل أقرب قليلاً.
+excalidraw-colors.pink-ar-A_vs_C,ar,A_vs_C,**وردي**,وردي
+excalidraw-colors.pink-ar-B_vs_C,ar,B_vs_C,وردي,وردي
+excalidraw-commandPalette.title-ar-A_vs_C,ar,A_vs_C,لوحة الأوامر,لوحة الأوامر
+excalidraw-commandPalette.title-ar-B_vs_C,ar,B_vs_C,لوحة الأوامر,لوحة الأوامر
+excalidraw-element.selection-ar-A_vs_C,ar,A_vs_C,التحديد,تحديد
+excalidraw-element.selection-ar-B_vs_C,ar,B_vs_C,تحديد,تحديد
+excalidraw-errors.asyncPasteFailedOnRead-ar-A_vs_C,ar,A_vs_C,تعذّر اللصق (تعذّرت القراءة من حافظة النظام).,تعذر اللصق (تعذر القراءة من حافظة النظام).
+excalidraw-errors.asyncPasteFailedOnRead-ar-B_vs_C,ar,B_vs_C,تعذر اللصق (تعذر القراءة من حافظة النظام).,تعذّر اللصق (تعذّرت القراءة من الحافظة).
+excalidraw-errors.libraryElementTypeError.iframe-ar-A_vs_C,ar,A_vs_C,لا يمكن إضافة عناصر IFrame إلى المكتبة.,لا يمكن إضافة عناصر IFrame إلى المكتبة.
+excalidraw-errors.libraryElementTypeError.iframe-ar-B_vs_C,ar,B_vs_C,لا يمكن إضافة عناصر IFrame إلى المكتبة.,لا يمكن إضافة عناصر IFrame إلى المكتبة.
+excalidraw-fontList.badge.old-ar-A_vs_C,ar,A_vs_C,قديم,قديم
+excalidraw-fontList.badge.old-ar-B_vs_C,ar,B_vs_C,قديم,قديم
+excalidraw-helpDialog.documentation-ar-A_vs_C,ar,A_vs_C,دليل الاستخدام,التوثيق
+excalidraw-helpDialog.documentation-ar-B_vs_C,ar,B_vs_C,الوثائق,دليل الاستخدام
+excalidraw-helpDialog.textNewLine-ar-A_vs_C,ar,A_vs_C,إضافة سطر جديد (محرر النصوص),إضافة سطر جديد (محرر النص)
+excalidraw-helpDialog.textNewLine-ar-B_vs_C,ar,B_vs_C,إضافة سطر جديد (محرر النص),إضافة سطر جديد (محرر النص)
+excalidraw-imageExportDialog.button.exportToSvg-ar-A_vs_C,ar,A_vs_C,SVG,SVG
+excalidraw-imageExportDialog.button.exportToSvg-ar-B_vs_C,ar,B_vs_C,SVG,SVG
+excalidraw-labels.align-ar-A_vs_C,ar,A_vs_C,محاذاة,محاذاة
+excalidraw-labels.align-ar-B_vs_C,ar,B_vs_C,محاذاة,محاذاة
+excalidraw-labels.arrowhead_none-ar-A_vs_C,ar,A_vs_C,لا شيء,None
+excalidraw-labels.arrowhead_none-ar-B_vs_C,ar,B_vs_C,شريط,لا شيء
+excalidraw-labels.canvasBackground-ar-A_vs_C,ar,A_vs_C,خلفية اللوحة,خلفية اللوحة
+excalidraw-labels.canvasBackground-ar-B_vs_C,ar,B_vs_C,خلفية اللوحة,خلفية اللوحة
+excalidraw-labels.copyAsSvg-ar-A_vs_C,ar,A_vs_C,نسخ إلى الحافظة بصيغة SVG,نسخ إلى الحافظة بصيغة SVG
+excalidraw-labels.copyAsSvg-ar-B_vs_C,ar,B_vs_C,نسخ إلى الحافظة بصيغة SVG,نسخ كـ SVG إلى الحافظة
+excalidraw-labels.edges-ar-A_vs_C,ar,A_vs_C,الحواف,الحواف
+excalidraw-labels.edges-ar-B_vs_C,ar,B_vs_C,حواف,الحواف
+excalidraw-labels.group-ar-A_vs_C,ar,A_vs_C,تحديد المجموعة,تحديد مجموعة
+excalidraw-labels.group-ar-B_vs_C,ar,B_vs_C,تحديد مجموعة,تجميع التحديد
+excalidraw-labels.link.edit-ar-A_vs_C,ar,A_vs_C,تعديل الرابط,تعديل الرابط
+excalidraw-labels.link.edit-ar-B_vs_C,ar,B_vs_C,تعديل الرابط,تعديل الرابط
+excalidraw-labels.multiSelect-ar-A_vs_C,ar,A_vs_C,إضافة عنصر إلى التحديد,إضافة عنصر للتحديد
+excalidraw-labels.multiSelect-ar-B_vs_C,ar,B_vs_C,إضافة عنصر للتحديد,إضافة عنصر للتحديد
+excalidraw-labels.selectAllElementsInFrame-ar-A_vs_C,ar,A_vs_C,تحديد جميع العناصر في الإطار,حدد جميع العناصر في الإطار
+excalidraw-labels.selectAllElementsInFrame-ar-B_vs_C,ar,B_vs_C,تحديد كل العناصر في الإطار,تحديد جميع العناصر في الإطار
+excalidraw-labels.strokeStyle_dashed-ar-A_vs_C,ar,A_vs_C,متقطع,متقطع
+excalidraw-labels.strokeStyle_dashed-ar-B_vs_C,ar,B_vs_C,متقطع,متقطع
+excalidraw-labels.viewMode-ar-A_vs_C,ar,A_vs_C,نمط العرض,وضع العرض
+excalidraw-labels.viewMode-ar-B_vs_C,ar,B_vs_C,وضع العرض,نمط العرض
+excalidraw-overwriteConfirm.action.excalidrawPlus.description-ar-A_vs_C,ar,A_vs_C,حفظ المشهد إلى مساحة العمل +Excalidraw الخاصة بك.,احفظ المشهد في مساحة عمل Excalidraw+ الخاصة بك.
+excalidraw-overwriteConfirm.action.excalidrawPlus.description-ar-B_vs_C,ar,B_vs_C,احفظ المشهد في مساحة عمل Excalidraw+ الخاصة بك.,حفظ المشهد إلى مساحة العمل +Excalidraw الخاصة بك.
+excalidraw-publishDialog.authorName-ar-A_vs_C,ar,A_vs_C,اسم المؤلف,اسم المؤلف
+excalidraw-publishDialog.authorName-ar-B_vs_C,ar,B_vs_C,اسم المؤلف,اسم المؤلف
+excalidraw-publishDialog.placeholder.twitterHandle-ar-A_vs_C,ar,A_vs_C,اسم مستخدم تويتر (اختياري)، حتى نعرف من الذي سيتم الإشارة إليه عند الترويج عبر تويتر,اسم المستخدم على تويتر (اختياري)، حتى نعرف الجهة التي سنُشير إليها عند الترويج عبر تويتر
+excalidraw-publishDialog.placeholder.twitterHandle-ar-B_vs_C,ar,B_vs_C,اسم مستخدم تويتر (اختياري)، لنعرف لمن ننسب الفضل عند الترويج عبر تويتر,اسم مستخدم تويتر (اختياري)، حتى نعرف من الذي سيتم الإشارة إليه عند الترويج عبر تويتر
+excalidraw-roomDialog.desc_shareLink-ar-A_vs_C,ar,A_vs_C,شارِك هذا الرابط مع أي شخص تريد التعاون معه:,شارك هذا الرابط مع أي شخص تريده أن يشاركك الجلسة:
+excalidraw-roomDialog.desc_shareLink-ar-B_vs_C,ar,B_vs_C,شارك هذا الرابط مع أي شخص تريده أن يشاركك الجلسة:,شارك هذا الرابط مع من تريد التعاون معه:
+excalidraw-stats.shapes-ar-A_vs_C,ar,A_vs_C,الأشكال,أشكال
+excalidraw-stats.shapes-ar-B_vs_C,ar,B_vs_C,"""أشكال""",الأشكال
+excalidraw-toast.fileSaved-ar-A_vs_C,ar,A_vs_C,تم حفظ الملف.,تم حفظ الملف.
+excalidraw-toast.fileSaved-ar-B_vs_C,ar,B_vs_C,تم حفظ الملف.,تم حفظ الملف.
+excalidraw-alerts.cannotExportEmptyCanvas-pt-BR-A_vs_C,pt-BR,A_vs_C,Não é possível exportar uma tela vazia.,Não é possível exportar uma tela vazia.
+excalidraw-alerts.cannotExportEmptyCanvas-pt-BR-B_vs_C,pt-BR,B_vs_C,Não é possível exportar tela vazia.,Não é possível exportar uma tela vazia.
+excalidraw-alerts.invalidSceneUrl-pt-BR-A_vs_C,pt-BR,A_vs_C,Não foi possível importar a cena da URL fornecida. Ela está incompleta ou não contém dados JSON válidos do Excalidraw.,Não foi possível importar a cena a partir da URL fornecida. Ela está malformada ou não contém dados JSON válidos do Excalidraw.
+excalidraw-alerts.invalidSceneUrl-pt-BR-B_vs_C,pt-BR,B_vs_C,Não foi possível importar a cena a partir da URL fornecida. Ela está malformada ou não contém dados JSON válidos do Excalidraw.,Não foi possível importar a cena da URL fornecida. Ela está incompleta ou não contém dados JSON válidos do Excalidraw.
+excalidraw-buttons.edit-pt-BR-A_vs_C,pt-BR,A_vs_C,Editar,Editar
+excalidraw-buttons.edit-pt-BR-B_vs_C,pt-BR,B_vs_C,Editar,Editar
+excalidraw-buttons.resetLibrary-pt-BR-A_vs_C,pt-BR,A_vs_C,Redefinir biblioteca,Redefinir biblioteca
+excalidraw-buttons.resetLibrary-pt-BR-B_vs_C,pt-BR,B_vs_C,Resetar biblioteca,Redefinir biblioteca
+excalidraw-chat.inputPlaceholderWithMessages-pt-BR-A_vs_C,pt-BR,A_vs_C,Continuar refinando seu diagrama...,Continue refinando seu diagrama...
+excalidraw-chat.inputPlaceholderWithMessages-pt-BR-B_vs_C,pt-BR,B_vs_C,Continue refinando seu diagrama...,Continuar refinando seu diagrama...
+excalidraw-colors.pink-pt-BR-A_vs_C,pt-BR,A_vs_C,Rosa,Rosa
+excalidraw-colors.pink-pt-BR-B_vs_C,pt-BR,B_vs_C,Rosa,Rosa
+excalidraw-confirmDialog.removeItemsFromLib-pt-BR-A_vs_C,pt-BR,A_vs_C,Remover itens selecionados da biblioteca,Remover itens selecionados da biblioteca
+excalidraw-confirmDialog.removeItemsFromLib-pt-BR-B_vs_C,pt-BR,B_vs_C,Remover itens selecionados da biblioteca,Remover itens selecionados da biblioteca
+excalidraw-elementLink.desc-pt-BR-A_vs_C,pt-BR,A_vs_C,Clique em uma forma na tela ou cole um link.,Clique em uma forma na tela ou cole um link.
+excalidraw-elementLink.desc-pt-BR-B_vs_C,pt-BR,B_vs_C,Clique em uma forma na tela ou cole um link.,Clique em uma forma na tela ou cole um link.
+excalidraw-errors.brave_measure_text_error.line3-pt-BR-A_vs_C,pt-BR,A_vs_C,Recomendamos fortemente desativar essa configuração. Você pode seguir <link>estes passos</link> para saber como fazer isso.,Recomendamos fortemente desativar essa configuração. Você pode acessar o <link>passo a passo</link> sobre como fazer isso.
+excalidraw-errors.brave_measure_text_error.line3-pt-BR-B_vs_C,pt-BR,B_vs_C,Recomendamos fortemente desativar essa configuração. Você pode acessar o <link>passo a passo</link> sobre como fazer isso.,Recomendamos desativar essa opção. Siga <link>estes passos</link> para saber como fazer isso.
+excalidraw-errors.unsupportedFileType-pt-BR-A_vs_C,pt-BR,A_vs_C,Tipo de arquivo não suportado.,Tipo de arquivo não suportado.
+excalidraw-errors.unsupportedFileType-pt-BR-B_vs_C,pt-BR,B_vs_C,Tipo de arquivo não suportado.,Tipo de arquivo não suportado.
+excalidraw-headings.shapes-pt-BR-A_vs_C,pt-BR,A_vs_C,Formas,Formas
+excalidraw-headings.shapes-pt-BR-B_vs_C,pt-BR,B_vs_C,Formas,Formas
+excalidraw-helpDialog.github-pt-BR-A_vs_C,pt-BR,A_vs_C,Encontrou um problema? Enviar,Encontrou algum problema? Nos informe
+excalidraw-helpDialog.github-pt-BR-B_vs_C,pt-BR,B_vs_C,Encontrou algum problema? Nos informe,Encontrou um bug? Envie
+excalidraw-hints.bindTextToElement-pt-BR-A_vs_C,pt-BR,A_vs_C,{{shortcut}} para adicionar texto,{{shortcut}} para adicionar texto
+excalidraw-hints.bindTextToElement-pt-BR-B_vs_C,pt-BR,B_vs_C,{{shortcut}} para adicionar texto,{{shortcut}} para adicionar texto
+excalidraw-imageExportDialog.label.padding-pt-BR-A_vs_C,pt-BR,A_vs_C,Preenchimento,Margem interna
+excalidraw-imageExportDialog.label.padding-pt-BR-B_vs_C,pt-BR,B_vs_C,Margem interna,Margem
+excalidraw-labels.arrowhead_arrow-pt-BR-A_vs_C,pt-BR,A_vs_C,Seta,Flecha
+excalidraw-labels.arrowhead_arrow-pt-BR-B_vs_C,pt-BR,B_vs_C,Flecha,Seta
+excalidraw-labels.arrowtypes-pt-BR-A_vs_C,pt-BR,A_vs_C,Tipo de seta,Tipo de seta
+excalidraw-labels.arrowtypes-pt-BR-B_vs_C,pt-BR,B_vs_C,Tipo de seta,Tipo de seta
+excalidraw-labels.clearCanvas-pt-BR-A_vs_C,pt-BR,A_vs_C,Limpar tela,Limpar a tela
+excalidraw-labels.clearCanvas-pt-BR-B_vs_C,pt-BR,B_vs_C,Limpar a tela,Limpar tela
+excalidraw-labels.delete-pt-BR-A_vs_C,pt-BR,A_vs_C,Excluir,Apagar
+excalidraw-labels.delete-pt-BR-B_vs_C,pt-BR,B_vs_C,Apagar,Excluir
+excalidraw-labels.flipHorizontal-pt-BR-A_vs_C,pt-BR,A_vs_C,Inverter horizontalmente,Inverter horizontalmente
+excalidraw-labels.flipHorizontal-pt-BR-B_vs_C,pt-BR,B_vs_C,Inverter horizontalmente,Inverter horiz.
+excalidraw-labels.libraryLoadingMessage-pt-BR-A_vs_C,pt-BR,A_vs_C,Carregando biblioteca…,Carregando biblioteca…
+excalidraw-labels.libraryLoadingMessage-pt-BR-B_vs_C,pt-BR,B_vs_C,Carregando…,Carregando biblioteca…
+excalidraw-labels.medium-pt-BR-A_vs_C,pt-BR,A_vs_C,Médio,Médio
+excalidraw-labels.medium-pt-BR-B_vs_C,pt-BR,B_vs_C,Médio,Médio
+excalidraw-labels.prompt-pt-BR-A_vs_C,pt-BR,A_vs_C,Prompt,Prompt
+excalidraw-labels.prompt-pt-BR-B_vs_C,pt-BR,B_vs_C,Prompt,Prompt
+excalidraw-labels.sloppiness-pt-BR-A_vs_C,pt-BR,A_vs_C,Precisão do traço,Descuido
+excalidraw-labels.sloppiness-pt-BR-B_vs_C,pt-BR,B_vs_C,Traço,Precisão do traço
+excalidraw-labels.toggleTheme-pt-BR-A_vs_C,pt-BR,A_vs_C,Alternar tema claro/escuro,Alternar tema claro/escuro
+excalidraw-labels.toggleTheme-pt-BR-B_vs_C,pt-BR,B_vs_C,Alternar tema claro/escuro,Alternar tema claro/escuro
+excalidraw-library.search.clearSearch-pt-BR-A_vs_C,pt-BR,A_vs_C,Limpar busca,Limpar pesquisa
+excalidraw-library.search.clearSearch-pt-BR-B_vs_C,pt-BR,B_vs_C,Limpar pesquisa,Limpar busca
+excalidraw-overwriteConfirm.action.saveToDisk.description-pt-BR-A_vs_C,pt-BR,A_vs_C,Exporte os dados da cena para um arquivo a partir do qual você pode importá-los posteriormente.,Exportar os dados da cena para um arquivo que você poderá importar mais tarde.
+excalidraw-overwriteConfirm.action.saveToDisk.description-pt-BR-B_vs_C,pt-BR,B_vs_C,Exportar os dados da cena para um arquivo que você poderá importar mais tarde.,Exporte os dados da cena para um arquivo para importar depois.
+excalidraw-publishDialog.noteDescription-pt-BR-A_vs_C,pt-BR,A_vs_C,Envie sua biblioteca para ser incluída no <link>repositório de biblioteca pública</link>para outras pessoas usarem em seus desenhos.,Envie sua biblioteca para ser incluída no <link>repositório público de bibliotecas</link> para que outras pessoas possam usá-la em seus desenhos.
+excalidraw-publishDialog.noteDescription-pt-BR-B_vs_C,pt-BR,B_vs_C,Envie sua biblioteca para o <link>repositório público de bibliotecas</link> para que outras pessoas a usem em seus desenhos.,Envie sua biblioteca para ser incluída no <link>repositório de biblioteca pública</link>para outras pessoas usarem em seus desenhos.
+excalidraw-quickSearch.placeholder-pt-BR-A_vs_C,pt-BR,A_vs_C,Busca rápida,Busca rápida
+excalidraw-quickSearch.placeholder-pt-BR-B_vs_C,pt-BR,B_vs_C,Busca rápida,Pesquisa rápida
+excalidraw-shareDialog.or-pt-BR-A_vs_C,pt-BR,A_vs_C,Ou,Ou
+excalidraw-shareDialog.or-pt-BR-B_vs_C,pt-BR,B_vs_C,Ou,Ou
+excalidraw-toast.addedToLibrary-pt-BR-A_vs_C,pt-BR,A_vs_C,Adicionado à biblioteca,Adicionado à biblioteca
+excalidraw-toast.addedToLibrary-pt-BR-B_vs_C,pt-BR,B_vs_C,Adicionado à biblioteca,Adicionado à biblioteca
+excalidraw-toolBar.ellipse-pt-BR-A_vs_C,pt-BR,A_vs_C,Elipse,Elipse
+excalidraw-toolBar.ellipse-pt-BR-B_vs_C,pt-BR,B_vs_C,Elipse,Elipse
+gitea-access_token-de-A_vs_C,de,A_vs_C,Zugriffstoken,Zugangs-Token
+gitea-access_token-de-B_vs_C,de,B_vs_C,Zugangs-Token,Zugriffstoken
+gitea-actions.runs.graph_jobs_count_1-de-A_vs_C,de,A_vs_C,%d Job,%d Job
+gitea-actions.runs.graph_jobs_count_1-de-B_vs_C,de,B_vs_C,%d Job,%d Job
+gitea-admin.auths.bind_password-de-A_vs_C,de,A_vs_C,Passwort binden,Bind-Passwort
+gitea-admin.auths.bind_password-de-B_vs_C,de,B_vs_C,Bind-Passwort,Passwort binden
+gitea-admin.badges.user_add_success-de-A_vs_C,de,A_vs_C,Abzeichen erfolgreich dem Benutzer zugewiesen.,Badge erfolgreich dem Benutzer zugewiesen.
+gitea-admin.badges.user_add_success-de-B_vs_C,de,B_vs_C,Badge erfolgreich dem Benutzer zugewiesen.,Abzeichen erfolgreich zugewiesen.
+gitea-admin.config.test_mail_sent-de-A_vs_C,de,A_vs_C,Eine Testmail wurde an „%s“ gesendet.,"Eine Test-E-Mail wurde an ""%s"" gesendet."
+gitea-admin.config.test_mail_sent-de-B_vs_C,de,B_vs_C,"Eine Test-E-Mail wurde an ""%s"" gesendet.",Test-E-Mail wurde an „%s“ gesendet.
+gitea-admin.monitor.name-de-A_vs_C,de,A_vs_C,Name,Name
+gitea-admin.monitor.name-de-B_vs_C,de,B_vs_C,Name,Name
+gitea-admin.users.list_status_filter.reset-de-A_vs_C,de,A_vs_C,Zurücksetzen,Zurücksetzen
+gitea-admin.users.list_status_filter.reset-de-B_vs_C,de,B_vs_C,Zurücksetzen,Reset
+gitea-copy_filename-de-A_vs_C,de,A_vs_C,Dateiname kopieren,Dateinamen kopieren
+gitea-copy_filename-de-B_vs_C,de,B_vs_C,Dateiname kopieren,Dateiname kopieren
+gitea-form.openid_been_used-de-A_vs_C,de,A_vs_C,Die OpenID-Adresse „%s“ wird bereits verwendet.,"Die OpenID-Adresse ""%s"" wird bereits verwendet."
+gitea-form.openid_been_used-de-B_vs_C,de,B_vs_C,"Die OpenID-Adresse ""%s"" wird bereits verwendet.","Die OpenID-Adresse ""%s"" wird bereits verwendet."
+gitea-install.email_title-de-A_vs_C,de,A_vs_C,E-Mail-Einstellungen,E-Mail-Einstellungen
+gitea-install.email_title-de-B_vs_C,de,B_vs_C,E-Mail-Einstellungen,E-Mail-Einstellungen
+gitea-mail.repo.actions.jobs.all_succeeded-de-A_vs_C,de,A_vs_C,Alle Jobs wurden erfolgreich ausgeführt,Alle Jobs waren erfolgreich
+gitea-mail.repo.actions.jobs.all_succeeded-de-B_vs_C,de,B_vs_C,Alle Jobs erfolgreich,Alle Jobs wurden erfolgreich ausgeführt
+gitea-org.settings.visibility.private_shortname-de-A_vs_C,de,A_vs_C,Privat,Privat
+gitea-org.settings.visibility.private_shortname-de-B_vs_C,de,B_vs_C,Privat,Privat
+gitea-packages.container.pull-de-A_vs_C,de,A_vs_C,Downloade das Container-Image aus der Kommandozeile:,Ziehen Sie das Image über die Befehlszeile herunter:
+gitea-packages.container.pull-de-B_vs_C,de,B_vs_C,Image über die Befehlszeile herunterladen:,Downloade das Container-Image aus der Kommandozeile:
+gitea-packages.settings.unlink.success-de-A_vs_C,de,A_vs_C,Der Repository-Link wurde erfolgreich entfernt.,Repository-Link wurde erfolgreich entfernt.
+gitea-packages.settings.unlink.success-de-B_vs_C,de,B_vs_C,Repository-Link wurde erfolgreich entfernt.,Repository-Link wurde erfolgreich entfernt.
+gitea-repo.archive.title-de-A_vs_C,de,A_vs_C,Dieses Repository ist archiviert. Sie können Dateien anzeigen und es klonen. Sie können keine Issues oder Pull Requests eröffnen oder Commits pushen.,"Dieses Repository ist archiviert. Du kannst Dateien ansehen und es klonen, kannst aber nicht pushen oder Issues/Pull-Requests öffnen."
+gitea-repo.archive.title-de-B_vs_C,de,B_vs_C,"Dieses Repository ist archiviert. Du kannst Dateien ansehen und es klonen, kannst aber nicht pushen oder Issues/Pull-Requests öffnen.","Dieses Repo ist archiviert. Sie können Dateien ansehen und klonen. Issues, Pull Requests oder Commits sind nicht möglich."
+gitea-repo.desc.template-de-A_vs_C,de,A_vs_C,Vorlage,Vorlage
+gitea-repo.desc.template-de-B_vs_C,de,B_vs_C,Vorlage,Vorlage
+gitea-repo.editor.or-de-A_vs_C,de,A_vs_C,oder,oder
+gitea-repo.editor.or-de-B_vs_C,de,B_vs_C,oder,oder
+gitea-repo.issues.commit_ref_at-de-A_vs_C,de,A_vs_C,"hat dieses Issue <a id=""%[1]s"" href=""#%[1]s"">%[2]s</a> aus einem Commit referenziert","hat dieses Issue in einem Commit <a id=""%[1]s"" href=""#%[1]s"">%[2]s</a> erwähnt"
+gitea-repo.issues.commit_ref_at-de-B_vs_C,de,B_vs_C,"hat dieses Issue in einem Commit <a id=""%[1]s"" href=""#%[1]s"">%[2]s</a> erwähnt","hat dieses Issue <a id=""%[1]s"" href=""#%[1]s"">%[2]s</a> aus einem Commit referenziert"
+gitea-repo.issues.is_stale-de-A_vs_C,de,A_vs_C,"Es wurden Änderungen an diesem Pull Request vorgenommen, seit diese Überprüfung erfolgt ist",Seit diesem Review gab es Änderungen an diesem PR
+gitea-repo.issues.is_stale-de-B_vs_C,de,B_vs_C,Seit diesem Review gab es Änderungen an diesem PR,Es gab Änderungen an diesem PR seit dieser Überprüfung
+gitea-repo.issues.review.resolved_by-de-A_vs_C,de,A_vs_C,hat diese Unterhaltung als gelöst markiert,markierte diese Unterhaltung als gelöst
+gitea-repo.issues.review.resolved_by-de-B_vs_C,de,B_vs_C,markierte diese Unterhaltung als gelöst,hat diese Unterhaltung als gelöst markiert
+gitea-repo.milestones.deletion_desc-de-A_vs_C,de,A_vs_C,Das Löschen des Meilensteins entfernt ihn von allen Issues. Fortfahren?,"Wenn Sie einen Meilenstein löschen, wird er aus allen zugehörigen Issues entfernt. Möchten Sie fortfahren?"
+gitea-repo.milestones.deletion_desc-de-B_vs_C,de,B_vs_C,Beim Löschen eines Meilensteins wird er aus allen zugehörigen Issues entfernt. Fortfahren?,Das Löschen des Meilensteins entfernt ihn von allen Issues. Fortfahren?
+gitea-repo.pulls.cant_reopen_deleted_branch-de-A_vs_C,de,A_vs_C,"Dieser Pull-Request kann nicht wieder geöffnet werden, da die Branch bereits gelöscht wurde.","Dieser Pull Request kann nicht wieder geöffnet werden, da der Branch gelöscht wurde."
+gitea-repo.pulls.cant_reopen_deleted_branch-de-B_vs_C,de,B_vs_C,"Dieser Pull-Request kann nicht wieder geöffnet werden, da der Branch gelöscht wurde.","Dieser Pull-Request kann nicht wieder geöffnet werden, da die Branch bereits gelöscht wurde."
+gitea-repo.pulls.upstream_diverging_merge_confirm-de-A_vs_C,de,A_vs_C,Möchtest du „%[1]s“ in „%[2]s“ mergen?,Möchten Sie „%[1]s“ mit „%[2]s“ zusammenführen?
+gitea-repo.pulls.upstream_diverging_merge_confirm-de-B_vs_C,de,B_vs_C,"Möchtest du ""%[1]s"" mit ""%[2]s"" zusammenführen?",Möchtest du „%[1]s“ in „%[2]s“ mergen?
+gitea-repo.settings.block_admin_merge_override-de-A_vs_C,de,A_vs_C,Administratoren müssen die Regeln zum Schutz von Branches befolgen,Administratoren müssen die Schutzregeln für Branches befolgen
+gitea-repo.settings.block_admin_merge_override-de-B_vs_C,de,B_vs_C,Administratoren müssen die Schutzregeln für Branches befolgen,Administratoren müssen Branch-Schutzregeln befolgen
+gitea-repo.settings.event_statuses_desc-de-A_vs_C,de,A_vs_C,"API による Commit Status の更新。
+
+Wait, the request says translate to German (de), but the content shows Japanese context. Let me provide correct German translation.
+
+Über die API aktualisierter Commit-Status.",Commit-Status von der API aktualisiert.
+gitea-repo.settings.event_statuses_desc-de-B_vs_C,de,B_vs_C,Commit-Status von der API aktualisiert.,Commit-Status über die API aktualisiert.
+gitea-repo.settings.protect_merge_whitelist_committers_desc-de-A_vs_C,de,A_vs_C,Erlaube Nutzern oder Teams auf der Genehmigungsliste Pull-Requests in diesen Branch zu mergen.,"Nur Benutzern oder Teams, die auf der Positivliste stehen, erlauben, Pull Requests in diesen Branch zusammenzuführen."
+gitea-repo.settings.protect_merge_whitelist_committers_desc-de-B_vs_C,de,B_vs_C,Nur zugelassene Benutzer oder Teams dürfen Pull-Requests in diesen Branch mergen.,Erlaube Nutzern oder Teams auf der Genehmigungsliste Pull-Requests in diesen Branch zu mergen.
+gitea-repo.settings.trust_model.default-de-A_vs_C,de,A_vs_C,Standard-Vertrauensmodell,Standardvertrauensmodell
+gitea-repo.settings.trust_model.default-de-B_vs_C,de,B_vs_C,Standardvertrauensmodell,Standard-Vertrauensmodell
+gitea-repo.trust_model_helper_committer-de-A_vs_C,de,A_vs_C,"Committer: Vertraue Signaturen, die mit Committern übereinstimmen","Committer: Vertraue Signaturen, die mit ihren Committern übereinstimmen"
+gitea-repo.trust_model_helper_committer-de-B_vs_C,de,B_vs_C,"Committer: Vertraue Signaturen, die mit ihren Committern übereinstimmen","Committer: Signaturen vertrauen, die zum Committer passen"
+gitea-settings.added_on-de-A_vs_C,de,A_vs_C,Hinzugefügt am %s,Hinzugefügt am %s
+gitea-settings.added_on-de-B_vs_C,de,B_vs_C,Hinzugefügt %s,Hinzugefügt am %s
+gitea-settings.oauth2_application_create_description-de-A_vs_C,de,A_vs_C,OAuth2 Anwendungen geben deiner Drittanwendung Zugriff auf Benutzeraccounts dieser Gitea-Instanz.,OAuth2-Anwendungen geben Ihrer Drittanbieteranwendung Zugriff auf Benutzerkonten auf dieser Instanz.
+gitea-settings.oauth2_application_create_description-de-B_vs_C,de,B_vs_C,OAuth2-Anwendungen gewähren deiner Drittanbieter-Anwendung Zugriff auf Benutzerkonten dieser Instanz.,OAuth2 Anwendungen geben deiner Drittanwendung Zugriff auf Benutzeraccounts dieser Gitea-Instanz.
+gitea-settings.update_language_success-de-A_vs_C,de,A_vs_C,Sprache wurde aktualisiert.,Die Sprache wurde aktualisiert.
+gitea-settings.update_language_success-de-B_vs_C,de,B_vs_C,Sprache wurde aktualisiert.,Sprache wurde aktualisiert.
+gitea-access_token-ja-A_vs_C,ja,A_vs_C,アクセストークン,アクセストークン
+gitea-access_token-ja-B_vs_C,ja,B_vs_C,アクセストークン,アクセストークン
+gitea-actions.runs.graph_dependencies_count_n-ja-A_vs_C,ja,A_vs_C,%d 件の依存関係,%d 件の依存関係
+gitea-actions.runs.graph_dependencies_count_n-ja-B_vs_C,ja,B_vs_C,%d 件の依存関係,%d件の依存関係
+gitea-admin.auths.attributes_in_bind-ja-A_vs_C,ja,A_vs_C,バインドDNのコンテクストから属性を取得する,バインドDNコンテキストで属性を取得
+gitea-admin.auths.attributes_in_bind-ja-B_vs_C,ja,B_vs_C,バインドDNコンテキストで属性を取得,バインドDNのコンテクストから属性を取得する
+gitea-admin.badges.remove_user-ja-A_vs_C,ja,A_vs_C,ユーザーを削除,ユーザーを削除
+gitea-admin.badges.remove_user-ja-B_vs_C,ja,B_vs_C,ユーザー削除,ユーザーを削除
+gitea-admin.config.ssh_port-ja-A_vs_C,ja,A_vs_C,ポート,ポート
+gitea-admin.config.ssh_port-ja-B_vs_C,ja,B_vs_C,ポート,ポート
+gitea-admin.monitor.desc-ja-A_vs_C,ja,A_vs_C,説明,説明
+gitea-admin.monitor.desc-ja-B_vs_C,ja,B_vs_C,説明,説明
+gitea-admin.users.list_status_filter.not_2fa_enabled-ja-A_vs_C,ja,A_vs_C,2段階認証が無効です,2要素認証無効
+gitea-admin.users.list_status_filter.not_2fa_enabled-ja-B_vs_C,ja,B_vs_C,2要素認証無効,2要素認証無効
+gitea-confirm_delete_artifact-ja-A_vs_C,ja,A_vs_C,アーティファクト '%s' を削除してよろしいですか？,アーティファクト「%s」を削除してもよろしいですか?
+gitea-confirm_delete_artifact-ja-B_vs_C,ja,B_vs_C,「%s」というアーティファクトを削除してもよろしいですか?,アーティファクト '%s' を削除してよろしいですか？
+gitea-form.invalid_ssh_principal-ja-A_vs_C,ja,A_vs_C,無効なプリンシパル: %s,`無効なプリンシパル: %s`
+gitea-form.invalid_ssh_principal-ja-B_vs_C,ja,B_vs_C,無効なプリンシパル: %s,無効なプリンシパル: %s
+gitea-install.default_keep_email_private_popup-ja-A_vs_C,ja,A_vs_C,デフォルトで新しいユーザーアカウントのメールアドレスを非表示にする。,新しいユーザーアカウントで、デフォルトでメールアドレスを隠す設定にします。
+gitea-install.default_keep_email_private_popup-ja-B_vs_C,ja,B_vs_C,新しいユーザーアカウントで、デフォルトでメールアドレスを隠す設定にします。,新しいユーザーアカウントのメールアドレスをデフォルトで非表示にする
+gitea-mail.release.new.text-ja-A_vs_C,ja,A_vs_C,<b>@%[1]s</b> さんが %[3]s で %[2]s をリリースしました,<b>@%[1]s</b>さんが%[3]sで%[2]sをリリースしました
+gitea-mail.release.new.text-ja-B_vs_C,ja,B_vs_C,<b>@%[1]s</b>が%[3]sで%[2]sをリリースしました,<b>@%[1]s</b> さんが %[3]s で %[2]s をリリースしました
+gitea-org.settings.update_setting_success-ja-A_vs_C,ja,A_vs_C,組織の設定を更新しました。,組織の設定が更新されました。
+gitea-org.settings.update_setting_success-ja-B_vs_C,ja,B_vs_C,組織設定を更新しました。,組織の設定を更新しました。
+gitea-packages.container.images-ja-A_vs_C,ja,A_vs_C,画像,イメージ
+gitea-packages.container.images-ja-B_vs_C,ja,B_vs_C,イメージ,画像
+gitea-packages.settings.link.notice2-ja-A_vs_C,ja,A_vs_C,リポジトリをリンクしても、パッケージの公開設定は変更されません。,リポジトリにリンクしてもパッケージの公開範囲は変わりません。
+gitea-packages.settings.link.notice2-ja-B_vs_C,ja,B_vs_C,リポジトリにリンクしてもパッケージの公開範囲は変わりません。,リポジトリのリンクは、パッケージの公開範囲を変更しません。
+gitea-repo.ambiguous_character-ja-A_vs_C,ja,A_vs_C,%[1]s は %[2]s と混同される可能性があります,%[1]s は %[2]s と混同するおそれがあります
+gitea-repo.ambiguous_character-ja-B_vs_C,ja,B_vs_C,%[1]s は %[2]s と混同するおそれがあります,%[1]sは%[2]sと混同されやすいです
+gitea-repo.desc.archived-ja-A_vs_C,ja,A_vs_C,アーカイブ,アーカイブ済み
+gitea-repo.desc.archived-ja-B_vs_C,ja,B_vs_C,アーカイブ済み,アーカイブ
+gitea-repo.editor.new_branch_name-ja-A_vs_C,ja,A_vs_C,このコミット用の新しいブランチの名前を付けてください,このコミットの新しいブランチに名前を付けます
+gitea-repo.editor.new_branch_name-ja-B_vs_C,ja,B_vs_C,このコミットの新しいブランチに名前を付けます,このコミット用の新しいブランチ名を入力
+gitea-repo.issues.comment.blocked_user-ja-A_vs_C,ja,A_vs_C,投稿者またはリポジトリのオーナーがあなたをブロックしているため、コメントの作成や編集はできません。,投稿者またはリポジトリのオーナーによってブロックされているため、コメントを作成または編集できません。
+gitea-repo.issues.comment.blocked_user-ja-B_vs_C,ja,B_vs_C,投稿者またはリポジトリオーナーにブロックされているため、コメントの作成や編集ができません。,投稿者またはリポジトリのオーナーがあなたをブロックしているため、コメントの作成や編集はできません。
+gitea-repo.issues.filter_type.reviewed_by_you-ja-A_vs_C,ja,A_vs_C,あなたによるレビュー済み,自分がレビュー
+gitea-repo.issues.filter_type.reviewed_by_you-ja-B_vs_C,ja,B_vs_C,自分がレビュー,あなたがレビュー済み
+gitea-repo.issues.review.reject-ja-A_vs_C,ja,A_vs_C,が変更を要請 %s,変更をリクエストしました %s
+gitea-repo.issues.review.reject-ja-B_vs_C,ja,B_vs_C,変更をリクエスト %s,が変更を要請 %s
+gitea-repo.milestones.close-ja-A_vs_C,ja,A_vs_C,クローズ,閉じる
+gitea-repo.milestones.close-ja-B_vs_C,ja,B_vs_C,閉じる,クローズ
+gitea-repo.pulls.blocked_by_outdated_branch-ja-A_vs_C,ja,A_vs_C,このプルリクエストは古くなっているためブロックされています。,このプルリクエストは遅れのためブロックされています。
+gitea-repo.pulls.blocked_by_outdated_branch-ja-B_vs_C,ja,B_vs_C,このプルリクエストは遅れのためブロックされています。,ブランチが古いため、このプルリクエストはブロックされています。
+gitea-repo.pulls.unrelated_histories-ja-A_vs_C,ja,A_vs_C,マージ失敗: マージHEADとベースには共通する履歴がありません。 ヒント: 別のストラテジーを試してみてください。,マージに失敗しました: マージ元とマージ先が共通の履歴を共有していません。ヒント: 別の戦略を試してください。
+gitea-repo.pulls.unrelated_histories-ja-B_vs_C,ja,B_vs_C,マージ失敗: マージ元とベースが共通の履歴を持っていません。別の戦略をお試しください。,マージ失敗: マージHEADとベースには共通する履歴がありません。 ヒント: 別のストラテジーを試してみてください。
+gitea-repo.settings.archive.success-ja-A_vs_C,ja,A_vs_C,リポジトリのアーカイブに成功しました。,リポジトリをアーカイブしました。
+gitea-repo.settings.archive.success-ja-B_vs_C,ja,B_vs_C,リポジトリをアーカイブしました。,リポジトリをアーカイブしました。
+gitea-repo.settings.event_release-ja-A_vs_C,ja,A_vs_C,リリース,リリース
+gitea-repo.settings.event_release-ja-B_vs_C,ja,B_vs_C,リリース,リリース
+gitea-repo.settings.protect_enable_push_desc-ja-A_vs_C,ja,A_vs_C,書き込み権限を持つ人は誰でも、このブランチにプッシュを行うことができます。(ただし強制プッシュは不可),書き込み権限を持つユーザーは誰でもこのブランチにプッシュできます(ただし、強制プッシュはできません)。
+gitea-repo.settings.protect_enable_push_desc-ja-B_vs_C,ja,B_vs_C,書き込み権限を持つユーザーは、このブランチへプッシュできるようになります(ただし強制プッシュは除く)。,書き込み権限を持つ人は誰でも、このブランチにプッシュを行うことができます。(ただし強制プッシュは不可)
+gitea-repo.settings.trust_model.collaboratorcommitter-ja-A_vs_C,ja,A_vs_C,共同作業者+コミッター,コラボレーター+コミッター
+gitea-repo.settings.trust_model.collaboratorcommitter-ja-B_vs_C,ja,B_vs_C,コラボレーター＋コミッター,共同作業者+コミッター
+gitea-repo.transfer.reject_desc-ja-A_vs_C,ja,A_vs_C,「%s」への転送をキャンセル,"""%s"" への移転をキャンセル"
+gitea-repo.transfer.reject_desc-ja-B_vs_C,ja,B_vs_C,"""%s"" への移転をキャンセル","""%s""への移転をキャンセル"
+gitea-settings.add_new_key-ja-A_vs_C,ja,A_vs_C,SSHキーの追加,SSHキーを追加
+gitea-settings.add_new_key-ja-B_vs_C,ja,B_vs_C,SSHキーを追加,SSHキーの追加
+gitea-settings.manage_social-ja-A_vs_C,ja,A_vs_C,ソーシャルアカウントの連携を管理,関連付けられているソーシャルアカウントを管理
+gitea-settings.manage_social-ja-B_vs_C,ja,B_vs_C,関連付けられているソーシャルアカウントを管理,関連ソーシャルアカウントの管理
+gitea-settings.unbind-ja-A_vs_C,ja,A_vs_C,連携の解除,リンク解除
+gitea-settings.unbind-ja-B_vs_C,ja,B_vs_C,リンク解除,連携の解除
+gitea-access_token-es-A_vs_C,es,A_vs_C,Token de acceso,Token de acceso
+gitea-access_token-es-B_vs_C,es,B_vs_C,Token de acceso,Token de acceso
+gitea-actions.variables.deletion.failed-es-A_vs_C,es,A_vs_C,No se pudo eliminar la variable.,No se pudo eliminar la variable.
+gitea-actions.variables.deletion.failed-es-B_vs_C,es,B_vs_C,No se pudo eliminar la variable.,No se pudo eliminar la variable.
+gitea-admin.auths.smtpport-es-A_vs_C,es,A_vs_C,SMTP Puerto,Puerto SMTP
+gitea-admin.auths.smtpport-es-B_vs_C,es,B_vs_C,Puerto SMTP,Puerto SMTP
+gitea-admin.config.mailer_use_sendmail-es-A_vs_C,es,A_vs_C,Usar Sendmail,Usar Sendmail
+gitea-admin.config.mailer_use_sendmail-es-B_vs_C,es,B_vs_C,Usar Sendmail,Usar Sendmail
+gitea-admin.dashboard.task.finished-es-A_vs_C,es,A_vs_C,Tarea: %[1]s iniciada por %[2]s ha finalizado,Tarea: %[1]s iniciada por %[2]s ha finalizado
+gitea-admin.dashboard.task.finished-es-B_vs_C,es,B_vs_C,%[1]s iniciado por %[2]s ha finalizado,Tarea: %[1]s iniciada por %[2]s ha finalizado
+gitea-admin.repos.lfs_size-es-A_vs_C,es,A_vs_C,Tamaño de LFS,Tamaño LFS
+gitea-admin.repos.lfs_size-es-B_vs_C,es,B_vs_C,Tamaño LFS,Tamaño LFS
+gitea-auth.manual_activation_only-es-A_vs_C,es,A_vs_C,Póngase en contacto con el administrador del sitio para completar la activación.,Contacta con el administrador de tu sitio para completar la activación.
+gitea-auth.manual_activation_only-es-B_vs_C,es,B_vs_C,Contacte con el administrador del sitio para completar la activación.,Póngase en contacto con el administrador del sitio para completar la activación.
+gitea-form.CommitChoice-es-A_vs_C,es,A_vs_C,Hacer commit de la elección,Confirmar elección
+gitea-form.CommitChoice-es-B_vs_C,es,B_vs_C,Confirmar elección,Hacer commit de la elección
+gitea-home.password_holder-es-A_vs_C,es,A_vs_C,Contraseña,Contraseña
+gitea-home.password_holder-es-B_vs_C,es,B_vs_C,Contraseña,Contraseña
+gitea-install.smtp_addr-es-A_vs_C,es,A_vs_C,SMTP Host,Servidor SMTP
+gitea-install.smtp_addr-es-B_vs_C,es,B_vs_C,Servidor SMTP,SMTP Host
+gitea-notification.unread-es-A_vs_C,es,A_vs_C,Sin leer,Sin leer
+gitea-notification.unread-es-B_vs_C,es,B_vs_C,No leído,Sin leer
+gitea-org.teams.read_access-es-A_vs_C,es,A_vs_C,Leer,Leer
+gitea-org.teams.read_access-es-B_vs_C,es,B_vs_C,Leer,Leer
+gitea-packages.owner.settings.cargo.rebuild.error-es-A_vs_C,es,A_vs_C,Fallo al reconstruir el índice de Cargo: %v,Error al reconstruir el índice de Cargo: %v
+gitea-packages.owner.settings.cargo.rebuild.error-es-B_vs_C,es,B_vs_C,Error al reconstruir el índice Cargo: %v,Fallo al reconstruir el índice de Cargo: %v
+gitea-repo.activity.git_stats_exclude_merges-es-A_vs_C,es,A_vs_C,"Excluyendo fusiones,","Excluyendo las fusiones,"
+gitea-repo.activity.git_stats_exclude_merges-es-B_vs_C,es,B_vs_C,"Excluyendo fusiones,","Excluyendo fusiones,"
+gitea-repo.branches-es-A_vs_C,es,A_vs_C,Ramas,Ramas
+gitea-repo.branches-es-B_vs_C,es,B_vs_C,Ramas,Ramas
+gitea-repo.diff.show_split_view-es-A_vs_C,es,A_vs_C,Vista dividida,Dividir vista
+gitea-repo.diff.show_split_view-es-B_vs_C,es,B_vs_C,Dividir vista,Vista dividida
+gitea-repo.find_tag-es-A_vs_C,es,A_vs_C,Buscar etiqueta,Buscar etiqueta
+gitea-repo.find_tag-es-B_vs_C,es,B_vs_C,Buscar tag,Buscar etiqueta
+gitea-repo.issues.dependency.add_error_dep_issue_not_exist-es-A_vs_C,es,A_vs_C,El problema dependiente no existe.,Incidencia dependiente no existe.
+gitea-repo.issues.dependency.add_error_dep_issue_not_exist-es-B_vs_C,es,B_vs_C,Incidencia dependiente no existe.,La incidencia dependiente no existe.
+gitea-repo.issues.label_count-es-A_vs_C,es,A_vs_C,%d etiquetas,%d etiquetas
+gitea-repo.issues.label_count-es-B_vs_C,es,B_vs_C,%d etiquetas,%d etiquetas
+gitea-repo.issues.review.remove_review_request-es-A_vs_C,es,A_vs_C,**Solicitud de revisión eliminada para %s %s**,solicitud de revisión eliminada para %s %s
+gitea-repo.issues.review.remove_review_request-es-B_vs_C,es,B_vs_C,solicitud de revisión eliminada para %s %s,solicitud de revisión eliminada de %s %s
+gitea-repo.milestones.clear-es-A_vs_C,es,A_vs_C,Limpiar,Borrar
+gitea-repo.milestones.clear-es-B_vs_C,es,B_vs_C,Borrar,Limpiar
+gitea-repo.pulls.auto_merge_canceled_schedule-es-A_vs_C,es,A_vs_C,Fusión automaticá estaba cancellada para este Pull Request.,Se canceló la fusión automática para esta solicitud de extracción.
+gitea-repo.pulls.auto_merge_canceled_schedule-es-B_vs_C,es,B_vs_C,La combinación automática fue cancelada para este PR.,Fusión automaticá estaba cancellada para este Pull Request.
+gitea-repo.pulls.update_branch-es-A_vs_C,es,A_vs_C,Actualizar rama por fusión,Actualizar rama mediante combinación
+gitea-repo.pulls.update_branch-es-B_vs_C,es,B_vs_C,Actualizar rama por fusión,Actualizar rama por fusión
+gitea-repo.settings.archive.branchsettings_unavailable-es-A_vs_C,es,A_vs_C,La configuración de la rama no está disponible si el repositorio está archivado.,Los ajustes de rama no están disponibles si el repositorio está archivado.
+gitea-repo.settings.archive.branchsettings_unavailable-es-B_vs_C,es,B_vs_C,Los ajustes de rama no están disponibles si el repositorio está archivado.,La configuración de rama no está disponible si el repo está archivado.
+gitea-repo.settings.event_pull_request_label-es-A_vs_C,es,A_vs_C,Pull Request Etiquetado,Pull Request Etiquetada
+gitea-repo.settings.event_pull_request_label-es-B_vs_C,es,B_vs_C,Pull Request etiquetado,Pull Request Etiquetado
+gitea-repo.settings.protect_enable_merge-es-A_vs_C,es,A_vs_C,Habilitar fusión,Activar fusión
+gitea-repo.settings.protect_enable_merge-es-B_vs_C,es,B_vs_C,Activar fusión,Habilitar fusión
+gitea-repo.settings.trust_model.collaborator.long-es-A_vs_C,es,A_vs_C,Colaborador: Firmas de confianza de colaboradores,Colaborador: Confiar en firmas de colaboradores
+gitea-repo.settings.trust_model.collaborator.long-es-B_vs_C,es,B_vs_C,Colaborador: Confiar en firmas de colaboradores,Colaborador: Confiar en firmas de colaboradores
+gitea-repo.visibility_helper_forced-es-A_vs_C,es,A_vs_C,La configuración del administrador de tu sitio obliga a que los nuevos repositorios sean privados.,El administrador de su sitio obliga a nuevos repositorios a ser privados.
+gitea-repo.visibility_helper_forced-es-B_vs_C,es,B_vs_C,El administrador de su sitio obliga a nuevos repositorios a ser privados.,Su administrador del sitio obliga a que los nuevos repositorios sean privados.
+gitea-settings.comment_type_group_project-es-A_vs_C,es,A_vs_C,Proyecto,Proyecto
+gitea-settings.comment_type_group_project-es-B_vs_C,es,B_vs_C,Proyecto,Proyecto
+gitea-settings.oauth2_client_secret-es-A_vs_C,es,A_vs_C,Clave secreta del cliente,Secreto de cliente
+gitea-settings.oauth2_client_secret-es-B_vs_C,es,B_vs_C,Secreto de cliente,Secreto cliente
+gitea-settings.update_language_not_found-es-A_vs_C,es,A_vs_C,"Idioma ""%s"" no está disponible.",El idioma «%s» no está disponible.
+gitea-settings.update_language_not_found-es-B_vs_C,es,B_vs_C,"El idioma ""%s"" no está disponible.","Idioma ""%s"" no está disponible."
+gitea-access_token-pt-BR-A_vs_C,pt-BR,A_vs_C,Token de Acesso,Token de Acesso
+gitea-access_token-pt-BR-B_vs_C,pt-BR,B_vs_C,Token de Acesso,Token de Acesso
+gitea-actions.workflow.disabled-pt-BR-A_vs_C,pt-BR,A_vs_C,O fluxo de trabalho está desativado.,Workflow está desativado.
+gitea-actions.workflow.disabled-pt-BR-B_vs_C,pt-BR,B_vs_C,Workflow está desativado.,Copiar
+gitea-admin.auths.type-pt-BR-A_vs_C,pt-BR,A_vs_C,Tipo,Tipo
+gitea-admin.auths.type-pt-BR-B_vs_C,pt-BR,B_vs_C,Tipo,Tipo
+gitea-admin.config.ssh_domain-pt-BR-A_vs_C,pt-BR,A_vs_C,**Domínio do Servidor SSH**,Domínio do servidor SSH
+gitea-admin.config.ssh_domain-pt-BR-B_vs_C,pt-BR,B_vs_C,Domínio do servidor SSH,Domínio do Servidor SSH
+gitea-admin.monitor.cron-pt-BR-A_vs_C,pt-BR,A_vs_C,Tarefas Cron,Tarefas Cron
+gitea-admin.monitor.cron-pt-BR-B_vs_C,pt-BR,B_vs_C,Tarefas Cron,Tarefas Cron
+gitea-admin.users.list_status_filter.is_2fa_enabled-pt-BR-A_vs_C,pt-BR,A_vs_C,2FA Ativado,2FA Ativado
+gitea-admin.users.list_status_filter.is_2fa_enabled-pt-BR-B_vs_C,pt-BR,B_vs_C,2FA Habilitado,2FA Ativado
+gitea-auth.sspi_auth_failed-pt-BR-A_vs_C,pt-BR,A_vs_C,Falha na autenticação SSPI,Falha de autenticação SSPI
+gitea-auth.sspi_auth_failed-pt-BR-B_vs_C,pt-BR,B_vs_C,Falha de autenticação SSPI,Falha na autenticação SSPI
+gitea-form.cannot_add_org_to_team-pt-BR-A_vs_C,pt-BR,A_vs_C,Uma organização não pode ser adicionada como membro da equipe.,Uma organização não pode ser adicionada como membro de uma equipe.
+gitea-form.cannot_add_org_to_team-pt-BR-B_vs_C,pt-BR,B_vs_C,Uma organização não pode ser adicionada como membro de uma equipe.,Uma organização não pode ser adicionada como membro da equipe.
+gitea-home.show_both_archived_unarchived-pt-BR-A_vs_C,pt-BR,A_vs_C,Mostrando arquivados e não arquivados,Exibindo arquivados e não arquivados
+gitea-home.show_both_archived_unarchived-pt-BR-B_vs_C,pt-BR,B_vs_C,Exibindo arquivados e não arquivados,Mostrando arquivados e não arquivados
+gitea-install.smtp_from_invalid-pt-BR-A_vs_C,pt-BR,A_vs_C,"O endereço de ""Enviar E-mail Como"" é inválido","O endereço ""Enviar e-mail como"" é inválido"
+gitea-install.smtp_from_invalid-pt-BR-B_vs_C,pt-BR,B_vs_C,"O endereço ""Enviar e-mail como"" é inválido","O endereço ""Enviar E-mail Como"" é inválido"
+gitea-org.code-pt-BR-A_vs_C,pt-BR,A_vs_C,Código,Código
+gitea-org.code-pt-BR-B_vs_C,pt-BR,B_vs_C,Código,Código
+gitea-org.teams.specific_repositories-pt-BR-A_vs_C,pt-BR,A_vs_C,Repositórios específicos,Repositórios específicos
+gitea-org.teams.specific_repositories-pt-BR-B_vs_C,pt-BR,B_vs_C,Repositórios específicos,Repositórios específicos
+gitea-packages.owner.settings.cargo.rebuild.description-pt-BR-A_vs_C,pt-BR,A_vs_C,A reconstrução pode ser útil se o índice não estiver sincronizado com os pacotes Cargo armazenados.,A recompilação pode ser útil se o índice não estiver sincronizado com os pacotes Cargo armazenados.
+gitea-packages.owner.settings.cargo.rebuild.description-pt-BR-B_vs_C,pt-BR,B_vs_C,A recompilação pode ser útil se o índice não estiver sincronizado com os pacotes Cargo armazenados.,A reconstrução pode ser útil se o índice não estiver sincronizado com os pacotes Cargo armazenados.
+gitea-repo.activity.git_stats_exclude_merges-pt-BR-A_vs_C,pt-BR,A_vs_C,"Excluindo merges,","Excluindo merges,"
+gitea-repo.activity.git_stats_exclude_merges-pt-BR-B_vs_C,pt-BR,B_vs_C,"Excluindo merges,","Excluindo merges,"
+gitea-repo.clone_helper-pt-BR-A_vs_C,pt-BR,A_vs_C,"Precisa de ajuda para clonar? Visite <a target=""_blank"" rel=""noopener noreferrer"" href=""%s"">Ajuda</a>.","Precisa de ajuda com o clone? Visite a <a target=""_blank"" rel=""noopener noreferrer"" href=""%s"">Ajuda</a>."
+gitea-repo.clone_helper-pt-BR-B_vs_C,pt-BR,B_vs_C,"Precisa de ajuda com o clone? Visite a <a target=""_blank"" rel=""noopener noreferrer"" href=""%s"">Ajuda</a>.","Precisa de ajuda para clonar? Visite <a target=""_blank"" rel=""noopener noreferrer"" href=""%s"">Ajuda</a>."
+gitea-repo.diff.whitespace_ignore_all_whitespace-pt-BR-A_vs_C,pt-BR,A_vs_C,Ignorar todas as alterações de espaço em branco,Ignorar espaços em branco ao comparar linhas
+gitea-repo.diff.whitespace_ignore_all_whitespace-pt-BR-B_vs_C,pt-BR,B_vs_C,Ignorar espaços em branco ao comparar linhas,Ignorar todas as alterações de espaço em branco
+gitea-repo.fork_to_different_account-pt-BR-A_vs_C,pt-BR,A_vs_C,Bifurcar para uma conta diferente,Faça um fork para uma conta diferente
+gitea-repo.fork_to_different_account-pt-BR-B_vs_C,pt-BR,B_vs_C,Faça um fork para uma conta diferente,Bifurcar para outra conta
+gitea-repo.issues.dependency.issue_no_dependencies-pt-BR-A_vs_C,pt-BR,A_vs_C,Nenhuma dependência definida.,Nenhuma dependência definida.
+gitea-repo.issues.dependency.issue_no_dependencies-pt-BR-B_vs_C,pt-BR,B_vs_C,Nenhuma dependência definida.,Sem dependências definidas.
+gitea-repo.issues.label_templates.info-pt-BR-A_vs_C,pt-BR,A_vs_C,Ainda não existem etiquetas. Crie uma etiqueta com 'Nova Etiqueta' ou use um conjunto de etiquetas predefinido:,Ainda não existem etiquetas. Crie uma etiqueta em 'Nova etiqueta' ou use um conjunto de etiquetas predefinida:
+gitea-repo.issues.label_templates.info-pt-BR-B_vs_C,pt-BR,B_vs_C,Ainda não existem etiquetas. Crie uma etiqueta em 'Nova etiqueta' ou use um conjunto de etiquetas predefinida:,Nenhuma etiqueta existe ainda. Crie uma com 'Nova Etiqueta' ou use um conjunto predefinido:
+gitea-repo.issues.role.member_helper-pt-BR-A_vs_C,pt-BR,A_vs_C,Este usuário é um membro da organização proprietária deste repositório.,Este usuário é um membro da organização proprietária deste repositório.
+gitea-repo.issues.role.member_helper-pt-BR-B_vs_C,pt-BR,B_vs_C,Este usuário é membro da organização proprietária deste repositório.,Este usuário é um membro da organização proprietária deste repositório.
+gitea-repo.milestones.edit-pt-BR-A_vs_C,pt-BR,A_vs_C,Editar Marco,Editar Marco
+gitea-repo.milestones.edit-pt-BR-B_vs_C,pt-BR,B_vs_C,Editar Marco,Editar Marco
+gitea-repo.pulls.blocked_by_approvals-pt-BR-A_vs_C,pt-BR,A_vs_C,Este pull request ainda não tem aprovações suficientes. %d de %d aprovações concedidas.,Esta pull request ainda não tem as aprovações necessárias. %d de %d aprovações oficiais concedidas.
+gitea-repo.pulls.blocked_by_approvals-pt-BR-B_vs_C,pt-BR,B_vs_C,Esta pull request ainda não tem as aprovações necessárias. %d de %d aprovações oficiais concedidas.,Este pull request ainda não tem aprovações suficientes. %d de %d aprovações concedidas.
+gitea-repo.pulls.tab_files-pt-BR-A_vs_C,pt-BR,A_vs_C,Arquivos Alterados,Arquivos Alterados
+gitea-repo.pulls.tab_files-pt-BR-B_vs_C,pt-BR,B_vs_C,Arquivos Alterados,Arquivos Alterados
+gitea-repo.settings.archive.error_ismirror-pt-BR-A_vs_C,pt-BR,A_vs_C,Você não pode arquivar um repositório espelhado.,Não é possível arquivar um repositório espelhado.
+gitea-repo.settings.archive.error_ismirror-pt-BR-B_vs_C,pt-BR,B_vs_C,Não é possível arquivar um repo espelhado.,Você não pode arquivar um repositório espelhado.
+gitea-repo.settings.event_pull_request_sync_desc-pt-BR-A_vs_C,pt-BR,A_vs_C,Pull request sincronizado.,Pull request sincronizado.
+gitea-repo.settings.event_pull_request_sync_desc-pt-BR-B_vs_C,pt-BR,B_vs_C,Pull request sincronizado.,Pull request sincronizado.
+gitea-repo.settings.protected_branch.delete_rule-pt-BR-A_vs_C,pt-BR,A_vs_C,Excluir Regra,Excluir Regra
+gitea-repo.settings.protected_branch.delete_rule-pt-BR-B_vs_C,pt-BR,B_vs_C,Excluir Regra,Excluir regra
+gitea-repo.settings.use_internal_issue_tracker-pt-BR-A_vs_C,pt-BR,A_vs_C,Usar o Issue Tracker Nativo,Usar o Rastreador de Problemas Integrado
+gitea-repo.settings.use_internal_issue_tracker-pt-BR-B_vs_C,pt-BR,B_vs_C,Usar Rastreador de Problemas,Usar o Issue Tracker Nativo
+gitea-repo.wiki.page_already_exists-pt-BR-A_vs_C,pt-BR,A_vs_C,Uma página de wiki com o mesmo nome já existe.,A página de wiki com o mesmo nome já existe.
+gitea-repo.wiki.page_already_exists-pt-BR-B_vs_C,pt-BR,B_vs_C,Já existe uma página wiki com esse nome.,Uma página de wiki com o mesmo nome já existe.
+gitea-settings.comment_type_group_reference-pt-BR-A_vs_C,pt-BR,A_vs_C,Referência,Referência
+gitea-settings.comment_type_group_reference-pt-BR-B_vs_C,pt-BR,B_vs_C,Referência,Referência
+gitea-settings.openid_deletion_success-pt-BR-A_vs_C,pt-BR,A_vs_C,O endereço de OpenID foi removido.,O endereço OpenID foi removido.
+gitea-settings.openid_deletion_success-pt-BR-B_vs_C,pt-BR,B_vs_C,O endereço OpenID foi removido.,O endereço de OpenID foi removido.
+gitea-settings.update_profile_success-pt-BR-A_vs_C,pt-BR,A_vs_C,Seu perfil foi atualizado.,Seu perfil foi atualizado.
+gitea-settings.update_profile_success-pt-BR-B_vs_C,pt-BR,B_vs_C,Seu perfil foi atualizado.,Seu perfil foi atualizado.
+zulip-Cjpwb2ludF9yaWdodDogIFVz-de-A_vs_C,de,A_vs_C,
+:point_right:  Verwende dieses Thema um [Zulips Nachrichtenfunktionen]({format_message_help_url}) auszuprobieren.
+,":point_right: Nutze dieses Thema, um die [Nachrichtenfunktionen von Zulip]({format_message_help_url}) auszuprobieren."
+zulip-JShyZWZlcnJlcl9mdWxsX25h-de-A_vs_C,de,A_vs_C,"%(referrer_full_name)s (%(referrer_email)s) möchte, dass du dich bei Zulip anmeldest – dem Team-Kommunikationstool, das für Produktivität entwickelt wurde.","%(referrer_full_name)s (%(referrer_email)s) hat dich zu Zulip eingeladen &mdash; dem Team-Kommunikationstool, das für Produktivität entworfen wurde."
+zulip-JShyZWZlcnJlcl9mdWxsX25h-de-B_vs_C,de,B_vs_C,"%(referrer_full_name)s (%(referrer_email)s) hat dich zu Zulip eingeladen &mdash; dem Team-Kommunikationstool, das für Produktivität entworfen wurde.","%(referrer_full_name)s (%(referrer_email)s) möchte, dass Sie sich bei Zulip anschließen -- dem für Produktivität entwickelten Team-Kommunikationstool."
+zulip-Q29uZmlybWF0aW9uIGxpbmsg-de-A_vs_C,de,A_vs_C,Der Bestätigungslink ist abgelaufen oder wurde deaktiviert,Bestätigungslink abgelaufen oder deaktiviert
+zulip-Q29uZmlybWF0aW9uIGxpbmsg-de-B_vs_C,de,B_vs_C,Bestätigungslink abgelaufen oder deaktiviert,Der Bestätigungslink ist abgelaufen oder wurde deaktiviert
+zulip-Q2hhbm5lbCBjb250ZW50IGFj-de-A_vs_C,de,A_vs_C,Zugriff auf Inhalt des Kanals ist erforderlich.,Zugriff auf Kanalinhalte ist erforderlich.
+zulip-Q2hhbm5lbCBjb250ZW50IGFj-de-B_vs_C,de,B_vs_C,Kanalinhaltszugriff ist erforderlich.,Zugriff auf Inhalt des Kanals ist erforderlich.
+zulip-QSBkZWZhdWx0IGNoYW5uZWwg-de-A_vs_C,de,A_vs_C,Ein Standardkanal kann nicht privat sein.,Ein Standardkanal kann nicht privat sein.
+zulip-QSBkZWZhdWx0IGNoYW5uZWwg-de-B_vs_C,de,B_vs_C,Ein Standardkanal kann nicht privat sein.,Ein Standardkanal kann nicht privat sein.
+zulip-QXQgbGVhc3Qgb25lIG9mIHRo-de-A_vs_C,de,A_vs_C,"Mindestens eines der folgenden Argumente muss gegeben sein: emoji_name, emoji_code","Mindestens eines der folgenden Argumente muss vorhanden sein: emoji_name, emoji_code"
+zulip-QXQgbGVhc3Qgb25lIG9mIHRo-de-B_vs_C,de,B_vs_C,"Mindestens eines der folgenden Argumente muss vorhanden sein: emoji_name, emoji_code","Mindestens eines der folgenden Argumente muss gegeben sein: emoji_name, emoji_code"
+zulip-RG8gbm90IHJlcGx5IHRvIHRo-de-A_vs_C,de,A_vs_C,"Antworte nicht auf diese E-Mail. Dieser Zulip-Server ist nicht dafür eingerichtet, eingehende E-Mails zu akzeptieren (<a href=""%(url)s"">Hilfe</a>).","Antworten Sie nicht auf diese E-Mail. Dieser Zulip-Server ist nicht so konfiguriert, dass er eingehende E-Mails akzeptiert (<a href=""%(url)s"">Hilfe</a>)."
+zulip-RG8gbm90IHJlcGx5IHRvIHRo-de-B_vs_C,de,B_vs_C,"Antworten Sie nicht auf diese E-Mail. Dieser Zulip-Server ist nicht für den Empfang eingehender E-Mails konfiguriert (<a href=""%(url)s"">Hilfe</a>).","Antworte nicht auf diese E-Mail. Dieser Zulip-Server ist nicht dafür eingerichtet, eingehende E-Mails zu akzeptieren (<a href=""%(url)s"">Hilfe</a>)."
+zulip-RGlzcG9zYWJsZSBlbWFpbCBh-de-A_vs_C,de,A_vs_C,Wegwerf-E-Mail-Adressen sind in dieser Organisation nicht zulässig,Wegwerf-E-Mail-Adressen sind in dieser Organisation nicht erlaubt
+zulip-RGlzcG9zYWJsZSBlbWFpbCBh-de-B_vs_C,de,B_vs_C,Wegwerf-E-Mail-Adressen sind in dieser Organisation nicht erlaubt,Wegwerf-E-Mail-Adressen sind in dieser Organisation nicht erlaubt
+zulip-RXZlbnQge2V2ZW50X2lkfSB3-de-A_vs_C,de,A_vs_C,Ereignis {event_id} befand sich nicht in dieser Warteschlange,Ereignis {event_id} war nicht in dieser Warteschlange enthalten
+zulip-RXZlbnQge2V2ZW50X2lkfSB3-de-B_vs_C,de,B_vs_C,Ereignis {event_id} war nicht in dieser Warteschlange enthalten,Ereignis {event_id} war nicht in dieser Warteschlange
+zulip-RmluZCB5b3VyIG9yZ2FuaXph-de-A_vs_C,de,A_vs_C,Finden Sie Ihre Organisation.,Finde deine Organisation.
+zulip-RmluZCB5b3VyIG9yZ2FuaXph-de-B_vs_C,de,B_vs_C,Finde deine Organisation.,Finde deine Organisation.
+zulip-SW52YWxpZCB1c2VyIElEczog-de-A_vs_C,de,A_vs_C,Ungültige Nutzer-IDs: {invalid_ids},Ungültige Benutzer-IDs: {invalid_ids}
+zulip-SW52YWxpZCB1c2VyIElEczog-de-B_vs_C,de,B_vs_C,Ungültige Nutzer-IDs: {invalid_ids},Ungültige Nutzer-IDs: {invalid_ids}
+zulip-SW52YWxpZCBjb25maWd1cmF0-de-A_vs_C,de,A_vs_C,Ungültige Konfigurationsdaten!,Ungültige Konfigurationsdaten!
+zulip-SW52YWxpZCBjb25maWd1cmF0-de-B_vs_C,de,B_vs_C,Ungültige Konfigurationsdaten!,Ungültige Konfigurationsdaten!
+zulip-SW52YWxpZCBwcm9wYWdhdGVf-de-A_vs_C,de,A_vs_C,Ungültiger propagate_mode ohne Themenbearbeitung,Ungültiger propagate_mode ohne Bearbeitung des Themas
+zulip-SW52YWxpZCBwcm9wYWdhdGVf-de-B_vs_C,de,B_vs_C,Ungültiger propagate_mode ohne Bearbeitung des Themas,Ungültiger propagate_mode ohne Themenbearbeitung
+zulip-SWYgeW91IGhhdmUgdHJvdWJs-de-A_vs_C,de,A_vs_C,"Wenn du Probleme bei der Anmeldung hast, kannst du dein Passwort zurücksetzen.","Wenn Sie Probleme beim Anmelden haben, können Sie Ihr Passwort zurücksetzen."
+zulip-SWYgeW91IGhhdmUgdHJvdWJs-de-B_vs_C,de,B_vs_C,"Wenn Sie sich nicht anmelden können, können Sie Ihr Passwort zurücksetzen.","Wenn du Probleme bei der Anmeldung hast, kannst du dein Passwort zurücksetzen."
+zulip-T3JnYW5pemF0aW9uIHR5cGU6-de-A_vs_C,de,A_vs_C,Organisationstyp: %(organization_type)s,Organisationstyp: %(organization_type)s
+zulip-T3JnYW5pemF0aW9uIHR5cGU6-de-B_vs_C,de,B_vs_C,Organisationstyp: %(organization_type)s,Organisationstyp: %(organization_type)s
+zulip-TWFzdG9kb24-de-A_vs_C,de,A_vs_C,Mastodon,Mastodon
+zulip-TWFzdG9kb24-de-B_vs_C,de,B_vs_C,Mastodon,Mastodon
+zulip-TXVzdCBiZSBhbiBvcmdhbml6-de-A_vs_C,de,A_vs_C,Muss ein Organisations-Administrator oder Emoji-Autor sein,Muss Organisationsadministrator oder Ersteller des Emojis sein
+zulip-TXVzdCBiZSBhbiBvcmdhbml6-de-B_vs_C,de,B_vs_C,Muss Organisationsadministrator oder Emoji-Autor sein,Muss ein Organisations-Administrator oder Emoji-Autor sein
+zulip-TmF2aWdhdGlvbiB2aWV3IGRv-de-A_vs_C,de,A_vs_C,Navigationsansicht existiert nicht.,Navigationsansicht existiert nicht.
+zulip-TmF2aWdhdGlvbiB2aWV3IGRv-de-B_vs_C,de,B_vs_C,Navigationsansicht existiert nicht.,Navigationsansicht existiert nicht.
+zulip-U2VsZWN0IHlvdXIgYWNjb3Vu-de-A_vs_C,de,A_vs_C,Wählen Sie Ihr Konto aus,Wähle deinen Account
+zulip-U2VsZWN0IHlvdXIgYWNjb3Vu-de-B_vs_C,de,B_vs_C,Wähle deinen Account,Konto auswählen
+zulip-UGFzc3dvcmQgcmVzZXQgcmVx-de-A_vs_C,de,A_vs_C,Passwort-Zurücksetzungsanfrage für %(realm_name)s,Passwortänderung angefordert für %(realm_name)s
+zulip-UGFzc3dvcmQgcmVzZXQgcmVx-de-B_vs_C,de,B_vs_C,Passwortänderung angefordert für %(realm_name)s,Passwort zurücksetzen für %(realm_name)s
+zulip-UmF0ZSBsaW1pdCBleGNlZWRl-de-A_vs_C,de,A_vs_C,Tarifgrenze überschritten.,Ratenlimit überschritten.
+zulip-UmF0ZSBsaW1pdCBleGNlZWRl-de-B_vs_C,de,B_vs_C,Ratenlimit überschritten.,Tarifgrenze überschritten.
+zulip-V2hhdCBhcmUgeW91IGludGVy-de-A_vs_C,de,A_vs_C,Woran haben Sie Interesse?,Woran bist du interessiert?
+zulip-V2hhdCBhcmUgeW91IGludGVy-de-B_vs_C,de,B_vs_C,Woran bist du interessiert?,Woran sind Sie interessiert?
+zulip-VGhlIG9yZ2FuaXphdGlvbiB5-de-A_vs_C,de,A_vs_C,"Die Organisation, der Sie beitreten möchten, <a href=""%(realm_url)s"">%(realm_name)s</a>, erlaubt keine Anmeldungen mit Wegwerf-E-Mail-Adressen.","Die Organisation, der du beitreten möchtest, <a href=""%(realm_url)s"">%(realm_name)s</a>, erlaubt keine Anmeldungen über Wegwerf-E-Mail-Adressen."
+zulip-VGhlIG9yZ2FuaXphdGlvbiB5-de-B_vs_C,de,B_vs_C,"Die Organisation, der du beitreten möchtest, <a href=""%(realm_url)s"">%(realm_name)s</a>, erlaubt keine Anmeldungen über Wegwerf-E-Mail-Adressen.","Die Organisation, der Sie beitreten möchten, <a href=""%(realm_url)s"">%(realm_name)s</a>, erlaubt keine Anmeldung mit Wegwerf-E-Mail-Adressen."
+zulip-VGhpcyBlbmRwb2ludCBkb2Vz-de-A_vs_C,de,A_vs_C,Dieser Endpunkt akzeptiert keine Bot-Anfragen.,Dieser Endpunkt akzeptiert keine Bot-Anfragen.
+zulip-VGhpcyBlbmRwb2ludCBkb2Vz-de-B_vs_C,de,B_vs_C,Dieser Endpunkt akzeptiert keine Bot-Anfragen.,Dieser Endpunkt akzeptiert keine Bot-Anfragen.
+zulip-VW5rbm93biB3ZWJob29rIHJl-de-A_vs_C,de,A_vs_C,Unbekannte Webhook-Anfrage,Unbekannte Webhook-Anfrage
+zulip-VW5rbm93biB3ZWJob29rIHJl-de-B_vs_C,de,B_vs_C,Unbekannte Webhook-Anfrage,Unbekannte Webhook-Anfrage
+zulip-VXNlciBoYXMgZGlzYWJsZWQg-de-A_vs_C,de,A_vs_C,Nutzer hat die Synchronisierung der Entwürfe deaktiviert.,Der Benutzer hat die Synchronisierung von Entwürfen deaktiviert.
+zulip-VXNlciBoYXMgZGlzYWJsZWQg-de-B_vs_C,de,B_vs_C,Nutzer hat Entwurfs-Synchronisierung deaktiviert.,Nutzer hat die Synchronisierung der Entwürfe deaktiviert.
+zulip-WW91IG11c3QgcHVyY2hhc2Ug-de-A_vs_C,de,A_vs_C,Sie müssen Lizenzen für alle aktiven Benutzer in Ihrer Organisation erwerben (mindestens {min_licenses}).,Du musst Lizenzen für alle aktiven Nutzer in deiner Organisation erwerben (mindestens {min_licenses}).
+zulip-WW91IG11c3QgcHVyY2hhc2Ug-de-B_vs_C,de,B_vs_C,Du musst Lizenzen für alle aktiven Nutzer in deiner Organisation erwerben (mindestens {min_licenses}).,Sie müssen Lizenzen für alle aktiven Nutzer Ihrer Organisation erwerben (mindestens {min_licenses}).
+zulip-WW91IGRvIG5vdCBoYXZlIHBl-de-A_vs_C,de,A_vs_C,"Du hast keine Berechtigung, Themen in diesem Kanal als gelöst zu markieren.","Du hast keine Berechtigung, neue Themen in diesem Kanal zu erstellen."
+zulip-WW91IGRvIG5vdCBoYXZlIHBl-de-B_vs_C,de,B_vs_C,"Sie sind nicht berechtigt, neue Themen in diesem Kanal zu erstellen.","Du hast keine Berechtigung, Themen in diesem Kanal als gelöst zu markieren."
+zulip-WW91ciBhY2NvdW50-de-A_vs_C,de,A_vs_C,Dein Account,Ihr Konto
+zulip-WW91ciBhY2NvdW50-de-B_vs_C,de,B_vs_C,Ihr Konto,Dein Account
+zulip-WnVsaXAgZ3VpZGUgZm9yIGNv-de-A_vs_C,de,A_vs_C,Zulip-Leitfaden für Communities,Zulip-Leitfaden für Gemeinschaften
+zulip-WnVsaXAgZ3VpZGUgZm9yIGNv-de-B_vs_C,de,B_vs_C,Zulip-Leitfaden für Gemeinschaften,Zulip-Leitfaden für Communities
+zulip-e2tleV9uYW1lfSBrZXkgaXMg-de-A_vs_C,de,A_vs_C,Der Key {key_name} fehlt in {var_name},`{key_name}`-Schlüssel fehlt in `{var_name}`
+zulip-e2tleV9uYW1lfSBrZXkgaXMg-de-B_vs_C,de,B_vs_C,Schlüssel {key_name} fehlt in {var_name},Der Key {key_name} fehlt in {var_name}
+zulip-Cjpwb2ludF9yaWdodDogIFVz-ja-A_vs_C,ja,A_vs_C,
+:point_right: このトピックを使って、[Zulipのメッセージ機能]({format_message_help_url})を試してみましょう。
+,:point_right: この機能を試すには、[Zulipのメッセージ機能]({format_message_help_url})を使ってください。
+zulip-Cjpwb2ludF9yaWdodDogIFVz-ja-B_vs_C,ja,B_vs_C,:point_right:  このトピックで[Zulipのメッセージ機能]({format_message_help_url})を試してみましょう。,
+:point_right: このトピックを使って、[Zulipのメッセージ機能]({format_message_help_url})を試してみましょう。
+
+zulip-PGEgaHJlZj0ibWFpbHRvOiUo-ja-A_vs_C,ja,A_vs_C,"<a href=""mailto:%(support_email)s"">このサーバーの管理者に連絡する</a>にはこちらへ。","サポートについては、<a href=""mailto:%(support_email)s"">このサーバーの管理者にお問い合わせください</a>。"
+zulip-PGEgaHJlZj0ibWFpbHRvOiUo-ja-B_vs_C,ja,B_vs_C,"サポートについては、<a href=""mailto:%(support_email)s"">このサーバーの管理者にお問い合わせください</a>。","サポートが必要な場合は<a href=""mailto:%(support_email)s"">このサーバーの管理者に連絡</a>してください。"
+zulip-Q29udHJpYnV0aW5nIGd1aWRl-ja-A_vs_C,ja,A_vs_C,コントリビューションガイド,貢献ガイド
+zulip-Q29udHJpYnV0aW5nIGd1aWRl-ja-B_vs_C,ja,B_vs_C,貢献ガイド,貢献ガイド
+zulip-Q2xpY2sgdGhlIGJ1dHRvbiBi-ja-A_vs_C,ja,A_vs_C,下のボタンをクリックして、組織を再有効化してください。,以下のボタンをクリックして組織を再有効化してください。
+zulip-Q2xpY2sgdGhlIGJ1dHRvbiBi-ja-B_vs_C,ja,B_vs_C,以下のボタンをクリックして組織を再有効化してください。,下のボタンをクリックして組織を再有効化してください。
+zulip-QW5hbHl0aWNzIGFyZSBmdWxs-ja-A_vs_C,ja,A_vs_C,組織作成から24時間後に、分析機能をすべてご利用いただけます。,アナリティクスは組織の作成後24時間以内に有効になります。
+zulip-QW5hbHl0aWNzIGFyZSBmdWxs-ja-B_vs_C,ja,B_vs_C,アナリティクスは組織の作成後24時間以内に有効になります。,組織作成から24時間後に分析機能をご利用いただけます。
+zulip-QXRsYXNzaWFuIGFjY291bnQg-ja-A_vs_C,ja,A_vs_C,アカウントはすでにあります,Atlassian アカウント ID
+zulip-QXRsYXNzaWFuIGFjY291bnQg-ja-B_vs_C,ja,B_vs_C,Atlassianアカウント ID,アカウントはすでにあります
+zulip-RG9tYWluIG11c3QgaGF2ZSBh-ja-A_vs_C,ja,A_vs_C,ドメインには少なくとも1つのピリオド(.)が必要です,ドメインは最低1つのドット (.) が必要です
+zulip-RG9tYWluIG11c3QgaGF2ZSBh-ja-B_vs_C,ja,B_vs_C,ドメインは最低1つのドット (.) が必要です,ドメインには少なくとも1つのドット(.)が必要です
+zulip-RHJhZnQgZG9lcyBub3QgZXhp-ja-A_vs_C,ja,A_vs_C,下書きが存在しません,下書きが存在しません
+zulip-RHJhZnQgZG9lcyBub3QgZXhp-ja-B_vs_C,ja,B_vs_C,下書きが存在しません,下書きが存在しません
+zulip-RXZlcnlvbmU-ja-A_vs_C,ja,A_vs_C,全員,みんな
+zulip-RXZlcnlvbmU-ja-B_vs_C,ja,B_vs_C,全員,全員
+zulip-RmlsdGVyIGJ5IGNhdGVnb3J5-ja-A_vs_C,ja,A_vs_C,カテゴリで絞り込む,カテゴリーでフィルター
+zulip-RmlsdGVyIGJ5IGNhdGVnb3J5-ja-B_vs_C,ja,B_vs_C,カテゴリーでフィルター,カテゴリで絞り込む
+zulip-SW50ZXJhY3RpdmUgYm90cw-ja-A_vs_C,ja,A_vs_C,インタラクティブボット,インタラクティブボット
+zulip-SW50ZXJhY3RpdmUgYm90cw-ja-B_vs_C,ja,B_vs_C,対話型ボット,インタラクティブボット
+zulip-SW52YWxpZCBjaGFubmVsIGZv-ja-A_vs_C,ja,A_vs_C,不正なデーターエクスポートID,無効なチャンネルフォルダIDです
+zulip-SW52YWxpZCBjaGFubmVsIGZv-ja-B_vs_C,ja,B_vs_C,無効なチャンネルフォルダID,不正なデーターエクスポートID
+zulip-SW52YWxpZCBtZXNzYWdlIHR5-ja-A_vs_C,ja,A_vs_C,無効なメッセージタイプ,不正なメッセージ種別
+zulip-SW52YWxpZCBtZXNzYWdlIHR5-ja-B_vs_C,ja,B_vs_C,不正なメッセージ種別,メッセージタイプが無効です
+zulip-SWYgeW91IGRvIG5vdCByZWNv-ja-A_vs_C,ja,A_vs_C,このログインに心当たりがない場合、またはアカウントが侵害された可能性があると思われる場合は、%(reset_link)s でパスワードをリセットするか、%(support_email)s まで至急ご連絡ください。,このログインについて身に覚えがない場合、またはアカウントが侵害された可能性がある場合は %(reset_link)s からパスワードをリセットするか、すぐに %(support_email)s までお問い合わせください。
+zulip-SWYgeW91IGRvIG5vdCByZWNv-ja-B_vs_C,ja,B_vs_C,このログインについて身に覚えがない場合、またはアカウントが侵害された可能性がある場合は %(reset_link)s からパスワードをリセットするか、すぐに %(support_email)s までお問い合わせください。,このログインに心当たりがない場合、またはアカウントが不正利用された可能性がある場合は、%(reset_link)s でパスワードを再設定するか、%(support_email)s まで至急ご連絡ください。
+zulip-T3JnYW5pemF0aW9uOiAlKG9y-ja-A_vs_C,ja,A_vs_C,組織：%(organization_link)s,組織: %(organization_link)s
+zulip-T3JnYW5pemF0aW9uOiAlKG9y-ja-B_vs_C,ja,B_vs_C,組織: %(organization_link)s,組織：%(organization_link)s
+zulip-TWFsZm9ybWVkIEpTT04gaW5w-ja-A_vs_C,ja,A_vs_C,JSON入力の形式が不正です,不正なJSON入力
+zulip-TWFsZm9ybWVkIEpTT04gaW5w-ja-B_vs_C,ja,B_vs_C,不正なJSON入力,不正なJSON入力
+zulip-TWlzc2luZyAnYW5jaG9yX2Rh-ja-A_vs_C,ja,A_vs_C,「anchor_date」引数がありません。,引数'anchor'がありません
+zulip-TWlzc2luZyAnYW5jaG9yX2Rh-ja-B_vs_C,ja,B_vs_C,引数'anchor'がありません,'anchor_date' 引数が指定されていません。
+zulip-Tm8gcGF5bWVudCBtZXRob2Qg-ja-A_vs_C,ja,A_vs_C,登録されている支払い方法がありません。,支払い方法が登録されていません。
+zulip-Tm8gcGF5bWVudCBtZXRob2Qg-ja-B_vs_C,ja,B_vs_C,登録済みの支払い方法がありません。,登録されている支払い方法がありません。
+zulip-TnVtYmVyIG9mIG1lc3NhZ2Vz-ja-A_vs_C,ja,A_vs_C,過去30日間のメッセージ数,過去30日のメッセージの累計
+zulip-TnVtYmVyIG9mIG1lc3NhZ2Vz-ja-B_vs_C,ja,B_vs_C,過去30日のメッセージの累計,過去30日間のメッセージ数
+zulip-U2lnbiB1cCB3aXRoICUoaWRl-ja-A_vs_C,ja,A_vs_C,%(identity_provider)sでサインアップ,%(identity_provider)sでサインアップ
+zulip-U2lnbiB1cCB3aXRoICUoaWRl-ja-B_vs_C,ja,B_vs_C,%(identity_provider)sでサインアップ,%(identity_provider)sで登録
+zulip-UGxhbiBtYW5hZ2VtZW50IGlz-ja-A_vs_C,ja,A_vs_C,"このZulipサーバーはすでに%(server_plan_name)sプランになっており、このサーバー上のすべての組織を対象としているため、この組織ではプラン管理は利用できません。Zulipサーバーのプランを管理するには、<a href=""https://zulip.com/help/self-hosted-billing#log-in-to-billing-management"">ログイン手順</a>の<b>サーバーレベルの請求</b>タブをご覧ください。","この組織ではプラン管理を利用できません。お使いのZulipサーバーには既に %(server_plan_name)s プランが適用されており、このサーバー上のすべての組織がその対象となっているためです。サーバーのプラン管理については、<a href=""https://zulip.com/help/self-hosted-billing#log-in-to-billing-management"">ログイン手順</a>の<b>サーバーレベルの請求</b>タブを参照してください。"
+zulip-UGxhbiBtYW5hZ2VtZW50IGlz-ja-B_vs_C,ja,B_vs_C,"この組織ではプラン管理を利用できません。お使いのZulipサーバーには既に %(server_plan_name)s プランが適用されており、このサーバー上のすべての組織がその対象となっているためです。サーバーのプラン管理については、<a href=""https://zulip.com/help/self-hosted-billing#log-in-to-billing-management"">ログイン手順</a>の<b>サーバーレベルの請求</b>タブを参照してください。","この組織ではプラン管理を利用できません。お使いのZulipサーバーは既に%(server_plan_name)sプランに加入しており、このサーバー上のすべての組織が対象となっているためです。Zulipサーバーのプランを管理するには、<a href=""https://zulip.com/help/self-hosted-billing#log-in-to-billing-management"">ログイン手順</a>の<b>サーバーレベルの請求</b>タブをご覧ください。"
+zulip-UmVhZCByZWNlaXB0cyBhcmUg-ja-A_vs_C,ja,A_vs_C,この組織では既読確認は無効になっています。,この組織では既読表示が無効化されています。
+zulip-UmVhZCByZWNlaXB0cyBhcmUg-ja-B_vs_C,ja,B_vs_C,この組織では既読表示が無効化されています。,この組織では既読通知が無効になっています。
+zulip-V2lkZ2V0czoge2Vycm9yX21z-ja-A_vs_C,ja,A_vs_C,ウィジェット：{error_msg},ウィジェット: {error_msg}
+zulip-V2lkZ2V0czoge2Vycm9yX21z-ja-B_vs_C,ja,B_vs_C,ウィジェット: {error_msg},ウィジェット：{error_msg}
+zulip-VGhlIG9yZGVyZWQgbGlzdCBt-ja-A_vs_C,ja,A_vs_C,順序付きリストでは、既存のすべてのリンク化ツールを1回ずつ列挙する必要があります,並べ替えられたリストに重複したリンク化機能を含めることはできません
+zulip-VGhlIG9yZGVyZWQgbGlzdCBt-ja-B_vs_C,ja,B_vs_C,並べ替えられたリストに重複したリンク化機能を含めることはできません,順序付きリストには、既存のリンク化ツールをすべて一度ずつ列挙する必要があります
+zulip-VGhpcyBpcyBob3cgeW91ciBh-ja-A_vs_C,ja,A_vs_C,Zulip上でアカウントの表示に使われます。,Zuipでのアカウントの表示方法は次のとおりです。
+zulip-VGhpcyBpcyBob3cgeW91ciBh-ja-B_vs_C,ja,B_vs_C,これがZulipでのアカウントの表示方法です。,Zulip上でアカウントの表示に使われます。
+zulip-VW5zdXBwb3J0ZWQgYnJvd3Nl-ja-A_vs_C,ja,A_vs_C,非対応のブラウザ,サポートされていないブラウザ
+zulip-VW5zdXBwb3J0ZWQgYnJvd3Nl-ja-B_vs_C,ja,B_vs_C,サポート対象外のブラウザ,非対応のブラウザ
+zulip-W0EgbWVzc2FnZV0oe21lc3Nh-ja-A_vs_C,ja,A_vs_C,{user}が[メッセージ]({message_link})を{old_location}からここに移動しました。,{user}が[1件のメッセージ]({message_link})を {old_location} からここに移動しました。
+zulip-W0EgbWVzc2FnZV0oe21lc3Nh-ja-B_vs_C,ja,B_vs_C,{user}が[1件のメッセージ]({message_link})を {old_location} からここに移動しました。,[メッセージ]({message_link})は{user}によって{old_location}からここに移動されました。
+zulip-WW91IGRvIG5vdCBoYXZlIHBl-ja-A_vs_C,ja,A_vs_C,このチャンネルに送信する権限がありません。,課金とプランを管理する権限がありません。
+zulip-WW91IGRvIG5vdCBoYXZlIHBl-ja-B_vs_C,ja,B_vs_C,プランと請求を管理する権限がありません。,このチャンネルに送信する権限がありません。
+zulip-WW91ciBlbWFpbCBhZGRyZXNz-ja-A_vs_C,ja,A_vs_C,あなたのメールアドレス（{email}）は、この組織でアカウント登録が許可されているドメインには含まれていません。,あなたのメールアドレス {email} はこの組織のアカウントに登録できるドメインではありません。
+zulip-WW91ciBlbWFpbCBhZGRyZXNz-ja-B_vs_C,ja,B_vs_C,あなたのメールアドレス {email} はこの組織のアカウントに登録できるドメインではありません。,```
+あなたのメールアドレス{email}は、この組織でのアカウント登録が許可されているドメインに含まれていません。
+```
+zulip-Y2hhbm5lbCBldmVudHM-ja-A_vs_C,ja,A_vs_C,チャンネルイベント,チャンネルイベント
+zulip-Y2hhbm5lbCBldmVudHM-ja-B_vs_C,ja,B_vs_C,チャンネルイベント,チャンネルイベント
+zulip-e3VzZXJ9IGpvaW5lZCB0aGlz-ja-A_vs_C,ja,A_vs_C,{user}がこの組織に参加しました。,{user}さんがこの組織に参加しました。
+zulip-e3VzZXJ9IGpvaW5lZCB0aGlz-ja-B_vs_C,ja,B_vs_C,{user}さんが組織に参加しました。,{user}がこの組織に参加しました。
+zulip-Ci0gKipPbGQge2ZpZWxkX25h-es-A_vs_C,es,A_vs_C,
+- **Antiguo {field_name}:** {old_value}
+- **Nuevo {field_name}:** {new_value}
+,- **{field_name} anterior:** {old_value}
+- **Nuevo {field_name}:** {new_value}
+zulip-Ci0gKipPbGQge2ZpZWxkX25h-es-B_vs_C,es,B_vs_C,- **{field_name} anterior:** {old_value}
+- **Nuevo {field_name}:** {new_value},
+- **Antiguo {field_name}:** {old_value}
+- **Nuevo {field_name}:** {new_value}
+
+zulip-JShyZWFsbV9uYW1lKXMgb24g-es-A_vs_C,es,A_vs_C,%(realm_name)s en Zulip: Los detalles de tu nueva cuenta,%(realm_name)s en Zulip: Detalles de tu nueva cuenta
+zulip-JShyZWFsbV9uYW1lKXMgb24g-es-B_vs_C,es,B_vs_C,%(realm_name)s en Zulip: Detalles de tu nueva cuenta,%(realm_name)s en Zulip: los detalles de tu nueva cuenta
+zulip-Q29uZmlybWF0aW9uIGxpbmsg-es-A_vs_C,es,A_vs_C,El enlace de confirmación ha caducado o ha sido desactivado,El enlace de confirmación ha expirado o ha sido desactivado
+zulip-Q29uZmlybWF0aW9uIGxpbmsg-es-B_vs_C,es,B_vs_C,El enlace de confirmación ha expirado o ha sido desactivado,Enlace de confirmación caducado o desactivado
+zulip-Q2hhbm5lbCBjb250ZW50IGFj-es-A_vs_C,es,A_vs_C,Se requiere acceso al contenido del canal.,Es necesario tener acceso al contenido del canal.
+zulip-Q2hhbm5lbCBjb250ZW50IGFj-es-B_vs_C,es,B_vs_C,Es necesario tener acceso al contenido del canal.,Se requiere acceso al contenido del canal.
+zulip-QSBmdWxsIHVwZGF0ZSBvZiBh-es-A_vs_C,es,A_vs_C,"Una actualización completa de todas las gráficas ocurre una vez al día. La gráfica de ""mensajes enviados a lo largo del tiempo"" se actualiza cada hora.","Una actualización completa de todos los gráficos se produce una vez al día. El gráfico de ""mensajes enviados a lo largo del tiempo"" se actualiza una vez por hora."
+zulip-QSBmdWxsIHVwZGF0ZSBvZiBh-es-B_vs_C,es,B_vs_C,"Una actualización completa de los gráficos ocurre una vez al día. El gráfico ""mensajes enviados"" se actualiza cada hora.","Una actualización completa de todas las gráficas ocurre una vez al día. La gráfica de ""mensajes enviados a lo largo del tiempo"" se actualiza cada hora."
+zulip-QXMgeW91IGFyZSBnZXR0aW5n-es-A_vs_C,es,A_vs_C,"Mientras aprendés a usar Zulip, nos encantaría ayudarte a descubrir cómo se pueda adaptar a tus necesidades. Revisá esta guía de características clave de Zulip para organizaciones como la tuya!","Mientras te iniciás en Zulip, nos encantaría ayudarte a descubrir cómo puede adaptarse mejor a tus necesidades. ¡Consultá esta guía sobre las funciones clave de Zulip para organizaciones como la tuya!"
+zulip-R3Vlc3QgdXNlcnM-es-A_vs_C,es,A_vs_C,Usuarios invitados,Usuarios invitados
+zulip-R3Vlc3QgdXNlcnM-es-B_vs_C,es,B_vs_C,Usuarios invitados,Invitados
+zulip-RGlyZWN0IG1lc3NhZ2VzIGNh-es-A_vs_C,es,A_vs_C,Los mensajes directos no pueden tener temas.,Los mensajes directos no pueden tener temas.
+zulip-RGlyZWN0IG1lc3NhZ2VzIGNh-es-B_vs_C,es,B_vs_C,Los mensajes directos no tienen temas.,Los mensajes directos no pueden tener temas.
+zulip-RXJyb3IgYXV0aGVudGljYXRp-es-A_vs_C,es,A_vs_C,Error al autenticarse en el servidor {provider_name},Error al autenticar con el servidor {provider_name}
+zulip-RXJyb3IgYXV0aGVudGljYXRp-es-B_vs_C,es,B_vs_C,Error al autenticar en el servidor {provider_name},Error al autenticarse en el servidor {provider_name}
+zulip-RmlsdGVyIGJ5IGNhdGVnb3J5-es-A_vs_C,es,A_vs_C,Filtrar por categoría,Filtrar por categoría
+zulip-RmlsdGVyIGJ5IGNhdGVnb3J5-es-B_vs_C,es,B_vs_C,Filtrar por categoría,Filtrar por categoría
+zulip-SW52YWxpZCB0b2tlbiB0eXBl-es-A_vs_C,es,A_vs_C,Tipo de token inválido,Tipo de token no válido
+zulip-SW52YWxpZCB0b2tlbiB0eXBl-es-B_vs_C,es,B_vs_C,Tipo de token inválido,Tipo de token inválido
+zulip-SW52YWxpZCBjaGFyYWN0ZXJz-es-A_vs_C,es,A_vs_C,Caracteres no válidos en el nombre del emoji,Caracteres inválidos en el nombre del emoticono
+zulip-SW52YWxpZCBjaGFyYWN0ZXJz-es-B_vs_C,es,B_vs_C,Caracteres inválidos en el nombre del emoticono,Caracteres inválidos en emoji
+zulip-SW52YWxpZCBwbGF5Z3JvdW5k-es-A_vs_C,es,A_vs_C,Playground no válido,Entorno de prueba no válido
+zulip-SW52YWxpZCBwbGF5Z3JvdW5k-es-B_vs_C,es,B_vs_C,Entorno de prueba no válido,Playground no válido
+zulip-SWYgeW91IHRoaW5rIHRoaXMg-es-A_vs_C,es,A_vs_C,"Si crees que se trata de un error o necesitas más información, ponte en contacto con nosotros en %(support_email)s.","Si crees que se trata de un error o necesitas más detalles, ponte en contacto con nosotros en %(support_email)s."
+zulip-SWYgeW91IHRoaW5rIHRoaXMg-es-B_vs_C,es,B_vs_C,"Si crees que esto fue un error o necesitas más detalles, contáctanos en %(support_email)s.","Si crees que se trata de un error o necesitas más información, ponte en contacto con nosotros en %(support_email)s."
+zulip-T3JnYW5pemF0aW9uIHR5cGU6-es-A_vs_C,es,A_vs_C,Tipo de organización: %(organization_type)s,Tipo de organización: %(organization_type)s
+zulip-T3JnYW5pemF0aW9uIHR5cGU6-es-B_vs_C,es,B_vs_C,Tipo de organización: %(organization_type)s,Tipo de organización: %(organization_type)s
+zulip-TWFuYWdlIGVtYWlsIHByZWZl-es-A_vs_C,es,A_vs_C,Gestionar preferencias de correo,Administrar preferencias de correo electrónico
+zulip-TWFuYWdlIGVtYWlsIHByZWZl-es-B_vs_C,es,B_vs_C,Gestionar preferencias de email,Gestionar preferencias de correo
+zulip-TXVzdCBiZSBhIGJvdCB1c2Vy-es-A_vs_C,es,A_vs_C,El usuario debe ser un bot,Debe ser un propietario de la organización
+zulip-TXVzdCBiZSBhIGJvdCB1c2Vy-es-B_vs_C,es,B_vs_C,Debe ser un propietario de la organización,Debe ser usuario bot
+zulip-Tm9ib2R5-es-A_vs_C,es,A_vs_C,Nadie,Nadie
+zulip-Tm9ib2R5-es-B_vs_C,es,B_vs_C,Nadie,Nadie
+zulip-U2VjdXJpdHk-es-A_vs_C,es,A_vs_C,Seguridad,Seguridad
+zulip-U2VjdXJpdHk-es-B_vs_C,es,B_vs_C,Seguridad,Seguridad
+zulip-UGFzc3dvcmQ-es-A_vs_C,es,A_vs_C,Contraseña,Contraseña
+zulip-UGFzc3dvcmQ-es-B_vs_C,es,B_vs_C,Contraseña,Contraseña
+zulip-UXVlc3Rpb25zPyBDb250YWN0-es-A_vs_C,es,A_vs_C,¿Tienes dudas? Contáctanos en %(support_email)s — ¡Estaremos encantados de ayudarte!,¿Tienes preguntas? Contáctanos en %(support_email)s. ¡Nos encantaría ayudarte!
+zulip-UXVlc3Rpb25zPyBDb250YWN0-es-B_vs_C,es,B_vs_C,¿Preguntas? Contáctanos en %(support_email)s. ¡Encantados de ayudarte!,¿Tienes dudas? Contáctanos en %(support_email)s — ¡Estaremos encantados de ayudarte!
+zulip-V2VsY29tZSB0byBadWxpcCE-es-A_vs_C,es,A_vs_C,¡Bienvenido a Zulip!,¡Bienvenido/a a Zulip!
+zulip-V2VsY29tZSB0byBadWxpcCE-es-B_vs_C,es,B_vs_C,¡Bienvenido a Zulip!,¡Bienvenido a Zulip!
+zulip-VGhlIG9yZ2FuaXphdGlvbiB5-es-A_vs_C,es,A_vs_C,"La organización a la que intentas unirte, <a href=""%(realm_url)s"">%(realm_name)s</a>, no permite registrarse con direcciones de correo electrónico desechables.","La organización a la que intentas unirte, <a href=""%(realm_url)s"">%(realm_name)s</a>, no permite registros con direcciones de correo electrónico desechables."
+zulip-VGhlIG9yZ2FuaXphdGlvbiB5-es-B_vs_C,es,B_vs_C,"La organización a la que intentas unirte, <a href=""%(realm_url)s"">%(realm_name)s</a>, no permite registros con correos electrónicos desechables.","La organización a la que intentas unirte, <a href=""%(realm_url)s"">%(realm_name)s</a>, no permite registrarse con direcciones de correo electrónico desechables."
+zulip-VGhpcyBlbmRwb2ludCBkb2Vz-es-A_vs_C,es,A_vs_C,Este endpoint no acepta peticiones de bots.,Este endpoint no acepta solicitudes de bots.
+zulip-VGhpcyBlbmRwb2ludCBkb2Vz-es-B_vs_C,es,B_vs_C,Este endpoint no acepta solicitudes de bots.,Este endpoint no acepta peticiones de bots.
+zulip-VW5rbm93biBJUCBhZGRyZXNz-es-A_vs_C,es,A_vs_C,Dirección IP desconocida,Dirección IP desconocida
+zulip-VW5rbm93biBJUCBhZGRyZXNz-es-B_vs_C,es,B_vs_C,IP desconocida,Dirección IP desconocida
+zulip-VXNlciBpcyBkZWFjdGl2YXRl-es-A_vs_C,es,A_vs_C,El usuario está desactivado,El usuario está desactivado
+zulip-VXNlciBpcyBkZWFjdGl2YXRl-es-B_vs_C,es,B_vs_C,"User is deactivated → ""Usuario desactivado"" (20 characters, fits within the 27-character limit)",El usuario está desactivado
+zulip-WW91IG11c3QgdXBsb2FkIGV4-es-A_vs_C,es,A_vs_C,Debes subir exactamente un logo.,Debe subir exactamente un logotipo.
+zulip-WW91IG11c3QgdXBsb2FkIGV4-es-B_vs_C,es,B_vs_C,Debe subir exactamente un logotipo.,Debes subir exactamente un logo.
+zulip-WW91IGRvbid0IGhhdmUgcGVy-es-A_vs_C,es,A_vs_C,No tienes permiso para resolver temas en este canal.,No tienes permiso para cerrar temas en este canal.
+zulip-WW91IGRvbid0IGhhdmUgcGVy-es-B_vs_C,es,B_vs_C,No tienes permiso para cerrar temas en este canal.,No tienes permiso para resolver temas en este canal.
+zulip-WW91ciBib3Qge2JvdF9pZGVu-es-A_vs_C,es,A_vs_C,"Tu bot {bot_identity} ha intentado enviar un mensaje al canal {channel_name}. El canal existe, pero no tiene suscriptores.",Su bot {bot_identity} intentó enviar un mensaje al canal {channel_name}. El canal existe pero no tiene ningún suscriptor.
+zulip-WW91ciBib3Qge2JvdF9pZGVu-es-B_vs_C,es,B_vs_C,Tu bot {bot_identity} intentó enviar un mensaje al canal {channel_name}. El canal existe pero no tiene suscriptores.,"Tu bot {bot_identity} ha intentado enviar un mensaje al canal {channel_name}. El canal existe, pero no tiene suscriptores."
+zulip-WnVsaXAgZm9yIGJ1c2luZXNz-es-A_vs_C,es,A_vs_C,Zulip para empresas,Zulip para empresas
+zulip-WnVsaXAgZm9yIGJ1c2luZXNz-es-B_vs_C,es,B_vs_C,Zulip para empresas,Zulip para empresas
+zulip-e3NlcnZpY2VfbmFtZX0gZGln-es-A_vs_C,es,A_vs_C,Resumen de {service_name},Resumen de {service_name}
+zulip-e3NlcnZpY2VfbmFtZX0gZGln-es-B_vs_C,es,B_vs_C,Resumen de {service_name},Resumen de {service_name}
+zulip-CkFzIGEgcmVtaW5kZXIsIHRo-ar-A_vs_C,ar,A_vs_C,تذكير: سيتم حذف [منظمة العرض التوضيحي هذه]({demo_help}) تلقائيًا في {deletion_time}، إلا إذا تم [تحويلها إلى منظمة دائمة]({convert_demo}).,"تهانينا, لقد قمت بإنشاء منظمة زوليب تجريبية جديدة. لاحظ أن تلك المنظمة ستحذف تلقائيا بعد 30 يوما. اعرف المزيد عن المنظمات التجريبية من هنا: %(demo_organizations_help_link)s"
+zulip-CkFzIGEgcmVtaW5kZXIsIHRo-ar-B_vs_C,ar,B_vs_C,"تهانينا, لقد قمت بإنشاء منظمة زوليب تجريبية جديدة. لاحظ أن تلك المنظمة ستحذف تلقائيا بعد 30 يوما. اعرف المزيد عن المنظمات التجريبية من هنا: %(demo_organizations_help_link)s",كتذكير، سيتم حذف [هذه المؤسسة التجريبية]({demo_help}) تلقائيًا في {deletion_time}، إلا إذا تم [تحويلها إلى مؤسسة دائمة]({convert_demo}).
+zulip-Q29uZmlndXJhdGlvbiBlcnJv-ar-A_vs_C,ar,A_vs_C,خطأ اعدادات,خطأ في الإعداد
+zulip-Q29uZmlndXJhdGlvbiBlcnJv-ar-B_vs_C,ar,B_vs_C,خطأ في الإعداد,خطأ اعدادات
+zulip-Q2Fubm90IGNoYW5nZSBtZXNz-ar-A_vs_C,ar,A_vs_C,لا يمكن تعديل محتوى الرسالة أثناء تغيير القناة,لا يمكن تغيير محتوى الرسالة أثناء تغيير القناة
+zulip-Q2Fubm90IGNoYW5nZSBtZXNz-ar-B_vs_C,ar,B_vs_C,لا يمكن تغيير محتوى الرسالة أثناء تغيير القناة,لا يمكن تعديل محتوى الرسالة أثناء تغيير القناة
+zulip-Q2xpZW50IG11c3QgcGFzcyBl-ar-A_vs_C,ar,A_vs_C,يجب أن يمرر العميل emoji_name إذا مرر إما emoji_code أو reaction_type.,يجب على العميل تمرير emoji_name إذا قام بتمرير emoji_code أو reaction_type.
+zulip-Q2xpZW50IG11c3QgcGFzcyBl-ar-B_vs_C,ar,B_vs_C,يجب أن يمرر العميل emoji_name إذا مرر emoji_code أو reaction_type.,يجب أن يمرر العميل emoji_name إذا مرر إما emoji_code أو reaction_type.
+zulip-QWNjZXNzIGRlbmllZA-ar-A_vs_C,ar,A_vs_C,تم رفض الوصول,تم رفض الوصول
+zulip-QWNjZXNzIGRlbmllZA-ar-B_vs_C,ar,B_vs_C,تم رفض الوصول,رفض الوصول
+zulip-Qmx1ZXNreQ-ar-A_vs_C,ar,A_vs_C,القيم,بلوسكاي
+zulip-Qmx1ZXNreQ-ar-B_vs_C,ar,B_vs_C,بلوسكاي,القيم
+zulip-RGFpbHkgYWN0aXZlcw-ar-A_vs_C,ar,A_vs_C,النشطون يوميًا,الأنشطة اليومية
+zulip-RGFpbHkgYWN0aXZlcw-ar-B_vs_C,ar,B_vs_C,الأنشطة اليومية,نشطون يوميًا
+zulip-RW1iZWRkZWQgYm90cyBhcmUg-ar-A_vs_C,ar,A_vs_C,لم يتم تمكين الروبوتات المضمنة.,البوتات المضمنة غير مفعّلة.
+zulip-RW1iZWRkZWQgYm90cyBhcmUg-ar-B_vs_C,ar,B_vs_C,البوتات المضمنة غير مفعّلة,لم يتم تمكين الروبوتات المضمنة.
+zulip-Rm9yZ290IHlvdXIgcGFzc3dv-ar-A_vs_C,ar,A_vs_C,نسيت رقمك السري؟,نسيت كلمة المرور؟
+zulip-Rm9yZ290IHlvdXIgcGFzc3dv-ar-B_vs_C,ar,B_vs_C,نسيت كلمة المرور؟,نسيت رقمك السري؟
+zulip-SGkgdGhlcmUs-ar-A_vs_C,ar,A_vs_C,أهلًا،,مرحباً بك،
+zulip-SGkgdGhlcmUs-ar-B_vs_C,ar,B_vs_C,مرحباً,أهلًا،
+zulip-SW52YWxpZCBBUEkga2V5-ar-A_vs_C,ar,A_vs_C,مفتاح API غير صالح,مفتاح API غير صالح
+zulip-SW52YWxpZCBBUEkga2V5-ar-B_vs_C,ar,B_vs_C,مفتاح API غير صالح,مفتاح API غير صالح
+zulip-SW52YWxpZCBmaWVsZCB0eXBl-ar-A_vs_C,ar,A_vs_C,نوع الحقل غير صالح.,نوع الحقل غير صالح.
+zulip-SW52YWxpZCBmaWVsZCB0eXBl-ar-B_vs_C,ar,B_vs_C,نوع الحقل غير صالح.,نوع حقل غير صالح.
+zulip-SWYgdGhpcyB3YXMgeW91LCBn-ar-A_vs_C,ar,A_vs_C,لو كان هذا أنت، رائع! لا حاجة لأي إجراء آخر.,إذا كان هذا أنت ، عظيم! لا يوجد شيء آخر عليك القيام به.
+zulip-SWYgdGhpcyB3YXMgeW91LCBn-ar-B_vs_C,ar,B_vs_C,إذا كان هذا أنت ، عظيم! لا يوجد شيء آخر عليك القيام به.,إذا كان هذا أنت، رائع! ليس هناك ما تحتاج إلى فعله.
+zulip-T3IsIGNvbnRpbnVlIGluIHlv-ar-A_vs_C,ar,A_vs_C,أو، استمر في متصفحك.,أو، استمر في متصفحك.
+zulip-T3IsIGNvbnRpbnVlIGluIHlv-ar-B_vs_C,ar,B_vs_C,أو تابع في متصفحك.,أو، استمر في متصفحك.
+zulip-TG9nIGluIHRvIHlvdXIgb3Jn-ar-A_vs_C,ar,A_vs_C,تسجيل الدخول إلى مؤسستك,سجّل الدخول إلى منظمتك
+zulip-TG9nIGluIHRvIHlvdXIgb3Jn-ar-B_vs_C,ar,B_vs_C,سجّل الدخول إلى منظمتك,سجّل الدخول إلى مؤسستك
+zulip-TWVzc2FnZSB3aXRoIGNvZGU-ar-A_vs_C,ar,A_vs_C,رسالة تحتوي على رمز,الرسائل المرسلة بمرور الوقت
+zulip-TWVzc2FnZSB3aXRoIGNvZGU-ar-B_vs_C,ar,B_vs_C,الرسائل المرسلة بمرور الوقت,رسالة برمز
+zulip-TXVzdCBiZSBhIGRlbW8gb3Jn-ar-A_vs_C,ar,A_vs_C,يجب أن تكون منظمة تجريبية.,يجب أن تكون منظمة تجريبية.
+zulip-TXVzdCBiZSBhIGRlbW8gb3Jn-ar-B_vs_C,ar,B_vs_C,يجب أن تكون منظمة تجريبية.,يجب أن تكون منظمة تجريبية
+zulip-Tm9ybWFsIHVzZXJz-ar-A_vs_C,ar,A_vs_C,المستخدمون العاديون,المستخدمون العاديون
+zulip-Tm9ybWFsIHVzZXJz-ar-B_vs_C,ar,B_vs_C,المستخدمون العاديون,مستخدمون عاديون
+zulip-U2NyZWVuc2hvdCBvZiBadWxp-ar-A_vs_C,ar,A_vs_C,ابدأ محادثة,لقطة شاشة لمحادثة Zulip
+zulip-U2NyZWVuc2hvdCBvZiBadWxp-ar-B_vs_C,ar,B_vs_C,لقطة شاشة لمحادثة زوليب,ابدأ محادثة
+zulip-UGF5bWVudCBpbnRlbnQgbm90-ar-A_vs_C,ar,A_vs_C,لم يتم العثور على غرض الدفع,لم يتم العثور على القصد من الدفع
+zulip-UGF5bWVudCBpbnRlbnQgbm90-ar-B_vs_C,ar,B_vs_C,لم يتم العثور على القصد من الدفع,نية الدفع غير موجودة
+zulip-UHJvZHVjdA-ar-A_vs_C,ar,A_vs_C,**المنتج**,المنتج
+zulip-UHJvZHVjdA-ar-B_vs_C,ar,B_vs_C,المنتج,منتج
+zulip-UmVzZXQgeW91ciBwYXNzd29y-ar-A_vs_C,ar,A_vs_C,إعادة تعيين كلمة المرور الخاصة بك,اعد تعيين كلمة المرور
+zulip-UmVzZXQgeW91ciBwYXNzd29y-ar-B_vs_C,ar,B_vs_C,اعد تعيين كلمة المرور,إعادة تعيين كلمة المرور
+zulip-VG8gdXNlIG9uZSBvZiB0aGVz-ar-A_vs_C,ar,A_vs_C,"لاستخدام أحد هذه العناوين لتسجيل الدخول إلى Zulip، يجب أولاً <a href=""https://github.com/settings/emails"">التحقق منه عبر GitHub.</a>","لاستخدام واحدة من هذه لتسجيل الدخول إلى ""زوليب""، يجب عليك أولًا <a href=""https://github.com/settings/emails"">التحقق منها بواسطة GitHub.</a>"
+zulip-VGhlcmUgc2hvdWxkIGJlIGEg-ar-A_vs_C,ar,A_vs_C,يجب أن يكون هناك شرطة مائلة (/) في بداية الأمر zcommand.,يجب أن يكون هناك شرطة مائلة في البداية في zcommand.
+zulip-VGhlcmUgc2hvdWxkIGJlIGEg-ar-B_vs_C,ar,B_vs_C,يجب أن يكون هناك شرطة مائلة في البداية في zcommand.,يجب أن تبدأ zcommand بشرطة مائلة.
+zulip-VHJ5IFp1bGlw-ar-A_vs_C,ar,A_vs_C,جرب زوليب الآن,جرّب Zulip
+zulip-VHJ5IFp1bGlw-ar-B_vs_C,ar,B_vs_C,جرّب زوليب,جرب زوليب الآن
+zulip-VXBsb2FkIHdvdWxkIGV4Y2Vl-ar-A_vs_C,ar,A_vs_C,سيؤدي التحميل إلى تجاوز حصة التحميل المخصصة لمؤسستك.,قد يتجاوز التحميل حصة التحميل الخاصة بمنظمتك.
+zulip-VXBsb2FkIHdvdWxkIGV4Y2Vl-ar-B_vs_C,ar,B_vs_C,قد يتجاوز التحميل حصة التحميل الخاصة بمنظمتك.,سيتجاوز الرفع حصة مؤسستك المسموح بها.
+zulip-VmlldyBwcmljaW5n-ar-A_vs_C,ar,A_vs_C,عرض الأسعار,عرض السعر
+zulip-VmlldyBwcmljaW5n-ar-B_vs_C,ar,B_vs_C,عرض السعر,عرض التسعير
+zulip-WW91IGNhbm5vdCBkZWNyZWFz-ar-A_vs_C,ar,A_vs_C,لا يمكنك تقليل التراخيص في فترة الفوترة الحالية.,لا يمكنك تقليل عدد التراخيص خلال فترة الفوترة الحالية.
+zulip-WW91IGNhbm5vdCBkZWNyZWFz-ar-B_vs_C,ar,B_vs_C,لا يمكنك تقليل التراخيص في فترة الفوترة الحالية.,لا يمكنك تقليل التراخيص في فترة الفوترة الحالية.
+zulip-WW91ciBadWxpcCBkZW1vIG9y-ar-A_vs_C,ar,A_vs_C,"تم تعطيل منظمة زوليب الخاصة بك, %(realm_name)s, في %(localized_date)s",تم إلغاء تفعيل مؤسسة Zulip التجريبية الخاصة بك، %(realm_name)s، بتاريخ %(localized_date)s.
+zulip-WW91ciBadWxpcCBkZW1vIG9y-ar-B_vs_C,ar,B_vs_C,تم إلغاء تفعيل مؤسسة Zulip التجريبية %(realm_name)s بتاريخ %(localized_date)s.,"تم تعطيل منظمة زوليب الخاصة بك, %(realm_name)s, في %(localized_date)s"
+zulip-WnVsaXA-ar-A_vs_C,ar,A_vs_C,Zulip,"""زوليب"""
+zulip-WnVsaXA-ar-B_vs_C,ar,B_vs_C,"""زوليب""",Zulip
+zulip-c3RhcnQgYSBjb252ZXJzYXRp-ar-A_vs_C,ar,A_vs_C,ابدأ محادثة,ابدأ محادثة
+zulip-c3RhcnQgYSBjb252ZXJzYXRp-ar-B_vs_C,ar,B_vs_C,ابدأ محادثة,ابدأ محادثة
