@@ -25,7 +25,7 @@ Chaque `CorpusEntry` conserve `sourceRepoUrl` et `sourceCommit` pour l'attributi
 ## Régénérer le corpus
 
 ```bash
-pnpm --filter @localize-infra/eval run corpus:build
+npm run corpus:build -w @localize-infra/eval
 ```
 
 Écrit `data/entries.json` et `data/glossary.json`. Les deux fichiers sont committés — le CI ne dépend jamais d'un accès réseau à ces dépôts externes.
@@ -35,7 +35,7 @@ L'extraction brute des 5 sources produit environ 35 900 entrées ; `build.ts` en
 ## Lancer les traductions (`translate:run`)
 
 ```bash
-pnpm --filter @localize-infra/eval run translate:run
+npm run translate:run -w @localize-infra/eval
 ```
 
 Lit `data/entries.json` et `data/glossary.json`, appelle les providers de traduction pour chaque

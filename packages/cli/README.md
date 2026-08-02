@@ -15,8 +15,8 @@ This package depends on `@localize-infra/core`'s build output
 first, then run the CLI directly with `tsx`:
 
 ```bash
-pnpm --filter @localize-infra/core run build
-pnpm --filter @localize-infra/cli exec tsx src/index.ts init <directory>
+npm run build -w @localize-infra/core
+npm exec -w @localize-infra/cli -- tsx src/index.ts init <directory>
 ```
 
 If you skip the core build step on a fresh clone, `@localize-infra/core`

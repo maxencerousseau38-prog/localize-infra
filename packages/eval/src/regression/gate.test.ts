@@ -95,11 +95,11 @@ describe('Sprint 0 exit gate: placeholder/ICU integrity on condition B', () => {
     const committedHash = readCommittedSourceHash();
     expect(
       committedHash,
-      'translations.meta.json is missing or unreadable — run `pnpm --filter @localize-infra/eval run translate:run` to generate it',
+      'translations.meta.json is missing or unreadable — run `npm run translate:run -w @localize-infra/eval` to generate it',
     ).not.toBeNull();
     expect(
       currentHash,
-      'prompts or corpus changed since the last translate:run — re-run `pnpm --filter @localize-infra/eval run translate:run` before trusting this gate',
+      'prompts or corpus changed since the last translate:run — re-run `npm run translate:run -w @localize-infra/eval` before trusting this gate',
     ).toBe(committedHash);
   });
 });

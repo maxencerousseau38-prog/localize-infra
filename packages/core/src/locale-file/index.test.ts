@@ -133,4 +133,21 @@ describe('writeLocaleFile', () => {
     writeLocaleFile(nested, 'en', { 'a.key': 'Hello' });
     expect(readLocaleFile(nested, 'en')).toEqual({ 'a.key': 'Hello' });
   });
+
+  it('sorts mixed-case keys by plain code-unit order, not locale-aware collation (stable across machines)', () => {
+    // keyFor() derives keys from file paths with original casing, so PascalCase component
+    // filenames are common. locale-aware collation (localeCompare) would sort these
+    // case-insensitively and reorder the output non-deterministically across environments;
+    // plain code-unit comparison keeps uppercase letters sorting before lowercase, matching
+    // ECMAScript's default array sort and giving every machine the same byte-identical output.
+    writeLocaleFile(localesDir, 'en', {
+      'src.about.title': 'About',
+      'src.App.welcome': 'Welcome',
+      'src.Zebra.label': 'Zebra',
+    });
+    const raw = readFileSync(join(localesDir, 'en.json'), 'utf-8');
+    expect(raw).toBe(
+      '{\n  "src.App.welcome": "Welcome",\n  "src.Zebra.label": "Zebra",\n  "src.about.title": "About"\n}\n',
+    );
+  });
 });

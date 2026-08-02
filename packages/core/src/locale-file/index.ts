@@ -65,8 +65,10 @@ export function writeLocaleFile(
 ): void {
   mkdirSync(localesDir, { recursive: true });
   const sorted: LocaleCatalog = {};
+  // Plain code-unit comparison, not localeCompare: sort order must be stable across
+  // machines/locales since this output is committed to git and diffed.
   for (const [key, value] of Object.entries(catalog).sort(([a], [b]) =>
-    a.localeCompare(b),
+    a < b ? -1 : a > b ? 1 : 0,
   ))
     sorted[key] = value;
   writeFileSync(
