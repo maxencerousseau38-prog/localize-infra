@@ -13,7 +13,7 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
-    "@localize-infra/core": "workspace:*"
+    "@localize-infra/core": "*"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

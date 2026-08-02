@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@formatjs/icu-messageformat-parser": "^2.9.4",
-    "@localize-infra/schemas": "workspace:*",
+   "@localize-infra/schemas": "*",
     "gettext-parser": "^8.0.0"
   },
   "devDependencies": {
