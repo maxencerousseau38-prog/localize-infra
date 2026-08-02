@@ -30,3 +30,32 @@ Le cœur ouvert doit être utilisable seul.
 ## Tests obligatoires en CI
 Intégrité placeholders/ICU ≥ 99,5 % (packages/eval, condition B).
 Harnais d'éval rejoué à chaque changement de modèle ou de prompt.
+
+## Frontend defaults
+
+For every website, landing page, dashboard, marketing page, or React/Next.js frontend:
+
+- Always use Lenis as the default smooth scrolling library unless I explicitly request another solution.
+- Use the official Lenis React integration.
+- Respect `prefers-reduced-motion`.
+- Ensure compatibility with Framer Motion.
+- Prioritize smoothness, accessibility, and performance.
+- Never implement custom smooth scrolling when Lenis can solve it.
+- Centralize Lenis configuration in a reusable provider/component.
+- Optimize Lenis usage for performance, 120Hz+ displays, and mobile devices.
+- Integrate Lenis carefully with Framer Motion and scroll-based animations.
+- Disable or reduce non-essential smooth scrolling effects when `prefers-reduced-motion` is enabled.
+
+- Use GSAP for complex, timeline-based, or high-performance animations when CSS animations or Framer Motion are not sufficient.
+- Use the official GSAP package and recommended integration patterns.
+- Ensure compatibility with React/Next.js projects.
+- Prefer GSAP timelines for complex sequences and coordinated animations.
+- Use performant transforms and opacity animations whenever possible.
+- Avoid unnecessary animations that impact performance or usability.
+- Respect `prefers-reduced-motion` for non-essential animations.
+
+- Use React Bits components and patterns when a premium React UI effect, animation, interaction, or visual component already exists.
+- Prefer React Bits over creating custom animated components from scratch when appropriate.
+- Adapt React Bits components to the project's design system instead of copying styles blindly.
+- Ensure React Bits components remain performant, accessible, and compatible with Next.js App Router.
+- Combine React Bits with Lenis, GSAP, and Framer Motion when creating premium interactive experiences.
