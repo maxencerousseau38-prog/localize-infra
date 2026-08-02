@@ -33,8 +33,8 @@ export function mergeLocaleFile(
 ): LocaleCatalog {
   const existing = readLocaleFile(localesDir, locale);
   const merged: LocaleCatalog = {};
-  for (const key of Object.keys(fresh)) {
-    merged[key] = locale === 'en' ? fresh[key] : (existing[key] ?? fresh[key]);
+  for (const [key, freshValue] of Object.entries(fresh)) {
+    merged[key] = locale === 'en' ? freshValue : (existing[key] ?? freshValue);
   }
   return merged;
 }
@@ -46,7 +46,8 @@ export function writeLocaleFile(
 ): void {
   mkdirSync(localesDir, { recursive: true });
   const sorted: LocaleCatalog = {};
-  for (const key of Object.keys(catalog).sort()) sorted[key] = catalog[key];
+  for (const key of Object.keys(catalog).sort())
+    sorted[key] = catalog[key] as string;
   writeFileSync(
     join(localesDir, `${locale}.json`),
     `${JSON.stringify(sorted, null, 2)}\n`,
