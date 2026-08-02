@@ -7,14 +7,23 @@ import {
   readLocaleFile,
   writeLocaleFile,
 } from '@localize-infra/core';
+import { translateBatch } from '../translate-client.js';
+
+const DEFAULT_LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'];
+const DEFAULT_API_URL = 'http://localhost:8787';
 
 export type InitResult =
-  | { ok: true; framework: string; keysWritten: number }
+  | {
+      ok: true;
+      framework: string;
+      keysWritten: number;
+      locales: { locale: string; keysWritten: number; missingKeys: string[] }[];
+    }
   | { ok: false; reason: string };
 
 export async function runInit(
   targetDir: string,
-  options?: { force?: boolean },
+  options?: { force?: boolean; apiUrl?: string; locales?: string[] },
 ): Promise<InitResult> {
   const framework = detectFramework(targetDir);
   if (!framework) {
@@ -41,9 +50,41 @@ export async function runInit(
   const merged = mergeLocaleFile(localesDir, 'en', fresh);
   writeLocaleFile(localesDir, 'en', merged);
 
+  const apiUrl = options?.apiUrl ?? DEFAULT_API_URL;
+  const targetLocales = options?.locales ?? DEFAULT_LOCALES;
+  const translatableStrings = extracted.map((e) => ({
+    key: e.key,
+    text: e.text,
+    filePath: e.filePath,
+    componentName: e.componentName,
+    surroundingCode: e.surroundingCode,
+  }));
+
+  const localeResults: {
+    locale: string;
+    keysWritten: number;
+    missingKeys: string[];
+  }[] = [];
+  for (const locale of targetLocales) {
+    const { translations, missingKeys } = await translateBatch(
+      apiUrl,
+      locale,
+      translatableStrings,
+    );
+    const freshForLocale = buildKeyCatalog(translations);
+    const mergedLocale = mergeLocaleFile(localesDir, locale, freshForLocale);
+    writeLocaleFile(localesDir, locale, mergedLocale);
+    localeResults.push({
+      locale,
+      keysWritten: Object.keys(mergedLocale).length,
+      missingKeys,
+    });
+  }
+
   return {
     ok: true,
     framework: framework.name,
     keysWritten: Object.keys(merged).length,
+    locales: localeResults,
   };
 }

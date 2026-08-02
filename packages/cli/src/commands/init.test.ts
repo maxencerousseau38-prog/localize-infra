@@ -7,7 +7,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runInit } from './init.js';
 
 let dir: string;
@@ -15,10 +15,22 @@ let dir: string;
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'cli-init-'));
   mkdirSync(join(dir, 'src'), { recursive: true });
+  // Default fetch stub so the original (pre-translation) tests below stay
+  // hermetic now that runInit always calls the translation API after
+  // writing locales/en.json. Tests that care about translation behavior
+  // override this with their own vi.stubGlobal('fetch', ...).
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ translations: [], missingKeys: [] }),
+    })),
+  );
 });
 
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
+  vi.unstubAllGlobals();
 });
 
 function writeViteReactProject(): void {
@@ -40,6 +52,13 @@ describe('runInit', () => {
       ok: true,
       framework: 'Vite + React',
       keysWritten: 1,
+      locales: [
+        { locale: 'de', keysWritten: 0, missingKeys: [] },
+        { locale: 'ja', keysWritten: 0, missingKeys: [] },
+        { locale: 'es', keysWritten: 0, missingKeys: [] },
+        { locale: 'ar', keysWritten: 0, missingKeys: [] },
+        { locale: 'pt-BR', keysWritten: 0, missingKeys: [] },
+      ],
     });
     const catalog = JSON.parse(
       readFileSync(join(dir, 'locales', 'en.json'), 'utf-8'),
@@ -119,5 +138,87 @@ describe('runInit', () => {
     );
     expect(onDisk).toEqual({ 'src.App.welcome': 'Welcome' });
     expect(onDisk).not.toHaveProperty('src.App.stale_key');
+  });
+});
+
+describe('runInit with translation', () => {
+  it('translates extracted strings into each requested locale and writes locales/<locale>.json', async () => {
+    writeViteReactProject();
+    // writeViteReactProject()'s fixture is `<h1>Welcome</h1>` in src/App.tsx, so keyFor()
+    // deterministically produces this exact key (file-path stem + slugified text) — see
+    // Task 2/keyFor in the M1 Phase 1 plan if this ever needs re-deriving.
+    const extractedKey = 'src.App.welcome';
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        translations: [{ key: extractedKey, text: 'Willkommen' }],
+        missingKeys: [],
+      }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      locales: ['de'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.locales).toEqual([
+        { locale: 'de', keysWritten: 1, missingKeys: [] },
+      ]);
+    }
+    const deCatalog = JSON.parse(
+      readFileSync(join(dir, 'locales', 'de.json'), 'utf-8'),
+    );
+    expect(Object.values(deCatalog)).toContain('Willkommen');
+
+    vi.unstubAllGlobals();
+  });
+
+  it('surfaces missingKeys per locale without failing the whole run', async () => {
+    writeViteReactProject();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          translations: [],
+          missingKeys: ['src.App.welcome'],
+        }),
+      })),
+    );
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      locales: ['de'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.locales[0]?.missingKeys).toEqual(['src.App.welcome']);
+    }
+
+    vi.unstubAllGlobals();
+  });
+
+  it('defaults to the 5 target locales (de, ja, es, ar, pt-BR) when none are specified', async () => {
+    writeViteReactProject();
+    const calledLocales: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        calledLocales.push(JSON.parse(init.body as string).targetLocale);
+        return {
+          ok: true,
+          json: async () => ({ translations: [], missingKeys: [] }),
+        };
+      }),
+    );
+
+    await runInit(dir, { apiUrl: 'http://localhost:8787' });
+
+    expect(calledLocales).toEqual(['de', 'ja', 'es', 'ar', 'pt-BR']);
+    vi.unstubAllGlobals();
   });
 });
