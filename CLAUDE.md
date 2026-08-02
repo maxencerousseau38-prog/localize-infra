@@ -8,8 +8,14 @@
 5. Résidence des données UE.
 
 ## État actuel
-Seul `packages/eval` (harnais d'évaluation, Sprint 0) et `packages/schemas`
-existent pour l'instant. Voir `docs/superpowers/specs/2026-07-30-eval-harness-design.md`.
+`packages/eval` (harnais d'évaluation, Sprint 0) et `packages/schemas`
+existent. Voir `docs/superpowers/specs/2026-07-30-eval-harness-design.md`.
+
+`packages/core` et `packages/cli` existent aussi (M1 Phase 1) : détection de
+framework local, extraction de chaînes en dur, et diff/merge de fichiers de
+locale. Pas encore de traduction ni de PR — dry-run local uniquement. Voir
+`docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et
+`docs/superpowers/plans/2026-08-02-m1-phase1-core-cli.md`.
 
 ## Avant toute UI
 Charger /mnt/skills/public/frontend-design/SKILL.md.

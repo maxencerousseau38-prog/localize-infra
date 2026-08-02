@@ -3,11 +3,25 @@ import { join } from 'node:path';
 
 export type LocaleCatalog = Record<string, string>;
 
+// When two extracted entries share the same key (e.g. because `keyFor`
+// truncates its slug and two different strings collide on the truncated
+// prefix), the later one is disambiguated with a numeric suffix instead of
+// silently overwriting the earlier one. Entries that share both the same key
+// AND the same text are genuine duplicate extractions of the identical
+// string and collapse into a single catalog entry.
 export function buildKeyCatalog(
   entries: { key: string; text: string }[],
 ): LocaleCatalog {
   const catalog: LocaleCatalog = {};
-  for (const entry of entries) catalog[entry.key] = entry.text;
+  for (const entry of entries) {
+    let key = entry.key;
+    let suffix = 2;
+    while (key in catalog && catalog[key] !== entry.text) {
+      key = `${entry.key}_${suffix}`;
+      suffix++;
+    }
+    catalog[key] = entry.text;
+  }
   return catalog;
 }
 
@@ -17,7 +31,12 @@ export function readLocaleFile(
 ): LocaleCatalog {
   const path = join(localesDir, `${locale}.json`);
   if (!existsSync(path)) return {};
-  return JSON.parse(readFileSync(path, 'utf-8')) as LocaleCatalog;
+  const raw = readFileSync(path, 'utf-8');
+  try {
+    return JSON.parse(raw) as LocaleCatalog;
+  } catch {
+    throw new Error(`Failed to parse locale file as JSON: ${path}`);
+  }
 }
 
 // Keys present in `fresh` but not in the existing file are added. Keys present in the
@@ -46,8 +65,10 @@ export function writeLocaleFile(
 ): void {
   mkdirSync(localesDir, { recursive: true });
   const sorted: LocaleCatalog = {};
-  for (const key of Object.keys(catalog).sort())
-    sorted[key] = catalog[key] as string;
+  for (const [key, value] of Object.entries(catalog).sort(([a], [b]) =>
+    a.localeCompare(b),
+  ))
+    sorted[key] = value;
   writeFileSync(
     join(localesDir, `${locale}.json`),
     `${JSON.stringify(sorted, null, 2)}\n`,

@@ -77,4 +77,63 @@ describe('extractFromProject', () => {
     expect(match?.filePath).toBe('src/Header.tsx');
     expect(match?.surroundingCode).toContain('Dashboard');
   });
+
+  it('skips test/spec/story files, only extracting from real component files', () => {
+    writeSource(
+      'src/Widget.tsx',
+      'export function Widget() {\n  return <p>Real widget text</p>\n}\n',
+    );
+    writeSource(
+      'src/Widget.test.tsx',
+      'export function WidgetFixture() {\n  return <p>Fixture-only test text</p>\n}\n',
+    );
+    writeSource(
+      'src/Widget.spec.tsx',
+      'export function WidgetSpecFixture() {\n  return <p>Spec-only fixture text</p>\n}\n',
+    );
+    writeSource(
+      'src/Widget.stories.tsx',
+      'export function WidgetStory() {\n  return <p>Story-only fixture text</p>\n}\n',
+    );
+    const results = extractFromProject(dir, ['src/**/*.{ts,tsx}']);
+    expect(results.some((r) => r.text === 'Real widget text')).toBe(true);
+    expect(results.some((r) => r.text === 'Fixture-only test text')).toBe(
+      false,
+    );
+    expect(results.some((r) => r.text === 'Spec-only fixture text')).toBe(
+      false,
+    );
+    expect(results.some((r) => r.text === 'Story-only fixture text')).toBe(
+      false,
+    );
+  });
+
+  it('does not extract purely numeric JSX text (e.g. a table cell value)', () => {
+    writeSource(
+      'src/Table.tsx',
+      'export function Table() {\n  return <td>42</td>\n}\n',
+    );
+    const results = extractFromProject(dir, ['src/**/*.{ts,tsx}']);
+    expect(results.some((r) => r.text === '42')).toBe(false);
+  });
+
+  it('does not extract a bare HTML entity like &nbsp;', () => {
+    writeSource(
+      'src/Spacer.tsx',
+      'export function Spacer() {\n  return <p>&nbsp;</p>\n}\n',
+    );
+    const results = extractFromProject(dir, ['src/**/*.{ts,tsx}']);
+    expect(results.some((r) => r.text === '&nbsp;')).toBe(false);
+  });
+
+  it('still extracts real prose that happens to contain a number', () => {
+    writeSource(
+      'src/Notifications.tsx',
+      'export function Notifications() {\n  return <p>You have 3 new messages</p>\n}\n',
+    );
+    const results = extractFromProject(dir, ['src/**/*.{ts,tsx}']);
+    expect(results.some((r) => r.text === 'You have 3 new messages')).toBe(
+      true,
+    );
+  });
 });

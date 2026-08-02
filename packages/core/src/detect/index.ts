@@ -10,7 +10,12 @@ interface PackageJson {
 function readPackageJson(rootDir: string): PackageJson | null {
   const path = join(rootDir, 'package.json');
   if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, 'utf-8')) as PackageJson;
+  const raw = readFileSync(path, 'utf-8');
+  try {
+    return JSON.parse(raw) as PackageJson;
+  } catch {
+    throw new Error(`Failed to parse package.json as JSON: ${path}`);
+  }
 }
 
 function hasDependency(pkg: PackageJson, name: string): boolean {

@@ -12,10 +12,21 @@ const UI_TEXT_ATTRIBUTES = new Set([
 const MIN_TEXT_LENGTH = 2;
 const CONTEXT_LINES_BEFORE = 3;
 const CONTEXT_LINES_AFTER = 2;
+// Purely numeric/punctuation/currency text (e.g. "42", "$9.99", "12%") is
+// not translatable UI copy, just data — filter it out.
+const NUMERIC_ONLY_PATTERN = /^[\d\s.,%$€-]+$/;
+// A bare HTML entity (e.g. "&nbsp;", "&amp;") is layout filler, not text
+// that needs translation.
+const HTML_ENTITY_ONLY_PATTERN = /^&[a-z]+;$/i;
+// Test/spec/story files contain fixture and story text that should never
+// end up in the real extracted catalog.
+const TEST_OR_STORY_FILE_PATTERN = /\.(test|spec|stories)\.[jt]sx?$/i;
 
 function looksLikeUiText(value: string): boolean {
   const trimmed = value.trim();
   if (trimmed.length < MIN_TEXT_LENGTH) return false;
+  if (NUMERIC_ONLY_PATTERN.test(trimmed)) return false;
+  if (HTML_ENTITY_ONLY_PATTERN.test(trimmed)) return false;
   const hasNoSpaces = !trimmed.includes(' ');
   // Class names/identifiers are kebab-case or snake_case (contain a hyphen or
   // underscore); a single Title-Case or lowercase word like "Dashboard" or
@@ -129,6 +140,7 @@ export function extractFromProject(
   }
   const results: ExtractedString[] = [];
   for (const sourceFile of project.getSourceFiles()) {
+    if (TEST_OR_STORY_FILE_PATTERN.test(sourceFile.getFilePath())) continue;
     results.push(...extractFromSourceFile(sourceFile, rootDir));
   }
   return results;

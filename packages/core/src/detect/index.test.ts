@@ -73,4 +73,19 @@ describe('detectFramework', () => {
     writePackageJson({ express: '^4.0.0' });
     expect(detectFramework(dir)).toBeNull();
   });
+
+  it('throws a clear, actionable error (naming the file) when package.json is malformed JSON', () => {
+    const path = join(dir, 'package.json');
+    writeFileSync(path, '{ not valid json');
+    let thrown: unknown;
+    try {
+      detectFramework(dir);
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(Error);
+    const message = (thrown as Error).message;
+    expect(message).toContain(path);
+    expect(message).not.toMatch(/^Unexpected token/);
+  });
 });

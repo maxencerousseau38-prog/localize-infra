@@ -73,4 +73,51 @@ describe('runInit', () => {
     expect(result.ok).toBe(true);
     expect(secondRun).toEqual(firstRun);
   });
+
+  it('refuses to overwrite locales/en.json when the merge would drop existing keys, and leaves the file unchanged', async () => {
+    writeViteReactProject();
+    mkdirSync(join(dir, 'locales'), { recursive: true });
+    const original = {
+      'src.App.welcome': 'Welcome',
+      'src.App.stale_key': 'This key no longer matches any extracted string',
+    };
+    writeFileSync(
+      join(dir, 'locales', 'en.json'),
+      JSON.stringify(original, null, 2),
+    );
+
+    const result = await runInit(dir);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toContain('1 existing key(s) would be removed');
+      expect(result.reason).toContain('--force');
+    }
+    const onDisk = JSON.parse(
+      readFileSync(join(dir, 'locales', 'en.json'), 'utf-8'),
+    );
+    expect(onDisk).toEqual(original);
+  });
+
+  it('overwrites and drops stale keys when force is passed', async () => {
+    writeViteReactProject();
+    mkdirSync(join(dir, 'locales'), { recursive: true });
+    const original = {
+      'src.App.welcome': 'Welcome',
+      'src.App.stale_key': 'This key no longer matches any extracted string',
+    };
+    writeFileSync(
+      join(dir, 'locales', 'en.json'),
+      JSON.stringify(original, null, 2),
+    );
+
+    const result = await runInit(dir, { force: true });
+
+    expect(result.ok).toBe(true);
+    const onDisk = JSON.parse(
+      readFileSync(join(dir, 'locales', 'en.json'), 'utf-8'),
+    );
+    expect(onDisk).toEqual({ 'src.App.welcome': 'Welcome' });
+    expect(onDisk).not.toHaveProperty('src.App.stale_key');
+  });
 });

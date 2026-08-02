@@ -31,6 +31,25 @@ describe('buildKeyCatalog', () => {
       'c.d': 'World',
     });
   });
+
+  it('disambiguates a key collision between two DIFFERENT texts with a numeric suffix', () => {
+    const catalog = buildKeyCatalog([
+      { key: 'a.b', text: 'First distinct string' },
+      { key: 'a.b', text: 'Second distinct string' },
+    ]);
+    expect(catalog).toEqual({
+      'a.b': 'First distinct string',
+      'a.b_2': 'Second distinct string',
+    });
+  });
+
+  it('collapses two entries with the same key AND the same text into a single entry (no spurious suffix)', () => {
+    const catalog = buildKeyCatalog([
+      { key: 'a.b', text: 'Same string' },
+      { key: 'a.b', text: 'Same string' },
+    ]);
+    expect(catalog).toEqual({ 'a.b': 'Same string' });
+  });
 });
 
 describe('readLocaleFile', () => {
@@ -44,6 +63,21 @@ describe('readLocaleFile', () => {
       JSON.stringify({ 'a.b': 'Hello' }),
     );
     expect(readLocaleFile(localesDir, 'en')).toEqual({ 'a.b': 'Hello' });
+  });
+
+  it('throws a clear, actionable error (naming the file) when the locale file is malformed JSON', () => {
+    const path = join(localesDir, 'en.json');
+    writeFileSync(path, '{ this is not valid json');
+    let thrown: unknown;
+    try {
+      readLocaleFile(localesDir, 'en');
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(Error);
+    const message = (thrown as Error).message;
+    expect(message).toContain(path);
+    expect(message).not.toMatch(/^Unexpected token/);
   });
 });
 
