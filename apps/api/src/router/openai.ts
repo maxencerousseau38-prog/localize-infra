@@ -1,6 +1,9 @@
-import type { Provider, TranslateRequest } from './types.js'
+import type { Provider, TranslateRequest } from './types.js';
 
-export function createOpenAiProvider(apiKey: string, baseUrl = 'https://api.openai.com/v1'): Provider {
+export function createOpenAiProvider(
+  apiKey: string,
+  baseUrl = 'https://api.openai.com/v1',
+): Provider {
   return {
     name: 'openai',
     async translate(req: TranslateRequest, modelId: string): Promise<string> {
@@ -17,14 +20,18 @@ export function createOpenAiProvider(apiKey: string, baseUrl = 'https://api.open
             { role: 'user', content: req.userPrompt },
           ],
         }),
-      })
+      });
       if (!response.ok) {
-        throw new Error(`OpenAI API error ${response.status}: ${await response.text()}`)
+        throw new Error(
+          `OpenAI API error ${response.status}: ${await response.text()}`,
+        );
       }
-      const body = (await response.json()) as { choices: { message: { content: string } }[] }
-      const content = body.choices[0]?.message.content
-      if (!content) throw new Error('OpenAI response had no message content')
-      return content.trim()
+      const body = (await response.json()) as {
+        choices: { message: { content: string } }[];
+      };
+      const content = body.choices[0]?.message.content;
+      if (!content) throw new Error('OpenAI response had no message content');
+      return content.trim();
     },
-  }
+  };
 }

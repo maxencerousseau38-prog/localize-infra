@@ -1,4 +1,4 @@
-import type { Provider, TranslateRequest } from './types.js'
+import type { Provider, TranslateRequest } from './types.js';
 
 export function createAnthropicProvider(apiKey: string): Provider {
   return {
@@ -17,16 +17,20 @@ export function createAnthropicProvider(apiKey: string): Provider {
           system: req.systemPrompt,
           messages: [{ role: 'user', content: req.userPrompt }],
         }),
-      })
+      });
       if (!response.ok) {
-        throw new Error(`Anthropic API error ${response.status}: ${await response.text()}`)
+        throw new Error(
+          `Anthropic API error ${response.status}: ${await response.text()}`,
+        );
       }
-      const body = (await response.json()) as { content: { type: string; text: string }[] }
-      const textBlock = body.content.find((block) => block.type === 'text')
+      const body = (await response.json()) as {
+        content: { type: string; text: string }[];
+      };
+      const textBlock = body.content.find((block) => block.type === 'text');
       if (!textBlock || !textBlock.text.trim()) {
-        throw new Error('Anthropic response had no usable text content block')
+        throw new Error('Anthropic response had no usable text content block');
       }
-      return textBlock.text.trim()
+      return textBlock.text.trim();
     },
-  }
+  };
 }
