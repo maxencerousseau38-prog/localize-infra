@@ -53,11 +53,11 @@ describe('runInit', () => {
       framework: 'Vite + React',
       keysWritten: 1,
       locales: [
-        { locale: 'de', keysWritten: 0, missingKeys: [] },
-        { locale: 'ja', keysWritten: 0, missingKeys: [] },
-        { locale: 'es', keysWritten: 0, missingKeys: [] },
-        { locale: 'ar', keysWritten: 0, missingKeys: [] },
-        { locale: 'pt-BR', keysWritten: 0, missingKeys: [] },
+        { locale: 'de', keysWritten: 0, missingKeys: [], error: null },
+        { locale: 'ja', keysWritten: 0, missingKeys: [], error: null },
+        { locale: 'es', keysWritten: 0, missingKeys: [], error: null },
+        { locale: 'ar', keysWritten: 0, missingKeys: [], error: null },
+        { locale: 'pt-BR', keysWritten: 0, missingKeys: [], error: null },
       ],
     });
     const catalog = JSON.parse(
@@ -165,7 +165,7 @@ describe('runInit with translation', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.locales).toEqual([
-        { locale: 'de', keysWritten: 1, missingKeys: [] },
+        { locale: 'de', keysWritten: 1, missingKeys: [], error: null },
       ]);
     }
     const deCatalog = JSON.parse(
@@ -219,6 +219,55 @@ describe('runInit with translation', () => {
     await runInit(dir, { apiUrl: 'http://localhost:8787' });
 
     expect(calledLocales).toEqual(['de', 'ja', 'es', 'ar', 'pt-BR']);
+    vi.unstubAllGlobals();
+  });
+
+  it('isolates a failure on one locale so other locales still succeed and are written to disk', async () => {
+    writeViteReactProject();
+    const extractedKey = 'src.App.welcome';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        const { targetLocale } = JSON.parse(init.body as string) as {
+          targetLocale: string;
+        };
+        if (targetLocale === 'ja') {
+          return {
+            ok: false,
+            status: 500,
+            text: async () => 'Internal Server Error',
+          };
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            translations: [{ key: extractedKey, text: 'Willkommen' }],
+            missingKeys: [],
+          }),
+        };
+      }),
+    );
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      locales: ['de', 'ja'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const de = result.locales.find((l) => l.locale === 'de');
+      const ja = result.locales.find((l) => l.locale === 'ja');
+      expect(de?.keysWritten).toBeGreaterThan(0);
+      expect(de?.error).toBeNull();
+      expect(ja?.error).toEqual(expect.any(String));
+      expect(ja?.error).toContain('500');
+    }
+
+    const deCatalog = JSON.parse(
+      readFileSync(join(dir, 'locales', 'de.json'), 'utf-8'),
+    );
+    expect(Object.values(deCatalog)).toContain('Willkommen');
+
     vi.unstubAllGlobals();
   });
 });

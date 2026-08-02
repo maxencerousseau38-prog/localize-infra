@@ -63,6 +63,10 @@ async function main(): Promise<void> {
   console.log(`Detected framework: ${result.framework}`);
   console.log(`Wrote ${result.keysWritten} key(s) to locales/en.json`);
   for (const localeResult of result.locales) {
+    if (localeResult.error !== null) {
+      console.log(`  ${localeResult.locale}: FAILED - ${localeResult.error}`);
+      continue;
+    }
     const missingNote =
       localeResult.missingKeys.length > 0
         ? ` (${localeResult.missingKeys.length} string(s) not translated: ${localeResult.missingKeys.join(', ')})`

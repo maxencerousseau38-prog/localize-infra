@@ -17,7 +17,12 @@ export type InitResult =
       ok: true;
       framework: string;
       keysWritten: number;
-      locales: { locale: string; keysWritten: number; missingKeys: string[] }[];
+      locales: {
+        locale: string;
+        keysWritten: number;
+        missingKeys: string[];
+        error: string | null;
+      }[];
     }
   | { ok: false; reason: string };
 
@@ -64,21 +69,32 @@ export async function runInit(
     locale: string;
     keysWritten: number;
     missingKeys: string[];
+    error: string | null;
   }[] = [];
   for (const locale of targetLocales) {
-    const { translations, missingKeys } = await translateBatch(
-      apiUrl,
-      locale,
-      translatableStrings,
-    );
-    const freshForLocale = buildKeyCatalog(translations);
-    const mergedLocale = mergeLocaleFile(localesDir, locale, freshForLocale);
-    writeLocaleFile(localesDir, locale, mergedLocale);
-    localeResults.push({
-      locale,
-      keysWritten: Object.keys(mergedLocale).length,
-      missingKeys,
-    });
+    try {
+      const { translations, missingKeys } = await translateBatch(
+        apiUrl,
+        locale,
+        translatableStrings,
+      );
+      const freshForLocale = buildKeyCatalog(translations);
+      const mergedLocale = mergeLocaleFile(localesDir, locale, freshForLocale);
+      writeLocaleFile(localesDir, locale, mergedLocale);
+      localeResults.push({
+        locale,
+        keysWritten: Object.keys(mergedLocale).length,
+        missingKeys,
+        error: null,
+      });
+    } catch (error) {
+      localeResults.push({
+        locale,
+        keysWritten: 0,
+        missingKeys: [],
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   return {
