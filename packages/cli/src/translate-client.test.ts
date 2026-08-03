@@ -27,7 +27,12 @@ describe('translateBatch', () => {
     }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const result = await translateBatch('http://localhost:8787', 'de', strings);
+    const result = await translateBatch(
+      'http://localhost:8787',
+      'de',
+      strings,
+      'test-token',
+    );
 
     expect(result).toEqual({
       translations: [{ key: 'a', text: 'Willkommen' }],
@@ -48,6 +53,30 @@ describe('translateBatch', () => {
     });
   });
 
+  it('sends the api token as a Bearer Authorization header', async () => {
+    const fetchMock = vi.fn(async (_url: string, _init: RequestInit) => ({
+      ok: true,
+      json: async () => ({ translations: [], missingKeys: [] }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await translateBatch(
+      'http://localhost:8787',
+      'de',
+      strings,
+      'secret-token',
+    );
+
+    const call = fetchMock.mock.calls[0];
+    if (!call) {
+      throw new Error('fetch was not called');
+    }
+    const [, init] = call;
+    expect((init.headers as Record<string, string>).authorization).toBe(
+      'Bearer secret-token',
+    );
+  });
+
   it('throws a clear error including the status and body when the API responds with an error', async () => {
     vi.stubGlobal(
       'fetch',
@@ -58,7 +87,7 @@ describe('translateBatch', () => {
       })),
     );
     await expect(
-      translateBatch('http://localhost:8787', 'de', strings),
+      translateBatch('http://localhost:8787', 'de', strings, 'test-token'),
     ).rejects.toThrow(
       'Translation API request failed (502): upstream provider failed',
     );

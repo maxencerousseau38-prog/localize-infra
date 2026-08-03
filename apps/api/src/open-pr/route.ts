@@ -52,9 +52,16 @@ export async function openPrRouteHandler(
     });
     return { status: 200, body: OpenPrApiResponseSchema.parse(result) };
   } catch (err) {
+    // Log the full error server-side for the operator's own diagnostics, but
+    // never echo it back to the caller: Octokit/GitHub errors can contain
+    // rate-limit details, repo internals, or auth hints that shouldn't leak
+    // to whoever can reach this endpoint.
+    console.error('open-pr failed:', err);
     return {
       status: 502,
-      body: { error: err instanceof Error ? err.message : String(err) },
+      body: {
+        error: 'Failed to open pull request. Check server logs for details.',
+      },
     };
   }
 }

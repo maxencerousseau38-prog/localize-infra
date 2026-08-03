@@ -4,6 +4,7 @@ import {
   openTranslationPr,
 } from '@localize-infra/github-app';
 import { Hono } from 'hono';
+import { createAuthMiddleware } from './auth.js';
 import {
   type GitHubAppOperations,
   openPrRouteHandler,
@@ -14,6 +15,14 @@ import { translateRouteHandler } from './translate/route.js';
 const ANTHROPIC_MODEL = process.env.API_ANTHROPIC_MODEL ?? 'claude-sonnet-5';
 const OPENAI_MODEL = process.env.API_OPENAI_MODEL ?? 'gpt-4o';
 const PORT = Number(process.env.PORT ?? 8787);
+
+// Fail closed: refuse to start rather than silently run every /v1/* route
+// unauthenticated. Mirrors router/index.ts's getProvider(), which throws
+// clearly rather than proceeding when an API key is missing.
+const API_AUTH_TOKEN = process.env.API_AUTH_TOKEN;
+if (!API_AUTH_TOKEN) {
+  throw new Error('API_AUTH_TOKEN is not set');
+}
 
 function readGitHubAppConfig(): {
   appId: string;
@@ -35,6 +44,10 @@ const githubAppOperations: GitHubAppOperations = {
 };
 
 export const app = new Hono();
+
+// Applies to /v1/translate and /v1/open-pr but not /health: health checks
+// are conventionally public and carry no sensitive capability.
+app.use('/v1/*', createAuthMiddleware(API_AUTH_TOKEN));
 
 app.post('/v1/translate', async (c) => {
   const body = await c.req.json().catch(() => null);

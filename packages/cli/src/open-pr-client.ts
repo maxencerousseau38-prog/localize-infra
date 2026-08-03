@@ -8,11 +8,15 @@ import {
 export async function requestPr(
   apiUrl: string,
   request: OpenPrApiRequest,
+  apiToken: string,
 ): Promise<OpenPrApiResponse> {
   const body = OpenPrApiRequestSchema.parse(request);
   const response = await fetch(`${apiUrl}/v1/open-pr`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${apiToken}`,
+    },
     body: JSON.stringify(body),
   });
   if (!response.ok) {

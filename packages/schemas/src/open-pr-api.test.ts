@@ -29,6 +29,44 @@ describe('OpenPrApiRequestSchema', () => {
       }),
     ).toThrow();
   });
+
+  it('rejects a file path containing a ".." segment', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: '../../.github/workflows/x.yml', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects an absolute file path', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: '/etc/passwd', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('accepts a normal relative locale-file path', () => {
+    const request = {
+      owner: 'a',
+      repo: 'b',
+      baseBranch: 'main',
+      title: 't',
+      body: 'b',
+      files: [{ path: 'locales/de.json', content: '{}' }],
+    };
+    expect(OpenPrApiRequestSchema.parse(request)).toEqual(request);
+  });
 });
 
 describe('OpenPrApiResponseSchema', () => {

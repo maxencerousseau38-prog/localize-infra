@@ -47,7 +47,7 @@ function writeViteReactProject(): void {
 describe('runInit', () => {
   it('detects the framework, extracts strings, and writes locales/en.json', async () => {
     writeViteReactProject();
-    const result = await runInit(dir);
+    const result = await runInit(dir, { apiToken: 'test-token' });
     expect(result).toEqual({
       ok: true,
       framework: 'Vite + React',
@@ -81,11 +81,11 @@ describe('runInit', () => {
 
   it('re-running init on the same project does not duplicate or change existing keys', async () => {
     writeViteReactProject();
-    await runInit(dir);
+    await runInit(dir, { apiToken: 'test-token' });
     const firstRun = JSON.parse(
       readFileSync(join(dir, 'locales', 'en.json'), 'utf-8'),
     );
-    const result = await runInit(dir);
+    const result = await runInit(dir, { apiToken: 'test-token' });
     const secondRun = JSON.parse(
       readFileSync(join(dir, 'locales', 'en.json'), 'utf-8'),
     );
@@ -130,7 +130,7 @@ describe('runInit', () => {
       JSON.stringify(original, null, 2),
     );
 
-    const result = await runInit(dir, { force: true });
+    const result = await runInit(dir, { force: true, apiToken: 'test-token' });
 
     expect(result.ok).toBe(true);
     const onDisk = JSON.parse(
@@ -138,6 +138,20 @@ describe('runInit', () => {
     );
     expect(onDisk).toEqual({ 'src.App.welcome': 'Welcome' });
     expect(onDisk).not.toHaveProperty('src.App.stale_key');
+  });
+
+  it('fails clearly when no API token is configured', async () => {
+    writeViteReactProject();
+    const result = await runInit(dir);
+    expect(result).toEqual({
+      ok: false,
+      reason:
+        'No API token configured. Pass --api-token or set the LOCALIZE_API_TOKEN environment variable.',
+    });
+    // No locale files should have been written, and no network call made.
+    expect(() =>
+      readFileSync(join(dir, 'locales', 'en.json'), 'utf-8'),
+    ).toThrow();
   });
 });
 
@@ -159,6 +173,7 @@ describe('runInit with translation', () => {
 
     const result = await runInit(dir, {
       apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
       locales: ['de'],
     });
 
@@ -191,6 +206,7 @@ describe('runInit with translation', () => {
 
     const result = await runInit(dir, {
       apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
       locales: ['de'],
     });
 
@@ -216,7 +232,10 @@ describe('runInit with translation', () => {
       }),
     );
 
-    await runInit(dir, { apiUrl: 'http://localhost:8787' });
+    await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
+    });
 
     expect(calledLocales).toEqual(['de', 'ja', 'es', 'ar', 'pt-BR']);
     vi.unstubAllGlobals();
@@ -250,6 +269,7 @@ describe('runInit with translation', () => {
 
     const result = await runInit(dir, {
       apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
       locales: ['de', 'ja'],
     });
 
@@ -308,6 +328,7 @@ describe('runInit with openPr', () => {
 
     const result = await runInit(dir, {
       apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
       locales: ['de'],
       openPr: true,
       owner: 'acme',
@@ -360,6 +381,7 @@ describe('runInit with openPr', () => {
 
     const result = await runInit(dir, {
       apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
       locales: ['de'],
     });
 

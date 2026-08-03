@@ -55,4 +55,26 @@ describe('openPrRouteHandler', () => {
     const result = await openPrRouteHandler(validBody, config, ops);
     expect(result.status).toBe(502);
   });
+
+  it('does not leak the underlying error message to the caller on failure', async () => {
+    const distinctiveMessage =
+      'installation token abc123 lacks permission on repo xyz-internal';
+    const ops = fakeOps({
+      openPr: vi.fn(async () => {
+        throw new Error(distinctiveMessage);
+      }),
+    });
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const result = await openPrRouteHandler(validBody, config, ops);
+    consoleErrorSpy.mockRestore();
+
+    expect(result.status).toBe(502);
+    const responseText = JSON.stringify(result.body);
+    expect(responseText).not.toContain(distinctiveMessage);
+    expect(responseText).not.toContain('abc123');
+    expect(result.body).toHaveProperty('error');
+    expect((result.body as { error: string }).error.length).toBeGreaterThan(0);
+  });
 });

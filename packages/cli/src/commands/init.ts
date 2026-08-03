@@ -33,6 +33,7 @@ export async function runInit(
   options?: {
     force?: boolean;
     apiUrl?: string;
+    apiToken?: string;
     locales?: string[];
     openPr?: boolean;
     owner?: string;
@@ -62,6 +63,15 @@ export async function runInit(
     };
   }
 
+  const apiToken = options?.apiToken;
+  if (!apiToken) {
+    return {
+      ok: false,
+      reason:
+        'No API token configured. Pass --api-token or set the LOCALIZE_API_TOKEN environment variable.',
+    };
+  }
+
   const merged = mergeLocaleFile(localesDir, 'en', fresh);
   writeLocaleFile(localesDir, 'en', merged);
 
@@ -87,6 +97,7 @@ export async function runInit(
         apiUrl,
         locale,
         translatableStrings,
+        apiToken,
       );
       const freshForLocale = buildKeyCatalog(translations);
       const mergedLocale = mergeLocaleFile(localesDir, locale, freshForLocale);
@@ -110,21 +121,25 @@ export async function runInit(
   const keysWritten = Object.keys(merged).length;
 
   if (options?.openPr) {
-    const prResult = await requestPr(apiUrl, {
-      owner: options.owner ?? '',
-      repo: options.repo ?? '',
-      baseBranch: options.baseBranch ?? 'main',
-      title: `Add translations (${targetLocales.join(', ')})`,
-      body: `Automated by \`localize-infra init\`. ${localeResults.map((r) => `${r.locale}: ${r.keysWritten} key(s)${r.missingKeys.length > 0 ? ` (${r.missingKeys.length} untranslated)` : ''}`).join('; ')}`,
-      files: targetLocales.map((locale) => ({
-        path: `${framework.localesDir}/${locale}.json`,
-        // Read back what was just written, rather than recomputing a merge: mergeLocaleFile's
-        // loop only walks the KEYS OF ITS `fresh` ARGUMENT, so calling it with an empty catalog
-        // here would silently return `{}`, not the file's real contents. readLocaleFile reads
-        // the actual bytes on disk that writeLocaleFile produced a few lines above.
-        content: JSON.stringify(readLocaleFile(localesDir, locale), null, 2),
-      })),
-    });
+    const prResult = await requestPr(
+      apiUrl,
+      {
+        owner: options.owner ?? '',
+        repo: options.repo ?? '',
+        baseBranch: options.baseBranch ?? 'main',
+        title: `Add translations (${targetLocales.join(', ')})`,
+        body: `Automated by \`localize-infra init\`. ${localeResults.map((r) => `${r.locale}: ${r.keysWritten} key(s)${r.missingKeys.length > 0 ? ` (${r.missingKeys.length} untranslated)` : ''}`).join('; ')}`,
+        files: targetLocales.map((locale) => ({
+          path: `${framework.localesDir}/${locale}.json`,
+          // Read back what was just written, rather than recomputing a merge: mergeLocaleFile's
+          // loop only walks the KEYS OF ITS `fresh` ARGUMENT, so calling it with an empty catalog
+          // here would silently return `{}`, not the file's real contents. readLocaleFile reads
+          // the actual bytes on disk that writeLocaleFile produced a few lines above.
+          content: JSON.stringify(readLocaleFile(localesDir, locale), null, 2),
+        })),
+      },
+      apiToken,
+    );
     return {
       ok: true,
       framework: framework.name,

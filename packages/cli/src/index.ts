@@ -13,6 +13,7 @@ function readFlagValue(args: string[], flag: string): string | undefined {
 // skipped when scanning for the positional target-directory argument.
 const VALUE_FLAGS = new Set([
   '--api-url',
+  '--api-token',
   '--locales',
   '--owner',
   '--repo',
@@ -41,6 +42,9 @@ async function main(): Promise<void> {
   const command = args[0];
   const force = args.includes('--force');
   const apiUrl = readFlagValue(args, '--api-url');
+  // --api-token takes precedence over LOCALIZE_API_TOKEN when both are given.
+  const apiToken =
+    readFlagValue(args, '--api-token') ?? process.env.LOCALIZE_API_TOKEN;
   const localesArg = readFlagValue(args, '--locales');
   const locales = localesArg
     ? localesArg.split(',').map((locale) => locale.trim())
@@ -53,7 +57,7 @@ async function main(): Promise<void> {
 
   if (command !== 'init') {
     console.error(
-      `Unknown command: ${command ?? '(none)'}\nUsage: localize-infra init [directory] [--force] [--api-url <url>] [--locales <comma,separated,list>] [--open-pr] [--owner <owner>] [--repo <repo>] [--base-branch <branch>]`,
+      `Unknown command: ${command ?? '(none)'}\nUsage: localize-infra init [directory] [--force] [--api-url <url>] [--api-token <token>] [--locales <comma,separated,list>] [--open-pr] [--owner <owner>] [--repo <repo>] [--base-branch <branch>]\n(--api-token can also be provided via the LOCALIZE_API_TOKEN environment variable; the flag takes precedence)`,
     );
     process.exitCode = 1;
     return;
@@ -62,6 +66,7 @@ async function main(): Promise<void> {
   const result = await runInit(targetDir ?? process.cwd(), {
     force,
     apiUrl,
+    apiToken,
     locales,
     openPr,
     owner,
