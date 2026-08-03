@@ -27,6 +27,13 @@ describe('isValidBearerToken', () => {
   it('returns false for an empty token', () => {
     expect(isValidBearerToken('Bearer ', expectedToken)).toBe(false);
   });
+
+  it('returns false for a token sharing a long common prefix with the expected token but differing in the last character', () => {
+    const almostRight = `${expectedToken.slice(0, -1)}X`;
+    expect(isValidBearerToken(`Bearer ${almostRight}`, expectedToken)).toBe(
+      false,
+    );
+  });
 });
 
 describe('createAuthMiddleware', () => {

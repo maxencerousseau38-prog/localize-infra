@@ -67,6 +67,57 @@ describe('OpenPrApiRequestSchema', () => {
     };
     expect(OpenPrApiRequestSchema.parse(request)).toEqual(request);
   });
+
+  it('rejects a file path using backslashes to smuggle a traversal segment', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'locales\\..\\..\\secret.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a file path containing a bare "." segment', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'locales/./de.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a file path containing a null byte', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'locales/de.json\0.png', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('accepts a locale code containing a hyphen', () => {
+    const request = {
+      owner: 'a',
+      repo: 'b',
+      baseBranch: 'main',
+      title: 't',
+      body: 'b',
+      files: [{ path: 'locales/pt-BR.json', content: '{}' }],
+    };
+    expect(OpenPrApiRequestSchema.parse(request)).toEqual(request);
+  });
 });
 
 describe('OpenPrApiResponseSchema', () => {

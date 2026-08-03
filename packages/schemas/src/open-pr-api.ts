@@ -1,12 +1,22 @@
 import { z } from 'zod';
 
-// Reject `..` path segments, absolute POSIX paths, and absolute Windows paths
-// (drive letters like `C:\` or `C:/`) so a malicious or buggy caller can't
-// steer this path outside the intended locale-file directory in the target
-// repo's tree (e.g. `../../.github/workflows/malicious.yml` or `/etc/passwd`).
+// Reject `..`/`.` path segments, absolute POSIX paths, and absolute Windows
+// paths (drive letters like `C:\` or `C:/`) so a malicious or buggy caller
+// can't steer this path outside the intended locale-file directory in the
+// target repo's tree (e.g. `../../.github/workflows/malicious.yml` or
+// `/etc/passwd`). Backslashes are rejected outright rather than treated as a
+// separator: git tree paths are always forward-slash-separated regardless of
+// OS, so no legitimate path needs one, and a backslash could otherwise be
+// used to smuggle a traversal segment past the `/`-based split below (e.g.
+// `locales\..\..\secret.json`).
 function isSafeRelativePath(path: string): boolean {
-  if (path.split('/').includes('..')) return false;
-  if (/^([a-zA-Z]:)?[\\/]/.test(path)) return false;
+  if (path.length === 0 || path.trim().length === 0) return false;
+  if (path.includes('\0')) return false;
+  if (path.includes('\\')) return false;
+  if (path.split('/').some((segment) => segment === '..' || segment === '.'))
+    return false;
+  if (path.startsWith('/')) return false;
+  if (/^[a-zA-Z]:/.test(path)) return false;
   return true;
 }
 
