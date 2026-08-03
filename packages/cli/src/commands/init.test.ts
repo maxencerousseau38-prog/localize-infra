@@ -271,3 +271,104 @@ describe('runInit with translation', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('runInit with openPr', () => {
+  it('opens a PR with the actually-written locale file contents when openPr is true', async () => {
+    writeViteReactProject();
+    const extractedKey = 'src.App.welcome';
+    const openPrCalls: { url: string; body: unknown }[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        const body = JSON.parse(init.body as string) as {
+          targetLocale?: string;
+        };
+        if (url.endsWith('/v1/translate')) {
+          return {
+            ok: true,
+            json: async () => ({
+              translations: [{ key: extractedKey, text: 'Willkommen' }],
+              missingKeys: [],
+            }),
+          };
+        }
+        if (url.endsWith('/v1/open-pr')) {
+          openPrCalls.push({ url, body });
+          return {
+            ok: true,
+            json: async () => ({
+              prUrl: 'https://github.com/acme/widgets/pull/1',
+              prNumber: 1,
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch call to ${url}`);
+      }),
+    );
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      locales: ['de'],
+      openPr: true,
+      owner: 'acme',
+      repo: 'widgets',
+      baseBranch: 'main',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.pr).toEqual({
+        prUrl: 'https://github.com/acme/widgets/pull/1',
+        prNumber: 1,
+      });
+    }
+
+    expect(openPrCalls).toHaveLength(1);
+    const openPrBody = openPrCalls[0]?.body as {
+      owner: string;
+      repo: string;
+      files: { path: string; content: string }[];
+    };
+    expect(openPrBody.owner).toBe('acme');
+    expect(openPrBody.repo).toBe('widgets');
+    expect(openPrBody.files).toHaveLength(1);
+    const deFile = openPrBody.files[0];
+    expect(deFile?.path).toBe('locales/de.json');
+    const deFileContent = JSON.parse(deFile?.content ?? '{}');
+    expect(Object.values(deFileContent)).toContain('Willkommen');
+    const deCatalogOnDisk = JSON.parse(
+      readFileSync(join(dir, 'locales', 'de.json'), 'utf-8'),
+    );
+    expect(deFileContent).toEqual(deCatalogOnDisk);
+
+    vi.unstubAllGlobals();
+  });
+
+  it('never calls /v1/open-pr when openPr is not set', async () => {
+    writeViteReactProject();
+    const calledUrls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        calledUrls.push(url);
+        return {
+          ok: true,
+          json: async () => ({ translations: [], missingKeys: [] }),
+        };
+      }),
+    );
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      locales: ['de'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.pr).toBeUndefined();
+    }
+    expect(calledUrls.some((url) => url.endsWith('/v1/open-pr'))).toBe(false);
+
+    vi.unstubAllGlobals();
+  });
+});

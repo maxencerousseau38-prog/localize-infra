@@ -11,7 +11,13 @@ function readFlagValue(args: string[], flag: string): string | undefined {
 
 // Flags that consume the following argument as their value, so it must be
 // skipped when scanning for the positional target-directory argument.
-const VALUE_FLAGS = new Set(['--api-url', '--locales']);
+const VALUE_FLAGS = new Set([
+  '--api-url',
+  '--locales',
+  '--owner',
+  '--repo',
+  '--base-branch',
+]);
 
 function findTargetDir(args: string[]): string | undefined {
   for (let i = 0; i < args.length; i++) {
@@ -39,11 +45,15 @@ async function main(): Promise<void> {
   const locales = localesArg
     ? localesArg.split(',').map((locale) => locale.trim())
     : undefined;
+  const openPr = args.includes('--open-pr');
+  const owner = readFlagValue(args, '--owner');
+  const repo = readFlagValue(args, '--repo');
+  const baseBranch = readFlagValue(args, '--base-branch');
   const targetDir = findTargetDir(args.slice(1));
 
   if (command !== 'init') {
     console.error(
-      `Unknown command: ${command ?? '(none)'}\nUsage: localize-infra init [directory] [--force] [--api-url <url>] [--locales <comma,separated,list>]`,
+      `Unknown command: ${command ?? '(none)'}\nUsage: localize-infra init [directory] [--force] [--api-url <url>] [--locales <comma,separated,list>] [--open-pr] [--owner <owner>] [--repo <repo>] [--base-branch <branch>]`,
     );
     process.exitCode = 1;
     return;
@@ -53,6 +63,10 @@ async function main(): Promise<void> {
     force,
     apiUrl,
     locales,
+    openPr,
+    owner,
+    repo,
+    baseBranch,
   });
   if (!result.ok) {
     console.error(result.reason);
@@ -74,6 +88,9 @@ async function main(): Promise<void> {
     console.log(
       `  ${localeResult.locale}: ${localeResult.keysWritten} key(s)${missingNote}`,
     );
+  }
+  if (result.pr) {
+    console.log(`Opened PR: ${result.pr.prUrl}`);
   }
 }
 

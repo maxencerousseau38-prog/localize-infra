@@ -7,6 +7,7 @@ import {
   readLocaleFile,
   writeLocaleFile,
 } from '@localize-infra/core';
+import { requestPr } from '../open-pr-client.js';
 import { translateBatch } from '../translate-client.js';
 
 const DEFAULT_LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'];
@@ -23,12 +24,21 @@ export type InitResult =
         missingKeys: string[];
         error: string | null;
       }[];
+      pr?: { prUrl: string; prNumber: number };
     }
   | { ok: false; reason: string };
 
 export async function runInit(
   targetDir: string,
-  options?: { force?: boolean; apiUrl?: string; locales?: string[] },
+  options?: {
+    force?: boolean;
+    apiUrl?: string;
+    locales?: string[];
+    openPr?: boolean;
+    owner?: string;
+    repo?: string;
+    baseBranch?: string;
+  },
 ): Promise<InitResult> {
   const framework = detectFramework(targetDir);
   if (!framework) {
@@ -97,10 +107,37 @@ export async function runInit(
     }
   }
 
+  const keysWritten = Object.keys(merged).length;
+
+  if (options?.openPr) {
+    const prResult = await requestPr(apiUrl, {
+      owner: options.owner ?? '',
+      repo: options.repo ?? '',
+      baseBranch: options.baseBranch ?? 'main',
+      title: `Add translations (${targetLocales.join(', ')})`,
+      body: `Automated by \`localize-infra init\`. ${localeResults.map((r) => `${r.locale}: ${r.keysWritten} key(s)${r.missingKeys.length > 0 ? ` (${r.missingKeys.length} untranslated)` : ''}`).join('; ')}`,
+      files: targetLocales.map((locale) => ({
+        path: `${framework.localesDir}/${locale}.json`,
+        // Read back what was just written, rather than recomputing a merge: mergeLocaleFile's
+        // loop only walks the KEYS OF ITS `fresh` ARGUMENT, so calling it with an empty catalog
+        // here would silently return `{}`, not the file's real contents. readLocaleFile reads
+        // the actual bytes on disk that writeLocaleFile produced a few lines above.
+        content: JSON.stringify(readLocaleFile(localesDir, locale), null, 2),
+      })),
+    });
+    return {
+      ok: true,
+      framework: framework.name,
+      keysWritten,
+      locales: localeResults,
+      pr: prResult,
+    };
+  }
+
   return {
     ok: true,
     framework: framework.name,
-    keysWritten: Object.keys(merged).length,
+    keysWritten,
     locales: localeResults,
   };
 }
