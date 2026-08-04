@@ -7,8 +7,20 @@ import {
   readLocaleFile,
   writeLocaleFile,
 } from '@localize-infra/core';
+import { OpenPrApiRequestSchema } from '@localize-infra/schemas';
 import { requestPr } from '../open-pr-client.js';
 import { translateBatch } from '../translate-client.js';
+
+// Same owner/repo character-set constraints the API enforces server-side
+// (OpenPrApiRequestSchema), reused here so an invalid --owner/--repo fails
+// fast, client-side, before the per-locale translation loop below runs any
+// billed LLM calls — rather than failing with a raw ZodError from
+// requestPr() only after that loop (and every locale's translation) has
+// already completed.
+const OwnerRepoSchema = OpenPrApiRequestSchema.pick({
+  owner: true,
+  repo: true,
+});
 
 const DEFAULT_LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'];
 const DEFAULT_API_URL = 'http://localhost:8787';
@@ -70,6 +82,25 @@ export async function runInit(
       reason:
         'No API token configured. Pass --api-token or set the LOCALIZE_API_TOKEN environment variable.',
     };
+  }
+
+  // Fail fast, before any writes and before the (billed) per-locale
+  // translation loop runs: --open-pr without a valid --owner/--repo can
+  // only ever fail later at the requestPr() call, but by then every locale
+  // has already been translated. Catching it here means a typo'd or
+  // missing --owner/--repo costs nothing.
+  if (options?.openPr) {
+    const ownerRepoResult = OwnerRepoSchema.safeParse({
+      owner: options.owner ?? '',
+      repo: options.repo ?? '',
+    });
+    if (!ownerRepoResult.success) {
+      return {
+        ok: false,
+        reason:
+          '--open-pr requires valid --owner and --repo values (non-empty, matching GitHub repository slug characters: letters, digits, ".", "_", "-"). Pass both flags and re-run.',
+      };
+    }
   }
 
   const merged = mergeLocaleFile(localesDir, 'en', fresh);

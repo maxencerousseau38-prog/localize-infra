@@ -53,6 +53,35 @@ describe('TranslateBatchRequestSchema', () => {
     };
     expect(TranslateBatchRequestSchema.parse(request)).toEqual(request);
   });
+
+  const validString = {
+    key: 'a',
+    text: 'Hello',
+    filePath: 'a.tsx',
+    componentName: null,
+    surroundingCode: '',
+  };
+
+  it.each(['de', 'ja', 'es', 'ar', 'pt-BR'])(
+    'accepts the default target locale %s',
+    (targetLocale) => {
+      expect(() =>
+        TranslateBatchRequestSchema.parse({
+          targetLocale,
+          strings: [validString],
+        }),
+      ).not.toThrow();
+    },
+  );
+
+  it('rejects a path-traversal-shaped targetLocale', () => {
+    expect(() =>
+      TranslateBatchRequestSchema.parse({
+        targetLocale: '../../x',
+        strings: [validString],
+      }),
+    ).toThrow();
+  });
 });
 
 describe('TranslatedStringSchema and TranslateBatchResponseSchema', () => {

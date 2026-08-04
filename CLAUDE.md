@@ -13,9 +13,23 @@ existent. Voir `docs/superpowers/specs/2026-07-30-eval-harness-design.md`.
 
 `packages/core` et `packages/cli` existent aussi (M1 Phase 1) : détection de
 framework local, extraction de chaînes en dur, et diff/merge de fichiers de
-locale. Pas encore de traduction ni de PR — dry-run local uniquement. Voir
-`docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et
+locale. Voir `docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et
 `docs/superpowers/plans/2026-08-02-m1-phase1-core-cli.md`.
+
+`apps/api` et `services/github-app` existent désormais (M1 Phase 2) :
+traduction réelle via Anthropic/OpenAI (`POST /v1/translate`) et ouverture
+de PR via une GitHub App (`POST /v1/open-pr`), consommés par
+`packages/cli`'s `init`. En attente de la GitHub App créée par un humain
+(Task 6 — voir `docs/superpowers/plans/2026-08-02-m1-phase2-api-github-app.md`)
+avant un premier run bout-en-bout réel contre un vrai repo.
+
+**Écart connu à l'invariant 5 (résidence des données UE) :** cette phase
+envoie du contexte extrait du code source (chemins de fichiers, noms de
+composants, code environnant) à des fournisseurs LLM non hébergés dans l'UE
+(Anthropic, OpenAI) pour la traduction — voir `packages/cli/README.md`. Il
+s'agit d'un compromis délibéré et documenté pour ce jalon pré-alpha, pas
+encore résolu, et à traiter quand la résidence des données UE sera
+réellement adressée.
 
 ## Avant toute UI
 Charger /mnt/skills/public/frontend-design/SKILL.md.

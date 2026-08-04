@@ -485,6 +485,44 @@ describe('runInit with openPr', () => {
     vi.unstubAllGlobals();
   });
 
+  it('fails fast with owner/repo missing before any translation API calls are made', async () => {
+    writeViteReactProject();
+    let translateCalls = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.endsWith('/v1/translate')) translateCalls++;
+        return {
+          ok: true,
+          json: async () => ({ translations: [], missingKeys: [] }),
+        };
+      }),
+    );
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
+      openPr: true,
+      owner: '',
+      repo: '',
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toContain('--owner');
+      expect(result.reason).toContain('--repo');
+    }
+    // Zero billed translation calls: the failure must happen before the
+    // per-locale translation loop, not just before the /v1/open-pr call.
+    expect(translateCalls).toBe(0);
+    // No locale files should have been written either.
+    expect(() =>
+      readFileSync(join(dir, 'locales', 'de.json'), 'utf-8'),
+    ).toThrow();
+
+    vi.unstubAllGlobals();
+  });
+
   it('never calls /v1/open-pr when openPr is not set', async () => {
     writeViteReactProject();
     const calledUrls: string[] = [];

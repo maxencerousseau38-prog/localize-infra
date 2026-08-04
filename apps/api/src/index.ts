@@ -24,7 +24,9 @@ if (!API_AUTH_TOKEN) {
   throw new Error('API_AUTH_TOKEN is not set');
 }
 
-function readGitHubAppConfig(): {
+// Exported for direct unit testing (see index.test.ts), in addition to being
+// reachable indirectly through the /v1/open-pr route.
+export function readGitHubAppConfig(): {
   appId: string;
   privateKey: string;
   installationId: number;
@@ -33,7 +35,15 @@ function readGitHubAppConfig(): {
   const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
   const installationId = process.env.GITHUB_APP_INSTALLATION_ID;
   if (!appId || !privateKey || !installationId) return null;
-  return { appId, privateKey, installationId: Number(installationId) };
+  const parsedInstallationId = Number(installationId);
+  // A non-numeric GITHUB_APP_INSTALLATION_ID (e.g. a typo, or an accidentally
+  // pasted URL fragment) makes `installationId` truthy as a STRING, so the
+  // check above alone wouldn't catch it. Number(...) on such a value produces
+  // NaN, which would otherwise flow all the way to getInstallationOctokit(NaN)
+  // and fail there with a confusing, indirect error. Treat it the same as a
+  // missing env var: fail closed with the same 501 "not configured" response.
+  if (Number.isNaN(parsedInstallationId)) return null;
+  return { appId, privateKey, installationId: parsedInstallationId };
 }
 
 // The only place in apps/api that touches the real @localize-infra/github-app
