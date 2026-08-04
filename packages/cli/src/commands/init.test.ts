@@ -434,6 +434,57 @@ describe('runInit with openPr', () => {
     vi.unstubAllGlobals();
   });
 
+  it('returns cleanly without a pr and without throwing when every locale translation fails', async () => {
+    writeViteReactProject();
+    const openPrCalls: { url: string; body: unknown }[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        if (url.endsWith('/v1/translate')) {
+          return {
+            ok: false,
+            status: 500,
+            text: async () => 'Internal Server Error',
+          };
+        }
+        if (url.endsWith('/v1/open-pr')) {
+          const body = JSON.parse(init.body as string) as unknown;
+          openPrCalls.push({ url, body });
+          return {
+            ok: true,
+            json: async () => ({
+              prUrl: 'https://github.com/acme/widgets/pull/1',
+              prNumber: 1,
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch call to ${url}`);
+      }),
+    );
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
+      locales: ['de', 'ja'],
+      openPr: true,
+      owner: 'acme',
+      repo: 'widgets',
+      baseBranch: 'main',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.pr).toBeUndefined();
+      expect(result.locales).toHaveLength(2);
+      for (const localeResult of result.locales) {
+        expect(localeResult.error).toEqual(expect.any(String));
+      }
+    }
+    expect(openPrCalls).toHaveLength(0);
+
+    vi.unstubAllGlobals();
+  });
+
   it('never calls /v1/open-pr when openPr is not set', async () => {
     writeViteReactProject();
     const calledUrls: string[] = [];

@@ -2,19 +2,22 @@ import { z } from 'zod';
 
 // This service's only legitimate purpose is writing locale JSON files, so
 // path validation is a positive allowlist rather than a denylist: every path
-// segment must match a restrictive safe-character set, and the path must end
-// in `.json`. This is stricter than (and subsumes) simply rejecting `..`/`.`
-// segments, absolute POSIX paths, and absolute Windows paths (drive letters
-// like `C:\` or `C:/`) — a pure traversal denylist still lets a caller steer
-// the PR at arbitrary in-repo files like `.github/workflows/malicious.yml`,
-// which don't traverse outside the repo but are still far outside the
-// intended locale directory. The traversal-specific checks are kept below
-// for defense-in-depth/clarity even though the segment allowlist and the
-// `.json` suffix requirement already rule them out. Backslashes are rejected
-// outright rather than treated as a separator: git tree paths are always
-// forward-slash-separated regardless of OS, so no legitimate path needs one,
-// and a backslash could otherwise be used to smuggle a traversal segment
-// past the `/`-based split below (e.g. `locales\..\..\secret.json`).
+// segment must match a restrictive safe-character set, the path must end
+// in `.json`, and the first segment must be exactly `locales` (every
+// framework's `localesDir` is hardcoded to that literal — see
+// packages/core/src/detect/index.ts). This is stricter than (and subsumes)
+// simply rejecting `..`/`.` segments, absolute POSIX paths, and absolute
+// Windows paths (drive letters like `C:\` or `C:/`) — a pure traversal
+// denylist still lets a caller steer the PR at arbitrary in-repo files like
+// `.github/workflows/malicious.yml` or `package.json`, which don't traverse
+// outside the repo but are still far outside the intended locale directory.
+// The traversal-specific checks are kept below for defense-in-depth/clarity
+// even though the segment allowlist, `.json` suffix requirement, and
+// `locales/` root restriction already rule them out. Backslashes are
+// rejected outright rather than treated as a separator: git tree paths are
+// always forward-slash-separated regardless of OS, so no legitimate path
+// needs one, and a backslash could otherwise be used to smuggle a traversal
+// segment past the `/`-based split below (e.g. `locales\..\..\secret.json`).
 const SAFE_PATH_SEGMENT = /^[A-Za-z0-9._-]+$/;
 
 function isSafeRelativePath(path: string): boolean {
@@ -25,6 +28,7 @@ function isSafeRelativePath(path: string): boolean {
   if (/^[a-zA-Z]:/.test(path)) return false;
   if (!path.endsWith('.json')) return false;
   const segments = path.split('/');
+  if (segments[0] !== 'locales') return false;
   return segments.every(
     (segment) =>
       segment !== '.' && segment !== '..' && SAFE_PATH_SEGMENT.test(segment),
@@ -34,7 +38,7 @@ function isSafeRelativePath(path: string): boolean {
 export const OpenPrFileSchema = z.object({
   path: z.string().min(1).refine(isSafeRelativePath, {
     message:
-      'path must be a relative, forward-slash-separated path ending in ".json", with every segment restricted to [A-Za-z0-9._-] and no "." or ".." segments, leading "/", or drive letter',
+      'path must be a relative, forward-slash-separated path under "locales/" ending in ".json", with every segment restricted to [A-Za-z0-9._-] and no "." or ".." segments, leading "/", or drive letter',
   }),
   content: z.string(),
 });

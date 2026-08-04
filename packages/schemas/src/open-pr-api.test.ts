@@ -145,6 +145,45 @@ describe('OpenPrApiRequestSchema', () => {
     ).toThrow();
   });
 
+  it('rejects a path at the repo root outside locales/ (package.json)', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'package.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a dotfile-directory path outside locales/ (.github/dependabot.json)', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: '.github/dependabot.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a nested path outside locales/ (apps/api/tsconfig.json)', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'apps/api/tsconfig.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
   it('rejects an owner containing a slash', () => {
     expect(() =>
       OpenPrApiRequestSchema.parse({

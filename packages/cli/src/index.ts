@@ -96,6 +96,10 @@ async function main(): Promise<void> {
   }
   if (result.pr) {
     console.log(`Opened PR: ${result.pr.prUrl}`);
+  } else if (openPr && result.locales.every((l) => l.error !== null)) {
+    console.log(
+      'No PR opened: all locale translations failed, so there was nothing to include.',
+    );
   }
 }
 
