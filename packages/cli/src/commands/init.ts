@@ -129,14 +129,19 @@ export async function runInit(
         baseBranch: options.baseBranch ?? 'main',
         title: `Add translations (${targetLocales.join(', ')})`,
         body: `Automated by \`localize-infra init\`. ${localeResults.map((r) => `${r.locale}: ${r.keysWritten} key(s)${r.missingKeys.length > 0 ? ` (${r.missingKeys.length} untranslated)` : ''}`).join('; ')}`,
-        files: targetLocales.map((locale) => ({
-          path: `${framework.localesDir}/${locale}.json`,
-          // Read back what was just written, rather than recomputing a merge: mergeLocaleFile's
-          // loop only walks the KEYS OF ITS `fresh` ARGUMENT, so calling it with an empty catalog
-          // here would silently return `{}`, not the file's real contents. readLocaleFile reads
-          // the actual bytes on disk that writeLocaleFile produced a few lines above.
-          content: JSON.stringify(readLocaleFile(localesDir, locale), null, 2),
-        })),
+        // Only include locales that actually succeeded: a locale whose translateBatch call
+        // failed was never written to disk, so readLocaleFile would return `{}` for it and
+        // silently include an empty locale file in the PR instead of omitting it.
+        files: localeResults
+          .filter((r) => r.error === null)
+          .map((r) => ({
+            path: `${framework.localesDir}/${r.locale}.json`,
+            // Read back what was just written, rather than recomputing a merge: mergeLocaleFile's
+            // loop only walks the KEYS OF ITS `fresh` ARGUMENT, so calling it with an empty catalog
+            // here would silently return `{}`, not the file's real contents. readLocaleFile reads
+            // the actual bytes on disk that writeLocaleFile produced a few lines above.
+            content: `${JSON.stringify(readLocaleFile(localesDir, r.locale), null, 2)}\n`,
+          })),
       },
       apiToken,
     );

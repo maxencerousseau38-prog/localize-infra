@@ -57,7 +57,7 @@ async function main(): Promise<void> {
 
   if (command !== 'init') {
     console.error(
-      `Unknown command: ${command ?? '(none)'}\nUsage: localize-infra init [directory] [--force] [--api-url <url>] [--api-token <token>] [--locales <comma,separated,list>] [--open-pr] [--owner <owner>] [--repo <repo>] [--base-branch <branch>]\n(--api-token can also be provided via the LOCALIZE_API_TOKEN environment variable; the flag takes precedence)`,
+      `Unknown command: ${command ?? '(none)'}\nUsage: localize-infra init [directory] [--force] [--api-url <url>] [--locales <comma,separated,list>] [--open-pr] [--owner <owner>] [--repo <repo>] [--base-branch <branch>] [--api-token <token>]\nAPI token: set the LOCALIZE_API_TOKEN environment variable (recommended). The --api-token flag is also available but leaks the token into shell history and process listings (e.g. \`ps\`); prefer the environment variable. If both are set, --api-token takes precedence.`,
     );
     process.exitCode = 1;
     return;

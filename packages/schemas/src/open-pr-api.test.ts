@@ -118,6 +118,70 @@ describe('OpenPrApiRequestSchema', () => {
     };
     expect(OpenPrApiRequestSchema.parse(request)).toEqual(request);
   });
+
+  it('rejects a path that does not traverse but is outside the locale directory (allowlist, not just a traversal denylist)', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: '.github/workflows/evil.yml', content: 'evil: true' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a file path containing a space or other non-allowlisted character', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'locales/de file.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects an owner containing a slash', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a/b',
+        repo: 'b',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'locales/de.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a repo containing a space', () => {
+    expect(() =>
+      OpenPrApiRequestSchema.parse({
+        owner: 'a',
+        repo: 'my repo',
+        baseBranch: 'main',
+        title: 't',
+        body: 'b',
+        files: [{ path: 'locales/de.json', content: '{}' }],
+      }),
+    ).toThrow();
+  });
+
+  it('accepts a normal owner, repo, and baseBranch', () => {
+    const request = {
+      owner: 'acme-corp',
+      repo: 'widgets.js',
+      baseBranch: 'release/1.0',
+      title: 't',
+      body: 'b',
+      files: [{ path: 'locales/de.json', content: '{}' }],
+    };
+    expect(OpenPrApiRequestSchema.parse(request)).toEqual(request);
+  });
 });
 
 describe('OpenPrApiResponseSchema', () => {

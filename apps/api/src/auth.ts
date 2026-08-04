@@ -25,7 +25,11 @@ export function isValidBearerToken(
   expectedToken: string,
 ): boolean {
   if (!authHeader || !expectedToken) return false;
-  if (!authHeader.startsWith(BEARER_PREFIX)) return false;
+  // The scheme name ("Bearer") is case-insensitive per RFC 7235 section 2.1;
+  // only the token value itself (compared below via constantTimeEquals) is
+  // case-sensitive.
+  const scheme = authHeader.slice(0, BEARER_PREFIX.length).toLowerCase();
+  if (scheme !== BEARER_PREFIX.toLowerCase()) return false;
   const token = authHeader.slice(BEARER_PREFIX.length);
   return token.length > 0 && constantTimeEquals(token, expectedToken);
 }

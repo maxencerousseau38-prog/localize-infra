@@ -52,8 +52,37 @@ describe('openPrRouteHandler', () => {
         throw new Error('branch already exists');
       }),
     });
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     const result = await openPrRouteHandler(validBody, config, ops);
+    consoleErrorSpy.mockRestore();
+
     expect(result.status).toBe(502);
+  });
+
+  // Regression test for a stale-dist class of bug: apps/api resolves
+  // `@localize-infra/schemas` through that package's `"main": "./dist/index.js"`
+  // (real npm/node package resolution), NOT through a relative source import.
+  // packages/schemas' own vitest suite imports `./open-pr-api.js` as a
+  // *relative sibling file*, which resolves to source regardless of whether
+  // dist/ is built or stale — so it can never catch dist/ going stale. This
+  // test calls `openPrRouteHandler` exactly as the running server does, which
+  // pulls `OpenPrApiRequestSchema` in via the real package resolution path.
+  // It only passes if `packages/schemas/dist/open-pr-api.js` actually
+  // contains the path-validation logic; if dist/ is ever rebuilt from an
+  // older commit (or not rebuilt at all), this test fails with a 200 instead
+  // of the expected 400, pinning the cross-package contract.
+  it('rejects a path-traversal file path via the real @localize-infra/schemas package resolution (not a relative source import)', async () => {
+    const result = await openPrRouteHandler(
+      {
+        ...validBody,
+        files: [{ path: '../../evil.yml', content: 'x' }],
+      },
+      config,
+      fakeOps(),
+    );
+    expect(result.status).toBe(400);
   });
 
   it('does not leak the underlying error message to the caller on failure', async () => {

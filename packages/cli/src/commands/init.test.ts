@@ -365,6 +365,75 @@ describe('runInit with openPr', () => {
     vi.unstubAllGlobals();
   });
 
+  it('excludes a locale whose translation failed from the PR files instead of including it with empty content', async () => {
+    writeViteReactProject();
+    const extractedKey = 'src.App.welcome';
+    const openPrCalls: { url: string; body: unknown }[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        if (url.endsWith('/v1/translate')) {
+          const { targetLocale } = JSON.parse(init.body as string) as {
+            targetLocale: string;
+          };
+          if (targetLocale === 'ja') {
+            return {
+              ok: false,
+              status: 500,
+              text: async () => 'Internal Server Error',
+            };
+          }
+          return {
+            ok: true,
+            json: async () => ({
+              translations: [{ key: extractedKey, text: 'Willkommen' }],
+              missingKeys: [],
+            }),
+          };
+        }
+        if (url.endsWith('/v1/open-pr')) {
+          const body = JSON.parse(init.body as string) as unknown;
+          openPrCalls.push({ url, body });
+          return {
+            ok: true,
+            json: async () => ({
+              prUrl: 'https://github.com/acme/widgets/pull/1',
+              prNumber: 1,
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch call to ${url}`);
+      }),
+    );
+
+    const result = await runInit(dir, {
+      apiUrl: 'http://localhost:8787',
+      apiToken: 'test-token',
+      locales: ['de', 'ja'],
+      openPr: true,
+      owner: 'acme',
+      repo: 'widgets',
+      baseBranch: 'main',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const ja = result.locales.find((l) => l.locale === 'ja');
+      expect(ja?.error).toEqual(expect.any(String));
+    }
+
+    const openPrBody = openPrCalls[0]?.body as {
+      files: { path: string; content: string }[];
+    };
+    expect(openPrBody.files).toHaveLength(1);
+    expect(openPrBody.files[0]?.path).toBe('locales/de.json');
+    expect(openPrBody.files.some((f) => f.path === 'locales/ja.json')).toBe(
+      false,
+    );
+
+    vi.unstubAllGlobals();
+  });
+
   it('never calls /v1/open-pr when openPr is not set', async () => {
     writeViteReactProject();
     const calledUrls: string[] = [];

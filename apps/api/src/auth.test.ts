@@ -34,6 +34,27 @@ describe('isValidBearerToken', () => {
       false,
     );
   });
+
+  it('accepts a differently-cased "bearer" scheme keyword (RFC 7235 scheme names are case-insensitive)', () => {
+    expect(isValidBearerToken(`bearer ${expectedToken}`, expectedToken)).toBe(
+      true,
+    );
+    expect(isValidBearerToken(`BEARER ${expectedToken}`, expectedToken)).toBe(
+      true,
+    );
+    expect(isValidBearerToken(`BeArEr ${expectedToken}`, expectedToken)).toBe(
+      true,
+    );
+  });
+
+  it('still compares the token value itself case-sensitively', () => {
+    expect(
+      isValidBearerToken(
+        `Bearer ${expectedToken.toUpperCase()}`,
+        expectedToken,
+      ),
+    ).toBe(false);
+  });
 });
 
 describe('createAuthMiddleware', () => {
