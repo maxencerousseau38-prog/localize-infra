@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { serve } from '@hono/node-server';
 import {
   createGitHubAppClient,
@@ -24,6 +25,27 @@ if (!API_AUTH_TOKEN) {
   throw new Error('API_AUTH_TOKEN is not set');
 }
 
+// Standard GitHub App config: the private key can be supplied either as the
+// raw PEM content directly (GITHUB_APP_PRIVATE_KEY) or, more commonly in
+// practice since GitHub's App-creation flow downloads a .pem file rather
+// than a copy-pasteable string, as a path to that file
+// (GITHUB_APP_PRIVATE_KEY_PATH). If both are set, the inline value wins.
+// Returns null (not a thrown error) on any read failure, matching this
+// function's existing "treat any config problem as not-configured, respond
+// 501" contract — a malformed path shouldn't crash the server any more than
+// a missing env var should.
+function readPrivateKey(): string | null {
+  const inline = process.env.GITHUB_APP_PRIVATE_KEY;
+  if (inline) return inline;
+  const path = process.env.GITHUB_APP_PRIVATE_KEY_PATH;
+  if (!path) return null;
+  try {
+    return readFileSync(path, 'utf-8');
+  } catch {
+    return null;
+  }
+}
+
 // Exported for direct unit testing (see index.test.ts), in addition to being
 // reachable indirectly through the /v1/open-pr route.
 export function readGitHubAppConfig(): {
@@ -32,7 +54,7 @@ export function readGitHubAppConfig(): {
   installationId: number;
 } | null {
   const appId = process.env.GITHUB_APP_ID;
-  const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
+  const privateKey = readPrivateKey();
   const installationId = process.env.GITHUB_APP_INSTALLATION_ID;
   if (!appId || !privateKey || !installationId) return null;
   const parsedInstallationId = Number(installationId);

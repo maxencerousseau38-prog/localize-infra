@@ -58,18 +58,39 @@ excluding tests):
 | `API_OPENAI_MODEL`             | No — defaults to `gpt-4o`           | OpenAI model ID used for translation requests. |
 | `PORT`                         | No — defaults to `8787`             | Port the HTTP server listens on. |
 | `GITHUB_APP_ID`                | Yes, for `/v1/open-pr` to work      | GitHub App ID used to authenticate as the App. |
-| `GITHUB_APP_PRIVATE_KEY`       | Yes, for `/v1/open-pr` to work      | The GitHub App's private key (PEM). See the gotcha below. |
+| `GITHUB_APP_PRIVATE_KEY_PATH`  | Recommended way to supply the key   | Path to the App's private key `.pem` file, exactly as downloaded from GitHub's App-creation flow (`<app-slug>.<date>.private-key.pem`). Read at request time. See "Standard GitHub App configuration" below. |
+| `GITHUB_APP_PRIVATE_KEY`       | Alternative to `GITHUB_APP_PRIVATE_KEY_PATH` | The App's private key as raw PEM content, inline. Takes precedence if both this and `_PATH` are set. See the gotcha below if you use this form. |
 | `GITHUB_APP_INSTALLATION_ID`   | Yes, for `/v1/open-pr` to work      | The App installation ID for the target GitHub account/org. Must parse as a number — a non-numeric value is treated the same as if it were unset. |
 
-If any one of `GITHUB_APP_ID` / `GITHUB_APP_PRIVATE_KEY` /
-`GITHUB_APP_INSTALLATION_ID` is missing (or `GITHUB_APP_INSTALLATION_ID`
-isn't numeric), `/v1/open-pr` responds `501 Not Implemented` rather than
-crashing — `/v1/translate` is unaffected either way.
+If `GITHUB_APP_ID` / `GITHUB_APP_INSTALLATION_ID` is missing, or neither
+`GITHUB_APP_PRIVATE_KEY_PATH` nor `GITHUB_APP_PRIVATE_KEY` resolves to a
+readable key (or `GITHUB_APP_INSTALLATION_ID` isn't numeric), `/v1/open-pr`
+responds `501 Not Implemented` rather than crashing — `/v1/translate` is
+unaffected either way.
 
-### `GITHUB_APP_PRIVATE_KEY` gotcha: it must be the full multi-line PEM
+### Standard GitHub App configuration
 
-This repo's convention (established since Sprint 0, for `ANTHROPIC_API_KEY`
-etc.) is a plain shell-style `.env` file at the repo root, loaded with:
+GitHub's App-creation flow gives you an App ID, an Installation ID (once
+you install the App on an account/org), and a private key **downloaded as a
+`.pem` file** — not a value you paste. `GITHUB_APP_PRIVATE_KEY_PATH` matches
+that flow directly: point it at wherever you saved the downloaded file (an
+absolute path is safest) and `apps/api` reads the file itself at request
+time. This is the recommended approach — it sidesteps the multi-line-PEM
+shell-quoting problem entirely, and it means the key file itself never has
+to be pasted into `.env` (or into a chat, or a shell command) at all.
+
+```bash
+# .env
+GITHUB_APP_ID=123456
+GITHUB_APP_PRIVATE_KEY_PATH=/c/Users/you/Downloads/your-app.2026-08-05.private-key.pem
+GITHUB_APP_INSTALLATION_ID=789012
+```
+
+### `GITHUB_APP_PRIVATE_KEY` (inline) gotcha: it must be the full multi-line PEM
+
+If you use the inline form instead of `_PATH`, be aware this repo's
+convention (established since Sprint 0, for `ANTHROPIC_API_KEY` etc.) is a
+plain shell-style `.env` file at the repo root, loaded with:
 
 ```bash
 set -a && source .env && set +a
@@ -95,4 +116,5 @@ assigns the whole thing, newlines included, to the variable.) Do **not**
 use a `\n`-escaped single-line form — nothing in this codebase unescapes
 `\n` sequences in `GITHUB_APP_PRIVATE_KEY`, so Octokit would receive the
 literal two-character sequence `\n` instead of a newline and fail to parse
-the key.
+the key. `GITHUB_APP_PRIVATE_KEY_PATH` avoids this problem entirely, which
+is why it's the recommended default.

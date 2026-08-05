@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // These tests import the REAL `app` export from ./index.js (not a
@@ -19,6 +22,7 @@ const ENV_KEYS = [
   'API_AUTH_TOKEN',
   'GITHUB_APP_ID',
   'GITHUB_APP_PRIVATE_KEY',
+  'GITHUB_APP_PRIVATE_KEY_PATH',
   'GITHUB_APP_INSTALLATION_ID',
 ] as const;
 
@@ -115,6 +119,52 @@ describe('readGitHubAppConfig', () => {
       privateKey: 'fake-pem-content',
       installationId: 456,
     });
+  });
+
+  it('reads the private key from GITHUB_APP_PRIVATE_KEY_PATH when GITHUB_APP_PRIVATE_KEY is not set', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'gh-app-key-'));
+    const keyPath = join(dir, 'key.pem');
+    writeFileSync(keyPath, 'fake-pem-content-from-file');
+    try {
+      process.env.GITHUB_APP_ID = 'app-123';
+      process.env.GITHUB_APP_PRIVATE_KEY_PATH = keyPath;
+      process.env.GITHUB_APP_INSTALLATION_ID = '456';
+      const { readGitHubAppConfig } = await loadModule();
+      expect(readGitHubAppConfig()).toEqual({
+        appId: 'app-123',
+        privateKey: 'fake-pem-content-from-file',
+        installationId: 456,
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('prefers GITHUB_APP_PRIVATE_KEY over GITHUB_APP_PRIVATE_KEY_PATH when both are set', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'gh-app-key-'));
+    const keyPath = join(dir, 'key.pem');
+    writeFileSync(keyPath, 'from-file');
+    try {
+      process.env.GITHUB_APP_ID = 'app-123';
+      process.env.GITHUB_APP_PRIVATE_KEY = 'from-inline';
+      process.env.GITHUB_APP_PRIVATE_KEY_PATH = keyPath;
+      process.env.GITHUB_APP_INSTALLATION_ID = '456';
+      const { readGitHubAppConfig } = await loadModule();
+      expect(readGitHubAppConfig()?.privateKey).toBe('from-inline');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns null when GITHUB_APP_PRIVATE_KEY_PATH points at a file that does not exist', async () => {
+    process.env.GITHUB_APP_ID = 'app-123';
+    process.env.GITHUB_APP_PRIVATE_KEY_PATH = join(
+      tmpdir(),
+      'this-file-does-not-exist.pem',
+    );
+    process.env.GITHUB_APP_INSTALLATION_ID = '456';
+    const { readGitHubAppConfig } = await loadModule();
+    expect(readGitHubAppConfig()).toBeNull();
   });
 
   it('causes /v1/open-pr to respond 501 (not configured) rather than crash, when installationId is non-numeric', async () => {
