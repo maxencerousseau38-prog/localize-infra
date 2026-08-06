@@ -175,6 +175,16 @@ Enforced in CI via Lighthouse CI and a bundle-size check that fails the build �
 - Session cookies `httpOnly`, `secure`, `sameSite=lax`; short access + rotating refresh.
 - Every permission check server-side (IA §5). Client-side gating is presentation only.
 - API tokens shown once, hashed at rest, scoped, revocable, last-used tracked.
-- Strict CSP; no inline scripts; no third-party tag manager.
+- **Strict CSP, with exactly one documented inline-script exception.** No third-party tag manager.
+
+  *Revised 2026-08-06 during FE-0.* The original rule ("no inline scripts") proved unimplementable: preventing a flash of the wrong colour scheme requires a script that runs **before first paint**, and every alternative — a React effect, a deferred script, an external file — paints once with the wrong theme first. That flash is the most common "this feels cheap" tell on an otherwise polished site.
+
+  **Resolution: hash-based allowlisting.** The theme script is a static build-time constant (`apps/site/src/lib/theme-script.ts`) with no user input or interpolation. `next.config.ts` imports that exact string, computes its SHA-256, and adds it to `script-src`. Deriving the hash from the source means the two cannot drift — a changed script with a stale hash is blocked by the browser, which surfaces as a visible theme flash rather than a silent policy hole.
+
+  A nonce would also satisfy a strict CSP but forces dynamic rendering on every route, costing the static-generation and LCP budget on a marketing site. Hashing a constant keeps pages static *and* the policy strict.
+
+  `style-src` retains `'unsafe-inline'` because Tailwind and `next/font` emit inline `<style>`; style injection is not a script-execution vector, so this is a materially smaller concession than the equivalent on `script-src`.
+
+  **Rule going forward:** any new inline script requires either a hash entry or a nonce. `'unsafe-inline'` on `script-src` is never acceptable.
 - **No customer source code in client-side telemetry or error reporting.** Given the product transmits `surroundingCode` to LLM providers already (R4), leaking it a second way into an analytics vendor would be inexcusable.
 - Bearer tokens never in URLs or `localStorage`.

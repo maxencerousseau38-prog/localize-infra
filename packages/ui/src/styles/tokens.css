@@ -1,0 +1,364 @@
+/*
+ * Design tokens — the single source of truth for the visual system.
+ * Specified in docs/design/05-design-system.md.
+ *
+ * Three layers, and components may only touch the third:
+ *   1. Raw palette   (--graphite-1 … --iris-12)  — never referenced by a component
+ *   2. Semantic      (--bg-canvas, --state-ambiguous) — flips with colour scheme
+ *   3. Tailwind      (@theme inline) — generates the utilities components use
+ *
+ * A component referencing a raw scale value directly is a review rejection:
+ * the indirection is what lets ambiguity be re-themed without a product-wide audit.
+ */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─────────────────────────────────────────────────────────────
+   Layer 1 — raw palette, light
+   Graphite is near-neutral with a faint cool cast. Chrome only.
+   Colour is reserved for meaning (see layer 2).
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --graphite-1: #ffffff;
+  --graphite-2: #f7f8f9;
+  --graphite-3: #edeef0;
+  --graphite-4: #e5e7ea;
+  --graphite-5: #dde0e4;
+  --graphite-6: #d7dae0;
+  --graphite-7: #c7cbd3;
+  --graphite-8: #aeb4bf;
+  --graphite-9: #6c727f;
+  --graphite-10: #5d636f;
+  --graphite-11: #4a505c;
+  --graphite-12: #0c0e12;
+
+  /* Iris — "your judgement is required". Used for nothing else, ever. */
+  --iris-1: #fcfcff;
+  --iris-2: #f6f5fe;
+  --iris-3: #efedfe;
+  --iris-4: #e5e1fd;
+  --iris-5: #dad5fb;
+  --iris-6: #c7c0f9;
+  --iris-7: #b3aaf6;
+  --iris-8: #9488f0;
+  --iris-9: #5b4be8;
+  --iris-10: #5140dd;
+  --iris-11: #4a3cd1;
+  --iris-12: #221b63;
+
+  /* Jade — confident, current, merged, passing */
+  --jade-1: #f9fefb;
+  --jade-2: #effaf5;
+  --jade-3: #e3f5ee;
+  --jade-4: #d3efe3;
+  --jade-5: #c1e7d7;
+  --jade-6: #a7dfcb;
+  --jade-7: #85d2b8;
+  --jade-8: #4fc09b;
+  --jade-9: #0b7d5b;
+  --jade-10: #0a7052;
+  --jade-11: #08674b;
+  --jade-12: #05301f;
+
+  /* Amber — degraded: missing keys, stale, partial. Never ambiguity. */
+  --amber-1: #fffdf9;
+  --amber-2: #fdf8ee;
+  --amber-3: #fdf3e0;
+  --amber-4: #f9ead0;
+  --amber-5: #f5e1bd;
+  --amber-6: #f0d9a8;
+  --amber-7: #e5c079;
+  --amber-8: #cc9e3d;
+  --amber-9: #9a6100;
+  --amber-10: #8a5600;
+  --amber-11: #7a4d00;
+  --amber-12: #40280a;
+
+  /* Crimson — failed, destructive, irreversible */
+  --crimson-1: #fffcfc;
+  --crimson-2: #fef4f4;
+  --crimson-3: #fdecec;
+  --crimson-4: #fbdcdc;
+  --crimson-5: #f9cccc;
+  --crimson-6: #f5bfbf;
+  --crimson-7: #eea3a3;
+  --crimson-8: #e07d7d;
+  --crimson-9: #be2c2c;
+  --crimson-10: #ab2727;
+  --crimson-11: #9a2222;
+  --crimson-12: #4a1212;
+
+  /* Azure — links and external references only (GitHub's language, deliberately) */
+  --azure-1: #fbfdff;
+  --azure-2: #f2f7ff;
+  --azure-3: #e7f0ff;
+  --azure-4: #d6e4fd;
+  --azure-5: #c3d7fa;
+  --azure-6: #acc8f7;
+  --azure-7: #8bb0f2;
+  --azure-8: #5a90ec;
+  --azure-9: #1f6feb;
+  --azure-10: #1c66d6;
+  --azure-11: #1a5cc4;
+  --azure-12: #0b2a5e;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Layer 1 — raw palette, dark
+   A distinct scale, NOT an inversion: inverted palettes produce
+   muddy mid-tones and broken contrast. Hues shift lighter and
+   desaturate slightly to avoid vibration on a dark ground.
+   ───────────────────────────────────────────────────────────── */
+.dark {
+  --graphite-1: #0c0e12;
+  --graphite-2: #131519;
+  --graphite-3: #1a1d23;
+  --graphite-4: #21252c;
+  --graphite-5: #282c34;
+  --graphite-6: #2f343d;
+  --graphite-7: #3a4049;
+  --graphite-8: #4a515c;
+  --graphite-9: #6c727f;
+  --graphite-10: #838a97;
+  --graphite-11: #a0a6b0;
+  --graphite-12: #f2f4f6;
+
+  --iris-1: #0f0d1c;
+  --iris-2: #16132a;
+  --iris-3: #1e1940;
+  --iris-4: #262051;
+  --iris-5: #2f275f;
+  --iris-6: #3b3272;
+  --iris-7: #4c4090;
+  --iris-8: #6355c4;
+  --iris-9: #8b7cf6;
+  --iris-10: #9c90f8;
+  --iris-11: #b4abfa;
+  --iris-12: #e8e4fe;
+
+  --jade-1: #06120d;
+  --jade-2: #081a13;
+  --jade-3: #0a2419;
+  --jade-4: #0c2e21;
+  --jade-5: #0e3928;
+  --jade-6: #124833;
+  --jade-7: #166044;
+  --jade-8: #1a8a61;
+  --jade-9: #34d399;
+  --jade-10: #4adca7;
+  --jade-11: #6ee7ba;
+  --jade-12: #d1fae9;
+
+  --amber-1: #140f05;
+  --amber-2: #1c1508;
+  --amber-3: #261c09;
+  --amber-4: #31240b;
+  --amber-5: #3d2d0d;
+  --amber-6: #4e3a11;
+  --amber-7: #6b4f16;
+  --amber-8: #9a731f;
+  --amber-9: #fbbf24;
+  --amber-10: #fccc4c;
+  --amber-11: #fcd77a;
+  --amber-12: #fef3d3;
+
+  --crimson-1: #150b0b;
+  --crimson-2: #1d0f0f;
+  --crimson-3: #281414;
+  --crimson-4: #331818;
+  --crimson-5: #401d1d;
+  --crimson-6: #522525;
+  --crimson-7: #6e3131;
+  --crimson-8: #9c4242;
+  --crimson-9: #f87171;
+  --crimson-10: #fa8a8a;
+  --crimson-11: #fca5a5;
+  --crimson-12: #fee2e2;
+
+  --azure-1: #0a0f18;
+  --azure-2: #0d1421;
+  --azure-3: #101c2e;
+  --azure-4: #13233b;
+  --azure-5: #172c49;
+  --azure-6: #1d375c;
+  --azure-7: #264a7d;
+  --azure-8: #2f66b3;
+  --azure-9: #58a6ff;
+  --azure-10: #74b5ff;
+  --azure-11: #93c5ff;
+  --azure-12: #dbeafe;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Layer 2 — semantic aliases. The only layer components may use.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --bg-canvas: var(--graphite-1);
+  --bg-surface: var(--graphite-2);
+  --bg-raised: var(--graphite-3);
+  --bg-active: var(--graphite-4);
+  --bg-overlay: color-mix(in srgb, var(--graphite-12) 40%, transparent);
+
+  --text-primary: var(--graphite-12);
+  --text-secondary: var(--graphite-11);
+  --text-tertiary: var(--graphite-9);
+  --text-inverse: var(--graphite-1);
+
+  --border-subtle: var(--graphite-4);
+  --border-default: var(--graphite-6);
+  --border-strong: var(--graphite-8);
+  --border-focus: var(--iris-9);
+
+  /* State — the product's core idea: confidence is always visible. */
+  --state-ambiguous: var(--iris-9);
+  --state-ambiguous-bg: var(--iris-3);
+  --state-ambiguous-text: var(--iris-11);
+  --state-confident: var(--jade-9);
+  --state-confident-bg: var(--jade-3);
+  --state-confident-text: var(--jade-11);
+  --state-degraded: var(--amber-9);
+  --state-degraded-bg: var(--amber-3);
+  --state-degraded-text: var(--amber-11);
+  --state-failed: var(--crimson-9);
+  --state-failed-bg: var(--crimson-3);
+  --state-failed-text: var(--crimson-11);
+
+  --link: var(--azure-9);
+  --link-hover: var(--azure-11);
+
+  /* Elevation — four levels. Borders do most of the work.
+     In dark mode shadows are near-useless, so elevation is
+     expressed via surface lightness + border instead. */
+  --elevation-1: 0 1px 2px rgb(12 14 18 / 0.06);
+  --elevation-2: 0 4px 12px rgb(12 14 18 / 0.08);
+  --elevation-3: 0 16px 48px rgb(12 14 18 / 0.16);
+}
+
+.dark {
+  --bg-overlay: color-mix(in srgb, #000000 60%, transparent);
+  --elevation-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --elevation-2: 0 4px 12px rgb(0 0 0 / 0.5);
+  --elevation-3: 0 16px 48px rgb(0 0 0 / 0.6);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Layer 3 — Tailwind theme. `inline` keeps the reference live so
+   utilities respond to the colour scheme instead of freezing.
+   ───────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-raised: var(--bg-raised);
+  --color-active: var(--bg-active);
+  --color-overlay: var(--bg-overlay);
+
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-inverse: var(--text-inverse);
+
+  --color-subtle: var(--border-subtle);
+  --color-line: var(--border-default);
+  --color-strong: var(--border-strong);
+  --color-focus: var(--border-focus);
+
+  --color-ambiguous: var(--state-ambiguous);
+  --color-ambiguous-bg: var(--state-ambiguous-bg);
+  --color-ambiguous-text: var(--state-ambiguous-text);
+  --color-confident: var(--state-confident);
+  --color-confident-bg: var(--state-confident-bg);
+  --color-confident-text: var(--state-confident-text);
+  --color-degraded: var(--state-degraded);
+  --color-degraded-bg: var(--state-degraded-bg);
+  --color-degraded-text: var(--state-degraded-text);
+  --color-failed: var(--state-failed);
+  --color-failed-bg: var(--state-failed-bg);
+  --color-failed-text: var(--state-failed-text);
+
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+
+  /* Type — Inter for interface, JetBrains Mono for keys/code/ICU.
+     Noto stacks so translated strings render in their own script;
+     rendering Japanese in a Latin-first fallback is the fastest way
+     for a localization product to prove it doesn't care. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+  --font-jp: var(--font-noto-jp), var(--font-inter), sans-serif;
+  --font-ar: var(--font-noto-ar), var(--font-inter), sans-serif;
+
+  /* 8px base. 4px and 2px exist only for optical alignment in controls. */
+  --spacing: 4px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  --shadow-e1: var(--elevation-1);
+  --shadow-e2: var(--elevation-2);
+  --shadow-e3: var(--elevation-3);
+
+  /* Motion — nothing in the app exceeds 300ms. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-micro: 100ms;
+  --duration-standard: 150ms;
+  --duration-emphasis: 200ms;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: var(--border-default);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 22px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus is never removed — only restyled. 2px ring at 2px offset,
+     ≥3:1 against both adjacent surfaces (WCAG 2.2 AA). */
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--iris-5);
+    color: var(--text-primary);
+  }
+
+  /* Tabular figures everywhere numbers are compared. */
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Honour the user's motion preference globally. The product must be
+   fully usable, and not visibly degraded, with motion off. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

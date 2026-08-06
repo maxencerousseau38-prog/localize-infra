@@ -4,3 +4,13 @@ dist/
 *.tsbuildinfo
 .env
 .corpus-checkout/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# test / tooling output
+coverage/
+playwright-report/
+test-results/
