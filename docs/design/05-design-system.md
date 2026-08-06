@@ -73,13 +73,25 @@ It is the product's core idea — *confidence is always visible* — compressed 
 Each semantic hue ships a 12-step scale (Radix-style: 1–2 backgrounds, 3–5 component backgrounds, 6–8 borders, 9–10 solid, 11 low-contrast text, 12 high-contrast text). Only the anchors are listed:
 
 ```
-graphite  1 #FFFFFF   2 #F7F8F9   3 #EDEEF0   6 #D7DAE0   9 #6C727F   11 #4A505C   12 #0C0E12
+graphite  1 #FFFFFF   2 #F7F8F9   3 #EDEEF0   6 #D7DAE0   8 #868D9B   9 #6C727F   11 #4A505C   12 #0C0E12
 iris      3 #EFEDFE   6 #C7C0F9   9 #5B4BE8   11 #4A3CD1   12 #221B63
 jade      3 #E3F5EE   6 #A7DFCB   9 #0B7D5B   11 #08674B   12 #05301F
-amber     3 #FDF3E0   6 #F0D9A8   9 #A96A00   11 #8A5600   12 #40280A
+amber     3 #FDF3E0   6 #F0D9A8   9 #9A6100   11 #7A4D00   12 #40280A
 crimson   3 #FDECEC   6 #F5BFBF   9 #BE2C2C   11 #A02222   12 #4A1212
 azure     3 #E7F0FF   6 #ACC8F7   9 #1F6FEB   11 #1A5CC4   12 #0B2A5E
 ```
+
+**These values were corrected by the CI contrast gate, not by eye.** The check (`packages/ui/src/__tests__/contrast.test.ts`) parses the real token file and failed three pairs on its first run, each a genuine accessibility defect that would otherwise have shipped:
+
+| Pair | Was | Now | Reason |
+|---|---|---|---|
+| light `graphite-8` on canvas | 2.08:1 | **3.33:1** | strong border below the 3:1 required of a boundary identifying an interactive state |
+| dark `graphite-9` on canvas | 4.00:1 | **5.02:1** | tertiary text below 4.5:1 |
+| dark `graphite-8` on canvas | 2.41:1 | **3.30:1** | strong border below 3:1 |
+
+The gate also asserts both themes define identical token names (a token present in one scale and missing from the other renders as an unresolved `var()`, usually invisible text) and that no hex value contains a non-ASCII character — which caught a real full-width-digit typo during implementation.
+
+It encodes one deliberate distinction: `border-strong` must meet 3:1 because it identifies interactive state, while `border-subtle` and `border-default` are decorative dividers and are not subject to WCAG 1.4.11.
 
 **Dark mode is a distinct scale, not an inversion.** Inverted palettes produce muddy mid-tones and broken contrast. Dark surfaces are `graphite-1 #0C0E12` → `graphite-3 #1A1D23`; hues shift lighter and *desaturate slightly* to avoid vibration on dark ground (Iris `#5B4BE8` → `#8B7CF6`).
 

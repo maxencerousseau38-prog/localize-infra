@@ -62,7 +62,14 @@ export function ThemeToggle() {
   }
 
   return (
-    <fieldset className="inline-flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5">
+    // `fieldset` alone maps to role="group". For a radio-only group,
+    // role="radiogroup" is the more precise mapping and is what assistive
+    // technology announces, so it is stated explicitly.
+    <fieldset
+      role="radiogroup"
+      aria-label="Colour theme"
+      className="inline-flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
+    >
       <legend className="sr-only">Colour theme</legend>
       {OPTIONS.map(({ value, label, Icon }) => {
         // Before hydration the stored preference is unknown; showing nothing as
@@ -91,7 +98,12 @@ export function ThemeToggle() {
                   : 'text-tertiary hover:text-secondary',
               )}
             >
-              <Icon className="size-3.5" aria-hidden="true" />
+              {/* pointer-events-none so a click always lands on the label and
+                  toggles the input, rather than being swallowed by the icon. */}
+              <Icon
+                className="pointer-events-none size-3.5"
+                aria-hidden="true"
+              />
               <span className="sr-only">{label}</span>
             </label>
           </div>

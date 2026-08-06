@@ -175,16 +175,23 @@ Enforced in CI via Lighthouse CI and a bundle-size check that fails the build �
 - Session cookies `httpOnly`, `secure`, `sameSite=lax`; short access + rotating refresh.
 - Every permission check server-side (IA §5). Client-side gating is presentation only.
 - API tokens shown once, hashed at rest, scoped, revocable, last-used tracked.
-- **Strict CSP, with exactly one documented inline-script exception.** No third-party tag manager.
+- **CSP is per-app, not global.** No third-party tag manager.
 
-  *Revised 2026-08-06 during FE-0.* The original rule ("no inline scripts") proved unimplementable: preventing a flash of the wrong colour scheme requires a script that runs **before first paint**, and every alternative — a React effect, a deferred script, an external file — paints once with the wrong theme first. That flash is the most common "this feels cheap" tell on an otherwise polished site.
+  *Revised twice on 2026-08-06 during FE-0. The first revision was wrong; both failures are recorded because the reasoning matters more than the conclusion.*
 
-  **Resolution: hash-based allowlisting.** The theme script is a static build-time constant (`apps/site/src/lib/theme-script.ts`) with no user input or interpolation. `next.config.ts` imports that exact string, computes its SHA-256, and adds it to `script-src`. Deriving the hash from the source means the two cannot drift — a changed script with a stale hash is blocked by the browser, which surfaces as a visible theme flash rather than a silent policy hole.
+  The original rule ("strict CSP; no inline scripts") proved unimplementable. Preventing a flash of the wrong colour scheme requires a script that runs **before first paint**, and every alternative — a React effect, a deferred script, an external file — paints once with the wrong theme first.
 
-  A nonce would also satisfy a strict CSP but forces dynamic rendering on every route, costing the static-generation and LCP budget on a marketing site. Hashing a constant keeps pages static *and* the policy strict.
+  **Attempt 1 — hash + `'strict-dynamic'`. Failed, and failed invisibly.** `'strict-dynamic'` *invalidates host sources by specification*, so `'self'` was ignored and **every Next.js chunk was blocked**. The site built green, prerendered all routes, and passed a full axe audit — because all of those inspect static markup. It was completely non-interactive: no theme toggle, no copy button, nothing hydrated. This is the most dangerous class of bug encountered in the project so far, because every gate in the pipeline reported success.
 
-  `style-src` retains `'unsafe-inline'` because Tailwind and `next/font` emit inline `<style>`; style injection is not a script-execution vector, so this is a materially smaller concession than the equivalent on `script-src`.
+  **Attempt 2 — hash + `'self'`, no `'strict-dynamic'`. Also fails.** Next's App Router emits per-page inline bootstrap scripts (the RSC flight payload). Their content varies per route and per build, so they cannot be enumerated as hashes in a static header.
 
-  **Rule going forward:** any new inline script requires either a hash entry or a nonce. `'unsafe-inline'` on `script-src` is never acceptable.
+  **Resolution, scoped per app:**
+
+  | App | `script-src` | Why |
+  |---|---|---|
+  | `apps/site` | `'self' 'unsafe-inline'` | Static marketing, **no user input, no auth, no user-generated content** — the injection surface `'unsafe-inline'` guards against does not meaningfully exist. Every other directive stays strict, and those carry the real weight here (`frame-ancestors`, `object-src`, `base-uri`, `form-action`, `connect-src`). Keeps pages static and protects the LCP budget. |
+  | `apps/web` | **nonce via middleware** | Renders user data behind authentication. The trade flips: a genuine injection surface exists, and dynamic rendering is an acceptable cost. **This is mandatory, not a preference.** |
+
+  **The durable lesson, now enforced in CI:** a build that succeeds and an accessibility audit that passes do **not** prove a page works. `apps/site/e2e/interaction.spec.ts` asserts zero console errors and zero CSP violations on every route, plus that the page actually hydrates and responds to interaction. That test is what caught this, and it is the reason it cannot recur silently.
 - **No customer source code in client-side telemetry or error reporting.** Given the product transmits `surroundingCode` to LLM providers already (R4), leaking it a second way into an analytics vendor would be inexcusable.
 - Bearer tokens never in URLs or `localStorage`.
