@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "pretest": "node -e \"require('fs').rmSync('../../packages/schemas/tsconfig.tsbuildinfo',{force:true});require('fs').rmSync('../../services/github-app/tsconfig.tsbuildinfo',{force:true})\" && npm run build -w @localize-infra/schemas -w @localize-infra/github-app",
+    "pretest": "npm run build -w @localize-infra/schemas -w @localize-infra/github-app",
     "test": "vitest run",
-    "predev": "node -e \"require('fs').rmSync('../../packages/schemas/tsconfig.tsbuildinfo',{force:true});require('fs').rmSync('../../services/github-app/tsconfig.tsbuildinfo',{force:true})\" && npm run build -w @localize-infra/schemas -w @localize-infra/github-app",
+    "predev": "npm run build -w @localize-infra/schemas -w @localize-infra/github-app",
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {

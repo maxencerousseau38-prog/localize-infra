@@ -8,8 +8,35 @@
 5. Résidence des données UE.
 
 ## État actuel
-`packages/eval` (harnais d'évaluation, Sprint 0) et `packages/schemas`
-existent. Voir `docs/superpowers/specs/2026-07-30-eval-harness-design.md`.
+
+**Backend (fonctionne aujourd'hui)**
+- `packages/eval` — harnais d'évaluation (Sprint 0). Corpus de 414 chaînes,
+  contrôles déterministes placeholders/ICU/pluriels en CI.
+- `packages/schemas` — contrats Zod partagés (CLI, API, web).
+- `packages/core` + `packages/cli` — détection de framework, extraction AST,
+  moteur de fusion des fichiers de locale, commande `init` (M1 Phase 1).
+- `apps/api` (propriétaire) — `POST /v1/translate`, `POST /v1/open-pr`,
+  auth bearer, en local uniquement.
+- `services/github-app` (propriétaire) — ouverture de PR via Octokit.
+- Validé de bout en bout : une vraie PR ouverte en 22 s sur un dépôt réel.
+
+**Frontend (FE-0)**
+- `packages/ui` (propriétaire) — tokens de design en 3 couches, primitives.
+  Livré en **source**, pas en `dist` : un artefact compilé partagé entre
+  paquets a déjà causé un bug de production ici (correctif de sécurité présent
+  en source mais absent du build servi).
+- `apps/site` (propriétaire) — site marketing statique, 5 pages.
+  Contrainte permanente : **toute affirmation du site doit être vraie
+  aujourd'hui.** `/quality` ne publie que les résultats vérifiés en CI et
+  déclare que l'évaluation humaine n'a pas eu lieu ; `/pricing` ne publie pas
+  de tarifs non modélisés ; `/security` divulgue l'écart de résidence UE.
+
+**N'existe pas encore** : base de données, comptes, organisations, équipes,
+permissions, facturation, projets persistants, tableau de bord.
+Ne jamais simuler ces fonctionnalités dans l'interface.
+
+Voir `docs/product/`, `docs/design/`, `docs/frontend/` (PRD → jalons), et
+`docs/product/08-critique.md` pour ce qui n'est pas encore solide.
 
 `packages/core` et `packages/cli` existent aussi (M1 Phase 1) : détection de
 framework local, extraction de chaînes en dur, et diff/merge de fichiers de

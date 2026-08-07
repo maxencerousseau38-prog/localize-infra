@@ -2,6 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
+    // Co-located with the output so `rm -rf dist` invalidates the
+    // incremental state atomically; otherwise tsc emits nothing after a clean.
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
     "rootDir": "src"
   },
   "references": [{ "path": "../core" }],
