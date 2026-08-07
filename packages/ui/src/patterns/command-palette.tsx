@@ -20,12 +20,16 @@ export interface CommandItem {
 }
 
 /**
- * Opens the palette on ⌘K / Ctrl+K. Exported separately so an app can own the
- * open state (the palette is also opened from the topbar button).
+ * Binds ⌘K / Ctrl+K. The callback should *toggle*, not open: the shortcut that
+ * summons the palette is the one a reader reaches for to dismiss it, and a
+ * shortcut that only opens leaves them pressing it with nothing happening.
+ *
+ * Exported separately so an app can own the open state — the palette is also
+ * opened from the topbar button.
  */
-export function useCommandPaletteHotkey(onOpen: () => void) {
-  const handler = React.useRef(onOpen);
-  handler.current = onOpen;
+export function useCommandPaletteHotkey(onToggle: () => void) {
+  const handler = React.useRef(onToggle);
+  handler.current = onToggle;
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -66,6 +70,13 @@ export function CommandPalette({
   const [query, setQuery] = React.useState('');
   const [activeIndex, setActiveIndex] = React.useState(0);
   const listRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  // Focus restoration is handled here rather than left to Radix. Radix restores
+  // to the element that had focus when its content mounted, and in this
+  // component that restore lands on <body> — verified by an end-to-end test, not
+  // assumed. Owning it also makes the hotkey path correct: the palette can be
+  // opened from anywhere, and focus must come back to wherever it was.
+  const returnFocusTo = React.useRef<HTMLElement | null>(null);
 
   const results = React.useMemo(() => {
     const scored = [];
@@ -139,7 +150,8 @@ export function CommandPalette({
       event.preventDefault();
       select(activeIndex);
     }
-    // Esc is handled by Radix, which also restores focus to the trigger.
+    // Esc is handled by Radix; focus restoration is handled in
+    // onCloseAutoFocus above.
   }
 
   let cursor = -1;
@@ -162,9 +174,23 @@ export function CommandPalette({
             'data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out',
           )}
           onOpenAutoFocus={(event) => {
+            // Runs before focus moves, so this is the last moment the opener is
+            // still the active element.
+            returnFocusTo.current =
+              document.activeElement as HTMLElement | null;
             // Focus the input, not the dialog: the reader is here to type.
             event.preventDefault();
-            listRef.current?.parentElement?.querySelector('input')?.focus();
+            inputRef.current?.focus();
+          }}
+          onCloseAutoFocus={(event) => {
+            const target = returnFocusTo.current;
+            returnFocusTo.current = null;
+            // Nothing to restore to when the palette was opened by the hotkey
+            // from a page with no focused control — let Radix do as it will
+            // rather than force focus somewhere arbitrary.
+            if (!target || target === document.body) return;
+            event.preventDefault();
+            target.focus();
           }}
         >
           <VisuallyHidden.Root>
@@ -172,6 +198,7 @@ export function CommandPalette({
           </VisuallyHidden.Root>
 
           <input
+            ref={inputRef}
             type="text"
             role="combobox"
             aria-expanded="true"

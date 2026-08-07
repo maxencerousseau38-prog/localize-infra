@@ -1,10 +1,9 @@
 'use client';
 
-import { cn } from '@localize-infra/ui';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
-
-type Theme = 'light' | 'dark' | 'system';
+import { cn } from '../lib/cn';
+import { type Theme, applyTheme, isTheme } from './theme';
 
 const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: 'light', label: 'Light', Icon: Sun },
@@ -12,18 +11,9 @@ const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: 'system', label: 'System', Icon: Monitor },
 ];
 
-function apply(theme: Theme) {
-  const dark =
-    theme === 'dark' ||
-    (theme === 'system' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.classList.toggle('dark', dark);
-  document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-}
-
 /**
  * Three explicit states rather than a light/dark switch: a user whose OS is
- * dark may still want this site light, and a binary toggle silently removes
+ * dark may still want this product light, and a binary toggle silently removes
  * that choice.
  *
  * Built on native radio inputs rather than buttons with `role="radio"`. The
@@ -40,17 +30,15 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
-      setTheme(stored);
-    }
+    if (isTheme(stored)) setTheme(stored);
   }, []);
 
-  // Follow the OS while in system mode, so the page updates if the user
-  // changes their preference in another window.
+  // Follow the OS while in system mode, so the page updates if the user changes
+  // their preference in another window.
   useEffect(() => {
     if (theme !== 'system') return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => apply('system');
+    const onChange = () => applyTheme('system');
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, [theme]);
@@ -58,7 +46,7 @@ export function ThemeToggle() {
   function select(next: Theme) {
     setTheme(next);
     localStorage.setItem('theme', next);
-    apply(next);
+    applyTheme(next);
   }
 
   return (

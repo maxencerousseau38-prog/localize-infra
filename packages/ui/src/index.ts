@@ -104,3 +104,13 @@ export {
 export { LocaleChip } from './patterns/locale-chip';
 export { EmptyState, ErrorState, NotBuiltYet } from './patterns/states';
 export { StringCard, type StringCardProps } from './patterns/string-card';
+
+/* ── Theme ───────────────────────────────────────────────────── */
+export {
+  THEME_SCRIPT,
+  applyTheme,
+  isTheme,
+  type Theme,
+} from './theme/theme';
+export { ThemeScript } from './theme/theme-script';
+export { ThemeToggle } from './theme/theme-toggle';

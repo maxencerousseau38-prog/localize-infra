@@ -1,0 +1,6 @@
+@import "@localize-infra/ui/styles/tokens.css";
+
+/* Tailwind v4 discovers classes by scanning source. The shared UI package lives
+   outside this app's root, so it must be registered explicitly or its utilities
+   are tree-shaken away. */
+@source '../../../../packages/ui/src';
