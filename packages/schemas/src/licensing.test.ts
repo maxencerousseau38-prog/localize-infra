@@ -100,6 +100,26 @@ describe('repository licensing', () => {
     }
   });
 
+  it('names one identical copyright holder in every notice', () => {
+    // Deliberately asserts consistency, not a specific name: the holder is a
+    // legal fact that changes (placeholder -> registered entity), and a
+    // hard-coded string would have to be edited in lockstep with the thing it
+    // is meant to be guarding. What must never happen is a partial rename
+    // leaving two different holders asserting rights over one codebase.
+    const holders = new Set<string>();
+    for (const dir of [...dirs, '.']) {
+      const text = readFileSync(join(REPO_ROOT, dir, 'LICENSE'), 'utf8');
+      for (const line of text.split('\n')) {
+        const match = line.match(/^Copyright \(c\) \d{4} (.+?)\.?$/);
+        if (match?.[1]) {
+          holders.add(match[1].replace(/\. All rights reserved$/, ''));
+        }
+      }
+    }
+
+    expect(holders.size, `found ${[...holders].join(' | ')}`).toBe(1);
+  });
+
   it('marks proprietary directories as such in their own LICENSE', () => {
     for (const dir of dirs) {
       if (MIT_PACKAGES.includes(dir)) continue;
