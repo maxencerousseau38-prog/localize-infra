@@ -57,6 +57,15 @@ Ne jamais simuler ces fonctionnalités dans l'interface.
 Voir `docs/product/`, `docs/design/`, `docs/frontend/` (PRD → jalons), et
 `docs/product/08-critique.md` pour ce qui n'est pas encore solide.
 
+**Rien n'est déployé.** `docs/deploying.md` donne les réglages Vercel et le
+piège qui casse le site en silence : sans « Include source files outside of the
+Root Directory », la directive `@source` de Tailwind ne trouve plus
+`packages/ui/src`. Le build passe au vert et **30 % de la feuille de style
+disparaît** (44,4 ko → 30,9 ko, mesuré) : les composants partagés perdent leurs
+utilitaires alors que la mise en page tient encore — donc ça ne se voit pas au
+premier coup d'œil. `docs/releasing.md` couvre la publication npm (rien n'est
+publié).
+
 `packages/core` et `packages/cli` existent aussi (M1 Phase 1) : détection de
 framework local, extraction de chaînes en dur, et diff/merge de fichiers de
 locale. Voir `docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et
