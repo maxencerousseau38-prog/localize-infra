@@ -85,7 +85,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Set per request in src/middleware.ts. Reading it here is what forces this
+  // Set per request in src/proxy.ts. Reading it here is what forces this
   // app to render dynamically — the deliberate cost of a strict CSP on a
   // surface that will render user data.
   const nonce = (await headers()).get('x-nonce') ?? undefined;
