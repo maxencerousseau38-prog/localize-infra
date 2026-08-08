@@ -66,6 +66,10 @@ export function Field({
     <FieldContext.Provider
       value={{ controlId, describedBy, invalid: Boolean(error) }}
     >
+      {/* 8px label→control, not the 16px in the wireframes layout contract.
+          Deliberate and documented in design system §4.4: against the 24px
+          gap between fields, 16px leaves the label floating between two
+          controls instead of belonging to one. */}
       <div className={cn('flex flex-col gap-2', className)}>
         <label
           htmlFor={controlId}

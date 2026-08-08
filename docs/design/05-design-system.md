@@ -220,6 +220,8 @@ Header `caption` weight 500 uppercase; rows 44px comfortable / 36px dense; zebra
 
 Labels **above** inputs, always (placeholder-as-label is an accessibility failure). Required marked on the label, not by absence. Inline validation on blur, never on keystroke. Errors below the field in Crimson-11 **with an icon** — never colour alone. Help text below label, above input. 560px form column. Sticky save bar appears only when dirty, with explicit Save / Discard.
 
+**Deviation from the layout contract (wireframes §0), recorded rather than silent.** That table specifies 16px label→control. The implementation uses 8px, with 24px between fields as specified. 16px against a 24px inter-field gap is too weak a ratio: the label stops reading as belonging to the control beneath it and starts floating between two fields, which is the one thing label placement has to get right. 8px against 24px groups unambiguously. Help text sits 4px below the label, inside the same group.
+
 ### 4.5 Dialogs / Drawers / Dropdowns / Popovers
 
 Radix primitives throughout. Dialog: centered, 480/560/720, `e3`, focus trapped, `Esc` closes, focus returns to trigger, scrim `graphite-12 @ 40%`. Drawer: right side, 400/560, for detail-without-navigation (run detail, member edit). Dropdown: `e2`, 8px radius, roving tabindex, type-ahead. Destructive confirmations require typing the resource name and state the consequence in plain language.
