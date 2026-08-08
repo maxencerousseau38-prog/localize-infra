@@ -169,17 +169,53 @@ test('theme choice persists across navigation', async ({ page }) => {
 });
 
 test.describe('honesty about the missing backend', () => {
-  // The product's entire pitch is that it does not lie about what it knows.
-  // A screen that invented projects or run counts would contradict that before
-  // a single translation was produced.
-  for (const route of ['/', '/ambiguity', '/review', '/runs', '/locales']) {
-    test(`${route} states that it is not built rather than showing invented data`, async ({
+  // The principle is unchanged; the mechanism changed. These routes used to
+  // render a placeholder saying "not built yet", which was honest but meant
+  // abandoning the design. They now render their real interface populated with
+  // sample data, labelled at three levels at once. This suite asserts all three
+  // are present, because any one of them alone could be missed.
+  const SAMPLE_ROUTES = ['/', '/ambiguity', '/review', '/runs', '/locales'];
+
+  for (const route of SAMPLE_ROUTES) {
+    test(`${route} labels its data as sample in the banner`, async ({
       page,
     }) => {
       await page.goto(route, { waitUntil: 'networkidle' });
-      await expect(page.getByText(/is not built yet/i)).toBeVisible();
+      await expect(
+        page.getByText(/sample data — this is not your project/i),
+      ).toBeVisible();
+    });
+
+    test(`${route} carries the sample chip in the breadcrumb`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(route, { waitUntil: 'networkidle' });
+      const nav = page.getByRole('navigation', { name: 'Breadcrumb' });
+      await expect(nav.getByText('Sample', { exact: true })).toBeVisible();
+    });
+
+    test(`${route} marks its data region for assistive technology`, async ({
+      page,
+    }) => {
+      await page.goto(route, { waitUntil: 'networkidle' });
+      // The dashed edge is invisible to a screen reader; the accessible name
+      // is what carries "this is sample" to someone who cannot see it.
+      await expect(
+        page.getByRole('region', { name: /\(sample data\)$/ }).first(),
+      ).toBeAttached();
     });
   }
+
+  test('settings still refuses rather than demonstrating', async ({ page }) => {
+    // Settings is the deliberate exception: its controls would not work, so
+    // there is nothing to demonstrate — only buttons that would lie.
+    await page.goto('/settings', { waitUntil: 'networkidle' });
+    await expect(page.getByText(/is not built yet/i)).toBeVisible();
+    await expect(
+      page.getByText(/sample data — this is not your project/i),
+    ).toHaveCount(0);
+  });
 });
 
 test('remains usable with reduced motion', async ({ page }) => {

@@ -3,6 +3,7 @@ import { AppTopbar } from '@/components/app-topbar';
 import { ThemeScript, TooltipProvider } from '@localize-infra/ui';
 import type { Metadata, Viewport } from 'next';
 import {
+  Archivo,
   Inter,
   JetBrains_Mono,
   Noto_Sans_Arabic,
@@ -17,6 +18,19 @@ import './globals.css';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+/**
+ * Display face. Titles only — never body copy.
+ *
+ * Deliberately not the interface face: Inter is the right UI font here and the
+ * wrong display font, because Inter at display sizes is the default every
+ * templated product lands on. See docs/design/09-app-design-direction.md §7.
+ */
+const archivo = Archivo({
+  subsets: ['latin'],
+  variable: '--font-archivo',
   display: 'swap',
 });
 
@@ -94,7 +108,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} ${notoSansJP.variable} ${notoSansArabic.variable}`}
+      className={`${inter.variable} ${archivo.variable} ${jetbrainsMono.variable} ${notoSansJP.variable} ${notoSansArabic.variable}`}
     >
       <head>
         <ThemeScript nonce={nonce} />

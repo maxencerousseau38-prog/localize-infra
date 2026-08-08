@@ -1,6 +1,7 @@
 'use client';
 
 import { SidebarFootnote, SidebarNav } from '@/components/app-sidebar';
+import { SampleChip } from '@/components/sample';
 import { ALL_ROUTES, routeByHref } from '@/lib/nav';
 import {
   type CommandItem,
@@ -72,7 +73,7 @@ export function AppTopbar() {
           aria-describedby={undefined}
           className="bg-surface"
         >
-          <DialogTitle className="flex h-12 shrink-0 items-center px-4 text-[14px] font-semibold text-primary">
+          <DialogTitle className="flex h-12 shrink-0 items-center px-4 text-body font-semibold text-primary">
             Localize Infra
           </DialogTitle>
           {/* The sheet IS the navigation landmark at this width; the persistent
@@ -85,7 +86,7 @@ export function AppTopbar() {
       </DialogRoot>
 
       <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
-        <ol className="flex items-center gap-1.5 text-[13px]">
+        <ol className="flex items-center gap-1.5 text-small">
           {/* The root segment is dropped on narrow screens rather than
               truncated: the last segment is the one that says where you are. */}
           <li className="hidden text-tertiary sm:block">Localize Infra</li>
@@ -97,6 +98,13 @@ export function AppTopbar() {
               <li className="truncate font-medium text-primary">
                 {current.label}
               </li>
+              {/* Third of the three sample markers. Present on every sample
+                  route, so a reader who lands mid-app still sees it. */}
+              {current.sample ? (
+                <li>
+                  <SampleChip />
+                </li>
+              ) : null}
             </>
           ) : null}
         </ol>
@@ -107,7 +115,7 @@ export function AppTopbar() {
         onClick={() => setPaletteOpen(true)}
         className={cn(
           'flex h-7 shrink-0 items-center gap-2 rounded-md border border-line bg-surface px-2.5',
-          'text-[13px] text-tertiary',
+          'text-small text-tertiary',
           'transition-colors duration-(--duration-micro) hover:text-secondary',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
         )}
@@ -117,7 +125,7 @@ export function AppTopbar() {
         {/* The shortcut is shown, not hidden: a palette nobody knows about is a
             palette nobody uses. Hidden where there is no keyboard to press it
             with. */}
-        <kbd className="hidden font-mono text-[11px] text-tertiary sm:inline">
+        <kbd className="hidden font-mono text-micro text-tertiary sm:inline">
           ⌘K
         </kbd>
       </button>

@@ -220,7 +220,7 @@ export function CommandPalette({
             onKeyDown={onKeyDown}
             className={cn(
               'h-12 w-full border-b border-subtle bg-transparent px-4',
-              'text-[15px] text-primary outline-none placeholder:text-tertiary',
+              'text-subtitle text-primary outline-none placeholder:text-tertiary',
             )}
           />
 
@@ -249,7 +249,7 @@ export function CommandPalette({
                   // name already reads its own label, and a listbox may not
                   // contain arbitrary text nodes as children.
                   aria-hidden="true"
-                  className="px-2 py-1.5 text-[11px] font-medium uppercase tracking-wide text-tertiary"
+                  className="px-2 py-1.5 text-micro font-medium uppercase tracking-wide text-tertiary"
                 >
                   {section}
                 </p>
@@ -272,7 +272,7 @@ export function CommandPalette({
                       onMouseMove={() => setActiveIndex(index)}
                       className={cn(
                         'flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-2',
-                        'text-[14px] leading-5 text-primary',
+                        'text-body leading-5 text-primary',
                         active && 'bg-surface',
                       )}
                     >
@@ -296,7 +296,7 @@ export function CommandPalette({
                         ))}
                       </span>
                       {item.shortcut ? (
-                        <span className="shrink-0 font-mono text-[12px] text-tertiary">
+                        <span className="shrink-0 font-mono text-caption text-tertiary">
                           {item.shortcut}
                         </span>
                       ) : null}
@@ -307,7 +307,7 @@ export function CommandPalette({
             ))}
           </div>
 
-          <output className="block px-2 py-6 text-center text-[14px] text-tertiary empty:hidden empty:p-0">
+          <output className="block px-2 py-6 text-center text-body text-tertiary empty:hidden empty:p-0">
             {flat.length === 0 ? emptyMessage : ''}
           </output>
         </Dialog.Content>

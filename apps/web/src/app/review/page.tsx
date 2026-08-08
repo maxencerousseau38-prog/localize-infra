@@ -1,17 +1,68 @@
-import { UnbuiltPage } from '@/components/page';
-import { routeByHref } from '@/lib/nav';
+import { Page, PageHeader, PageMeta } from '@/components/page';
+import { SampleBanner, SampleRegion } from '@/components/sample';
+import { SAMPLE_REVIEW } from '@/lib/sample';
+import { Button, StringCard } from '@localize-infra/ui';
+import { Check, Pencil } from 'lucide-react';
 import type { Metadata } from 'next';
-
-const ROUTE = routeByHref('/review');
 
 export const metadata: Metadata = { title: 'Review' };
 
+/**
+ * The non-developer surface, and the only one designed mobile-first.
+ *
+ * Inès reviews from a phone. Everything a developer needs and she does not —
+ * keys, branches, ICU syntax, file paths — is absent by design; the UX doc's
+ * vocabulary rules are enforced here. Actions are full-width and thumb-sized on
+ * small screens and only collapse to inline buttons once there is room.
+ */
 export default function ReviewPage() {
   return (
-    <UnbuiltPage
-      title="Review"
-      surface="The review surface"
-      blockedBy={ROUTE?.blockedBy ?? ''}
-    />
+    <Page>
+      <PageHeader
+        title="Review"
+        purpose="Suggested wording, waiting for someone who knows the product to say yes."
+        meta={<PageMeta label="Waiting">{SAMPLE_REVIEW.length}</PageMeta>}
+      />
+
+      <div className="mt-6">
+        <SampleBanner>
+          Approving here changes nothing — there is no project to write back to.
+          These three show how a reviewer would see suggested copy.
+        </SampleBanner>
+      </div>
+
+      <SampleRegion label="Suggestions awaiting review" className="mt-6">
+        <ul className="flex flex-col gap-3">
+          {SAMPLE_REVIEW.map((item) => (
+            <li
+              key={item.id}
+              className="rounded-lg border border-subtle bg-canvas p-3 sm:p-4"
+            >
+              <StringCard
+                source={item.source}
+                sourceLocale={item.sourceLocale}
+                translation={item.translation}
+                targetLocale={item.targetLocale}
+                tone="confident"
+                stateLabel={item.stateLabel}
+                context={item.context}
+              />
+              {/* Full-width and stacked on a phone; inline once there is room.
+                  This is the one surface where thumb reach outranks density. */}
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <Button variant="primary" size="sm" className="sm:w-auto">
+                  <Check aria-hidden="true" />
+                  Looks right
+                </Button>
+                <Button variant="secondary" size="sm" className="sm:w-auto">
+                  <Pencil aria-hidden="true" />
+                  Suggest a change
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </SampleRegion>
+    </Page>
   );
 }

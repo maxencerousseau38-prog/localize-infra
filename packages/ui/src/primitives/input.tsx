@@ -4,7 +4,7 @@ import { useFieldControl } from './field';
 
 const controlBase = [
   'w-full rounded-md border border-line bg-canvas',
-  'text-[14px] leading-5 text-primary',
+  'text-body leading-5 text-primary',
   'placeholder:text-tertiary',
   'transition-colors duration-(--duration-micro) ease-(--ease-standard)',
   'hover:border-strong',

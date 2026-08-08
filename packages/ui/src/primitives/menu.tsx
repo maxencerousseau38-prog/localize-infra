@@ -38,7 +38,7 @@ export function MenuContent({
 
 const itemBase = [
   'relative flex cursor-pointer select-none items-center gap-2 rounded-[4px]',
-  'px-2 py-1.5 text-[14px] leading-5 text-primary outline-none',
+  'px-2 py-1.5 text-body leading-5 text-primary outline-none',
   'data-[highlighted]:bg-surface',
   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
   '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-tertiary',
@@ -89,7 +89,7 @@ export function MenuLabel({
   return (
     <DropdownMenu.Label
       className={cn(
-        'px-2 py-1.5 text-[12px] font-medium uppercase tracking-wide text-tertiary',
+        'px-2 py-1.5 text-caption font-medium uppercase tracking-wide text-tertiary',
         className,
       )}
       {...props}
@@ -117,7 +117,7 @@ export function MenuShortcut({
   // discoverable without reading documentation (UX doc §10).
   return (
     <span
-      className={cn('ms-auto font-mono text-[12px] text-tertiary', className)}
+      className={cn('ms-auto font-mono text-caption text-tertiary', className)}
       {...props}
     />
   );
@@ -159,7 +159,7 @@ export function TooltipContent({
         sideOffset={sideOffset}
         className={cn(
           'z-50 max-w-[16rem] rounded-md border border-line bg-canvas',
-          'px-2 py-1 text-[13px] leading-5 text-primary shadow-e2',
+          'px-2 py-1 text-small leading-5 text-primary shadow-e2',
           'data-[state=delayed-open]:animate-pop-in',
           className,
         )}

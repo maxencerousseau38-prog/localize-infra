@@ -8,8 +8,8 @@ import { cn } from '../lib/cn';
 const focusRing =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus';
 
-const labelText = 'cursor-pointer text-[14px] leading-5 text-primary';
-const descriptionText = 'mt-0.5 block text-[13px] leading-5 text-tertiary';
+const labelText = 'cursor-pointer text-body leading-5 text-primary';
+const descriptionText = 'mt-0.5 block text-small leading-5 text-tertiary';
 
 /**
  * Checkbox, radio and switch share one visual language: a 16px control with a

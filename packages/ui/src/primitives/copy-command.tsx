@@ -70,13 +70,13 @@ export function CopyCommand({
         >
           {prompt}
         </span>
-        <code className="min-w-0 flex-1 truncate font-mono text-[14px] text-primary sm:text-[15px]">
+        <code className="min-w-0 flex-1 truncate font-mono text-body text-primary sm:text-subtitle">
           {command}
         </code>
         <span
           className={cn(
             'inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1',
-            'text-[12px] font-medium',
+            'text-caption font-medium',
             'transition-colors duration-(--duration-micro)',
             state === 'copied'
               ? 'text-confident-text'
@@ -104,7 +104,7 @@ export function CopyCommand({
       </output>
 
       {state === 'error' ? (
-        <p className="mt-2 text-[13px] text-degraded-text">
+        <p className="mt-2 text-small text-degraded-text">
           Couldn&rsquo;t copy automatically — select the command above and copy
           it manually.
         </p>

@@ -138,7 +138,7 @@ export function AvatarRoot({
       {src ? (
         <Avatar.Image src={src} alt="" className="size-full object-cover" />
       ) : null}
-      <Avatar.Fallback className="text-[11px] font-medium text-secondary">
+      <Avatar.Fallback className="text-micro font-medium text-secondary">
         {initials}
       </Avatar.Fallback>
     </Avatar.Root>
@@ -170,7 +170,7 @@ export function TabsTrigger({
     <Tabs.Trigger
       className={cn(
         '-mb-px border-b-2 border-transparent px-3 py-2',
-        'text-[14px] text-tertiary transition-colors duration-(--duration-micro)',
+        'text-body text-tertiary transition-colors duration-(--duration-micro)',
         'hover:text-secondary',
         'data-[state=active]:border-primary data-[state=active]:text-primary',
         'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',

@@ -22,7 +22,7 @@ export function SelectTrigger({
       className={cn(
         'flex h-9 w-full items-center justify-between gap-2 rounded-md',
         'border border-line bg-canvas px-3',
-        'text-[14px] leading-5 text-primary',
+        'text-body leading-5 text-primary',
         'transition-colors duration-(--duration-micro)',
         'hover:border-strong',
         'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus',
@@ -77,7 +77,7 @@ export function SelectItem({
     <Select.Item
       className={cn(
         'relative flex cursor-pointer select-none items-center gap-2 rounded-[4px]',
-        'py-1.5 pe-8 ps-2 text-[14px] leading-5 text-primary outline-none',
+        'py-1.5 pe-8 ps-2 text-body leading-5 text-primary outline-none',
         'data-[highlighted]:bg-surface',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
@@ -99,7 +99,7 @@ export function SelectLabel({
   return (
     <Select.Label
       className={cn(
-        'px-2 py-1.5 text-[12px] font-medium uppercase tracking-wide text-tertiary',
+        'px-2 py-1.5 text-caption font-medium uppercase tracking-wide text-tertiary',
         className,
       )}
       {...props}

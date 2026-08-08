@@ -29,13 +29,13 @@ const buttonVariants = cva(
         secondary:
           'bg-canvas text-primary border border-line hover:bg-surface active:bg-raised',
         ghost: 'text-primary hover:bg-surface active:bg-raised',
-        danger: 'bg-failed text-white hover:bg-failed/90 active:bg-failed/85',
+        danger: 'bg-failed text-inverse hover:bg-failed/90 active:bg-failed/85',
         link: 'text-link underline-offset-4 hover:underline hover:text-link-hover p-0 h-auto',
       },
       size: {
-        sm: 'h-7 px-2.5 text-[13px] [&_svg]:size-3.5',
-        md: 'h-8 px-3 text-[14px] [&_svg]:size-4',
-        lg: 'h-10 px-4 text-[14px] [&_svg]:size-4',
+        sm: 'h-7 px-2.5 text-small [&_svg]:size-3.5',
+        md: 'h-8 px-3 text-body [&_svg]:size-4',
+        lg: 'h-10 px-4 text-body [&_svg]:size-4',
         icon: 'size-8 [&_svg]:size-4',
       },
     },

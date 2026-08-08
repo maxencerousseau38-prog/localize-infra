@@ -79,7 +79,7 @@ export function TH({
       scope="col"
       className={cn(
         'h-9 px-3 align-middle',
-        'text-[12px] font-medium uppercase tracking-wide text-tertiary',
+        'text-caption font-medium uppercase tracking-wide text-tertiary',
         numeric ? 'text-end' : 'text-start',
         className,
       )}
@@ -97,7 +97,7 @@ export function TD({
     <td
       data-numeric={numeric || undefined}
       className={cn(
-        'h-11 px-3 text-[14px] leading-5 text-secondary',
+        'h-11 px-3 text-body leading-5 text-secondary',
         numeric ? 'text-end' : 'text-start',
         className,
       )}
@@ -147,7 +147,7 @@ export function SortableTH({
         onClick={onSort}
         className={cn(
           'flex h-9 w-full items-center gap-1.5 px-3',
-          'text-[12px] font-medium uppercase tracking-wide text-tertiary',
+          'text-caption font-medium uppercase tracking-wide text-tertiary',
           'transition-colors hover:text-secondary',
           'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
           numeric && 'justify-end',

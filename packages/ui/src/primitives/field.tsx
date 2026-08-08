@@ -73,7 +73,7 @@ export function Field({
       <div className={cn('flex flex-col gap-2', className)}>
         <label
           htmlFor={controlId}
-          className="text-[13px] font-medium leading-5 text-primary"
+          className="text-small font-medium leading-5 text-primary"
         >
           {label}
           {required ? (
@@ -85,7 +85,7 @@ export function Field({
         </label>
 
         {help ? (
-          <p id={helpId} className="-mt-1 text-[13px] leading-5 text-tertiary">
+          <p id={helpId} className="-mt-1 text-small leading-5 text-tertiary">
             {help}
           </p>
         ) : null}
@@ -96,7 +96,7 @@ export function Field({
           // Icon + text, never colour alone (WCAG 1.4.1).
           <p
             id={errorId}
-            className="flex items-start gap-1.5 text-[13px] leading-5 text-failed-text"
+            className="flex items-start gap-1.5 text-small leading-5 text-failed-text"
           >
             <AlertCircle
               className="mt-0.5 size-3.5 shrink-0"

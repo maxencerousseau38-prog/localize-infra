@@ -73,7 +73,7 @@ export function StringCard({
             <p
               {...localeTextProps(sourceLocale)}
               className={cn(
-                'min-w-0 text-[14px] leading-6 text-primary',
+                'min-w-0 text-body leading-6 text-primary',
                 localeFontClass(sourceLocale),
               )}
             >
@@ -92,7 +92,7 @@ export function StringCard({
               <p
                 {...localeTextProps(targetLocale)}
                 className={cn(
-                  'min-w-0 text-[14px] leading-6 text-primary',
+                  'min-w-0 text-body leading-6 text-primary',
                   localeFontClass(targetLocale),
                 )}
               >
@@ -101,7 +101,7 @@ export function StringCard({
             ) : (
               // Never render an empty line where a translation would go: an
               // untranslated string is a state, and it says so.
-              <p className="min-w-0 text-[14px] leading-6 text-tertiary italic">
+              <p className="min-w-0 text-body leading-6 text-tertiary italic">
                 Not translated
               </p>
             )}
@@ -121,7 +121,7 @@ export function StringCard({
           </div>
 
           {origin || context ? (
-            <p className="mt-1.5 truncate text-[12px] leading-5 text-tertiary">
+            <p className="mt-1.5 truncate text-caption leading-5 text-tertiary">
               {origin ? <span className="font-mono">{origin}</span> : null}
               {origin && context ? ' · ' : null}
               {context}

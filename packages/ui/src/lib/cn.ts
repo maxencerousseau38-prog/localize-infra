@@ -1,5 +1,39 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+/**
+ * The eight steps of the type scale (tokens.css, `--text-*`).
+ *
+ * tailwind-merge has to be told about these. Out of the box it knows Tailwind's
+ * default font-size names, so a custom `text-body` looks to it like a *colour*
+ * — and `cn('text-inverse', 'text-body')` silently dropped `text-inverse` as a
+ * conflicting utility in the same group.
+ *
+ * That produced dark ink on the dark primary button and 3.29:1 on the danger
+ * button, from a change that only touched font sizes. It was invisible in the
+ * source, invisible in the generated CSS (both utilities existed and were
+ * correct), and only showed up in the computed class list on the element.
+ */
+const TYPE_SCALE = [
+  'micro',
+  'caption',
+  'small',
+  'body',
+  'subtitle',
+  'title',
+  'display',
+  'display-lg',
+] as const;
+
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      // Declaring these as font-size lets twMerge keep a colour and a size on
+      // the same element, and still collapse two sizes down to the last one.
+      'font-size': [{ text: [...TYPE_SCALE] }],
+    },
+  },
+});
 
 /**
  * Merge class names with Tailwind conflict resolution.

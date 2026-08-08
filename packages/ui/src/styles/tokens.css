@@ -289,13 +289,41 @@
   --font-jp: var(--font-noto-jp), var(--font-inter), sans-serif;
   --font-ar: var(--font-noto-ar), var(--font-inter), sans-serif;
 
+  /* Display — an engineered grotesque, deliberately NOT the interface face.
+     Inter is right for dense UI (optical sizing, small-size legibility, script
+     coverage) and wrong as a display face: Inter-at-40px is the default every
+     templated product reaches for. Archivo has tighter apertures and more
+     structure at large sizes. Titles only; never body copy. */
+  --font-display: var(--font-archivo), var(--font-inter), sans-serif;
+
+  /* Type scale — eight steps, and nothing outside them.
+     Replaces 15 ad-hoc pixel sizes across 256 occurrences; a test enforces it.
+     Sizes stay in px because this is a data-dense product where a 14px row has
+     to be 14px, not 14px scaled by a root the user changed. */
+  --text-micro: 11px;
+  --text-micro--line-height: 1.3;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.35;
+  --text-small: 13px;
+  --text-small--line-height: 1.5;
+  --text-body: 14px;
+  --text-body--line-height: 1.5;
+  --text-subtitle: 16px;
+  --text-subtitle--line-height: 1.5;
+  --text-title: 20px;
+  --text-title--line-height: 1.3;
+  --text-display: 28px;
+  --text-display--line-height: 1.15;
+  --text-display-lg: 40px;
+  --text-display-lg--line-height: 1.05;
+
   /* 8px base. 4px and 2px exist only for optical alignment in controls. */
   --spacing: 4px;
 
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
-  --radius-xl: 14px;
+  --radius-xl: 12px;
 
   --shadow-e1: var(--elevation-1);
   --shadow-e2: var(--elevation-2);

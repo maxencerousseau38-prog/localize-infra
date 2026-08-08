@@ -35,9 +35,9 @@ export function EmptyState({
         />
       ) : null}
       <div className="flex flex-col gap-1">
-        <p className="text-[15px] font-medium text-primary">{title}</p>
+        <p className="text-subtitle font-medium text-primary">{title}</p>
         {description ? (
-          <p className="max-w-[36ch] text-[14px] leading-6 text-secondary">
+          <p className="max-w-[36ch] text-body leading-6 text-secondary">
             {description}
           </p>
         ) : null}
@@ -78,13 +78,13 @@ export function ErrorState({
       )}
     >
       <div className="flex flex-col gap-1">
-        <p className="text-[15px] font-medium text-failed-text">{title}</p>
+        <p className="text-subtitle font-medium text-failed-text">{title}</p>
         {description ? (
-          <p className="text-[14px] leading-6 text-secondary">{description}</p>
+          <p className="text-body leading-6 text-secondary">{description}</p>
         ) : null}
       </div>
       {detail ? (
-        <pre className="w-full overflow-x-auto rounded-md bg-canvas px-3 py-2 font-mono text-[12px] leading-5 text-secondary">
+        <pre className="w-full overflow-x-auto rounded-md bg-canvas px-3 py-2 font-mono text-caption leading-5 text-secondary">
           {detail}
         </pre>
       ) : null}
@@ -119,10 +119,10 @@ export function NotBuiltYet({
         className,
       )}
     >
-      <p className="text-[14px] font-medium text-primary">
+      <p className="text-body font-medium text-primary">
         {surface} is not built yet.
       </p>
-      <p className="mt-1 text-[14px] leading-6 text-secondary">
+      <p className="mt-1 text-body leading-6 text-secondary">
         This screen has no data behind it. {blockedBy}
       </p>
     </div>

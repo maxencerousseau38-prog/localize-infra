@@ -82,11 +82,11 @@ function Section({
       aria-labelledby={id}
       className="border-t border-subtle py-8 first:border-t-0 first:pt-0"
     >
-      <h2 id={id} className="text-[15px] font-semibold text-primary">
+      <h2 id={id} className="text-subtitle font-semibold text-primary">
         {title}
       </h2>
       {note ? (
-        <p className="mt-1 max-w-[70ch] text-[13px] leading-6 text-secondary">
+        <p className="mt-1 max-w-[70ch] text-small leading-6 text-secondary">
           {note}
         </p>
       ) : null}
@@ -133,7 +133,7 @@ export function DesignGallery() {
         <div className="flex flex-col gap-2">
           {TONES.map((tone) => (
             <StateRule key={tone} tone={tone} className="py-2">
-              <p className="text-[14px] text-primary">{TONE_LABEL[tone]}</p>
+              <p className="text-body text-primary">{TONE_LABEL[tone]}</p>
             </StateRule>
           ))}
         </div>
@@ -187,7 +187,7 @@ export function DesignGallery() {
           />
         </div>
 
-        <p className="mt-6 mb-2 text-[13px] text-secondary">
+        <p className="mt-6 mb-2 text-small text-secondary">
           The rule follows the direction of the <em>interface</em>, not of the
           string. A single Arabic translation inside an English interface keeps
           the rule on the left; the same card in an Arabic interface moves it to
@@ -417,7 +417,7 @@ export function DesignGallery() {
           </TBody>
         </Table>
 
-        <p className="mt-6 mb-2 text-[13px] text-secondary">
+        <p className="mt-6 mb-2 text-small text-secondary">
           Empty and loading states render inside the body, so the headers stay
           visible.
         </p>
@@ -460,7 +460,7 @@ export function DesignGallery() {
         <div className="flex max-w-[35rem] flex-col gap-6">
           <div className="flex items-center gap-3">
             <AvatarRoot name="Inès Moreau" />
-            <span className="text-[14px] text-primary">Inès Moreau</span>
+            <span className="text-body text-primary">Inès Moreau</span>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -486,7 +486,7 @@ export function DesignGallery() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-[14px] leading-6 text-secondary">
+              <p className="text-body leading-6 text-secondary">
                 Chrome is neutral. Colour means something.
               </p>
             </CardContent>
@@ -498,13 +498,13 @@ export function DesignGallery() {
               <TabsTrigger value="two">Details</TabsTrigger>
             </TabsList>
             <TabsContent value="one">
-              <p className="text-[14px] leading-6 text-secondary">
+              <p className="text-body leading-6 text-secondary">
                 Tabs group in-page sections. Deeper hierarchy goes here, never
                 into a third level of sidebar.
               </p>
             </TabsContent>
             <TabsContent value="two">
-              <p className="text-[14px] leading-6 text-secondary">
+              <p className="text-body leading-6 text-secondary">
                 Second panel.
               </p>
             </TabsContent>

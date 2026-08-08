@@ -82,7 +82,7 @@ export function DialogTitle({
 }: React.ComponentPropsWithoutRef<typeof Dialog.Title>) {
   return (
     <Dialog.Title
-      className={cn('text-[17px] font-semibold text-primary', className)}
+      className={cn('text-title font-semibold text-primary', className)}
       {...props}
     />
   );
@@ -94,7 +94,7 @@ export function DialogDescription({
 }: React.ComponentPropsWithoutRef<typeof Dialog.Description>) {
   return (
     <Dialog.Description
-      className={cn('text-[14px] leading-6 text-secondary', className)}
+      className={cn('text-body leading-6 text-secondary', className)}
       {...props}
     />
   );

@@ -3,7 +3,7 @@ import { SiteHeader } from '@/components/site-header';
 import { SITE_URL } from '@/lib/routes';
 import { ThemeScript } from '@localize-infra/ui';
 import type { Metadata, Viewport } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Archivo, Inter, JetBrains_Mono } from 'next/font/google';
 import type * as React from 'react';
 import './globals.css';
 
@@ -12,6 +12,19 @@ import './globals.css';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+/**
+ * Display face. Titles only — never body copy.
+ *
+ * Deliberately not the interface face: Inter is the right UI font here and the
+ * wrong display font, because Inter at display sizes is the default every
+ * templated product lands on. See docs/design/09-app-design-direction.md §7.
+ */
+const archivo = Archivo({
+  subsets: ['latin'],
+  variable: '--font-archivo',
   display: 'swap',
 });
 
@@ -53,7 +66,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${archivo.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <ThemeScript />

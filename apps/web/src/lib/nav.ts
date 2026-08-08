@@ -29,6 +29,17 @@ export interface NavRoute {
   label: string;
   icon: LucideIcon;
   built: boolean;
+  /**
+   * Content is sample data, not this user's. Drives the breadcrumb chip.
+   * Settings is deliberately false: it has controls that would not work, so
+   * there is nothing to demonstrate.
+   */
+  sample?: boolean;
+  /**
+   * Count shown in the sidebar. Only two routes ever carry one, and both mean
+   * a human is blocked — a badge on Runs would be engagement bait.
+   */
+  count?: number;
   /** What must exist before this screen can show anything real. */
   blockedBy?: string;
   /** Keywords for the command palette that are not in the label. */
@@ -38,6 +49,7 @@ export interface NavRoute {
 export const PRIMARY_NAV: NavRoute[] = [
   {
     href: '/',
+    sample: true,
     label: 'Home',
     icon: LayoutGrid,
     built: false,
@@ -47,6 +59,8 @@ export const PRIMARY_NAV: NavRoute[] = [
   },
   {
     href: '/ambiguity',
+    sample: true,
+    count: 3,
     label: 'Ambiguity',
     icon: TriangleAlert,
     built: false,
@@ -56,6 +70,8 @@ export const PRIMARY_NAV: NavRoute[] = [
   },
   {
     href: '/review',
+    sample: true,
+    count: 3,
     label: 'Review',
     icon: FileText,
     built: false,
@@ -65,6 +81,7 @@ export const PRIMARY_NAV: NavRoute[] = [
   },
   {
     href: '/runs',
+    sample: true,
     label: 'Runs',
     icon: History,
     built: false,
@@ -74,6 +91,7 @@ export const PRIMARY_NAV: NavRoute[] = [
   },
   {
     href: '/locales',
+    sample: true,
     label: 'Locales',
     icon: Languages,
     built: false,

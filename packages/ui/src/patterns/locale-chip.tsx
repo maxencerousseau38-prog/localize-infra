@@ -23,7 +23,7 @@ export function LocaleChip({
       title={name}
       className={cn(
         'inline-flex shrink-0 items-center rounded-[4px] border px-1.5',
-        'font-mono text-[11px] leading-[18px] uppercase',
+        'font-mono text-micro leading-[18px] uppercase',
         source
           ? 'border-line bg-surface text-tertiary'
           : 'border-subtle bg-raised text-secondary',
