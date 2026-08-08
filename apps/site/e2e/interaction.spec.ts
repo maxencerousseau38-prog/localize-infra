@@ -1,6 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-const ROUTES = ['/', '/pricing', '/quality', '/security', '/roadmap'];
+const ROUTES = [
+  '/',
+  '/docs',
+  '/benchmarks',
+  '/pricing',
+  '/quality',
+  '/security',
+  '/roadmap',
+];
 
 /**
  * The guard that matters most in this file.
@@ -102,4 +110,260 @@ test('remains usable with reduced motion', async ({ page }) => {
   await expect(
     page.getByRole('heading', { level: 1, name: /build artifact/i }),
   ).toBeVisible();
+});
+
+/**
+ * The published-numbers guard.
+ *
+ * Every figure on /benchmarks and /quality comes from the generated artifact.
+ * These tests assert the two ways that contract can break in the browser: a
+ * number that does not match the artifact, and a check with an empty
+ * denominator rendered as a percentage. The second one shipped on /quality as
+ * the word "Pass" and survived until the artifact was generated.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const ARTIFACT = JSON.parse(
+  readFileSync(
+    join(process.cwd(), '../../packages/eval/src/report/benchmarks.json'),
+    'utf8',
+  ),
+) as {
+  corpus: { entries: number; projects: Array<{ name: string }> };
+  run: { translations: number; models: string[] };
+  conditions: Array<{
+    condition: 'A' | 'B';
+    placeholderIntact: { applicable: number; passed: number };
+    withinLengthBudget: { applicable: number; passed: number };
+    icuValid: { applicable: number };
+    pluralCategoriesCorrect: { applicable: number };
+  }>;
+};
+
+const conditionB = ARTIFACT.conditions.find((c) => c.condition === 'B');
+if (!conditionB) throw new Error('artifact is missing condition B');
+
+test.describe('published numbers trace to the artifact', () => {
+  test('/benchmarks renders the corpus size and model from the artifact', async ({
+    page,
+  }) => {
+    await page.goto('/benchmarks', { waitUntil: 'networkidle' });
+    const body = await page.locator('body').innerText();
+
+    expect(body).toContain(String(ARTIFACT.corpus.entries));
+    expect(body).toContain(String(ARTIFACT.run.translations));
+    for (const model of ARTIFACT.run.models) {
+      expect(body).toContain(model);
+    }
+  });
+
+  test('/benchmarks shows the measured length-budget figures, not rounded prose', async ({
+    page,
+  }) => {
+    await page.goto('/benchmarks', { waitUntil: 'networkidle' });
+    const body = await page.locator('body').innerText();
+
+    // The exact passed/applicable pair must appear, so a percentage cannot
+    // drift away from the counts it was computed from.
+    expect(body).toContain(
+      `${conditionB.withinLengthBudget.passed}/${conditionB.withinLengthBudget.applicable}`,
+    );
+  });
+
+  for (const route of ['/benchmarks', '/quality']) {
+    test(`${route} never renders a percentage for a zero-denominator check`, async ({
+      page,
+    }) => {
+      await page.goto(route, { waitUntil: 'networkidle' });
+
+      // The corpus exercises neither ICU validity nor plural categories.
+      expect(conditionB.icuValid.applicable).toBe(0);
+      expect(conditionB.pluralCategoriesCorrect.applicable).toBe(0);
+
+      for (const label of ['ICU message validity', 'Plural categories']) {
+        const row = page.locator('tr', { hasText: label }).first();
+        await expect(row).toBeVisible();
+        await expect(row).toContainText('No data');
+        // "100%" off nothing is the exact failure this guards.
+        await expect(row).not.toContainText('%');
+      }
+    });
+  }
+
+  test('/quality states why those checks have no data', async ({ page }) => {
+    await page.goto('/quality', { waitUntil: 'networkidle' });
+    await expect(
+      page.getByText(/corpus contains no ICU plural or select messages/i),
+    ).toBeVisible();
+  });
+
+  test('/benchmarks names what it has not measured', async ({ page }) => {
+    await page.goto('/benchmarks', { waitUntil: 'networkidle' });
+    await expect(
+      page.getByRole('heading', {
+        name: /what these numbers do not tell you/i,
+      }),
+    ).toBeVisible();
+    await expect(page.getByText(/native speaker/i).first()).toBeVisible();
+  });
+});
+
+test.describe('the install claim is qualified', () => {
+  // @localize-infra/cli is not on npm. The hero still shows the command it is
+  // heading for, so the qualification is what keeps the page truthful.
+  test('the landing page says the command is not published yet', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(page.getByText(/not published to npm yet/i)).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: /see the docs/i }),
+    ).toBeVisible();
+  });
+
+  test('/docs leads with the same limitation', async ({ page }) => {
+    await page.goto('/docs', { waitUntil: 'networkidle' });
+    await expect(
+      page.getByText(/The CLI is not published to npm yet/i),
+    ).toBeVisible();
+  });
+});
+
+test.describe('docs navigation', () => {
+  test('the table of contents jumps to a section', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/docs', { waitUntil: 'networkidle' });
+
+    const toc = page.getByRole('navigation', { name: /on this page/i });
+    await expect(toc).toBeVisible();
+    await toc.getByRole('link', { name: 'Command reference' }).click();
+
+    await expect(page).toHaveURL(/#reference$/);
+    await expect(
+      page.getByRole('heading', { name: 'Command reference' }),
+    ).toBeInViewport();
+  });
+
+  test('Docs and Benchmarks are reachable from the header', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const nav = page.getByRole('navigation', { name: 'Main' });
+    await nav.getByRole('link', { name: 'Docs' }).click();
+    await expect(page).toHaveURL(/\/docs$/);
+  });
+
+  test('long code samples are reachable by keyboard', async ({ page }) => {
+    await page.goto('/docs', { waitUntil: 'networkidle' });
+    // A scrollable region that cannot be focused is unreadable without a
+    // mouse (WCAG 2.1.1).
+    const block = page.getByRole('region', { name: 'Run the API' });
+    await block.focus();
+    await expect(block).toBeFocused();
+  });
+});
+
+/**
+ * The site had no width coverage before these. /docs and /benchmarks are the
+ * pages most likely to break one: both are dominated by wide tables and long
+ * code samples, which are exactly what pushes a layout sideways.
+ */
+test.describe('responsive', () => {
+  for (const route of ['/docs', '/benchmarks']) {
+    for (const width of [390, 768, 1024, 1440]) {
+      test(`${route} does not scroll sideways at ${width}px`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(route, { waitUntil: 'networkidle' });
+
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - window.innerWidth,
+        );
+        expect(overflow, `overflowed by ${overflow}px`).toBeLessThanOrEqual(0);
+      });
+    }
+  }
+
+  test('any table that overflows scrolls itself, never the page', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    // Asserted as a conditional invariant rather than "this table scrolls":
+    // the results table used to overflow at phone width and no longer does,
+    // and a test pinned to that fact would have failed for the right reason
+    // while telling us nothing useful.
+    for (const route of ['/benchmarks', '/quality', '/docs']) {
+      await page.goto(route, { waitUntil: 'networkidle' });
+
+      const offenders = await page.$$eval('table', (tables) =>
+        tables
+          .filter((table) => {
+            const container = table.parentElement as HTMLElement;
+            const overflows = container.scrollWidth > container.clientWidth;
+            const scrolls = getComputedStyle(container).overflowX === 'auto';
+            return overflows && !scrolls;
+          })
+          .map((table) => table.querySelector('caption')?.textContent ?? '?'),
+      );
+
+      expect(offenders, `${route}: tables overflowing the page`).toEqual([]);
+    }
+  });
+
+  test('the table of contents is hidden where it would push content down', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/docs', { waitUntil: 'networkidle' });
+    await expect(
+      page.getByRole('navigation', { name: /on this page/i }),
+    ).toBeHidden();
+  });
+});
+
+test.describe('SEO', () => {
+  test('the sitemap lists every public route', async ({ request }) => {
+    const xml = await (await request.get('/sitemap.xml')).text();
+    for (const route of ROUTES) {
+      expect(xml, `sitemap missing ${route}`).toContain(
+        `https://localize-infra.dev${route === '/' ? '/' : route}`,
+      );
+    }
+  });
+
+  test('robots.txt points at the sitemap', async ({ request }) => {
+    const txt = await (await request.get('/robots.txt')).text();
+    expect(txt).toContain('Sitemap: https://localize-infra.dev/sitemap.xml');
+  });
+
+  test('every page declares a canonical URL and a unique description', async ({
+    page,
+  }) => {
+    const seen = new Map<string, string>();
+    for (const route of ROUTES) {
+      await page.goto(route, { waitUntil: 'domcontentloaded' });
+
+      const canonical = await page
+        .locator('link[rel="canonical"]')
+        .getAttribute('href');
+      expect(canonical, `${route}: canonical`).toBeTruthy();
+
+      const description = await page
+        .locator('meta[name="description"]')
+        .getAttribute('content');
+      expect(description, `${route}: description`).toBeTruthy();
+      // A description reused across pages is worse than none: it tells a search
+      // engine the pages are duplicates of each other.
+      const previous = seen.get(description ?? '');
+      expect(
+        previous,
+        `${route} shares its description with ${previous}`,
+      ).toBeUndefined();
+      seen.set(description ?? '', route);
+    }
+  });
 });

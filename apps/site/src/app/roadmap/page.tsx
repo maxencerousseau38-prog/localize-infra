@@ -3,6 +3,7 @@ import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/roadmap' },
   title: 'Roadmap',
   description:
     'What is shipped, what is being built, and what is deliberately out of scope.',

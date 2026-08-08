@@ -1,45 +1,57 @@
 import { PageHeader } from '@/components/page-header';
+import { RateCell } from '@/components/rate-cell';
+import { BENCHMARKS, type Check, conditionBy } from '@/lib/benchmarks';
 import { GITHUB_REPO_URL } from '@/lib/constants';
 import { Badge, StateRule } from '@localize-infra/ui';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Quality',
   description:
-    'Mechanical correctness is verified on every build against a corpus of 414 real strings. Human preference has not been measured yet, and we say so.',
+    'Mechanical correctness is verified on every build against a corpus of 414 real strings. Two checks have nothing in the corpus to run against, and human preference has not been measured. We say both.',
+  alternates: { canonical: '/quality' },
 };
 
-const MECHANICAL = [
+/**
+ * Results come from the generated benchmark artifact, never from this file.
+ *
+ * The rows for ICU validity and plural categories previously read "Pass". The
+ * corpus contains no ICU messages at all, so those checks had nothing to run
+ * against and the word was meaningless — a vacuous pass on a page whose entire
+ * argument is that it does not publish numbers it cannot source. They now
+ * render "No data", which is what the artifact says.
+ */
+const B = conditionBy('B');
+
+const MECHANICAL: Array<{ check: string; detail: string; result: Check }> = [
   {
     check: 'Placeholder integrity',
     detail:
       'Interpolations like {name}, {{count}} and %s survive translation unchanged',
-    result: '413 / 413',
+    result: B.placeholderIntact,
+  },
+  {
+    check: 'Length constraints',
+    detail: 'Translations stay inside the space the original string was given',
+    result: B.withinLengthBudget,
+  },
+  {
+    check: 'Glossary consistency',
+    detail: 'Terms with a required translation use it',
+    result: B.glossaryRespected,
   },
   {
     check: 'ICU message validity',
     detail: 'Translated ICU plural and select blocks still parse',
-    result: 'Pass',
+    result: B.icuValid,
   },
   {
     check: 'Plural categories',
     detail:
       'Correct category set per language — Arabic has six, Japanese has one',
-    result: 'Pass',
+    result: B.pluralCategoriesCorrect,
   },
-  {
-    check: 'Length constraints',
-    detail: 'Translations flagged when they overflow their container budget',
-    result: 'Pass',
-  },
-];
-
-const CORPUS = [
-  ['Excalidraw', 'MIT'],
-  ['Gitea', 'MIT'],
-  ['Zulip', 'Apache-2.0'],
-  ['Syncthing', 'MPL-2.0'],
-  ['Wekan', 'MIT'],
 ];
 
 export default function QualityPage() {
@@ -69,9 +81,22 @@ export default function QualityPage() {
             the target language. They are checked deterministically against the
             corpus below, and the build fails if the rate drops under 99.5%.
           </p>
+          <p className="mt-3 max-w-[64ch] text-[15px] leading-7 text-secondary">
+            Results are for the context-rich condition — the one the CLI
+            actually uses. The{' '}
+            <Link
+              href="/benchmarks"
+              className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              benchmarks page
+            </Link>{' '}
+            compares it against the same model with no context at all.
+          </p>
 
           <div className="mt-8 overflow-x-auto">
-            <table className="w-full min-w-[34rem] border-collapse">
+            {/* Description folds into the first cell below `sm`, so the
+                result column stays on screen. */}
+            <table className="w-full min-w-[20rem] border-collapse sm:min-w-[34rem]">
               <caption className="sr-only">
                 Mechanical correctness checks and their current results
               </caption>
@@ -85,7 +110,7 @@ export default function QualityPage() {
                   </th>
                   <th
                     scope="col"
-                    className="py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                    className="hidden py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary sm:table-cell"
                   >
                     What it catches
                   </th>
@@ -100,23 +125,36 @@ export default function QualityPage() {
               <tbody>
                 {MECHANICAL.map((row) => (
                   <tr key={row.check} className="border-b border-subtle">
-                    <td className="py-3 pe-4 align-top text-[14px] font-medium text-primary">
+                    <th
+                      scope="row"
+                      className="py-3 pe-4 text-start align-top text-[14px] font-medium text-primary"
+                    >
                       {row.check}
-                    </td>
-                    <td className="py-3 pe-4 align-top text-[14px] leading-6 text-secondary">
+                      <span className="mt-1 block text-[13px] font-normal leading-5 text-secondary sm:hidden">
+                        {row.detail}
+                      </span>
+                    </th>
+                    <td className="hidden py-3 pe-4 align-top text-[14px] leading-6 text-secondary sm:table-cell">
                       {row.detail}
                     </td>
-                    <td
-                      className="py-3 text-end align-top font-mono text-[13px] text-confident-text"
-                      data-numeric
-                    >
-                      {row.result}
+                    <td className="py-3 text-end align-top" data-numeric>
+                      <RateCell check={row.result} />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          <p className="mt-4 max-w-[64ch] text-[13px] leading-6 text-tertiary">
+            Two rows read <strong className="text-secondary">No data</strong>{' '}
+            rather than a percentage. The corpus contains no ICU plural or
+            select messages, so those two checks had nothing to run against.
+            Their implementations are unit-tested, which is not the same as
+            evidence — and reporting them as a pass would be exactly the kind of
+            unearned number this page exists to avoid. Extending the corpus to
+            cover them is outstanding work.
+          </p>
         </section>
 
         {/* The unmeasured half. Publishing "not yet measured" is more credible
@@ -167,19 +205,21 @@ export default function QualityPage() {
                 The corpus
               </h3>
               <p className="mt-2 text-[14px] leading-6 text-secondary">
-                414 real interface strings sampled from five open-source
-                projects, each with community translations reviewed by native
-                speakers. Sampling is stratified so every project and language
-                pair is represented, and pinned to exact commits so the corpus
-                is reproducible.
+                {BENCHMARKS.corpus.entries} real interface strings sampled from{' '}
+                {BENCHMARKS.corpus.projects.length} open-source projects, each
+                with community translations reviewed by native speakers.
+                Sampling is stratified so every project and language pair is
+                represented, and pinned to exact commits so the corpus is
+                reproducible.
               </p>
               <ul className="mt-4 flex flex-wrap gap-2">
-                {CORPUS.map(([name, licence]) => (
+                {BENCHMARKS.corpus.projects.map((project) => (
                   <li
-                    key={name}
+                    key={project.name}
                     className="rounded-sm border border-subtle bg-canvas px-2 py-1 text-[12px] text-secondary"
                   >
-                    {name} <span className="text-tertiary">({licence})</span>
+                    {project.name}{' '}
+                    <span className="text-tertiary">({project.license})</span>
                   </li>
                 ))}
               </ul>

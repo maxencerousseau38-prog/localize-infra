@@ -25,11 +25,21 @@
   Livré en **source**, pas en `dist` : un artefact compilé partagé entre
   paquets a déjà causé un bug de production ici (correctif de sécurité présent
   en source mais absent du build servi).
-- `apps/site` (propriétaire) — site marketing statique, 5 pages.
+- `apps/site` (propriétaire) — site marketing statique, 7 pages.
   Contrainte permanente : **toute affirmation du site doit être vraie
   aujourd'hui.** `/quality` ne publie que les résultats vérifiés en CI et
   déclare que l'évaluation humaine n'a pas eu lieu ; `/pricing` ne publie pas
   de tarifs non modélisés ; `/security` divulgue l'écart de résidence UE.
+
+  `/benchmarks` et `/quality` ne contiennent **aucun chiffre écrit à la main** :
+  tout provient de `packages/eval/src/report/benchmarks.json`, généré depuis le
+  corpus par `npm run benchmarks:build -w @localize-infra/eval`, et un test
+  vérifie que le fichier commité correspond au générateur. Un contrôle sans
+  entrée applicable affiche « No data », jamais un pourcentage — le corpus ne
+  contient aucun message ICU, et afficher « Pass » pour ces deux contrôles était
+  un faux résultat, corrigé. `/docs` documente le chemin réel : le paquet
+  **n'est pas publié sur npm**, donc `npx` ne fonctionne pas ; la page d'accueil
+  le dit désormais au lieu de laisser une commande qui échoue.
 
 - `apps/web` (propriétaire) — coquille applicative : barre latérale 240 px
   (feuille latérale sous 1024 px), barre supérieure 48 px, palette de commandes

@@ -8,7 +8,15 @@ import { expect, test } from '@playwright/test';
  * Both colour schemes are checked: the dark palette is a distinct scale, not an
  * inversion, so light passing tells us nothing about dark.
  */
-const ROUTES = ['/', '/pricing', '/quality', '/security', '/roadmap'];
+const ROUTES = [
+  '/',
+  '/docs',
+  '/benchmarks',
+  '/pricing',
+  '/quality',
+  '/security',
+  '/roadmap',
+];
 
 for (const route of ROUTES) {
   for (const scheme of ['light', 'dark'] as const) {

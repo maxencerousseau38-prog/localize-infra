@@ -3,6 +3,8 @@ import { Button, ThemeToggle } from '@localize-infra/ui';
 import Link from 'next/link';
 
 const NAV = [
+  { href: '/docs', label: 'Docs' },
+  { href: '/benchmarks', label: 'Benchmarks' },
   { href: '/quality', label: 'Quality' },
   { href: '/security', label: 'Security' },
   { href: '/pricing', label: 'Pricing' },

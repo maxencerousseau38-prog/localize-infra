@@ -5,6 +5,7 @@ import { Check, X } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/pricing' },
   title: 'Pricing',
   description:
     'Flat pricing, never metered by words, characters, keys or seats. Public repositories are free permanently. Final prices are not set yet, and we say so.',

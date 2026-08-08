@@ -1,0 +1,217 @@
+{
+  "corpus": {
+    "entries": 414,
+    "projects": [
+      {
+        "name": "excalidraw",
+        "license": "MIT",
+        "repoUrl": "https://github.com/excalidraw/excalidraw",
+        "commit": "786ab266ff3a9cfffaed16804cf9132b44bc08ae",
+        "entries": 90
+      },
+      {
+        "name": "gitea",
+        "license": "MIT",
+        "repoUrl": "https://github.com/go-gitea/gitea",
+        "commit": "a30d865b781b4611826bf44d60e44d9f6e8fdf4e",
+        "entries": 72
+      },
+      {
+        "name": "syncthing",
+        "license": "MPL-2.0",
+        "repoUrl": "https://github.com/syncthing/syncthing",
+        "commit": "bcef5c5bc68dddfb68a3d341f41fad44c11fb52e",
+        "entries": 90
+      },
+      {
+        "name": "wekan",
+        "license": "MIT",
+        "repoUrl": "https://github.com/wekan/wekan",
+        "commit": "7def748adce331c66be5d3c15d6558cfacf3177c",
+        "entries": 90
+      },
+      {
+        "name": "zulip",
+        "license": "Apache-2.0",
+        "repoUrl": "https://github.com/zulip/zulip",
+        "commit": "83cdbfd28c14bb950d67e578893a062add8af633",
+        "entries": 72
+      }
+    ],
+    "locales": [
+      {
+        "locale": "ar",
+        "entries": 72
+      },
+      {
+        "locale": "de",
+        "entries": 90
+      },
+      {
+        "locale": "es",
+        "entries": 90
+      },
+      {
+        "locale": "ja",
+        "entries": 90
+      },
+      {
+        "locale": "pt-BR",
+        "entries": 72
+      }
+    ],
+    "icuEntries": 0,
+    "withLengthBudget": 414,
+    "withHumanReference": 414
+  },
+  "run": {
+    "providers": [
+      "anthropic"
+    ],
+    "models": [
+      "claude-sonnet-5"
+    ],
+    "translations": 828
+  },
+  "conditions": [
+    {
+      "condition": "A",
+      "translations": 414,
+      "errors": 1,
+      "placeholderIntact": {
+        "applicable": 413,
+        "passed": 413
+      },
+      "icuValid": {
+        "applicable": 0,
+        "passed": 0
+      },
+      "pluralCategoriesCorrect": {
+        "applicable": 0,
+        "passed": 0
+      },
+      "withinLengthBudget": {
+        "applicable": 413,
+        "passed": 354
+      },
+      "glossaryRespected": {
+        "applicable": 28,
+        "passed": 27
+      },
+      "byLocale": [
+        {
+          "locale": "ar",
+          "translations": 72,
+          "placeholderIntact": {
+            "applicable": 72,
+            "passed": 72
+          }
+        },
+        {
+          "locale": "de",
+          "translations": 90,
+          "placeholderIntact": {
+            "applicable": 90,
+            "passed": 90
+          }
+        },
+        {
+          "locale": "es",
+          "translations": 90,
+          "placeholderIntact": {
+            "applicable": 90,
+            "passed": 90
+          }
+        },
+        {
+          "locale": "ja",
+          "translations": 89,
+          "placeholderIntact": {
+            "applicable": 89,
+            "passed": 89
+          }
+        },
+        {
+          "locale": "pt-BR",
+          "translations": 72,
+          "placeholderIntact": {
+            "applicable": 72,
+            "passed": 72
+          }
+        }
+      ]
+    },
+    {
+      "condition": "B",
+      "translations": 414,
+      "errors": 1,
+      "placeholderIntact": {
+        "applicable": 413,
+        "passed": 413
+      },
+      "icuValid": {
+        "applicable": 0,
+        "passed": 0
+      },
+      "pluralCategoriesCorrect": {
+        "applicable": 0,
+        "passed": 0
+      },
+      "withinLengthBudget": {
+        "applicable": 413,
+        "passed": 410
+      },
+      "glossaryRespected": {
+        "applicable": 27,
+        "passed": 27
+      },
+      "byLocale": [
+        {
+          "locale": "ar",
+          "translations": 72,
+          "placeholderIntact": {
+            "applicable": 72,
+            "passed": 72
+          }
+        },
+        {
+          "locale": "de",
+          "translations": 89,
+          "placeholderIntact": {
+            "applicable": 89,
+            "passed": 89
+          }
+        },
+        {
+          "locale": "es",
+          "translations": 90,
+          "placeholderIntact": {
+            "applicable": 90,
+            "passed": 90
+          }
+        },
+        {
+          "locale": "ja",
+          "translations": 90,
+          "placeholderIntact": {
+            "applicable": 90,
+            "passed": 90
+          }
+        },
+        {
+          "locale": "pt-BR",
+          "translations": 72,
+          "placeholderIntact": {
+            "applicable": 72,
+            "passed": 72
+          }
+        }
+      ]
+    }
+  ],
+  "notMeasured": [
+    "Whether a translation reads well to a native speaker. Requires the blind human comparison against the corpus references; that study has not run.",
+    "Comparison against other localization vendors. We have not run their products over this corpus, and publishing a competitor number we did not measure would be the same dishonesty we are arguing against.",
+    "Latency and cost per string. Not recorded during this run."
+  ]
+}
