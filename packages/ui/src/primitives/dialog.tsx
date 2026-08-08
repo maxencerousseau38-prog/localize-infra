@@ -123,17 +123,24 @@ export function DialogFooter({
 }
 
 /**
- * Right-side panel for detail-without-navigation (a run, a member). Distinct
- * from Dialog: a drawer does not interrupt, it reveals.
+ * Edge panel. Distinct from Dialog: a drawer does not interrupt, it reveals.
+ *
+ * `side` is logical, not physical. The trailing edge (default) carries
+ * detail-without-navigation — a run, a member. The leading edge carries
+ * navigation, which is where a reader already expects to find it, and is what
+ * the sidebar becomes below the 1024px breakpoint.
  */
 export function SheetContent({
   className,
   children,
   size = 'md',
+  side = 'end',
   ...props
 }: React.ComponentPropsWithoutRef<typeof Dialog.Content> & {
   size?: 'sm' | 'md';
+  side?: 'start' | 'end';
 }) {
+  const leading = side === 'start';
   return (
     <Dialog.Portal>
       <Dialog.Overlay
@@ -145,11 +152,13 @@ export function SheetContent({
       />
       <Dialog.Content
         className={cn(
-          'fixed inset-y-0 end-0 z-50 flex w-full flex-col',
+          'fixed inset-y-0 z-50 flex w-full flex-col',
+          leading ? 'start-0 border-e' : 'end-0 border-s',
+          'border-line bg-canvas shadow-e3',
           size === 'sm' ? 'sm:max-w-[25rem]' : 'sm:max-w-[35rem]',
-          'border-s border-line bg-canvas shadow-e3',
-          'data-[state=open]:animate-sheet-in',
-          'data-[state=closed]:animate-sheet-out',
+          leading
+            ? 'data-[state=open]:animate-sheet-in-start data-[state=closed]:animate-sheet-out-start'
+            : 'data-[state=open]:animate-sheet-in data-[state=closed]:animate-sheet-out',
           className,
         )}
         {...props}

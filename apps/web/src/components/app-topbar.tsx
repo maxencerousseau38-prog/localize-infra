@@ -1,28 +1,34 @@
 'use client';
 
+import { SidebarFootnote, SidebarNav } from '@/components/app-sidebar';
 import { ALL_ROUTES, routeByHref } from '@/lib/nav';
 import {
   type CommandItem,
   CommandPalette,
+  DialogRoot,
+  DialogTitle,
+  DialogTrigger,
+  SheetContent,
   ThemeToggle,
   cn,
   useCommandPaletteHotkey,
 } from '@localize-infra/ui';
-import { Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
 /**
- * 48px top bar (layout contract, docs/product/04-wireframes.md §2).
+ * 48px top bar (layout contract, docs/product/04-wireframes.md §0).
  *
- * Breadcrumb left, ⌘K search centre, theme control right. There is no global
- * "New" button: creation happens in the terminal, and a prominent web CTA would
- * contradict the product's shape.
+ * Breadcrumb left, ⌘K search centre, theme control right, plus the navigation
+ * trigger below 1024px. There is no global "New" button: creation happens in
+ * the terminal, and a prominent web CTA would contradict the product's shape.
  */
 export function AppTopbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [paletteOpen, setPaletteOpen] = React.useState(false);
+  const [navOpen, setNavOpen] = React.useState(false);
 
   useCommandPaletteHotkey(() => setPaletteOpen((open) => !open));
 
@@ -45,13 +51,47 @@ export function AppTopbar() {
   // worse than one that offers fewer.
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-4 border-b border-line px-4">
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line px-4">
+      <DialogRoot open={navOpen} onOpenChange={setNavOpen}>
+        <DialogTrigger
+          className={cn(
+            '-ms-1 rounded-md p-1.5 text-secondary lg:hidden',
+            'transition-colors hover:bg-surface hover:text-primary',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+          )}
+        >
+          <Menu className="size-4" aria-hidden="true" />
+          <span className="sr-only">Open navigation</span>
+        </DialogTrigger>
+        {/* Navigation comes from the leading edge, where a reader already
+            expects it — and `side="start"` is logical, so it arrives from the
+            right in an RTL interface. */}
+        <SheetContent
+          side="start"
+          size="sm"
+          aria-describedby={undefined}
+          className="bg-surface"
+        >
+          <DialogTitle className="flex h-12 shrink-0 items-center px-4 text-[14px] font-semibold text-primary">
+            Localize Infra
+          </DialogTitle>
+          {/* The sheet IS the navigation landmark at this width; the persistent
+              sidebar that normally carries that role is not rendered. */}
+          <nav aria-label="Main">
+            <SidebarNav onNavigate={() => setNavOpen(false)} />
+          </nav>
+          <SidebarFootnote className="mt-auto" />
+        </SheetContent>
+      </DialogRoot>
+
       <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
         <ol className="flex items-center gap-1.5 text-[13px]">
-          <li className="text-tertiary">Localize Infra</li>
+          {/* The root segment is dropped on narrow screens rather than
+              truncated: the last segment is the one that says where you are. */}
+          <li className="hidden text-tertiary sm:block">Localize Infra</li>
           {current ? (
             <>
-              <li aria-hidden="true" className="text-tertiary">
+              <li aria-hidden="true" className="hidden text-tertiary sm:block">
                 /
               </li>
               <li className="truncate font-medium text-primary">
@@ -66,17 +106,20 @@ export function AppTopbar() {
         type="button"
         onClick={() => setPaletteOpen(true)}
         className={cn(
-          'flex h-7 items-center gap-2 rounded-md border border-line bg-surface px-2.5',
+          'flex h-7 shrink-0 items-center gap-2 rounded-md border border-line bg-surface px-2.5',
           'text-[13px] text-tertiary',
           'transition-colors duration-(--duration-micro) hover:text-secondary',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
         )}
       >
         <Search className="size-3.5" aria-hidden="true" />
-        <span>Search</span>
+        <span className="sr-only sm:not-sr-only">Search</span>
         {/* The shortcut is shown, not hidden: a palette nobody knows about is a
-            palette nobody uses. */}
-        <kbd className="font-mono text-[11px] text-tertiary">⌘K</kbd>
+            palette nobody uses. Hidden where there is no keyboard to press it
+            with. */}
+        <kbd className="hidden font-mono text-[11px] text-tertiary sm:inline">
+          ⌘K
+        </kbd>
       </button>
 
       <ThemeToggle />

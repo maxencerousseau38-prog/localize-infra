@@ -190,3 +190,57 @@ test('remains usable with reduced motion', async ({ page }) => {
     page.getByRole('heading', { name: /disconnect this project/i }),
   ).toBeVisible();
 });
+
+/**
+ * The layout contract puts the sidebar at ≥1024 and the page gutter at 16px
+ * below 768 (docs/product/04-wireframes.md §0). Below the breakpoint the same
+ * navigation becomes a sheet — the one thing a fixed 240px sidebar cannot do on
+ * a phone is get out of the way.
+ */
+test.describe('responsive shell', () => {
+  test('below 1024 the sidebar is replaced by a navigation sheet', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    // Exactly one "Main" navigation landmark must be present at any width, or a
+    // screen reader announces two navigations with identical names.
+    await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0);
+
+    await page.getByRole('button', { name: /open navigation/i }).click();
+    const nav = page.getByRole('navigation', { name: 'Main' });
+    await expect(nav).toBeVisible();
+    await expect(nav).toHaveCount(1);
+
+    await nav.getByRole('link', { name: 'Design system' }).click();
+    await expect(page).toHaveURL(/\/design$/);
+    // Selecting a destination must dismiss the sheet, or the reader lands on
+    // the new page with the navigation still covering it.
+    await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0);
+  });
+
+  test('at 1024 and above the sidebar is persistent', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /open navigation/i }),
+    ).toBeHidden();
+  });
+
+  for (const width of [390, 768, 1024, 1440]) {
+    test(`no horizontal overflow at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/design', { waitUntil: 'networkidle' });
+
+      // A page that scrolls sideways is the single most common tell that a
+      // layout was never opened at this width.
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      expect(overflow, `overflowed by ${overflow}px`).toBeLessThanOrEqual(0);
+    });
+  }
+});

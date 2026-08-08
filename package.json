@@ -7,14 +7,18 @@
   "engines": {
     "node": ">=20"
   },
-  "workspaces": ["packages/*", "apps/*", "services/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "turbo run typecheck",
-    "test:e2e": "npm run test:e2e -w @localize-infra/site"
+    "test:e2e": "turbo run test:e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

@@ -146,6 +146,7 @@ export function DesignGallery() {
       >
         <div className="flex max-w-[40rem] flex-col gap-2">
           <StringCard
+            data-testid="card-ltr"
             tone="confident"
             stateLabel="Confident"
             source="Close"
@@ -182,7 +183,27 @@ export function DesignGallery() {
             translation="الإعدادات"
             targetLocale="ar"
             origin="src/app/settings/page.tsx"
-            context="Right-to-left: the rule flips to the trailing edge"
+            context="Right-to-left text inside a left-to-right interface"
+          />
+        </div>
+
+        <p className="mt-6 mb-2 text-[13px] text-secondary">
+          The rule follows the direction of the <em>interface</em>, not of the
+          string. A single Arabic translation inside an English interface keeps
+          the rule on the left; the same card in an Arabic interface moves it to
+          the right, because it uses <code>border-inline-start</code>.
+        </p>
+        <div dir="rtl" className="max-w-[40rem]">
+          <StringCard
+            data-testid="card-rtl"
+            tone="confident"
+            stateLabel="Confident"
+            source="Settings"
+            sourceLocale="en"
+            translation="الإعدادات"
+            targetLocale="ar"
+            origin="src/app/settings/page.tsx"
+            context="The same card in a right-to-left interface"
           />
         </div>
       </Section>

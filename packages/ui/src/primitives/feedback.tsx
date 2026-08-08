@@ -122,7 +122,13 @@ export function AvatarRoot({
     .join('')
     .toUpperCase();
   return (
+    // The avatar is decorative, and hidden as a whole rather than only its
+    // image: the initials fallback is a compressed rendering of a name that is
+    // always displayed beside it, so announcing "IM" adds noise, not meaning.
+    // Callers must render the person's name — that is what carries it.
     <Avatar.Root
+      aria-hidden="true"
+      title={name}
       className={cn(
         'inline-flex size-7 shrink-0 select-none items-center justify-center',
         'overflow-hidden rounded-full border border-subtle bg-raised',
@@ -132,9 +138,6 @@ export function AvatarRoot({
       {src ? (
         <Avatar.Image src={src} alt="" className="size-full object-cover" />
       ) : null}
-      {/* alt="" above and the accessible name here: the avatar is decorative
-          when the person's name is already rendered beside it, and duplicating
-          it would make a screen reader read the name twice. */}
       <Avatar.Fallback className="text-[11px] font-medium text-secondary">
         {initials}
       </Avatar.Fallback>

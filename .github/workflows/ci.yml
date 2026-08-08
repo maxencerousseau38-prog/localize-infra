@@ -15,4 +15,21 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run typecheck
       - run: npm run test
+
+  # End-to-end runs as its own job: it needs browsers, and it is the only gate
+  # that catches the failures the others structurally cannot — a CSP that
+  # blocks every script, an ARIA structure axe does not inspect, a page that
+  # builds green and never hydrates. All three have shipped in this repo.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e

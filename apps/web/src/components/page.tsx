@@ -15,7 +15,8 @@ export function Page({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[75rem] px-6 py-8">
+    // 24px gutter, 16px below 768 (layout contract §0).
+    <div className="mx-auto w-full max-w-[75rem] px-4 py-8 sm:px-6">
       <header className="mb-6">
         <h1 className="text-[22px] font-semibold leading-8 text-primary">
           {title}
@@ -50,7 +51,14 @@ export function UnbuiltPage({
 }) {
   return (
     <Page title={title}>
-      <NotBuiltYet surface={surface} blockedBy={blockedBy} />
+      {/* Measure-constrained rather than full width: a dashed box stretched
+          across 1200px for two lines of prose reads as an unfinished layout,
+          not as a deliberate statement. */}
+      <NotBuiltYet
+        surface={surface}
+        blockedBy={blockedBy}
+        className="max-w-[65ch]"
+      />
     </Page>
   );
 }
