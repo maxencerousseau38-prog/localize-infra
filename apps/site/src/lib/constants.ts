@@ -21,4 +21,13 @@ export const EXAMPLE_PR_URL =
  * fails for every visitor who copies it, on a site whose stated constraint is
  * that every claim must be true today.
  */
+/**
+ * The evaluation harness, which is MIT-licensed.
+ *
+ * Linked instead of the repository root wherever the surrounding copy claims
+ * something is open source: the repository is deliberately mixed-licence
+ * (see LICENSE), so "the open-source repository" was never quite true.
+ */
+export const EVAL_PACKAGE_URL = `${GITHUB_REPO_URL}/tree/master/packages/eval`;
+
 export const INSTALL_COMMAND = 'npx @localize-infra/cli init';

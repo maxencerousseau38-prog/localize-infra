@@ -1,3 +1,61 @@
+LICENSING
+=========
+
+This repository contains code under two different licences. This file states
+which applies where. Read it before copying anything out of this repository.
+
+Previously this file contained the MIT licence text with no statement of scope,
+which would have granted MIT rights over the entire repository — including the
+proprietary parts listed below. That was not the intent.
+
+
+1. MIT-LICENSED PARTS
+---------------------
+
+The following directories, and only these, are licensed under the MIT licence
+reproduced in section 3:
+
+    packages/cli
+    packages/core
+    packages/eval
+    packages/schemas
+
+Each of those directories also carries its own copy of the MIT text, so the
+licence travels with the code when a package is published or vendored.
+
+These are the open core. They are intended to be usable on their own, without
+any of the proprietary parts.
+
+
+2. PROPRIETARY PARTS
+--------------------
+
+All other content in this repository is proprietary and is NOT covered by the
+MIT licence. This includes, without limitation:
+
+    packages/ui
+    apps/api
+    apps/site
+    apps/web
+    services/github-app
+
+Copyright (c) 2026 the localize-infra contributors. All rights reserved.
+
+No licence, express or implied, is granted to use, copy, modify, merge,
+publish, distribute, sublicense or sell any part of the proprietary content.
+Its presence in a public repository is for transparency and does not place it
+in the public domain or grant any right to reuse it.
+
+Anything added to this repository in future is proprietary unless it is placed
+in one of the directories listed in section 1, or this file is amended to say
+otherwise.
+
+
+3. THE MIT LICENCE
+------------------
+
+Applies only to the directories listed in section 1.
+
 MIT License
 
 Copyright (c) 2026 the localize-infra contributors
