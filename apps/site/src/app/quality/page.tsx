@@ -68,20 +68,20 @@ export default function QualityPage() {
           <div className="flex flex-wrap items-center gap-3">
             <h2
               id="mechanical"
-              className="text-[22px] font-semibold text-primary"
+              className="font-display text-headline font-semibold text-primary"
             >
               Mechanical correctness
             </h2>
             <Badge tone="confident">Verified every build</Badge>
           </div>
-          <p className="mt-3 max-w-[64ch] text-[15px] leading-7 text-secondary">
+          <p className="mt-3 max-w-[64ch] text-prose text-secondary">
             These are the failures that silently break a running app: a dropped{' '}
-            <code className="font-mono text-[13px]">{'{count}'}</code>, an ICU
+            <code className="font-mono text-small">{'{count}'}</code>, an ICU
             block that no longer parses, a plural form that does not exist in
             the target language. They are checked deterministically against the
             corpus below, and the build fails if the rate drops under 99.5%.
           </p>
-          <p className="mt-3 max-w-[64ch] text-[15px] leading-7 text-secondary">
+          <p className="mt-3 max-w-[64ch] text-prose text-secondary">
             Results are for the context-rich condition — the one the CLI
             actually uses. The{' '}
             <Link
@@ -104,19 +104,19 @@ export default function QualityPage() {
                 <tr className="border-b border-line">
                   <th
                     scope="col"
-                    className="py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                    className="py-2.5 pe-4 text-start text-caption font-medium uppercase tracking-wide text-tertiary"
                   >
                     Check
                   </th>
                   <th
                     scope="col"
-                    className="hidden py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary sm:table-cell"
+                    className="hidden py-2.5 pe-4 text-start text-caption font-medium uppercase tracking-wide text-tertiary sm:table-cell"
                   >
                     What it catches
                   </th>
                   <th
                     scope="col"
-                    className="py-2.5 text-end text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                    className="py-2.5 text-end text-caption font-medium uppercase tracking-wide text-tertiary"
                   >
                     Result
                   </th>
@@ -127,14 +127,14 @@ export default function QualityPage() {
                   <tr key={row.check} className="border-b border-subtle">
                     <th
                       scope="row"
-                      className="py-3 pe-4 text-start align-top text-[14px] font-medium text-primary"
+                      className="py-3 pe-4 text-start align-top text-body font-medium text-primary"
                     >
                       {row.check}
-                      <span className="mt-1 block text-[13px] font-normal leading-5 text-secondary sm:hidden">
+                      <span className="mt-1 block text-small font-normal leading-5 text-secondary sm:hidden">
                         {row.detail}
                       </span>
                     </th>
-                    <td className="hidden py-3 pe-4 align-top text-[14px] leading-6 text-secondary sm:table-cell">
+                    <td className="hidden py-3 pe-4 align-top text-body leading-6 text-secondary sm:table-cell">
                       {row.detail}
                     </td>
                     <td className="py-3 text-end align-top" data-numeric>
@@ -146,7 +146,7 @@ export default function QualityPage() {
             </table>
           </div>
 
-          <p className="mt-4 max-w-[64ch] text-[13px] leading-6 text-tertiary">
+          <p className="mt-4 max-w-[64ch] text-small leading-6 text-tertiary">
             Two rows read <strong className="text-secondary">No data</strong>{' '}
             rather than a percentage. The corpus contains no ICU plural or
             select messages, so those two checks had nothing to run against.
@@ -163,23 +163,26 @@ export default function QualityPage() {
         <section aria-labelledby="human" className="mt-14">
           <StateRule tone="ambiguous" className="max-w-[70ch]">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 id="human" className="text-[22px] font-semibold text-primary">
+              <h2
+                id="human"
+                className="font-display text-headline font-semibold text-primary"
+              >
                 Human preference
               </h2>
               <Badge tone="ambiguous">Not yet measured</Badge>
             </div>
-            <p className="mt-3 text-[15px] leading-7 text-secondary">
+            <p className="mt-3 text-prose text-secondary">
               Mechanical correctness says a translation is well-formed. It says
               nothing about whether it is <em>good</em>. Answering that requires
               native speakers comparing our output against human reference
               translations, blind, in a randomised order.
             </p>
-            <p className="mt-3 text-[15px] leading-7 text-secondary">
+            <p className="mt-3 text-prose text-secondary">
               The evaluation harness is built and the corpus is prepared. The
               study has not run, so we have no preference data — and we would
               rather publish that sentence than a number we cannot stand behind.
             </p>
-            <p className="mt-3 text-[15px] leading-7 text-secondary">
+            <p className="mt-3 text-prose text-secondary">
               When it does run, results go here per language,{' '}
               <strong className="font-medium text-primary">
                 including the languages where we lose
@@ -196,15 +199,18 @@ export default function QualityPage() {
         className="border-t border-subtle bg-surface/40"
       >
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
-          <h2 id="method" className="text-[22px] font-semibold text-primary">
+          <h2
+            id="method"
+            className="font-display text-headline font-semibold text-primary"
+          >
             Method
           </h2>
           <div className="mt-6 grid gap-10 lg:grid-cols-2 lg:gap-16">
             <div>
-              <h3 className="text-[15px] font-semibold text-primary">
+              <h3 className="text-subtitle font-semibold text-primary">
                 The corpus
               </h3>
-              <p className="mt-2 text-[14px] leading-6 text-secondary">
+              <p className="mt-2 text-body leading-6 text-secondary">
                 {BENCHMARKS.corpus.entries} real interface strings sampled from{' '}
                 {BENCHMARKS.corpus.projects.length} open-source projects, each
                 with community translations reviewed by native speakers.
@@ -216,7 +222,7 @@ export default function QualityPage() {
                 {BENCHMARKS.corpus.projects.map((project) => (
                   <li
                     key={project.name}
-                    className="rounded-sm border border-subtle bg-canvas px-2 py-1 text-[12px] text-secondary"
+                    className="rounded-sm border border-subtle bg-canvas px-2 py-1 text-caption text-secondary"
                   >
                     {project.name}{' '}
                     <span className="text-tertiary">({project.license})</span>
@@ -225,16 +231,16 @@ export default function QualityPage() {
               </ul>
             </div>
             <div>
-              <h3 className="text-[15px] font-semibold text-primary">
+              <h3 className="text-subtitle font-semibold text-primary">
                 Languages under test
               </h3>
-              <p className="mt-2 text-[14px] leading-6 text-secondary">
+              <p className="mt-2 text-body leading-6 text-secondary">
                 German, Japanese, Spanish, Arabic and Brazilian Portuguese —
                 chosen for spread across writing systems, text direction,
                 expansion length and morphological complexity rather than for
                 ease.
               </p>
-              <p className="mt-4 text-[14px] leading-6 text-secondary">
+              <p className="mt-4 text-body leading-6 text-secondary">
                 The harness, the corpus and the checks are in the{' '}
                 <a
                   href={EVAL_PACKAGE_URL}

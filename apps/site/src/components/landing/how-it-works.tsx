@@ -19,7 +19,7 @@ const STEPS = [
 export function HowItWorks() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-      <h2 className="max-w-2xl text-[26px] font-semibold leading-tight tracking-[-0.015em] text-primary">
+      <h2 className="max-w-2xl font-display text-headline font-semibold tracking-[-0.015em] text-primary">
         One command, three steps, no new tab
       </h2>
 
@@ -27,16 +27,16 @@ export function HowItWorks() {
         {STEPS.map((step) => (
           <li key={step.n}>
             <span
-              className="font-mono text-[13px] text-tertiary"
+              className="font-mono text-small text-tertiary"
               data-numeric
               aria-hidden="true"
             >
               {step.n}
             </span>
-            <h3 className="mt-2 text-[17px] font-semibold text-primary">
+            <h3 className="mt-2 text-prose font-semibold text-primary">
               {step.title}
             </h3>
-            <p className="mt-2 text-[14px] leading-6 text-secondary">
+            <p className="mt-2 text-body leading-6 text-secondary">
               {step.body}
             </p>
           </li>
@@ -47,7 +47,7 @@ export function HowItWorks() {
           context leaving the machine is the single most likely objection from a
           security-conscious buyer, and hiding it until later would be a worse
           first impression than stating it plainly here. */}
-      <p className="mt-10 max-w-[70ch] border-t border-subtle pt-6 text-[13px] leading-6 text-tertiary">
+      <p className="mt-10 max-w-[70ch] border-t border-subtle pt-6 text-small leading-6 text-tertiary">
         Step 02 sends the string, its file path, its component name and a short
         snippet of surrounding code to a third-party model provider. That
         context is what makes the translation good, and it means the snippet

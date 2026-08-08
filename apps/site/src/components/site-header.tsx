@@ -37,7 +37,7 @@ export function SiteHeader() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="rounded-md px-2.5 py-1.5 text-[14px] text-secondary transition-colors duration-(--duration-micro) hover:bg-surface hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  className="rounded-md px-2.5 py-1.5 text-body text-secondary transition-colors duration-(--duration-micro) hover:bg-surface hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
                   {item.label}
                 </Link>
@@ -65,7 +65,7 @@ export function SiteHeader() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="inline-block rounded-md px-2.5 py-1.5 text-[13px] text-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                className="inline-block rounded-md px-2.5 py-1.5 text-small text-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
               >
                 {item.label}
               </Link>

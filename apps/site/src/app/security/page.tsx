@@ -58,10 +58,10 @@ export default function SecurityPage() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <section aria-labelledby="sent">
-            <h2 id="sent" className="text-[20px] font-semibold text-primary">
+            <h2 id="sent" className="text-title font-semibold text-primary">
               What is sent
             </h2>
-            <p className="mt-3 text-[14px] leading-6 text-secondary">
+            <p className="mt-3 text-body leading-6 text-secondary">
               Context is what separates a good translation from a plausible
               wrong one — “Close” on a button is a different word in German than
               “close” in a sentence. That context is also code, so here it is,
@@ -70,10 +70,8 @@ export default function SecurityPage() {
             <dl className="mt-6 space-y-3">
               {SENT.map(([term, detail]) => (
                 <div key={term} className="border-b border-subtle pb-3">
-                  <dt className="text-[14px] font-medium text-primary">
-                    {term}
-                  </dt>
-                  <dd className="mt-0.5 font-mono text-[13px] text-tertiary">
+                  <dt className="text-body font-medium text-primary">{term}</dt>
+                  <dd className="mt-0.5 font-mono text-small text-tertiary">
                     {detail}
                   </dd>
                 </div>
@@ -82,13 +80,10 @@ export default function SecurityPage() {
           </section>
 
           <section aria-labelledby="not-sent">
-            <h2
-              id="not-sent"
-              className="text-[20px] font-semibold text-primary"
-            >
+            <h2 id="not-sent" className="text-title font-semibold text-primary">
               What is not
             </h2>
-            <p className="mt-3 text-[14px] leading-6 text-secondary">
+            <p className="mt-3 text-body leading-6 text-secondary">
               Extraction is AST-based and targeted. Files without extractable UI
               strings are never read for content.
             </p>
@@ -96,7 +91,7 @@ export default function SecurityPage() {
               {NOT_SENT.map((item) => (
                 <li
                   key={item}
-                  className="text-[14px] leading-6 text-secondary before:me-2 before:text-confident before:content-['—']"
+                  className="text-body leading-6 text-secondary before:me-2 before:text-confident before:content-['—']"
                 >
                   {item}
                 </li>
@@ -114,11 +109,11 @@ export default function SecurityPage() {
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
           <h2
             id="subprocessors-heading"
-            className="text-[22px] font-semibold text-primary"
+            className="font-display text-headline font-semibold text-primary"
           >
             Sub-processors
           </h2>
-          <p className="mt-3 max-w-[62ch] text-[14px] leading-6 text-secondary">
+          <p className="mt-3 max-w-[62ch] text-body leading-6 text-secondary">
             Every third party that receives any part of your data, what they
             get, and where they process it.
           </p>
@@ -135,7 +130,7 @@ export default function SecurityPage() {
                     <th
                       key={h}
                       scope="col"
-                      className="py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                      className="py-2.5 pe-4 text-start text-caption font-medium uppercase tracking-wide text-tertiary"
                     >
                       {h}
                     </th>
@@ -145,16 +140,16 @@ export default function SecurityPage() {
               <tbody>
                 {SUBPROCESSORS.map((p) => (
                   <tr key={p.name} className="border-b border-subtle">
-                    <td className="py-3 pe-4 text-[14px] font-medium text-primary">
+                    <td className="py-3 pe-4 text-body font-medium text-primary">
                       {p.name}
                     </td>
-                    <td className="py-3 pe-4 text-[14px] text-secondary">
+                    <td className="py-3 pe-4 text-body text-secondary">
                       {p.purpose}
                     </td>
-                    <td className="py-3 pe-4 text-[14px] text-secondary">
+                    <td className="py-3 pe-4 text-body text-secondary">
                       {p.data}
                     </td>
-                    <td className="py-3 pe-4 text-[14px] text-secondary">
+                    <td className="py-3 pe-4 text-body text-secondary">
                       {p.region}
                     </td>
                   </tr>
@@ -171,19 +166,19 @@ export default function SecurityPage() {
             a far better outcome than finding it hidden. */}
         <StateRule tone="degraded" className="max-w-[70ch]">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-[20px] font-semibold text-primary">
+            <h2 className="text-title font-semibold text-primary">
               Data residency: an honest gap
             </h2>
             <Badge tone="degraded">Not yet resolved</Badge>
           </div>
-          <p className="mt-3 text-[14px] leading-6 text-secondary">
+          <p className="mt-3 text-body leading-6 text-secondary">
             We intend to process data in the EU. Today we do not: translation
             runs through US-hosted model providers, as listed above. That is a
             real gap between our stated commitment and current behaviour, and it
             is tracked as a blocker for European enterprise use rather than
             quietly deferred.
           </p>
-          <p className="mt-3 text-[14px] leading-6 text-secondary">
+          <p className="mt-3 text-body leading-6 text-secondary">
             Planned resolution is EU-region model endpoints plus
             bring-your-own-key, so inference can run against your own provider
             account and never touch ours. Until that ships, this page will keep
@@ -195,47 +190,46 @@ export default function SecurityPage() {
           <section aria-labelledby="github-perms">
             <h2
               id="github-perms"
-              className="text-[20px] font-semibold text-primary"
+              className="text-title font-semibold text-primary"
             >
               GitHub App permissions
             </h2>
-            <p className="mt-3 text-[14px] leading-6 text-secondary">
+            <p className="mt-3 text-body leading-6 text-secondary">
               The App requests the minimum needed to open a pull request, and
               nothing else.
             </p>
-            <ul className="mt-5 space-y-2.5 text-[14px] leading-6 text-secondary">
+            <ul className="mt-5 space-y-2.5 text-body leading-6 text-secondary">
               <li className="before:me-2 before:text-confident before:content-['—']">
-                <code className="font-mono text-[13px]">contents: write</code> —
+                <code className="font-mono text-small">contents: write</code> —
                 create a branch and commit locale files
               </li>
               <li className="before:me-2 before:text-confident before:content-['—']">
-                <code className="font-mono text-[13px]">
+                <code className="font-mono text-small">
                   pull_requests: write
                 </code>{' '}
                 — open the pull request
               </li>
             </ul>
-            <p className="mt-4 text-[14px] leading-6 text-secondary">
+            <p className="mt-4 text-body leading-6 text-secondary">
               Writes are additionally constrained server-side: a pull request
-              may only touch{' '}
-              <code className="font-mono text-[13px]">.json</code> files under
-              your locales directory. A request naming any other path is
-              rejected before it reaches GitHub.
+              may only touch <code className="font-mono text-small">.json</code>{' '}
+              files under your locales directory. A request naming any other
+              path is rejected before it reaches GitHub.
             </p>
           </section>
 
           <section aria-labelledby="retention">
             <h2
               id="retention"
-              className="text-[20px] font-semibold text-primary"
+              className="text-title font-semibold text-primary"
             >
               Storage and retention
             </h2>
-            <p className="mt-3 text-[14px] leading-6 text-secondary">
+            <p className="mt-3 text-body leading-6 text-secondary">
               Your translations are committed to your repository. They are the
               record — there is no second copy that constitutes the real one.
             </p>
-            <p className="mt-3 text-[14px] leading-6 text-secondary">
+            <p className="mt-3 text-body leading-6 text-secondary">
               We do not currently operate a hosted database at all; the product
               runs as a CLI against your own repositories. When hosted accounts
               ship, the database will hold projects, members and settings —

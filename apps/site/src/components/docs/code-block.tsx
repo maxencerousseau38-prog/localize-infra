@@ -30,7 +30,7 @@ export function CodeBlock({
       aria-label={label}
       className={cn(
         'mt-3 overflow-x-auto rounded-md border border-subtle bg-surface/60',
-        'px-4 py-3 font-mono text-[13px] leading-6 text-secondary',
+        'px-4 py-3 font-mono text-small leading-6 text-secondary',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
         className,
       )}
@@ -43,7 +43,7 @@ export function CodeBlock({
 /** Inline code inside prose. */
 export function Code({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded-sm bg-raised px-1.5 py-0.5 font-mono text-[13px] text-secondary">
+    <code className="rounded-sm bg-raised px-1.5 py-0.5 font-mono text-small text-secondary">
       {children}
     </code>
   );

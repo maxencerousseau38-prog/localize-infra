@@ -21,7 +21,7 @@ export function RateCell({
   if (result.kind === 'not-applicable') {
     return (
       <span
-        className={cn('font-mono text-[13px] text-tertiary', className)}
+        className={cn('font-mono text-small text-tertiary', className)}
         title="No entry in the corpus exercises this check"
       >
         No data
@@ -30,7 +30,7 @@ export function RateCell({
   }
 
   return (
-    <span className={cn('font-mono text-[13px] text-primary', className)}>
+    <span className={cn('font-mono text-small text-primary', className)}>
       {formatPercent(result.percent)}
       <span className="ms-1.5 text-tertiary">
         {result.passed}/{result.applicable}

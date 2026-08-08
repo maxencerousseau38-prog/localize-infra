@@ -23,7 +23,7 @@ export function DocsToc({ entries }: { entries: TocEntry[] }) {
       aria-label="On this page"
       className="hidden lg:sticky lg:top-20 lg:block lg:self-start"
     >
-      <h2 className="text-[12px] font-medium uppercase tracking-wide text-tertiary">
+      <h2 className="text-caption font-medium uppercase tracking-wide text-tertiary">
         On this page
       </h2>
       <ul className="mt-3 space-y-1.5 border-s border-subtle">
@@ -31,7 +31,7 @@ export function DocsToc({ entries }: { entries: TocEntry[] }) {
           <li key={entry.id}>
             <Link
               href={`#${entry.id}`}
-              className="-ms-px block border-s border-transparent ps-3 text-[13px] leading-6 text-secondary transition-colors hover:border-strong hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="-ms-px block border-s border-transparent ps-3 text-small leading-6 text-secondary transition-colors hover:border-strong hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               {entry.label}
             </Link>

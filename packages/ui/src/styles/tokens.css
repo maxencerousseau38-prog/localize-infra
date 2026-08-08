@@ -317,6 +317,25 @@
   --text-display-lg: 40px;
   --text-display-lg--line-height: 1.05;
 
+  /* Editorial register — the marketing site only (design direction §20: one
+     design system, two registers). The app never uses these: a 52px hero or a
+     1.65 prose measure would be wrong on a data surface, and forcing the site
+     into the app's eight steps would flatten the hero and squash long-form
+     reading. Three steps, each earning its place:
+
+     prose      long-form body copy. Absorbs the site's 15/17/18px, all of
+                which were the same job at three sizes. 17/1.65 reads better
+                than the 15/1.87 it replaces.
+     headline   section headings. Absorbs 22px (14 uses), 26px (5) and 28px
+                (1) — three sizes doing one job across the site.
+     display-xl the landing hero, and nothing else. */
+  --text-prose: 17px;
+  --text-prose--line-height: 1.65;
+  --text-headline: 24px;
+  --text-headline--line-height: 1.25;
+  --text-display-xl: 52px;
+  --text-display-xl--line-height: 1.02;
+
   /* 8px base. 4px and 2px exist only for optical alignment in controls. */
   --spacing: 4px;
 

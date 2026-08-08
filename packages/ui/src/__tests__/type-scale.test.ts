@@ -14,15 +14,17 @@ import { describe, expect, it } from 'vitest';
  * The scale is eight named steps (docs/design/09-app-design-direction.md §7).
  * Anything outside it is a defect.
  *
- * apps/site is deliberately out of scope: it is the editorial register, with a
- * legitimately different and larger scale, and migrating it carries regression
- * risk for a surface that already reads well. Tracked as follow-up.
+ * apps/site is now in scope too. It carries the editorial register — three
+ * further steps (prose, headline, display-xl) that the app never uses — but it
+ * is the same system, and it had the same disease: section headings at 22px,
+ * 26px and 28px doing one job, and body copy at 15/17/18px doing another.
  */
 const REPO_ROOT = join(import.meta.dirname, '../../../..');
 
 const SCANNED = [
   join(REPO_ROOT, 'packages/ui/src'),
   join(REPO_ROOT, 'apps/web/src'),
+  join(REPO_ROOT, 'apps/site/src'),
 ];
 
 const AD_HOC_SIZE = /text-\[\d+px\]/g;
@@ -80,6 +82,9 @@ describe('type scale', () => {
       'title',
       'display',
       'display-lg',
+      'prose',
+      'headline',
+      'display-xl',
     ]) {
       expect(tokens, `--text-${step}`).toContain(`--text-${step}:`);
       // A size without a line height is half a type step.
@@ -87,6 +92,27 @@ describe('type scale', () => {
         `--text-${step}--line-height:`,
       );
     }
+  });
+
+  it('keeps the editorial steps out of the application', () => {
+    // The registers share a system, not a scale. A 52px hero or a 1.65 prose
+    // measure on a data surface would be the site's voice in the wrong room.
+    const appFiles = sourceFiles(join(REPO_ROOT, 'apps/web/src'));
+    const offenders: string[] = [];
+
+    for (const file of appFiles) {
+      const source = readFileSync(file, 'utf8');
+      for (const step of ['text-prose', 'text-headline', 'text-display-xl']) {
+        // String.raw, because `\b` in an ordinary template literal is the
+        // backspace character rather than a word boundary — which made this
+        // check match nothing at all until a mutation test caught it.
+        if (new RegExp(String.raw`\b${step}\b`).test(source)) {
+          offenders.push(`${file.replace(REPO_ROOT, '')}: ${step}`);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
   });
 
   it('pairs a display face distinct from the interface face', () => {

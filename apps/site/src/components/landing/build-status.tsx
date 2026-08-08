@@ -34,10 +34,10 @@ export function BuildStatus() {
     <section className="border-t border-subtle bg-surface/40">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <div className="max-w-2xl">
-          <h2 className="text-[26px] font-semibold leading-tight tracking-[-0.015em] text-primary">
+          <h2 className="font-display text-headline font-semibold tracking-[-0.015em] text-primary">
             What actually works today
           </h2>
-          <p className="mt-4 text-[15px] leading-7 text-secondary">
+          <p className="mt-4 text-prose text-secondary">
             This is an early-access product. Rather than describe the roadmap in
             the present tense, here is the honest state of it.
           </p>
@@ -47,7 +47,7 @@ export function BuildStatus() {
           <section aria-labelledby="status-working">
             <h3
               id="status-working"
-              className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wide text-confident-text"
+              className="flex items-center gap-2 text-small font-medium uppercase tracking-wide text-confident-text"
             >
               <Check className="size-3.5" aria-hidden="true" />
               Working
@@ -56,7 +56,7 @@ export function BuildStatus() {
               {WORKING.map((item) => (
                 <li
                   key={item}
-                  className="text-[14px] leading-6 text-secondary before:me-2 before:text-confident before:content-['—']"
+                  className="text-body leading-6 text-secondary before:me-2 before:text-confident before:content-['—']"
                 >
                   {item}
                 </li>
@@ -67,7 +67,7 @@ export function BuildStatus() {
           <section aria-labelledby="status-development">
             <h3
               id="status-development"
-              className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wide text-ambiguous-text"
+              className="flex items-center gap-2 text-small font-medium uppercase tracking-wide text-ambiguous-text"
             >
               <CircleDashed className="size-3.5" aria-hidden="true" />
               In development
@@ -76,7 +76,7 @@ export function BuildStatus() {
               {IN_DEVELOPMENT.map((item) => (
                 <li
                   key={item}
-                  className="text-[14px] leading-6 text-secondary before:me-2 before:text-ambiguous before:content-['—']"
+                  className="text-body leading-6 text-secondary before:me-2 before:text-ambiguous before:content-['—']"
                 >
                   {item}
                 </li>
@@ -87,7 +87,7 @@ export function BuildStatus() {
           <section aria-labelledby="status-unmeasured">
             <h3
               id="status-unmeasured"
-              className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wide text-tertiary"
+              className="flex items-center gap-2 text-small font-medium uppercase tracking-wide text-tertiary"
             >
               <Minus className="size-3.5" aria-hidden="true" />
               Not yet measured
@@ -96,7 +96,7 @@ export function BuildStatus() {
               {NOT_MEASURED.map((item) => (
                 <li
                   key={item}
-                  className="text-[14px] leading-6 text-secondary before:me-2 before:text-tertiary before:content-['—']"
+                  className="text-body leading-6 text-secondary before:me-2 before:text-tertiary before:content-['—']"
                 >
                   {item}
                 </li>

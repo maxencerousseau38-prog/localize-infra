@@ -93,7 +93,7 @@ export default function RoadmapPage() {
               <div className="flex items-center gap-3">
                 <h2
                   id={`stage-${stage.status}`}
-                  className="text-[22px] font-semibold text-primary"
+                  className="font-display text-headline font-semibold text-primary"
                 >
                   {stage.label}
                 </h2>
@@ -105,10 +105,10 @@ export default function RoadmapPage() {
                     key={item.title}
                     className="rounded-lg border border-subtle p-5"
                   >
-                    <h3 className="text-[16px] font-semibold text-primary">
+                    <h3 className="text-subtitle font-semibold text-primary">
                       {item.title}
                     </h3>
-                    <p className="mt-2 text-[14px] leading-6 text-secondary">
+                    <p className="mt-2 text-body leading-6 text-secondary">
                       {item.body}
                     </p>
                   </li>
@@ -124,11 +124,11 @@ export default function RoadmapPage() {
         >
           <h2
             id="out-of-scope"
-            className="text-[20px] font-semibold text-primary"
+            className="text-title font-semibold text-primary"
           >
             Deliberately not building
           </h2>
-          <p className="mt-3 max-w-[64ch] text-[14px] leading-6 text-secondary">
+          <p className="mt-3 max-w-[64ch] text-body leading-6 text-secondary">
             A translator marketplace, a full CAT editor, vendor management, or
             project management with assignments and due dates. These are the
             features that made existing localization platforms slow and

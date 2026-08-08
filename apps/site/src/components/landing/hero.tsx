@@ -12,17 +12,17 @@ export function Hero() {
           empty, which reads unfinished rather than spacious. */}
       <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
         <div>
-          <p className="text-[13px] font-medium uppercase tracking-wide text-tertiary">
+          <p className="text-small font-medium uppercase tracking-wide text-tertiary">
             Localization infrastructure
           </p>
 
           {/* Measure capped near 20ch/line at display size: long lines at 48px+
               are genuinely hard to track back to the next line. */}
-          <h1 className="mt-4 max-w-[19ch] text-[40px] font-semibold leading-[1.08] tracking-[-0.02em] text-primary sm:text-[52px]">
+          <h1 className="mt-4 max-w-[19ch] font-display text-display-lg font-semibold tracking-[-0.02em] text-primary sm:font-display text-display-xl">
             Your copy is a build artifact, not a project.
           </h1>
 
-          <p className="mt-6 max-w-[52ch] text-[17px] leading-7 text-secondary sm:text-[18px]">
+          <p className="mt-6 max-w-[52ch] text-prose text-secondary sm:text-prose">
             Extract the hardcoded strings from your codebase, translate them,
             and open a pull request. The translations live in your repository —
             not in someone else&rsquo;s database.
@@ -33,7 +33,7 @@ export function Hero() {
             {/* The command is the destination, not the current state. Leaving
                 it unqualified would mean the site's primary action fails for
                 everyone who copies it. */}
-            <p className="mt-2.5 text-[13px] leading-6 text-tertiary">
+            <p className="mt-2.5 text-small leading-6 text-tertiary">
               Not published to npm yet — this is where it is going. Today it
               runs from a clone:{' '}
               <Link
@@ -51,7 +51,7 @@ export function Hero() {
               href={EXAMPLE_PR_URL}
               target="_blank"
               rel="noreferrer noopener"
-              className="group inline-flex items-center gap-1.5 rounded-sm text-[14px] font-medium text-link transition-colors hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="group inline-flex items-center gap-1.5 rounded-sm text-body font-medium text-link transition-colors hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               See a real pull request
               <ArrowRight
@@ -59,7 +59,7 @@ export function Hero() {
                 aria-hidden="true"
               />
             </a>
-            <p className="text-[14px] text-tertiary">
+            <p className="text-body text-tertiary">
               No account needed to extract your first strings.
             </p>
           </div>

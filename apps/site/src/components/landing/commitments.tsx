@@ -35,7 +35,7 @@ const COMMITMENTS = [
 export function Commitments() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-      <h2 className="max-w-2xl text-[26px] font-semibold leading-tight tracking-[-0.015em] text-primary">
+      <h2 className="max-w-2xl font-display text-headline font-semibold tracking-[-0.015em] text-primary">
         Three commitments that shape everything else
       </h2>
 
@@ -55,13 +55,11 @@ export function Commitments() {
                 }
                 aria-hidden="true"
               />
-              <h3 className="mt-3 text-[17px] font-semibold text-primary">
+              <h3 className="mt-3 text-prose font-semibold text-primary">
                 {title}
               </h3>
-              <p className="mt-2 text-[14px] leading-6 text-secondary">
-                {body}
-              </p>
-              <p className="mt-3 text-[13px] leading-5 text-tertiary">
+              <p className="mt-2 text-body leading-6 text-secondary">{body}</p>
+              <p className="mt-3 text-small leading-5 text-tertiary">
                 {status}
               </p>
             </StateRule>

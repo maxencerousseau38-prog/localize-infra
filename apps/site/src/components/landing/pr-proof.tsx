@@ -34,15 +34,15 @@ export function PrProof() {
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
           <div>
-            <h2 className="text-[26px] font-semibold leading-tight tracking-[-0.015em] text-primary">
+            <h2 className="font-display text-headline font-semibold tracking-[-0.015em] text-primary">
               The deliverable is a pull request
             </h2>
-            <p className="mt-4 text-[15px] leading-7 text-secondary">
+            <p className="mt-4 text-prose text-secondary">
               Not a dashboard you have to log into. Your existing review process
               already knows how to handle a diff — so translations arrive the
               same way every other change does.
             </p>
-            <p className="mt-4 text-[15px] leading-7 text-secondary">
+            <p className="mt-4 text-prose text-secondary">
               This is the real file from a real run: 22 seconds, end to end,
               against a live repository.
             </p>
@@ -50,7 +50,7 @@ export function PrProof() {
               href={EXAMPLE_PR_URL}
               target="_blank"
               rel="noreferrer noopener"
-              className="mt-5 inline-flex items-center gap-1.5 rounded-sm text-[14px] font-medium text-link hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-sm text-body font-medium text-link hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               Open the pull request on GitHub
               <ArrowUpRight className="size-3.5" aria-hidden="true" />
@@ -64,25 +64,25 @@ export function PrProof() {
                   className="size-4 shrink-0 text-confident"
                   aria-hidden="true"
                 />
-                <span className="text-[14px] font-medium text-primary">
+                <span className="text-body font-medium text-primary">
                   Add translations (de, ja, es, ar, pt-BR)
                 </span>
                 <Badge tone="confident">Merged</Badge>
               </div>
 
               <div className="flex items-center justify-between border-b border-subtle px-4 py-2">
-                <code className="font-mono text-[12px] text-tertiary">
+                <code className="font-mono text-caption text-tertiary">
                   locales/es.json
                 </code>
                 <span
-                  className="font-mono text-[12px] text-confident-text"
+                  className="font-mono text-caption text-confident-text"
                   data-numeric
                 >
                   +6
                 </span>
               </div>
 
-              <pre className="overflow-x-auto px-4 py-3 text-[12px] leading-6">
+              <pre className="overflow-x-auto px-4 py-3 text-caption leading-6">
                 <code className="font-mono">
                   {DIFF_LINES.map((line) => (
                     <span
@@ -105,7 +105,7 @@ export function PrProof() {
                 </code>
               </pre>
             </div>
-            <figcaption className="mt-3 text-[13px] text-tertiary">
+            <figcaption className="mt-3 text-small text-tertiary">
               Output of <code className="font-mono">init --open-pr</code> on a
               Vite + React project.
             </figcaption>

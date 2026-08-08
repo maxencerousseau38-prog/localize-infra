@@ -34,11 +34,11 @@ export function HeroOutput() {
     <div aria-hidden="true" className="select-none space-y-4">
       <div className="overflow-hidden rounded-lg border border-line bg-surface">
         <div className="border-b border-subtle px-4 py-2">
-          <span className="font-mono text-[11px] uppercase tracking-wide text-tertiary">
+          <span className="font-mono text-micro uppercase tracking-wide text-tertiary">
             Terminal
           </span>
         </div>
-        <div className="px-4 py-3 font-mono text-[12px] leading-6">
+        <div className="px-4 py-3 font-mono text-caption leading-6">
           <div className="flex gap-2">
             <span className="text-tertiary">$</span>
             <span className="text-primary">npx @localize-infra/cli init</span>
@@ -59,14 +59,14 @@ export function HeroOutput() {
       <div className="overflow-hidden rounded-lg border border-line bg-canvas">
         <div className="flex items-center gap-2 border-b border-subtle px-4 py-2">
           <FileJson className="size-3.5 text-tertiary" />
-          <span className="font-mono text-[12px] text-secondary">
+          <span className="font-mono text-caption text-secondary">
             locales/en.json
           </span>
-          <span className="ms-auto font-mono text-[11px] text-confident-text">
+          <span className="ms-auto font-mono text-micro text-confident-text">
             new
           </span>
         </div>
-        <pre className="overflow-x-auto px-4 py-3 font-mono text-[12px] leading-6 text-secondary">
+        <pre className="overflow-x-auto px-4 py-3 font-mono text-caption leading-6 text-secondary">
           <code>{FILE_LINES.join('\n')}</code>
         </pre>
       </div>

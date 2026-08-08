@@ -41,13 +41,13 @@ export function SiteFooter() {
           <p className="font-semibold tracking-tight text-primary">
             Localize&nbsp;Infra
           </p>
-          <p className="mt-2 max-w-56 text-[13px] leading-5 text-tertiary">
+          <p className="mt-2 max-w-56 text-small leading-5 text-tertiary">
             Localization infrastructure for teams who keep their strings in Git.
           </p>
         </div>
         {GROUPS.map((group) => (
           <nav key={group.title} aria-label={group.title}>
-            <h2 className="text-[12px] font-medium uppercase tracking-wide text-tertiary">
+            <h2 className="text-caption font-medium uppercase tracking-wide text-tertiary">
               {group.title}
             </h2>
             <ul className="mt-3 space-y-2">
@@ -58,14 +58,14 @@ export function SiteFooter() {
                       href={link.href}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="rounded-sm text-[14px] text-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      className="rounded-sm text-body text-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                     >
                       {link.label}
                     </a>
                   ) : (
                     <Link
                       href={link.href}
-                      className="rounded-sm text-[14px] text-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      className="rounded-sm text-body text-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                     >
                       {link.label}
                     </Link>
@@ -78,7 +78,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-subtle">
         <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6">
-          <p className="text-[13px] text-tertiary">
+          <p className="text-small text-tertiary">
             Early access. The CLI works today; the hosted product is in
             development.
           </p>

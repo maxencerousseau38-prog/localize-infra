@@ -23,6 +23,10 @@ const TYPE_SCALE = [
   'title',
   'display',
   'display-lg',
+  // Editorial steps, used by apps/site only.
+  'prose',
+  'headline',
+  'display-xl',
 ] as const;
 
 const twMerge = extendTailwindMerge({

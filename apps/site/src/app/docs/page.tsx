@@ -41,12 +41,15 @@ function Section({
   return (
     <section aria-labelledby={id} className="scroll-mt-24 pt-14 first:pt-0">
       <div className="flex flex-wrap items-center gap-3">
-        <h2 id={id} className="text-[22px] font-semibold text-primary">
+        <h2
+          id={id}
+          className="font-display text-headline font-semibold text-primary"
+        >
           {title}
         </h2>
         {badge}
       </div>
-      <div className="mt-3 max-w-[68ch] space-y-3 text-[15px] leading-7 text-secondary">
+      <div className="mt-3 max-w-[68ch] space-y-3 text-prose text-secondary">
         {children}
       </div>
     </section>
@@ -283,7 +286,7 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                   <li key={step} className="flex gap-3">
                     <span
                       aria-hidden="true"
-                      className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-subtle font-mono text-[11px] text-tertiary"
+                      className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-subtle font-mono text-micro text-tertiary"
                     >
                       {index + 1}
                     </span>
@@ -322,13 +325,13 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                     <tr className="border-b border-line">
                       <th
                         scope="col"
-                        className="py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                        className="py-2.5 pe-4 text-start text-caption font-medium uppercase tracking-wide text-tertiary"
                       >
                         Flag
                       </th>
                       <th
                         scope="col"
-                        className="py-2.5 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                        className="py-2.5 text-start text-caption font-medium uppercase tracking-wide text-tertiary"
                       >
                         Meaning
                       </th>
@@ -339,14 +342,14 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                       <tr key={row.flag} className="border-b border-subtle">
                         <th
                           scope="row"
-                          className="py-3 pe-4 text-start align-top font-mono text-[13px] font-normal text-primary"
+                          className="py-3 pe-4 text-start align-top font-mono text-small font-normal text-primary"
                         >
                           {row.flag}
                           {row.value ? (
                             <span className="text-tertiary"> {row.value}</span>
                           ) : null}
                         </th>
-                        <td className="py-3 align-top text-[14px] leading-6 text-secondary">
+                        <td className="py-3 align-top text-body leading-6 text-secondary">
                           {row.detail}
                         </td>
                       </tr>
@@ -366,19 +369,19 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                     <tr className="border-b border-line">
                       <th
                         scope="col"
-                        className="py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                        className="py-2.5 pe-4 text-start text-caption font-medium uppercase tracking-wide text-tertiary"
                       >
                         Variable
                       </th>
                       <th
                         scope="col"
-                        className="py-2.5 pe-4 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                        className="py-2.5 pe-4 text-start text-caption font-medium uppercase tracking-wide text-tertiary"
                       >
                         Read by
                       </th>
                       <th
                         scope="col"
-                        className="py-2.5 text-start text-[12px] font-medium uppercase tracking-wide text-tertiary"
+                        className="py-2.5 text-start text-caption font-medium uppercase tracking-wide text-tertiary"
                       >
                         Purpose
                       </th>
@@ -425,14 +428,14 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                       <tr key={name} className="border-b border-subtle">
                         <th
                           scope="row"
-                          className="py-3 pe-4 text-start align-top font-mono text-[13px] font-normal text-primary"
+                          className="py-3 pe-4 text-start align-top font-mono text-small font-normal text-primary"
                         >
                           {name}
                         </th>
-                        <td className="py-3 pe-4 align-top text-[13px] text-tertiary">
+                        <td className="py-3 pe-4 align-top text-small text-tertiary">
                           {readBy}
                         </td>
-                        <td className="py-3 align-top text-[14px] leading-6 text-secondary">
+                        <td className="py-3 align-top text-body leading-6 text-secondary">
                           {purpose}
                         </td>
                       </tr>
@@ -453,13 +456,13 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                     key={framework.name}
                     className="rounded-lg border border-line p-4"
                   >
-                    <h3 className="text-[15px] font-semibold text-primary">
+                    <h3 className="text-subtitle font-semibold text-primary">
                       {framework.name}
                     </h3>
-                    <p className="mt-1.5 text-[14px] leading-6 text-secondary">
+                    <p className="mt-1.5 text-body leading-6 text-secondary">
                       Detected by {framework.signal}.
                     </p>
-                    <p className="mt-1.5 font-mono text-[12px] leading-5 text-tertiary">
+                    <p className="mt-1.5 font-mono text-caption leading-5 text-tertiary">
                       Scans: {framework.globs}
                     </p>
                   </div>
@@ -496,7 +499,7 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
               </ul>
 
               <StateRule tone="degraded" className="mt-6">
-                <h3 className="text-[15px] font-semibold text-primary">
+                <h3 className="text-subtitle font-semibold text-primary">
                   Known gap: elements containing expressions
                 </h3>
                 <p className="mt-2">
@@ -587,13 +590,13 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                     key={refusal.when}
                     className="rounded-lg border border-line p-4"
                   >
-                    <h3 className="text-[14px] font-semibold text-primary">
+                    <h3 className="text-body font-semibold text-primary">
                       {refusal.when}
                     </h3>
-                    <p className="mt-2 overflow-x-auto font-mono text-[12px] leading-5 text-failed-text">
+                    <p className="mt-2 overflow-x-auto font-mono text-caption leading-5 text-failed-text">
                       {refusal.message}
                     </p>
-                    <p className="mt-2 text-[14px] leading-6 text-secondary">
+                    <p className="mt-2 text-body leading-6 text-secondary">
                       {refusal.fix}
                     </p>
                   </div>
