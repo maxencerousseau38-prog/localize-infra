@@ -201,6 +201,32 @@ Called out explicitly because it is invisible in a frontend plan and is the real
 
 ---
 
+## Delivered so far — and where it diverged from this plan
+
+Recorded here rather than by renumbering the milestones below, because the
+sequencing argument in this document is still the one being followed and
+rewriting it would erase the reasoning that produced it.
+
+| Shipped | Corresponds to | Notes |
+|---|---|---|
+| `packages/ui` tokens + first primitives | FE-0 | As planned. |
+| `apps/site` — 5 static pages | FE-1, partially | Marketing surface only. **Docs and benchmarks pages are not built**; `/quality` publishes CI-verified results and states plainly that human evaluation has not happened. |
+| `packages/ui` full component library | FE-0, completed | Forms, overlays, tables, feedback, patterns, command palette. |
+| `apps/web` — shell, routing, `/design` gallery | **FE-2, shell only** | Taken out of order, deliberately: the shell needs no backend. Auth does, so it is absent. |
+
+**`apps/web` ships with six of its seven routes stating they are not built.**
+That is the honest consequence of building the shell before Track B: there is
+no database, no account, and no persisted project for those screens to read.
+An e2e test asserts each one says so, so the gap cannot quietly become a
+mock. The remaining route, `/design`, renders the component library itself and
+needs no backend.
+
+This does not unblock FE-2 onward. Everything those milestones actually
+deliver — tenancy, real projects, the ambiguity queue — still waits on
+Track B.
+
+---
+
 ## Complexity & sequencing summary
 
 | Milestone | Complexity | Blocked by | Ships value to |

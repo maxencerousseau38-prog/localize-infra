@@ -306,6 +306,134 @@
   --duration-micro: 100ms;
   --duration-standard: 150ms;
   --duration-emphasis: 200ms;
+
+  --animate-fade-in: li-fade-in var(--duration-standard) var(--ease-standard);
+  --animate-fade-out: li-fade-out var(--duration-standard) var(--ease-standard);
+  --animate-dialog-in: li-dialog-in var(--duration-emphasis)
+    var(--ease-standard);
+  --animate-dialog-out: li-dialog-out var(--duration-standard)
+    var(--ease-standard);
+  --animate-pop-in: li-pop-in var(--duration-standard) var(--ease-standard);
+  --animate-pop-out: li-pop-out var(--duration-micro) var(--ease-standard);
+  --animate-sheet-in: li-sheet-in var(--duration-emphasis) var(--ease-standard);
+  --animate-sheet-out: li-sheet-out var(--duration-standard)
+    var(--ease-standard);
+  --animate-sheet-in-start: li-sheet-in-start var(--duration-emphasis)
+    var(--ease-standard);
+  --animate-sheet-out-start: li-sheet-out-start var(--duration-standard)
+    var(--ease-standard);
+  --animate-shimmer: li-shimmer 1.2s linear infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Motion — the complete set. Transform and opacity only, nothing
+   over 200ms, and every one disabled by the reduced-motion block
+   at the end of this file.
+   Defined here rather than pulled from an animation library so the
+   system cannot accumulate motion it never specified.
+   ───────────────────────────────────────────────────────────── */
+@keyframes li-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes li-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes li-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes li-dialog-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+}
+@keyframes li-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes li-pop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+/* Leading-edge sheets (navigation).
+
+   `transform` has no logical equivalent, so the direction is carried in a
+   custom property instead. These sheets are pinned with `start-0`, which IS
+   RTL-aware: in Arabic the panel sits on the right, and a hard-coded
+   translateX(-100%) would slide it in from the opposite side to the one it
+   occupies. --li-inline-start-sign flips that. */
+@keyframes li-sheet-in-start {
+  from {
+    transform: translateX(calc(-100% * var(--li-inline-start-sign, 1)));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes li-sheet-out-start {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% * var(--li-inline-start-sign, 1)));
+  }
+}
+
+@keyframes li-sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes li-sheet-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes li-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -319,6 +447,14 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Inherited sign used by transforms that need to follow the inline axis.
+     Scoped to [dir] rather than :dir() so it works in every browser we
+     support, and applied to any RTL subtree, not only the document root —
+     a single RTL panel inside an LTR page must animate correctly too. */
+  [dir="rtl"] {
+    --li-inline-start-sign: -1;
   }
 
   body {

@@ -20,7 +20,7 @@
 - `services/github-app` (propriétaire) — ouverture de PR via Octokit.
 - Validé de bout en bout : une vraie PR ouverte en 22 s sur un dépôt réel.
 
-**Frontend (FE-0)**
+**Frontend**
 - `packages/ui` (propriétaire) — tokens de design en 3 couches, primitives.
   Livré en **source**, pas en `dist` : un artefact compilé partagé entre
   paquets a déjà causé un bug de production ici (correctif de sécurité présent
@@ -30,6 +30,15 @@
   aujourd'hui.** `/quality` ne publie que les résultats vérifiés en CI et
   déclare que l'évaluation humaine n'a pas eu lieu ; `/pricing` ne publie pas
   de tarifs non modélisés ; `/security` divulgue l'écart de résidence UE.
+
+- `apps/web` (propriétaire) — coquille applicative : barre latérale 240 px
+  (feuille latérale sous 1024 px), barre supérieure 48 px, palette de commandes
+  ⌘K, et la galerie `/design` qui rend toute la bibliothèque de composants.
+  **Six de ses sept routes déclarent qu'elles ne sont pas construites**, faute
+  de backend ; un test e2e vérifie que chacune le dit. Ne jamais remplacer ces
+  écrans par des données inventées — c'est la contrainte, pas un provisoire.
+  CSP à nonce par requête (`src/proxy.ts`), à l'inverse d'`apps/site` : les deux
+  configurations documentent leur arbitrage et pourquoi il ne se transpose pas.
 
 **N'existe pas encore** : base de données, comptes, organisations, équipes,
 permissions, facturation, projets persistants, tableau de bord.

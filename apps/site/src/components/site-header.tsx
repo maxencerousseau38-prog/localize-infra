@@ -1,7 +1,6 @@
 import { GITHUB_REPO_URL } from '@/lib/constants';
-import { Button } from '@localize-infra/ui';
+import { Button, ThemeToggle } from '@localize-infra/ui';
 import Link from 'next/link';
-import { ThemeToggle } from './theme-toggle';
 
 const NAV = [
   { href: '/quality', label: 'Quality' },
