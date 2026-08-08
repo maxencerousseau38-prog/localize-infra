@@ -296,7 +296,8 @@
      structure at large sizes. Titles only; never body copy. */
   --font-display: var(--font-archivo), var(--font-inter), sans-serif;
 
-  /* Type scale — eight steps, and nothing outside them.
+  /* Type scale — the application register. Eight steps here, three more for
+     the editorial register below; nothing outside the eleven.
      Replaces 15 ad-hoc pixel sizes across 256 occurrences; a test enforces it.
      Sizes stay in px because this is a data-dense product where a 14px row has
      to be 14px, not 14px scaled by a root the user changed. */

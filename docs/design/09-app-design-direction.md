@@ -149,20 +149,46 @@ display/body separation the house rules require, while keeping Inter — which i
 genuinely the right UI face here — for the dense work. It is not a serif
 revival, not a geometric humanist, and not Inter-at-40px.
 
-**The named scale replaces all 15 ad-hoc sizes.** Tokens, not arbitrary pixels:
+**The named scale replaces all 15 ad-hoc sizes.** Tokens, not arbitrary pixels.
+
+Eleven steps across two registers. The application uses the first eight and is
+forbidden the last three; the marketing site may use all eleven.
+
+**Shared — the application register (8):**
 
 | Token | Size / line | Role |
 |---|---|---|
-| `display-lg` | 40 / 1.05 | Marketing hero only |
+| `display-lg` | 40 / 1.05 | Largest title an app surface may use |
 | `display` | 28 / 1.15 | Page title |
 | `title` | 20 / 1.3 | Section heading |
-| `subtitle` | 16 / 1.5 | Card title, lede |
+| `subtitle` | 16 / 1.5 | Card title, small heading |
 | `body` | 14 / 1.5 | Default |
 | `small` | 13 / 1.5 | Secondary, help |
 | `caption` | 12 / 1.35 | Labels, table headers, meta |
 | `micro` | 11 / 1.3 | Chips, shortcuts |
 
-Eight steps. Anything not on the scale is a defect, and a test enforces it.
+**Editorial — `apps/site` only (3):**
+
+| Token | Size / line | Role |
+|---|---|---|
+| `display-xl` | 52 / 1.02 | The landing hero, and nothing else |
+| `headline` | 24 / 1.25 | Section heading on a marketing page |
+| `prose` | 17 / 1.65 | Long-form body copy |
+
+The split is the type-level expression of §20: one system, two registers. A
+52px hero or a 1.65 prose measure on a data surface would be the site's voice
+in the wrong room, so the boundary is enforced in both directions — a test
+fails on an ad-hoc pixel size anywhere, and on an editorial step appearing
+inside `apps/web`.
+
+The editorial steps exist because the site had the same disease as the app in
+its own dialect: section headings at 22px, 26px and 28px doing one job, and
+body copy at 15px, 17px and 18px doing another. `headline` and `prose` each
+collapse three sizes into one decision. Prose moved 15 → 17 rather than being
+held at its old size: 15px is small for marketing copy, and the 1.87 line
+height it carried was compensating for that.
+
+Anything not on the scale is a defect, and a test enforces it.
 
 ## 8. Colour system
 

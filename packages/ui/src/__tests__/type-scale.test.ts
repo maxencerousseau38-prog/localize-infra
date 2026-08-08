@@ -11,8 +11,9 @@ import { describe, expect, it } from 'vitest';
  * nothing stopped the next component inventing a sixteenth size, and nothing
  * did stop it.
  *
- * The scale is eight named steps (docs/design/09-app-design-direction.md §7).
- * Anything outside it is a defect.
+ * The scale is eleven named steps across two registers — eight the app uses
+ * and three the site adds (docs/design/09-app-design-direction.md §7).
+ * Anything outside them is a defect, in either direction.
  *
  * apps/site is now in scope too. It carries the editorial register — three
  * further steps (prose, headline, display-xl) that the app never uses — but it

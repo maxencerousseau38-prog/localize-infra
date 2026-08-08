@@ -2,7 +2,8 @@ import { type ClassValue, clsx } from 'clsx';
 import { extendTailwindMerge } from 'tailwind-merge';
 
 /**
- * The eight steps of the type scale (tokens.css, `--text-*`).
+ * Every step of the type scale (tokens.css, `--text-*`) — the application's
+ * eight plus the site's three editorial steps.
  *
  * tailwind-merge has to be told about these. Out of the box it knows Tailwind's
  * default font-size names, so a custom `text-body` looks to it like a *colour*
