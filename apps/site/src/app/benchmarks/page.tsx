@@ -8,7 +8,7 @@ import {
   localeName,
   rate,
 } from '@/lib/benchmarks';
-import { GITHUB_REPO_URL } from '@/lib/constants';
+import { EVAL_PACKAGE_URL } from '@/lib/constants';
 import { Badge, StateRule } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -457,12 +457,12 @@ export default function BenchmarksPage() {
                 The corpus, the translations, the checks and the script that
                 produces the numbers on this page are all in the{' '}
                 <a
-                  href={GITHUB_REPO_URL}
+                  href={EVAL_PACKAGE_URL}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
-                  open-source repository
+                  MIT-licensed evaluation package
                 </a>
                 . Run{' '}
                 <code className="rounded-sm bg-raised px-1.5 py-0.5 font-mono text-[12px] text-secondary">

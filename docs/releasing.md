@@ -77,10 +77,16 @@ one-line `npx` that actually translates requires a hosted API, which is Track B.
 Until that exists, the landing page and `/docs` must keep saying so — publishing
 changes the wording, not the disclosure.
 
-## Unresolved: repository licensing
+## Licensing
 
-The root `LICENSE` is unscoped MIT, while `packages/ui` and every app are
-`UNLICENSED` and proprietary. A root MIT licence arguably grants MIT rights over
-the entire repository, including the proprietary parts. The three packages above
-are genuinely MIT and now carry their own copy, but the root file's scope is a
-legal question, not an engineering one, and has been left alone deliberately.
+Resolved. The root `LICENSE` now states its scope explicitly: MIT applies only
+to `packages/cli`, `packages/core`, `packages/eval` and `packages/schemas`, and
+everything else is proprietary with all rights reserved. Each of the four MIT
+packages carries its own copy of the MIT text so the licence travels with a
+published tarball, and each proprietary directory carries an explicit notice so
+nobody browsing it assumes the root licence applies.
+
+Before publishing, confirm the copyright holder. Every notice reads
+"the localize-infra contributors", which is a reasonable default for the MIT
+packages but is probably not the entity you want asserting rights over the
+proprietary ones. That string is the one thing here a lawyer would change.

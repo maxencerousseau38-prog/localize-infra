@@ -89,8 +89,21 @@ Stripe : prix récurrents fixes uniquement. Jamais `metered`.
 21st : primitives dashboard. Figma : seulement si design system existant.
 
 ## Open source
-Ouverts : cli, core, adapters, sdk-*, schemas, eval.
-Propriétaires : context, agents, api, web.
+**Le fichier `LICENSE` à la racine fait foi** : il délimite explicitement les
+deux licences et énumère les chemins réels. Ne pas laisser cette section diverger.
+
+Ouverts (MIT) : `packages/cli`, `packages/core`, `packages/eval`,
+`packages/schemas`. Chacun porte sa propre copie du texte MIT, pour que la
+licence voyage avec le code publié ou copié.
+
+Propriétaires (tous droits réservés) : `packages/ui`, `apps/api`, `apps/site`,
+`apps/web`, `services/github-app`. Chacun porte un avis explicite, pour qu'on ne
+puisse pas supposer que le MIT de la racine s'applique en parcourant un dossier.
+
+**Tout ajout est propriétaire par défaut**, sauf s'il est placé dans l'un des
+chemins ouverts ci-dessus ou que `LICENSE` est amendé. `adapters` et `sdk-*`
+sont prévus comme ouverts mais n'existent pas encore.
+
 Le cœur ouvert doit être utilisable seul.
 
 ## Tests obligatoires en CI
