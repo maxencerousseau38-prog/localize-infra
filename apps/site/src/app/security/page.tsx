@@ -3,6 +3,7 @@ import { Badge, StateRule } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/security' },
   title: 'Security & data',
   description:
     'Exactly what leaves your machine, which sub-processors receive it, GitHub App permissions, and where our data residency commitment currently falls short.',

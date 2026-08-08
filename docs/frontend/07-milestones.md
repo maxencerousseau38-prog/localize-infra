@@ -210,9 +210,23 @@ rewriting it would erase the reasoning that produced it.
 | Shipped | Corresponds to | Notes |
 |---|---|---|
 | `packages/ui` tokens + first primitives | FE-0 | As planned. |
-| `apps/site` — 5 static pages | FE-1, partially | Marketing surface only. **Docs and benchmarks pages are not built**; `/quality` publishes CI-verified results and states plainly that human evaluation has not happened. |
+| `apps/site` — 7 static pages | **FE-1, complete** | Marketing, docs and benchmarks. Every published figure is generated from the corpus, not written by hand. |
 | `packages/ui` full component library | FE-0, completed | Forms, overlays, tables, feedback, patterns, command palette. |
 | `apps/web` — shell, routing, `/design` gallery | **FE-2, shell only** | Taken out of order, deliberately: the shell needs no backend. Auth does, so it is absent. |
+
+**FE-1 is now complete.** `/docs` documents the CLI that exists — one command,
+eight flags, the extraction limits it has not solved — and states that the
+package is not published to npm, which is why the landing page no longer
+presents `npx` as something a visitor can run today. `/benchmarks` publishes
+the one comparison the committed data supports: the same model with and
+without source-code context, scored deterministically. Building it surfaced
+that `/quality` had been reporting "Pass" for two checks the corpus never
+exercised; those now read "No data".
+
+Still not built from the original FE-1 scope: nothing. Fumadocs and MDX were
+named in the plan as the docs stack and were not used — the documentation is
+one page of static JSX, which is the right size for a CLI with one command,
+and adding a docs framework for it would have been the larger mistake.
 
 **`apps/web` ships with six of its seven routes stating they are not built.**
 That is the honest consequence of building the shell before Track B: there is

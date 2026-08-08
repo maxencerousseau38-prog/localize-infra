@@ -1,6 +1,7 @@
 import { EXAMPLE_PR_URL, INSTALL_COMMAND } from '@/lib/constants';
 import { CopyCommand } from '@localize-infra/ui';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { HeroOutput } from './hero-output';
 
 export function Hero() {
@@ -29,6 +30,20 @@ export function Hero() {
 
           <div className="mt-9 max-w-xl">
             <CopyCommand command={INSTALL_COMMAND} />
+            {/* The command is the destination, not the current state. Leaving
+                it unqualified would mean the site's primary action fails for
+                everyone who copies it. */}
+            <p className="mt-2.5 text-[13px] leading-6 text-tertiary">
+              Not published to npm yet — this is where it is going. Today it
+              runs from a clone:{' '}
+              <Link
+                href="/docs#install"
+                className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              >
+                see the docs
+              </Link>
+              .
+            </p>
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">

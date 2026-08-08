@@ -9,8 +9,15 @@ const GROUPS: {
     title: 'Product',
     links: [
       { href: '/pricing', label: 'Pricing' },
-      { href: '/quality', label: 'Quality' },
       { href: '/roadmap', label: 'Roadmap' },
+    ],
+  },
+  {
+    title: 'Evidence',
+    links: [
+      { href: '/docs', label: 'Documentation' },
+      { href: '/benchmarks', label: 'Benchmarks' },
+      { href: '/quality', label: 'Quality' },
     ],
   },
   {
@@ -29,7 +36,7 @@ const GROUPS: {
 export function SiteFooter() {
   return (
     <footer className="border-t border-subtle">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-5">
         <div className="lg:col-span-1">
           <p className="font-semibold tracking-tight text-primary">
             Localize&nbsp;Infra

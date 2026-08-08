@@ -4,13 +4,17 @@
   "private": false,
   "license": "MIT",
   "type": "module",
+  "exports": {
+    "./benchmarks.json": "./src/report/benchmarks.json"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "corpus:build": "tsx src/corpus/build.ts",
     "translate:run": "tsx src/conditions/translate.ts",
     "human-eval:generate": "tsx src/human-eval/export.ts",
-    "report:build": "tsx src/report/build.ts"
+    "report:build": "tsx src/report/build.ts",
+    "benchmarks:build": "tsx src/report/benchmarks.ts"
   },
   "dependencies": {
     "@formatjs/icu-messageformat-parser": "^2.9.4",

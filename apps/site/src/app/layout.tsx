@@ -1,5 +1,6 @@
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { SITE_URL } from '@/lib/routes';
 import { ThemeScript } from '@localize-infra/ui';
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
@@ -21,7 +22,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://localize-infra.dev'),
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: '/' },
   title: {
     default: 'Localize Infra — translations that live in Git',
     template: '%s · Localize Infra',
