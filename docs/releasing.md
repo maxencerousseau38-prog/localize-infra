@@ -86,7 +86,12 @@ packages carries its own copy of the MIT text so the licence travels with a
 published tarball, and each proprietary directory carries an explicit notice so
 nobody browsing it assumes the root licence applies.
 
-Before publishing, confirm the copyright holder. Every notice reads
-"the localize-infra contributors", which is a reasonable default for the MIT
-packages but is probably not the entity you want asserting rights over the
-proprietary ones. That string is the one thing here a lawyer would change.
+The copyright holder is **Rousseau Software SAS**, on all eleven notices — the
+MIT grant and the proprietary reservations alike. A test asserts every notice
+names one identical holder, so a partial rename fails the build rather than
+leaving two entities asserting rights over one codebase.
+
+One consequence worth knowing: a single-holder MIT line stays accurate only
+while Rousseau Software SAS is the sole author of the open packages. If you
+accept outside pull requests, contributors retain copyright in their own
+patches — at that point you want either a CLA or a "and contributors" line.
