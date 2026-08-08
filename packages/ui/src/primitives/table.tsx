@@ -167,6 +167,11 @@ export function SortableTH({
  * Empty state rendered INSIDE the table body, never replacing the table
  * (design system §4.3) — so the column headers stay visible and the user can
  * still see what they were looking for.
+ *
+ * The cell contributes horizontal padding only. Its intended child is
+ * `EmptyState`, which brings its own vertical rhythm; adding more here stacked
+ * the two and produced a 380px-tall blank row for one line of text. A child
+ * that is bare text should be wrapped, or given its own padding.
  */
 export function TableEmpty({
   colSpan,
@@ -177,7 +182,7 @@ export function TableEmpty({
 }) {
   return (
     <tr>
-      <td colSpan={colSpan} className="px-3 py-10 text-center">
+      <td colSpan={colSpan} className="px-3 text-center">
         {children}
       </td>
     </tr>
