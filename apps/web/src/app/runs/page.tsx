@@ -12,6 +12,7 @@ import {
   type Tone,
 } from '@localize-infra/ui';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = { title: 'Runs' };
 
@@ -65,14 +66,21 @@ export default function RunsPage() {
             {SAMPLE_RUNS.map((run) => {
               const state = STATE[run.state];
               return (
-                <TR key={run.id}>
+                <TR key={run.id} className="relative">
                   <TD>
                     <Badge tone={state.tone}>{state.label}</Badge>
                   </TD>
                   <TD>
-                    <span className="font-mono text-caption text-secondary">
+                    {/* One focus stop per row, and the whole row is the click
+                        target. The accessible name says which run, because
+                        "localize-infra init" repeats down the column. */}
+                    <Link
+                      href={`/runs/${run.id}`}
+                      aria-label={`Run ${run.id.replace('run-', '')}, ${state.label.toLowerCase()}`}
+                      className="font-mono text-caption text-secondary after:absolute after:inset-0 hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                    >
                       {run.trigger}
-                    </span>
+                    </Link>
                   </TD>
                   <TD numeric>
                     {run.localesFailed > 0 ? (

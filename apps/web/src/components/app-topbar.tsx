@@ -2,7 +2,7 @@
 
 import { SidebarFootnote, SidebarNav } from '@/components/app-sidebar';
 import { SampleChip } from '@/components/sample';
-import { ALL_ROUTES, routeByHref } from '@/lib/nav';
+import { ALL_ROUTES, resolveRoute } from '@/lib/nav';
 import {
   type CommandItem,
   CommandPalette,
@@ -15,6 +15,7 @@ import {
   useCommandPaletteHotkey,
 } from '@localize-infra/ui';
 import { Menu, Search } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
@@ -33,7 +34,7 @@ export function AppTopbar() {
 
   useCommandPaletteHotkey(() => setPaletteOpen((open) => !open));
 
-  const current = routeByHref(pathname);
+  const { route: current, detail } = resolveRoute(pathname);
 
   const items: CommandItem[] = React.useMemo(
     () =>
@@ -95,9 +96,32 @@ export function AppTopbar() {
               <li aria-hidden="true" className="hidden text-tertiary sm:block">
                 /
               </li>
-              <li className="truncate font-medium text-primary">
-                {current.label}
+              {/* On a detail page the parent stays a link, so the breadcrumb
+                  is a way back rather than a label. */}
+              <li className="truncate">
+                {detail ? (
+                  <Link
+                    href={current.href}
+                    className="rounded-sm text-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                  >
+                    {current.label}
+                  </Link>
+                ) : (
+                  <span className="font-medium text-primary">
+                    {current.label}
+                  </span>
+                )}
               </li>
+              {detail ? (
+                <>
+                  <li aria-hidden="true" className="text-tertiary">
+                    /
+                  </li>
+                  <li className="truncate font-mono font-medium text-primary">
+                    {detail}
+                  </li>
+                </>
+              ) : null}
               {/* Third of the three sample markers. Present on every sample
                   route, so a reader who lands mid-app still sees it. */}
               {current.sample ? (

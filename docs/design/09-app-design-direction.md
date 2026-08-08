@@ -300,8 +300,24 @@ Two blocked-work cards (ambiguity, review) and a recent-runs list. If nothing is
 blocked, it says so plainly and does not manufacture a metric.
 
 **Runs** is a table: status, project, locales, duration, PR link, when. Status
-carries icon and text, never colour alone. Row opens detail. No chart — a run
-history chart would be decoration; the table is the information.
+carries icon and text, never colour alone. The whole row is a link to detail,
+with one focus stop and an accessible name that says which run — the trigger
+column repeats `localize-infra init` down the page. No chart: a run history
+chart would be decoration; the table is the information.
+
+**Run detail** opens with the pipeline, because a run is not an event with a
+status — it is a walk through detect → extract → translate → escalate → open a
+pull request, and it can stop or degrade at any step. Drawing the stages puts
+the failure *where it happened* instead of as a red badge at the top, and makes
+the product's workflow legible on the one screen where the reader already cares
+about it. It is an ordered list because the content genuinely is a sequence,
+which is the only thing that justifies numbering.
+
+Below it: one row per target language with what it produced, then failures with
+the provider's message reproduced verbatim. Paraphrasing that message destroys
+its only use, which is being searchable. A stage that never ran says so rather
+than rendering an empty success, and an unknown run id is a 404 rather than a
+page pretending the run exists.
 
 ## 17. Ambiguity
 

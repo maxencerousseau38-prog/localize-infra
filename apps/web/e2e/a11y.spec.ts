@@ -13,6 +13,7 @@ const ROUTES = [
   '/ambiguity',
   '/review',
   '/runs',
+  '/runs/run-7c1b',
   '/locales',
   '/settings',
   '/design',

@@ -125,3 +125,33 @@ export const ALL_ROUTES = [...PRIMARY_NAV, ...SECONDARY_NAV];
 export function routeByHref(href: string): NavRoute | undefined {
   return ALL_ROUTES.find((route) => route.href === href);
 }
+
+/**
+ * Resolves any path, including a detail page, to the nav entry it belongs under.
+ *
+ * A detail route like `/runs/run-7c1b` is not in the nav list, so an exact
+ * lookup returned nothing — which left run detail with no breadcrumb and, worse,
+ * no `Sample` chip. Losing one of the three sample markers on a page full of
+ * sample data is exactly what the contract exists to prevent.
+ *
+ * Returns the deepest matching parent plus the trailing segment, so the
+ * breadcrumb can read `Runs / 7c1b` and stay a way back rather than a label.
+ */
+export function resolveRoute(pathname: string): {
+  route: NavRoute | undefined;
+  detail?: string;
+} {
+  const exact = routeByHref(pathname);
+  if (exact) return { route: exact };
+
+  const parent = ALL_ROUTES.filter(
+    (route) => route.href !== '/' && pathname.startsWith(`${route.href}/`),
+  )
+    // Deepest wins, so a future nested route does not resolve to a shallower one.
+    .sort((a, b) => b.href.length - a.href.length)[0];
+
+  if (!parent) return { route: undefined };
+
+  const trailing = pathname.slice(parent.href.length + 1).split('/')[0];
+  return { route: parent, detail: trailing?.replace(/^run-/, '') };
+}

@@ -5,6 +5,7 @@ const ROUTES = [
   '/ambiguity',
   '/review',
   '/runs',
+  '/runs/run-7c1b',
   '/locales',
   '/settings',
   '/design',
@@ -174,7 +175,14 @@ test.describe('honesty about the missing backend', () => {
   // abandoning the design. They now render their real interface populated with
   // sample data, labelled at three levels at once. This suite asserts all three
   // are present, because any one of them alone could be missed.
-  const SAMPLE_ROUTES = ['/', '/ambiguity', '/review', '/runs', '/locales'];
+  const SAMPLE_ROUTES = [
+    '/',
+    '/ambiguity',
+    '/review',
+    '/runs',
+    '/runs/run-7c1b',
+    '/locales',
+  ];
 
   for (const route of SAMPLE_ROUTES) {
     test(`${route} labels its data as sample in the banner`, async ({
@@ -279,4 +287,61 @@ test.describe('responsive shell', () => {
       expect(overflow, `overflowed by ${overflow}px`).toBeLessThanOrEqual(0);
     });
   }
+});
+
+test.describe('run detail', () => {
+  test('a runs row opens its detail', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/runs', { waitUntil: 'networkidle' });
+
+    await page.getByRole('link', { name: /run 7c1b/i }).click();
+    await expect(page).toHaveURL(/\/runs\/run-7c1b$/);
+    await expect(
+      page.getByRole('heading', { level: 1, name: /run 7c1b/i }),
+    ).toBeVisible();
+  });
+
+  test('the pipeline shows every stage in order', async ({ page }) => {
+    await page.goto('/runs/run-7c1b', { waitUntil: 'networkidle' });
+
+    const stages = page
+      .getByRole('list', { name: 'Pipeline stages' })
+      .getByRole('listitem');
+    await expect(stages).toHaveCount(5);
+    // The order is the information — a pipeline out of sequence is wrong even
+    // if every stage is present.
+    await expect(stages.nth(0)).toContainText('Detect');
+    await expect(stages.nth(4)).toContainText('Pull request');
+  });
+
+  test('stage state reaches assistive technology as words', async ({
+    page,
+  }) => {
+    await page.goto('/runs/run-6a09', { waitUntil: 'networkidle' });
+    const stages = page
+      .getByRole('list', { name: 'Pipeline stages' })
+      .getByRole('listitem');
+
+    // The failed run stopped at Translate; the two stages after it never ran.
+    // Colour and glyph carry that to the eye, these words carry it to everyone.
+    await expect(stages.nth(2)).toContainText('Failed');
+    await expect(stages.nth(3)).toContainText('Did not run');
+  });
+
+  test('a failure shows the provider message verbatim', async ({ page }) => {
+    await page.goto('/runs/run-6a09', { waitUntil: 'networkidle' });
+    // Paraphrasing destroys its only use: being searchable.
+    await expect(
+      page.getByText('fetch failed — ECONNREFUSED 127.0.0.1:8787').first(),
+    ).toBeVisible();
+  });
+
+  test('a run that does not exist is a 404, not an empty page', async ({
+    page,
+  }) => {
+    const response = await page.goto('/runs/run-nope', {
+      waitUntil: 'domcontentloaded',
+    });
+    expect(response?.status()).toBe(404);
+  });
 });

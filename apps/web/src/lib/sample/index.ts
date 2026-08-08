@@ -271,4 +271,107 @@ export const SAMPLE_LOCALES: SampleLocale[] = [
   },
 ];
 
+/* ── Run detail ────────────────────────────────────────────────
+   A run is a traversal of the pipeline, so the detail view is the
+   pipeline with per-stage outcomes. The stages are the real ones the
+   CLI performs, in the order it performs them.
+   ───────────────────────────────────────────────────────────── */
+export type StageState = 'done' | 'partial' | 'failed' | 'skipped';
+
+export interface SampleRunStage {
+  name: string;
+  state: StageState;
+  /** The metric this stage produced, or why it did not run. */
+  detail: string;
+}
+
+export interface SampleLocaleResult {
+  code: string;
+  state: 'translated' | 'escalated' | 'failed';
+  strings: number;
+  escalated: number;
+  /** Verbatim provider or API message. Never paraphrased — it is what you search for. */
+  error?: string;
+}
+
+export interface SampleRunDetail extends SampleRun {
+  branch: string;
+  commit: string;
+  stages: SampleRunStage[];
+  localeResults: SampleLocaleResult[];
+}
+
+const SUCCEEDED_STAGES: SampleRunStage[] = [
+  { name: 'Detect', state: 'done', detail: 'Vite + React' },
+  { name: 'Extract', state: 'done', detail: '128 strings' },
+  { name: 'Translate', state: 'done', detail: '5 locales' },
+  { name: 'Escalate', state: 'done', detail: 'Nothing ambiguous' },
+  { name: 'Pull request', state: 'done', detail: '#142 merged' },
+];
+
+export const SAMPLE_RUN_DETAILS: Record<string, SampleRunDetail | undefined> = {
+  'run-8f2a': {
+    ...(SAMPLE_RUNS[0] as SampleRun),
+    branch: 'localize/add-translations',
+    commit: '4f9c2ab',
+    stages: SUCCEEDED_STAGES,
+    localeResults: [
+      { code: 'de', state: 'translated', strings: 128, escalated: 0 },
+      { code: 'ja', state: 'translated', strings: 128, escalated: 0 },
+      { code: 'es', state: 'translated', strings: 128, escalated: 0 },
+      { code: 'pt-BR', state: 'translated', strings: 128, escalated: 0 },
+      { code: 'ar', state: 'translated', strings: 128, escalated: 0 },
+    ],
+  },
+  'run-7c1b': {
+    ...(SAMPLE_RUNS[1] as SampleRun),
+    branch: 'localize/add-translations',
+    commit: '2b7e10d',
+    stages: [
+      { name: 'Detect', state: 'done', detail: 'Vite + React' },
+      { name: 'Extract', state: 'done', detail: '128 strings' },
+      { name: 'Translate', state: 'partial', detail: '4 of 5 locales' },
+      { name: 'Escalate', state: 'done', detail: '1 needs a decision' },
+      { name: 'Pull request', state: 'done', detail: '#141 open' },
+    ],
+    localeResults: [
+      { code: 'de', state: 'translated', strings: 128, escalated: 0 },
+      { code: 'ja', state: 'escalated', strings: 127, escalated: 1 },
+      { code: 'es', state: 'translated', strings: 128, escalated: 0 },
+      { code: 'pt-BR', state: 'translated', strings: 128, escalated: 0 },
+      {
+        code: 'ar',
+        state: 'failed',
+        strings: 0,
+        escalated: 0,
+        error: 'Anthropic response had no text content block',
+      },
+    ],
+  },
+  'run-6a09': {
+    ...(SAMPLE_RUNS[2] as SampleRun),
+    branch: 'localize/add-translations',
+    commit: '9d4a77c',
+    stages: [
+      { name: 'Detect', state: 'done', detail: 'Vite + React' },
+      { name: 'Extract', state: 'done', detail: '128 strings' },
+      { name: 'Translate', state: 'failed', detail: 'All 5 locales failed' },
+      // A stage that never ran says so, rather than showing an empty success.
+      { name: 'Escalate', state: 'skipped', detail: 'Nothing to escalate' },
+      {
+        name: 'Pull request',
+        state: 'skipped',
+        detail: 'Nothing to open one with',
+      },
+    ],
+    localeResults: (['de', 'ja', 'es', 'pt-BR', 'ar'] as const).map((code) => ({
+      code,
+      state: 'failed' as const,
+      strings: 0,
+      escalated: 0,
+      error: 'fetch failed — ECONNREFUSED 127.0.0.1:8787',
+    })),
+  },
+};
+
 export const SAMPLE_SOURCE_STRINGS = 128;
