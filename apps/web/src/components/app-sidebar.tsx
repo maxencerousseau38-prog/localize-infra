@@ -95,14 +95,6 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function SidebarFootnote({ className }: { className?: string }) {
-  return (
-    <p className={cn('p-4 text-caption leading-5 text-tertiary', className)}>
-      Pre-alpha. Most screens here have no backend behind them yet and say so.
-    </p>
-  );
-}
-
 /**
  * 240px persistent sidebar (layout contract, docs/product/04-wireframes.md §0).
  *
@@ -126,8 +118,6 @@ export function AppSidebar() {
       </div>
 
       <SidebarNav />
-
-      <SidebarFootnote className="mt-auto" />
     </nav>
   );
 }

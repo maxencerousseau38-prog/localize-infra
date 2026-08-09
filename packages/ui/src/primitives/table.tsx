@@ -78,7 +78,7 @@ export function TH({
     <th
       scope="col"
       className={cn(
-        'h-9 px-3 align-middle',
+        'h-9 px-2 align-middle sm:px-3',
         'text-caption font-medium uppercase tracking-wide text-tertiary',
         numeric ? 'text-end' : 'text-start',
         className,
@@ -97,7 +97,7 @@ export function TD({
     <td
       data-numeric={numeric || undefined}
       className={cn(
-        'h-11 px-3 text-body leading-5 text-secondary',
+        'h-11 px-2 text-body leading-5 text-secondary sm:px-3',
         numeric ? 'text-end' : 'text-start',
         className,
       )}

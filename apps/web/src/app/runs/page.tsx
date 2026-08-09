@@ -54,11 +54,15 @@ export default function RunsPage() {
           <THead>
             <TR>
               <TH>Status</TH>
-              <TH>Trigger</TH>
+              <TH className="hidden lg:table-cell">Trigger</TH>
               <TH numeric>Locales</TH>
-              <TH numeric>Strings</TH>
-              <TH numeric>Duration</TH>
-              <TH>Output</TH>
+              <TH numeric className="hidden sm:table-cell">
+                Strings
+              </TH>
+              <TH numeric className="hidden md:table-cell">
+                Duration
+              </TH>
+              <TH className="hidden md:table-cell">Output</TH>
               <TH>When</TH>
             </TR>
           </THead>
@@ -69,8 +73,13 @@ export default function RunsPage() {
                 <TR key={run.id} className="relative">
                   <TD>
                     <Badge tone={state.tone}>{state.label}</Badge>
+                    {/* The trigger folds in here below lg rather than being
+                        dropped: it is how you recognise the run. */}
+                    <span className="mt-1 block max-w-[11rem] truncate font-mono text-caption text-tertiary sm:max-w-[18rem] lg:hidden">
+                      {run.trigger}
+                    </span>
                   </TD>
-                  <TD>
+                  <TD className="hidden lg:table-cell">
                     {/* One focus stop per row, and the whole row is the click
                         target. The accessible name says which run, because
                         "localize-infra init" repeats down the column. */}
@@ -91,9 +100,13 @@ export default function RunsPage() {
                       `${run.locales}`
                     )}
                   </TD>
-                  <TD numeric>{run.strings || '—'}</TD>
-                  <TD numeric>{duration(run.durationMs)}</TD>
-                  <TD>
+                  <TD numeric className="hidden sm:table-cell">
+                    {run.strings || '—'}
+                  </TD>
+                  <TD numeric className="hidden md:table-cell">
+                    {duration(run.durationMs)}
+                  </TD>
+                  <TD className="hidden md:table-cell">
                     {run.prNumber ? (
                       <span className="text-link">
                         #{run.prNumber}
@@ -103,7 +116,7 @@ export default function RunsPage() {
                       <span className="text-tertiary">None</span>
                     )}
                   </TD>
-                  <TD>{run.when}</TD>
+                  <TD className="whitespace-nowrap">{run.when}</TD>
                 </TR>
               );
             })}

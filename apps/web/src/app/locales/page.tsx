@@ -14,6 +14,7 @@ import {
   TR,
   Table,
   type Tone,
+  cn,
   localeDisplayName,
   localeFontClass,
   localeTextProps,
@@ -68,11 +69,13 @@ export default function LocalesPage() {
           <THead>
             <TR>
               <TH>Language</TH>
-              <TH>Specimen</TH>
+              <TH className="hidden lg:table-cell">Specimen</TH>
               <TH numeric>Coverage</TH>
-              <TH numeric>Translated</TH>
+              <TH numeric className="hidden sm:table-cell">
+                Translated
+              </TH>
               <TH>State</TH>
-              <TH>Last run</TH>
+              <TH className="hidden md:table-cell">Last run</TH>
             </TR>
           </THead>
           <TBody>
@@ -88,11 +91,23 @@ export default function LocalesPage() {
                     <span className="font-mono text-caption text-tertiary">
                       {locale.code}
                     </span>
+                    {/* The specimen is the product demonstrating that it
+                        renders each script properly, so it folds in here
+                        rather than being dropped on a narrow screen. */}
+                    <span
+                      {...localeTextProps(locale.code)}
+                      className={cn(
+                        'mt-0.5 block text-small text-secondary lg:hidden',
+                        localeFontClass(locale.code),
+                      )}
+                    >
+                      {SPECIMEN[locale.code]}
+                    </span>
                   </TD>
                   {/* Rendered in its own script and direction. A localization
                       product showing Arabic in a Latin fallback would be
                       arguing against itself. */}
-                  <TD>
+                  <TD className="hidden lg:table-cell">
                     <span
                       {...localeTextProps(locale.code)}
                       className={localeFontClass(locale.code)}
@@ -103,13 +118,15 @@ export default function LocalesPage() {
                   <TD numeric>
                     <span className="tabular-nums">{pct}%</span>
                   </TD>
-                  <TD numeric>
+                  <TD numeric className="hidden sm:table-cell">
                     {locale.translated}/{locale.total}
                   </TD>
                   <TD>
                     <Badge tone={tone.tone}>{tone.label}</Badge>
                   </TD>
-                  <TD>{locale.lastRun}</TD>
+                  <TD className="hidden whitespace-nowrap md:table-cell">
+                    {locale.lastRun}
+                  </TD>
                 </TR>
               );
             })}

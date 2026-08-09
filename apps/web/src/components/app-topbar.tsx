@@ -1,6 +1,6 @@
 'use client';
 
-import { SidebarFootnote, SidebarNav } from '@/components/app-sidebar';
+import { SidebarNav } from '@/components/app-sidebar';
 import { SampleChip } from '@/components/sample';
 import { ALL_ROUTES, resolveRoute } from '@/lib/nav';
 import {
@@ -154,7 +154,6 @@ export function AppTopbar() {
           <nav aria-label="Main">
             <SidebarNav onNavigate={() => setNavOpen(false)} />
           </nav>
-          <SidebarFootnote className="mt-auto" />
         </SheetContent>
       </DialogRoot>
 
