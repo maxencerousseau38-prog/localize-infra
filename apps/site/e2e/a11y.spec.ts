@@ -56,3 +56,34 @@ test('every page has exactly one h1 and no skipped heading levels', async ({
     }
   }
 });
+
+test('the open mobile menu has no axe violations', async ({ page }) => {
+  // New surface, and the one most likely to regress: a sheet traps focus and
+  // carries its own theme control. A closed dialog is not in the DOM, so the
+  // route audits above prove nothing about it.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /open menu/i }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  expect(
+    results.violations.map((v) => `${v.id}: ${v.nodes.length} node(s)`),
+  ).toEqual([]);
+});
+
+test('the mobile menu closes on selection and restores focus', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const trigger = page.getByRole('button', { name: /open menu/i });
+
+  await trigger.click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  // Landing back on the trigger is what makes the sheet usable by keyboard.
+  await expect(trigger).toBeFocused();
+});
