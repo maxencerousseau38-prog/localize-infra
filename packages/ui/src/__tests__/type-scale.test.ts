@@ -86,6 +86,7 @@ describe('type scale', () => {
       'prose',
       'headline',
       'display-xl',
+      'display-2xl',
     ]) {
       expect(tokens, `--text-${step}`).toContain(`--text-${step}:`);
       // A size without a line height is half a type step.
@@ -103,7 +104,12 @@ describe('type scale', () => {
 
     for (const file of appFiles) {
       const source = readFileSync(file, 'utf8');
-      for (const step of ['text-prose', 'text-headline', 'text-display-xl']) {
+      for (const step of [
+        'text-prose',
+        'text-headline',
+        'text-display-xl',
+        'text-display-2xl',
+      ]) {
         // String.raw, because `\b` in an ordinary template literal is the
         // backspace character rather than a word boundary — which made this
         // check match nothing at all until a mutation test caught it.

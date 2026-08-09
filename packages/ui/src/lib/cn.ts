@@ -28,6 +28,7 @@ const TYPE_SCALE = [
   'prose',
   'headline',
   'display-xl',
+  'display-2xl',
 ] as const;
 
 const twMerge = extendTailwindMerge({

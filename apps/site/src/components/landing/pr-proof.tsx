@@ -30,19 +30,22 @@ const DIFF_LINES: { text: string; kind: 'add' | 'context' }[] = [
 
 export function PrProof() {
   return (
-    <section className="border-t border-subtle bg-surface/40">
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+    <section className="border-y border-subtle bg-primary text-inverse">
+      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
           <div>
-            <h2 className="font-display text-headline font-semibold tracking-[-0.015em] text-primary">
-              The deliverable is a pull request
+            <p className="text-caption font-medium uppercase tracking-[0.14em] text-inverse/70">
+              The deliverable
+            </p>
+            <h2 className="mt-3 font-display text-headline font-semibold tracking-[-0.02em] text-inverse">
+              A pull request, not a dashboard
             </h2>
-            <p className="mt-4 text-prose text-secondary">
+            <p className="mt-4 text-prose text-inverse/70">
               Not a dashboard you have to log into. Your existing review process
               already knows how to handle a diff — so translations arrive the
               same way every other change does.
             </p>
-            <p className="mt-4 text-prose text-secondary">
+            <p className="mt-4 text-prose text-inverse/70">
               This is the real file from a real run: 22 seconds, end to end,
               against a live repository.
             </p>
@@ -50,7 +53,7 @@ export function PrProof() {
               href={EXAMPLE_PR_URL}
               target="_blank"
               rel="noreferrer noopener"
-              className="mt-5 inline-flex items-center gap-1.5 rounded-sm text-body font-medium text-link hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="mt-6 inline-flex items-center gap-1.5 rounded-sm text-body font-medium text-inverse underline underline-offset-4 decoration-inverse/40 transition-colors hover:decoration-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               Open the pull request on GitHub
               <ArrowUpRight className="size-3.5" aria-hidden="true" />
@@ -105,7 +108,7 @@ export function PrProof() {
                 </code>
               </pre>
             </div>
-            <figcaption className="mt-3 text-small text-tertiary">
+            <figcaption className="mt-3 text-small text-inverse/70">
               Output of <code className="font-mono">init --open-pr</code> on a
               Vite + React project.
             </figcaption>

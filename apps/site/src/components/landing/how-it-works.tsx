@@ -18,27 +18,46 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-      <h2 className="max-w-2xl font-display text-headline font-semibold tracking-[-0.015em] text-primary">
-        One command, three steps, no new tab
-      </h2>
+    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+      <div className="max-w-2xl">
+        <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+          How it works
+        </p>
+        <h2 className="mt-3 font-display text-headline font-semibold tracking-[-0.02em] text-primary">
+          One command, three steps, no new tab
+        </h2>
+      </div>
 
-      <ol className="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-12">
-        {STEPS.map((step) => (
-          <li key={step.n}>
+      {/* Drawn as a connected pipeline rather than three equal columns of
+          prose. The steps are a genuine sequence, and this is the same visual
+          language the application uses on run detail — so the site and the
+          product read as one thing rather than two designs that share a
+          palette. */}
+      <ol className="mt-14 grid gap-10 lg:grid-cols-3 lg:gap-8">
+        {STEPS.map((step, index) => (
+          <li key={step.n} className="relative flex gap-4 lg:flex-col lg:gap-0">
+            {index < STEPS.length - 1 ? (
+              <span
+                aria-hidden="true"
+                className="absolute bg-subtle left-[15px] top-9 h-[calc(100%-1rem)] w-px lg:left-auto lg:top-[15px] lg:h-px lg:w-full lg:translate-x-9"
+              />
+            ) : null}
+
             <span
-              className="font-mono text-small text-tertiary"
-              data-numeric
               aria-hidden="true"
+              className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border border-line bg-canvas font-mono text-caption text-secondary"
             >
               {step.n}
             </span>
-            <h3 className="mt-2 text-prose font-semibold text-primary">
-              {step.title}
-            </h3>
-            <p className="mt-2 text-body leading-6 text-secondary">
-              {step.body}
-            </p>
+
+            <div className="min-w-0 pb-2 lg:mt-6 lg:pe-8">
+              <h3 className="text-subtitle font-semibold tracking-[-0.01em] text-primary">
+                {step.title}
+              </h3>
+              <p className="mt-2 text-body leading-6 text-secondary">
+                {step.body}
+              </p>
+            </div>
           </li>
         ))}
       </ol>

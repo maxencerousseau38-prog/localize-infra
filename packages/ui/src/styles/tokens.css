@@ -225,7 +225,10 @@
   --state-failed-bg: var(--crimson-3);
   --state-failed-text: var(--crimson-11);
 
-  --link: var(--azure-9);
+  /* azure-10, not azure-9. At 13px on white azure-9 measured 4.53:1 and on a
+     tinted surface 4.47:1 — failing AA on the marketing CTA. A link that
+     depends on the exact background under it is not a token, it is luck. */
+  --link: var(--azure-10);
   --link-hover: var(--azure-11);
 
   /* Elevation — four levels. Borders do most of the work.
@@ -336,6 +339,11 @@
   --text-headline--line-height: 1.25;
   --text-display-xl: 52px;
   --text-display-xl--line-height: 1.02;
+  /* The landing hero, and only that. 52px was too polite for a first
+     viewport at 1440 — the headline read as a paragraph rather than a
+     statement. Steps down to display-xl below sm. */
+  --text-display-2xl: 68px;
+  --text-display-2xl--line-height: 0.98;
 
   /* 8px base. 4px and 2px exist only for optical alignment in controls. */
   --spacing: 4px;
@@ -371,6 +379,10 @@
   --animate-sheet-out-start: li-sheet-out-start var(--duration-standard)
     var(--ease-standard);
   --animate-shimmer: li-shimmer 1.2s linear infinite;
+  /* 60s for a full pass: slow enough to read as drift rather than motion, and
+     cheap enough that it is one composited transform. Exactly -50% because the
+     rail renders its contents twice — that is what makes the loop seamless. */
+  --animate-marquee: li-marquee 60s linear infinite;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -475,6 +487,15 @@
     transform: translateX(100%);
   }
 }
+@keyframes li-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @keyframes li-shimmer {
   from {
     background-position: 200% 0;

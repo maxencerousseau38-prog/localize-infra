@@ -369,64 +369,64 @@ test.describe('SEO', () => {
 });
 
 test.describe('ecosystem rail', () => {
-  test('names only technologies the product genuinely supports', async ({
-    page,
-  }) => {
+  test('names what the product works alongside', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    const rail = page.getByRole('region', {
-      name: /it works where your code already lives/i,
+    const rail = page.getByRole('list', {
+      name: /technologies this works alongside/i,
     });
 
-    // Verified against packages/core detection and services/github-app.
-    for (const supported of [
-      'Next.js',
-      'Vite + React',
-      'React Native',
-      'TypeScript',
-      'GitHub',
-    ]) {
-      await expect(rail.getByText(supported, { exact: true })).toBeVisible();
+    for (const name of ['GitHub', 'Next.js', 'React', 'TypeScript', 'Vite']) {
+      await expect(rail.getByText(name, { exact: true }).first()).toBeVisible();
     }
+  });
 
-    // Considered and excluded: neither is integrated anywhere in this
-    // codebase, so showing them would be an unearned claim.
-    const body = await page.locator('body').innerText();
-    expect(body).not.toMatch(/\bVercel\b/);
-    expect(body).not.toMatch(/\bSupabase\b/);
+  test('states that GitHub is the only integration', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    // This sentence is what makes showing a host or a database honest: they
+    // are on the rail because the CLI leaves them alone, not because anything
+    // is integrated with them.
+    await expect(
+      page.getByText(/GitHub is the one integration/i),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/none of these projects endorse this one/i),
+    ).toBeVisible();
   });
 
   test('claims no customers, partners or endorsements', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     const body = await page.locator('body').innerText();
-    // The section communicates stack fit, not social proof.
     for (const claim of [
       /trusted by/i,
       /our customers/i,
-      /partners/i,
-      /powered by/i,
+      /partnership/i,
       /loved by/i,
     ]) {
       expect(body, String(claim)).not.toMatch(claim);
     }
   });
 
-  test('is static — no marquee, no animation to pause', async ({ page }) => {
+  test('the marquee loops seamlessly and pauses on hover', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    const rail = page.getByRole('region', {
-      name: /it works where your code already lives/i,
-    });
+    const track = page.locator('.animate-marquee');
 
-    // Six items do not need a scrolling rail. Animating them would be
-    // decoration, and would buy CLS, overflow and reduced-motion risk.
-    const animated = await rail.evaluate((node) =>
-      [...node.querySelectorAll('*')].some((el) => {
-        const s = getComputedStyle(el);
-        return (
-          s.animationName !== 'none' || s.transitionProperty === 'transform'
-        );
-      }),
-    );
-    expect(animated).toBe(false);
+    // Rendered twice and translated by exactly -50%: that identity is what
+    // makes the loop seamless rather than jumping at the wrap.
+    const names = await track.locator('li >> text=GitHub').count();
+    expect(names).toBeGreaterThanOrEqual(2);
+
+    // Hover the container, which is static and exactly viewport width. The
+    // track itself is both wider than the viewport and continuously moving,
+    // so neither its centre point nor any logo on it is a stable hover target.
+    await page.locator('[data-marquee]').hover();
+    await expect(track).toHaveCSS('animation-play-state', 'paused');
+  });
+
+  test('does not animate under reduced motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const track = page.locator('.animate-marquee');
+    await expect(track).toHaveCSS('animation-name', 'none');
   });
 
   for (const width of [390, 768, 1440]) {
