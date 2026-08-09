@@ -17,3 +17,6 @@ test-results/
 
 .vercel
 .env*
+
+# Scratch directory for design-audit screenshots (Playwright).
+apps/web/.audit/

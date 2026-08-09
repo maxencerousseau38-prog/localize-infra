@@ -1,30 +1,10 @@
 import { Page, PageHeader, PageMeta } from '@/components/page';
+import { RunsTable } from '@/components/runs-table';
 import { SampleBanner, SampleRegion } from '@/components/sample';
-import { SAMPLE_RUNS, type SampleRun } from '@/lib/sample';
-import {
-  Badge,
-  TBody,
-  TD,
-  TH,
-  THead,
-  TR,
-  Table,
-  type Tone,
-} from '@localize-infra/ui';
+import { SAMPLE_RUNS } from '@/lib/sample';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 export const metadata: Metadata = { title: 'Runs' };
-
-const STATE: Record<SampleRun['state'], { tone: Tone; label: string }> = {
-  succeeded: { tone: 'confident', label: 'Succeeded' },
-  partial: { tone: 'degraded', label: 'Partial' },
-  failed: { tone: 'failed', label: 'Failed' },
-};
-
-function duration(ms: number): string {
-  return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
-}
 
 export default function RunsPage() {
   return (
@@ -47,81 +27,8 @@ export default function RunsPage() {
         </SampleBanner>
       </div>
 
-      {/* No chart. A run-history chart would be decoration; the table is the
-          information, and it is scannable in one pass. */}
       <SampleRegion label="Run history" className="mt-6">
-        <Table>
-          <THead>
-            <TR>
-              <TH>Status</TH>
-              <TH className="hidden lg:table-cell">Trigger</TH>
-              <TH numeric>Locales</TH>
-              <TH numeric className="hidden sm:table-cell">
-                Strings
-              </TH>
-              <TH numeric className="hidden md:table-cell">
-                Duration
-              </TH>
-              <TH className="hidden md:table-cell">Output</TH>
-              <TH>When</TH>
-            </TR>
-          </THead>
-          <TBody>
-            {SAMPLE_RUNS.map((run) => {
-              const state = STATE[run.state];
-              return (
-                <TR key={run.id} className="relative">
-                  <TD>
-                    <Badge tone={state.tone}>{state.label}</Badge>
-                    {/* The trigger folds in here below lg rather than being
-                        dropped: it is how you recognise the run. */}
-                    <span className="mt-1 block max-w-[11rem] truncate font-mono text-caption text-tertiary sm:max-w-[18rem] lg:hidden">
-                      {run.trigger}
-                    </span>
-                  </TD>
-                  <TD className="hidden lg:table-cell">
-                    {/* One focus stop per row, and the whole row is the click
-                        target. The accessible name says which run, because
-                        "localize-infra init" repeats down the column. */}
-                    <Link
-                      href={`/runs/${run.id}`}
-                      aria-label={`Run ${run.id.replace('run-', '')}, ${state.label.toLowerCase()}`}
-                      className="font-mono text-caption text-secondary after:absolute after:inset-0 hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
-                    >
-                      {run.trigger}
-                    </Link>
-                  </TD>
-                  <TD numeric>
-                    {run.localesFailed > 0 ? (
-                      <span className="text-degraded-text">
-                        {run.locales - run.localesFailed}/{run.locales}
-                      </span>
-                    ) : (
-                      `${run.locales}`
-                    )}
-                  </TD>
-                  <TD numeric className="hidden sm:table-cell">
-                    {run.strings || '—'}
-                  </TD>
-                  <TD numeric className="hidden md:table-cell">
-                    {duration(run.durationMs)}
-                  </TD>
-                  <TD className="hidden md:table-cell">
-                    {run.prNumber ? (
-                      <span className="text-link">
-                        #{run.prNumber}
-                        {run.prMerged ? ' · merged' : ''}
-                      </span>
-                    ) : (
-                      <span className="text-tertiary">None</span>
-                    )}
-                  </TD>
-                  <TD className="whitespace-nowrap">{run.when}</TD>
-                </TR>
-              );
-            })}
-          </TBody>
-        </Table>
+        <RunsTable runs={SAMPLE_RUNS} />
       </SampleRegion>
     </Page>
   );

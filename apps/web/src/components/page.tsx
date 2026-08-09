@@ -2,12 +2,40 @@ import { NotBuiltYet, cn } from '@localize-infra/ui';
 import type * as React from 'react';
 
 /**
- * Content column: 1200px maximum, 24px gutter, 16px below 768
- * (layout contract, docs/product/04-wireframes.md §0).
+ * The content column (DESIGN.md §4.2).
+ *
+ * `content` is 1200px and is the default: prose, forms and reading surfaces
+ * gain nothing from more width, and a 68ch measure stretched across 1920 is
+ * worse, not better.
+ *
+ * `wide` is for a data surface that is *hiding* columns at 1440 and can reveal
+ * them above 1680. That qualifier is load-bearing and was learned by building
+ * the other version first: widening the run table to 1600 did not add any
+ * information, it just poured the slack into the widest column. Empty space at
+ * 1920 is a real finding, but stretching columns to cover it is decoration, and
+ * on a three-row sample the emptiness is a data problem that no layout fixes.
+ *
+ * No surface qualifies today — every column is already visible at 1440. Kept
+ * because the responsive contract in DESIGN.md §4.2 has to have one place it is
+ * expressed, and because the next surface with real column pressure should find
+ * the decision already made rather than inventing a local one.
  */
-export function Page({ children }: { children: React.ReactNode }) {
+export function Page({
+  children,
+  width = 'content',
+}: {
+  children: React.ReactNode;
+  width?: 'content' | 'wide';
+}) {
   return (
-    <div className="mx-auto w-full max-w-[75rem] px-4 pb-16 sm:px-6">
+    <div
+      className={cn(
+        'mx-auto w-full px-4 pb-16 sm:px-6',
+        width === 'wide'
+          ? 'max-w-[75rem] wide:max-w-[100rem]'
+          : 'max-w-[75rem]',
+      )}
+    >
       {children}
     </div>
   );
@@ -40,7 +68,10 @@ export function PageHeader({
     <header className="border-b border-subtle py-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display text-display font-semibold tracking-[-0.02em] text-primary">
+          {/* DESIGN.md §3.4: display type steps down below sm. 28px was
+              constant from 390 to 1920, which on a phone spends a third of the
+              width on the title before any content appears. */}
+          <h1 className="font-display text-title font-semibold tracking-[-0.02em] text-primary sm:text-display">
             {title}
           </h1>
           {purpose ? (
@@ -97,7 +128,7 @@ export function PageSection({
       {title ? (
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-title font-semibold tracking-[-0.01em] text-primary">
+            <h2 className="text-subtitle font-semibold tracking-[-0.01em] text-primary sm:text-title">
               {title}
             </h2>
             {description ? (

@@ -348,6 +348,12 @@
   /* 8px base. 4px and 2px exist only for optical alignment in controls. */
   --spacing: 4px;
 
+  /* DESIGN.md §4.2: above this width the application spends the extra space on
+     information rather than margin — data surfaces widen, prose does not. There
+     is no Tailwind default here; 2xl (1536) is too early to change behaviour and
+     leaves 1680 and 1920 identical. */
+  --breakpoint-wide: 1680px;
+
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
