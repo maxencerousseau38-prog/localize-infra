@@ -367,3 +367,76 @@ test.describe('SEO', () => {
     }
   });
 });
+
+test.describe('ecosystem rail', () => {
+  test('names only technologies the product genuinely supports', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const rail = page.getByRole('region', {
+      name: /it works where your code already lives/i,
+    });
+
+    // Verified against packages/core detection and services/github-app.
+    for (const supported of [
+      'Next.js',
+      'Vite + React',
+      'React Native',
+      'TypeScript',
+      'GitHub',
+    ]) {
+      await expect(rail.getByText(supported, { exact: true })).toBeVisible();
+    }
+
+    // Considered and excluded: neither is integrated anywhere in this
+    // codebase, so showing them would be an unearned claim.
+    const body = await page.locator('body').innerText();
+    expect(body).not.toMatch(/\bVercel\b/);
+    expect(body).not.toMatch(/\bSupabase\b/);
+  });
+
+  test('claims no customers, partners or endorsements', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const body = await page.locator('body').innerText();
+    // The section communicates stack fit, not social proof.
+    for (const claim of [
+      /trusted by/i,
+      /our customers/i,
+      /partners/i,
+      /powered by/i,
+      /loved by/i,
+    ]) {
+      expect(body, String(claim)).not.toMatch(claim);
+    }
+  });
+
+  test('is static — no marquee, no animation to pause', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const rail = page.getByRole('region', {
+      name: /it works where your code already lives/i,
+    });
+
+    // Six items do not need a scrolling rail. Animating them would be
+    // decoration, and would buy CLS, overflow and reduced-motion risk.
+    const animated = await rail.evaluate((node) =>
+      [...node.querySelectorAll('*')].some((el) => {
+        const s = getComputedStyle(el);
+        return (
+          s.animationName !== 'none' || s.transitionProperty === 'transform'
+        );
+      }),
+    );
+    expect(animated).toBe(false);
+  });
+
+  for (const width of [390, 768, 1440]) {
+    test(`does not overflow at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/', { waitUntil: 'networkidle' });
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      expect(overflow, `overflowed by ${overflow}px`).toBeLessThanOrEqual(0);
+    });
+  }
+});

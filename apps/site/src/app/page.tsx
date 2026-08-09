@@ -1,5 +1,6 @@
 import { BuildStatus } from '@/components/landing/build-status';
 import { Commitments } from '@/components/landing/commitments';
+import { Ecosystem } from '@/components/landing/ecosystem';
 import { Hero } from '@/components/landing/hero';
 import { HowItWorks } from '@/components/landing/how-it-works';
 import { PrProof } from '@/components/landing/pr-proof';
@@ -12,6 +13,7 @@ export default function HomePage() {
       <Hero />
       <PrProof />
       <HowItWorks />
+      <Ecosystem />
       <Commitments />
       <BuildStatus />
 
