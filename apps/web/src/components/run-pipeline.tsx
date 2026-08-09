@@ -1,5 +1,5 @@
 import type { SampleRunStage, StageState } from '@/lib/sample';
-import { cn } from '@localize-infra/ui';
+import { PIPELINE_STAGE_NAMES, cn } from '@localize-infra/ui';
 import { Check, Circle, Minus, TriangleAlert, X } from 'lucide-react';
 
 /**
@@ -58,7 +58,7 @@ export function RunPipeline({ stages }: { stages: SampleRunStage[] }) {
 
         return (
           <li
-            key={stage.name}
+            key={stage.id}
             className="relative flex flex-1 gap-3 pb-5 sm:flex-col sm:gap-0 sm:pb-0"
           >
             {/* The connector. Horizontal between stages on desktop, vertical on
@@ -86,7 +86,7 @@ export function RunPipeline({ stages }: { stages: SampleRunStage[] }) {
 
             <div className="min-w-0 sm:mt-2.5 sm:pe-6">
               <p className={cn('text-body font-medium', style.text)}>
-                {stage.name}
+                {PIPELINE_STAGE_NAMES[stage.id]}
               </p>
               <p className="mt-0.5 text-small leading-5 text-secondary">
                 {stage.detail}

@@ -24,6 +24,8 @@
  * to live data is a data-source change and not a redesign.
  */
 
+import type { PipelineStageId } from '@localize-infra/ui';
+
 export type ConfidenceState =
   | 'ambiguous'
   | 'confident'
@@ -279,7 +281,12 @@ export const SAMPLE_LOCALES: SampleLocale[] = [
 export type StageState = 'done' | 'partial' | 'failed' | 'skipped';
 
 export interface SampleRunStage {
-  name: string;
+  /**
+   * The stage, by id. The displayed name is resolved from
+   * `PIPELINE_STAGE_NAMES` rather than written here, so a run cannot name a
+   * stage differently from the landing page that taught the reader the word.
+   */
+  id: PipelineStageId;
   state: StageState;
   /** The metric this stage produced, or why it did not run. */
   detail: string;
@@ -302,11 +309,11 @@ export interface SampleRunDetail extends SampleRun {
 }
 
 const SUCCEEDED_STAGES: SampleRunStage[] = [
-  { name: 'Detect', state: 'done', detail: 'Vite + React' },
-  { name: 'Extract', state: 'done', detail: '128 strings' },
-  { name: 'Translate', state: 'done', detail: '5 locales' },
-  { name: 'Escalate', state: 'done', detail: 'Nothing ambiguous' },
-  { name: 'Pull request', state: 'done', detail: '#142 merged' },
+  { id: 'detect', state: 'done', detail: 'Vite + React' },
+  { id: 'extract', state: 'done', detail: '128 strings' },
+  { id: 'translate', state: 'done', detail: '5 locales' },
+  { id: 'escalate', state: 'done', detail: 'Nothing ambiguous' },
+  { id: 'pull-request', state: 'done', detail: '#142 merged' },
 ];
 
 export const SAMPLE_RUN_DETAILS: Record<string, SampleRunDetail | undefined> = {
@@ -328,11 +335,11 @@ export const SAMPLE_RUN_DETAILS: Record<string, SampleRunDetail | undefined> = {
     branch: 'localize/add-translations',
     commit: '2b7e10d',
     stages: [
-      { name: 'Detect', state: 'done', detail: 'Vite + React' },
-      { name: 'Extract', state: 'done', detail: '128 strings' },
-      { name: 'Translate', state: 'partial', detail: '4 of 5 locales' },
-      { name: 'Escalate', state: 'done', detail: '1 needs a decision' },
-      { name: 'Pull request', state: 'done', detail: '#141 open' },
+      { id: 'detect', state: 'done', detail: 'Vite + React' },
+      { id: 'extract', state: 'done', detail: '128 strings' },
+      { id: 'translate', state: 'partial', detail: '4 of 5 locales' },
+      { id: 'escalate', state: 'done', detail: '1 needs a decision' },
+      { id: 'pull-request', state: 'done', detail: '#141 open' },
     ],
     localeResults: [
       { code: 'de', state: 'translated', strings: 128, escalated: 0 },
@@ -353,13 +360,13 @@ export const SAMPLE_RUN_DETAILS: Record<string, SampleRunDetail | undefined> = {
     branch: 'localize/add-translations',
     commit: '9d4a77c',
     stages: [
-      { name: 'Detect', state: 'done', detail: 'Vite + React' },
-      { name: 'Extract', state: 'done', detail: '128 strings' },
-      { name: 'Translate', state: 'failed', detail: 'All 5 locales failed' },
+      { id: 'detect', state: 'done', detail: 'Vite + React' },
+      { id: 'extract', state: 'done', detail: '128 strings' },
+      { id: 'translate', state: 'failed', detail: 'All 5 locales failed' },
       // A stage that never ran says so, rather than showing an empty success.
-      { name: 'Escalate', state: 'skipped', detail: 'Nothing to escalate' },
+      { id: 'escalate', state: 'skipped', detail: 'Nothing to escalate' },
       {
-        name: 'Pull request',
+        id: 'pull-request',
         state: 'skipped',
         detail: 'Nothing to open one with',
       },

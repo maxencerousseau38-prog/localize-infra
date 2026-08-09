@@ -1,4 +1,10 @@
 export { cn } from './lib/cn';
+export {
+  PIPELINE_STAGES,
+  PIPELINE_STAGE_NAMES,
+  type PipelineStage,
+  type PipelineStageId,
+} from './lib/pipeline';
 export { fuzzyMatch, highlightRuns, type FuzzyMatch } from './lib/fuzzy';
 export {
   localeDir,

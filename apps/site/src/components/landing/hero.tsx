@@ -1,5 +1,5 @@
 import { EXAMPLE_PR_URL, INSTALL_COMMAND } from '@/lib/constants';
-import { CopyCommand } from '@localize-infra/ui';
+import { CopyCommand, StateRule } from '@localize-infra/ui';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -111,20 +111,28 @@ export function Hero() {
                 </p>
                 <ul className="mt-3 flex flex-col gap-2.5">
                   {TRANSLATIONS.map((t) => (
-                    <li
-                      key={t.locale}
-                      className="flex items-baseline gap-3 [border-inline-start-color:var(--state-confident)] [border-inline-start-style:solid] [border-inline-start-width:2px] ps-3"
-                    >
-                      <span className="w-12 shrink-0 font-mono text-micro uppercase text-tertiary">
-                        {t.locale}
-                      </span>
-                      <span
-                        lang={t.locale}
-                        dir={t.dir ?? 'ltr'}
-                        className={`min-w-0 text-body text-primary ${FONT_FOR[t.locale] ?? ''}`}
+                    <li key={t.locale}>
+                      {/* The State Rule primitive, not a hand-rolled copy of
+                          it. This card previously drew its own at 2px while the
+                          system's is 3px — the signature element rendered wrong
+                          on the most prominent surface in the product, which is
+                          exactly the local reinvention DESIGN.md §5 calls a
+                          defect. */}
+                      <StateRule
+                        tone="confident"
+                        className="flex items-baseline gap-3 ps-3"
                       >
-                        {t.text}
-                      </span>
+                        <span className="w-12 shrink-0 font-mono text-micro uppercase text-tertiary">
+                          {t.locale}
+                        </span>
+                        <span
+                          lang={t.locale}
+                          dir={t.dir ?? 'ltr'}
+                          className={`min-w-0 text-body text-primary ${FONT_FOR[t.locale] ?? ''}`}
+                        >
+                          {t.text}
+                        </span>
+                      </StateRule>
                     </li>
                   ))}
                 </ul>

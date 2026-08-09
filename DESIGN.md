@@ -80,10 +80,19 @@ Three things make this product recognisable, and no future work may dilute them:
 2. **Iris means one thing.** A cool violet reserved *exclusively* for "your
    judgement is required". Never chrome, never a brand accent, never a roadmap
    state, never a logo.
-3. **The pipeline as visual language.** repository → detect → extract →
-   translate → escalate → review → locale files → pull request. Drawn as
-   connected stages on run detail and on the marketing site. Any surface that
-   can express where the user is in that pipeline, should.
+3. **The pipeline as visual language.** Five stages —
+   **detect → extract → translate → escalate → pull request** — bounded by your
+   repository at one end and locale files at the other. The repository and the
+   files are inputs and outputs, not stages; conflating them is how this
+   document once listed eight while the application drew five and the marketing
+   site named three.
+
+   Defined once, in `PIPELINE_STAGES` (`packages/ui/src/lib/pipeline.ts`), and
+   every surface that expresses where a run is takes its names from there.
+   Collapsing stages for a smaller surface is a presentation choice; renaming
+   or dropping one is not, because the word a reader learns on the landing page
+   must be the word they meet in the product. Drawn as connected stages on run
+   detail and on the landing page, and pinned by test in both.
 
 ---
 
