@@ -341,11 +341,36 @@ no project switcher until there is more than one project to switch between.
 
 ## 19. Settings
 
-Three scopes, tabs not pages: Profile, Project, Danger. Forms use the existing
-`Field` column at 560px. Destructive actions require typing the resource name
-and state the consequence in plain language. Everything here is currently
-unavailable, so Settings keeps an honest unavailable state rather than sample
-data — there is nothing to *demonstrate*, only controls that would not work.
+Three sections, URL-addressable: Configuration, Account, Danger zone. They are
+links rather than an ARIA tab widget — the sections survive a reload, can be
+linked to, and need no JavaScript, which a tab widget would require for roving
+focus and gain nothing by.
+
+**Settings takes no sample data, and this is the one surface where that rule
+differs.** Everywhere else the content is *data*, and labelled sample data
+demonstrates its shape honestly. Here the content is *controls*, and a control
+that silently fails to save is a worse lie than an empty section: it invites an
+action and swallows it.
+
+But configuration does exist today — it lives in flags and environment
+variables, and getting it wrong is the most common way a first run fails. So
+**Configuration reports the CLI's real effective settings read-only**: target
+locales, locale directory, API URL, token variable, pull-request flags, base
+branch, and the framework-detection signals. Each value sits beside the exact
+flag or variable that changes it. Nothing claims to be editable from the
+browser, because nothing is.
+
+Those values are duplicated from `packages/cli` and `packages/core` — the web
+app cannot import a Node CLI's module-private constants without dragging its
+dependency tree into a browser bundle — so a test in `packages/schemas` pins
+them to their source. A default changed in the CLI and not here would make the
+one surface claiming to be real into the most confidently wrong page in the
+product.
+
+**Account** and **Danger zone** stay genuinely unavailable, because they depend
+on accounts and projects that do not exist. When they arrive, destructive
+actions will require typing the resource name and state their consequence in
+plain language, and forms will use the existing `Field` column at 560px.
 
 ## 20. Marketing site ↔ application
 
@@ -368,7 +393,7 @@ per-request nonces and dynamic rendering. Documented in both configs.
 | Review | Approve suggested copy | Approve / edit | sample · empty · loading |
 | Runs | What ran, what failed | Open run detail | sample · empty · loading · error |
 | Locales | Which languages are behind | Open a locale | sample · empty |
-| Settings | Configure | Save | **unavailable** (no sample) |
+| Settings | Know how it is configured | — (read-only) | real config · unavailable per section |
 | Design | Verify the system | — | live, real |
 
 ## Verdict on the existing implementation

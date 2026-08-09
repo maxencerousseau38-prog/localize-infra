@@ -215,14 +215,59 @@ test.describe('honesty about the missing backend', () => {
     });
   }
 
-  test('settings still refuses rather than demonstrating', async ({ page }) => {
-    // Settings is the deliberate exception: its controls would not work, so
-    // there is nothing to demonstrate — only buttons that would lie.
+  test('settings shows no sample data and no controls that cannot save', async ({
+    page,
+  }) => {
+    // Settings is the deliberate exception. The other surfaces show data,
+    // where a labelled sample demonstrates the shape honestly. This shows
+    // controls, and a control that silently fails to save is a worse lie than
+    // an empty section — so the configuration here is read-only and real.
     await page.goto('/settings', { waitUntil: 'networkidle' });
-    await expect(page.getByText(/is not built yet/i)).toBeVisible();
+
     await expect(
       page.getByText(/sample data — this is not your project/i),
     ).toHaveCount(0);
+
+    // Scoped to the settings surface, not the whole page: the shell's theme
+    // toggle is a real control that really works, and excluding it is the
+    // point — the contract is about controls that would silently fail.
+    const surface = page.locator('main');
+    await expect(surface.locator('input, textarea, select')).toHaveCount(0);
+    await expect(surface.getByRole('switch')).toHaveCount(0);
+    await expect(
+      surface.getByRole('button', { name: /save|update|apply/i }),
+    ).toHaveCount(0);
+  });
+
+  test('settings reports real configuration rather than a placeholder', async ({
+    page,
+  }) => {
+    await page.goto('/settings', { waitUntil: 'networkidle' });
+    // These are the CLI's actual defaults, pinned to their source by a test in
+    // packages/schemas.
+    await expect(page.getByText('http://localhost:8787')).toBeVisible();
+    await expect(page.getByText('LOCALIZE_API_TOKEN')).toBeVisible();
+    await expect(page.getByText(/de, ja, es, ar, pt-BR/)).toBeVisible();
+  });
+
+  test('the sections that genuinely cannot exist still say so', async ({
+    page,
+  }) => {
+    await page.goto('/settings?section=account', { waitUntil: 'networkidle' });
+    await expect(page.getByText(/is not built yet/i)).toBeVisible();
+
+    await page.goto('/settings?section=danger', { waitUntil: 'networkidle' });
+    await expect(page.getByText(/is not built yet/i)).toBeVisible();
+  });
+
+  test('settings sections survive a reload', async ({ page }) => {
+    // Links rather than an ARIA tab widget: addressable, shareable, and
+    // working without JavaScript.
+    await page.goto('/settings?section=danger', { waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(
+      page.getByRole('link', { name: 'Danger zone' }),
+    ).toHaveAttribute('aria-current', 'page');
   });
 });
 
