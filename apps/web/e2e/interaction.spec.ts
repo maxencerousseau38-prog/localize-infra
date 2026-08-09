@@ -390,3 +390,77 @@ test.describe('run detail', () => {
     expect(response?.status()).toBe(404);
   });
 });
+
+test.describe('command palette actions', () => {
+  test('offers navigation, actions and help', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.keyboard.press('ControlOrMeta+k');
+
+    const list = page.getByRole('listbox');
+    for (const section of ['Navigation', 'Actions', 'Help']) {
+      await expect(
+        list.getByRole('group', { name: section }),
+        `${section} section`,
+      ).toBeAttached();
+    }
+  });
+
+  test('a theme action actually changes the theme', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(page.locator('html')).not.toHaveClass(/dark/);
+
+    await page.keyboard.press('ControlOrMeta+k');
+    await page.getByRole('combobox').fill('dark');
+    await page.keyboard.press('Enter');
+
+    // The point of shipping actions at all: they run.
+    await expect(page.locator('html')).toHaveClass(/dark/);
+  });
+
+  test('the topbar toggle stays in sync with the palette', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    await page.keyboard.press('ControlOrMeta+k');
+    await page.getByRole('combobox').fill('dark');
+    await page.keyboard.press('Enter');
+
+    // Two surfaces can set the theme. Before they shared a store, the toggle
+    // read localStorage once on mount and kept showing the old value.
+    await expect(page.getByRole('radio', { name: 'Dark' })).toBeChecked();
+  });
+
+  test('the theme survives a reload after a palette change', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.keyboard.press('ControlOrMeta+k');
+    await page.getByRole('combobox').fill('dark');
+    await page.keyboard.press('Enter');
+
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.locator('html')).toHaveClass(/dark/);
+  });
+
+  test('offers no action it cannot perform', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.keyboard.press('ControlOrMeta+k');
+    const list = page.getByRole('listbox');
+
+    // Extraction, translation, opening a pull request and approving a
+    // suggestion all need a backend. A palette that offers a command it cannot
+    // run is worse than one that offers fewer.
+    for (const forbidden of [
+      /run extraction/i,
+      /translate/i,
+      /open a pull request/i,
+      /approve/i,
+      /resolve/i,
+    ]) {
+      await expect(
+        list.getByRole('option', { name: forbidden }),
+        String(forbidden),
+      ).toHaveCount(0);
+    }
+  });
+});

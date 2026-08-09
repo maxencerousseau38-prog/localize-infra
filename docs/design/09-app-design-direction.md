@@ -268,9 +268,27 @@ the opposite of that.
 
 ## 14. Command palette
 
-Retained and extended. Currently navigation-only, correctly, because no actions
-existed. It gains sections in this order: **Recents · Navigation · Actions ·
-Help**. Actions only appear when they can actually run.
+Sections in this order: **Navigation · Actions · Help**. Recents is absent
+because nothing persists a history yet, and a section that is always empty is
+worse than one that does not exist.
+
+**Every entry runs.** That constraint decides the contents, not a wish list.
+Actions are the three theme commands; Help opens the documentation, the
+repository and a real example pull request. Extraction, translation, opening a
+pull request, resolving an ambiguity and approving a suggestion are all absent
+and stay absent until there is a backend — a palette that offers a command it
+cannot perform is worse than one that offers fewer, and a test asserts none of
+them appear.
+
+Shipping theme here required fixing a real coherence bug first. Two surfaces
+can now set the preference, and `ThemeToggle` read `localStorage` once on
+mount, so a change made from the palette left its radio showing the previous
+value until a reload. The theme module now owns a single `setTheme` that
+persists, applies and announces, with `subscribeToTheme` for anything that
+displays the preference. Both surfaces go through it.
+
+`⌘K` toggles, `↑↓` move, `Enter` runs, `Esc` restores focus to the opener. Empty
+query lists everything.
 
 `⌘K` toggles, `↑↓` move, `Enter` runs, `Esc` restores focus to the opener. Empty
 query lists everything. All verified by existing tests, which stay green.

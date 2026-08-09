@@ -110,6 +110,9 @@ export {
   THEME_SCRIPT,
   applyTheme,
   isTheme,
+  readTheme,
+  setTheme,
+  subscribeToTheme,
   type Theme,
 } from './theme/theme';
 export { ThemeScript } from './theme/theme-script';

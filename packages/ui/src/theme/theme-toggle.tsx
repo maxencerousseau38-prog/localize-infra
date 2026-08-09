@@ -3,7 +3,13 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import { cn } from '../lib/cn';
-import { type Theme, applyTheme, isTheme } from './theme';
+import {
+  type Theme,
+  applyTheme,
+  setTheme as persistTheme,
+  readTheme,
+  subscribeToTheme,
+} from './theme';
 
 const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: 'light', label: 'Light', Icon: Sun },
@@ -29,8 +35,9 @@ export function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem('theme');
-    if (isTheme(stored)) setTheme(stored);
+    setTheme(readTheme());
+    // Another surface — the command palette — can change the preference too.
+    return subscribeToTheme(setTheme);
   }, []);
 
   // Follow the OS while in system mode, so the page updates if the user changes
@@ -45,8 +52,7 @@ export function ThemeToggle() {
 
   function select(next: Theme) {
     setTheme(next);
-    localStorage.setItem('theme', next);
-    applyTheme(next);
+    persistTheme(next);
   }
 
   return (

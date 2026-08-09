@@ -33,3 +33,37 @@ export function applyTheme(theme: Theme) {
 export function isTheme(value: unknown): value is Theme {
   return value === 'light' || value === 'dark' || value === 'system';
 }
+
+/**
+ * Broadcast when the preference changes, so every mounted control agrees.
+ *
+ * Without this, two surfaces can set the theme and disagree about it: the
+ * toggle reads localStorage once on mount, so a change made from the command
+ * palette would leave its radio showing the previous value until a reload.
+ * Anything that changes the theme goes through `setTheme`; anything that
+ * displays it subscribes.
+ */
+const THEME_EVENT = 'localize-infra:theme';
+
+/** The one way to change the preference. Persists, applies, and announces. */
+export function setTheme(theme: Theme) {
+  localStorage.setItem('theme', theme);
+  applyTheme(theme);
+  window.dispatchEvent(new CustomEvent<Theme>(THEME_EVENT, { detail: theme }));
+}
+
+/** Current stored preference, defaulting to `system` when nothing is set. */
+export function readTheme(): Theme {
+  const stored = localStorage.getItem('theme');
+  return isTheme(stored) ? stored : 'system';
+}
+
+/** Returns an unsubscribe function, for use from an effect. */
+export function subscribeToTheme(onChange: (theme: Theme) => void): () => void {
+  const handler = (event: Event) => {
+    const next = (event as CustomEvent<Theme>).detail;
+    if (isTheme(next)) onChange(next);
+  };
+  window.addEventListener(THEME_EVENT, handler);
+  return () => window.removeEventListener(THEME_EVENT, handler);
+}

@@ -12,9 +12,19 @@ import {
   SheetContent,
   ThemeToggle,
   cn,
+  setTheme,
   useCommandPaletteHotkey,
 } from '@localize-infra/ui';
-import { Menu, Search } from 'lucide-react';
+import {
+  BookOpen,
+  GitBranch,
+  GitPullRequest,
+  Menu,
+  Monitor,
+  Moon,
+  Search,
+  Sun,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
@@ -37,8 +47,8 @@ export function AppTopbar() {
   const { route: current, detail } = resolveRoute(pathname);
 
   const items: CommandItem[] = React.useMemo(
-    () =>
-      ALL_ROUTES.map((route) => ({
+    () => [
+      ...ALL_ROUTES.map((route) => ({
         id: route.href,
         label: route.label,
         section: 'Navigation',
@@ -46,11 +56,73 @@ export function AppTopbar() {
         keywords: route.keywords,
         onSelect: () => router.push(route.href),
       })),
+
+      // Every entry below actually runs. Extraction, translation, opening a
+      // pull request and approving a suggestion are all absent, deliberately:
+      // they need a backend, and a palette that offers a command it cannot run
+      // is worse than one that offers fewer. Theme and external references are
+      // the actions that genuinely work today.
+      {
+        id: 'theme-light',
+        label: 'Switch to light theme',
+        section: 'Actions',
+        icon: Sun,
+        keywords: 'appearance colour scheme bright',
+        onSelect: () => setTheme('light'),
+      },
+      {
+        id: 'theme-dark',
+        label: 'Switch to dark theme',
+        section: 'Actions',
+        icon: Moon,
+        keywords: 'appearance colour scheme night',
+        onSelect: () => setTheme('dark'),
+      },
+      {
+        id: 'theme-system',
+        label: 'Match system theme',
+        section: 'Actions',
+        icon: Monitor,
+        keywords: 'appearance colour scheme auto os',
+        onSelect: () => setTheme('system'),
+      },
+
+      {
+        id: 'help-docs',
+        label: 'Read the documentation',
+        section: 'Help',
+        icon: BookOpen,
+        keywords: 'cli flags init guide',
+        onSelect: () =>
+          window.open('https://localize-infra.dev/docs', '_blank'),
+      },
+      {
+        id: 'help-repo',
+        label: 'Open the repository',
+        section: 'Help',
+        icon: GitBranch,
+        keywords: 'source github code',
+        onSelect: () =>
+          window.open(
+            'https://github.com/maxencerousseau38-prog/localize-infra',
+            '_blank',
+          ),
+      },
+      {
+        id: 'help-pr',
+        label: 'See an example pull request',
+        section: 'Help',
+        icon: GitPullRequest,
+        keywords: 'output diff deliverable',
+        onSelect: () =>
+          window.open(
+            'https://github.com/maxencerousseau38-prog/localize-infra-fixture-vite/pull/1',
+            '_blank',
+          ),
+      },
+    ],
     [router],
   );
-  // Only navigation is listed. An "Actions" section would have to name actions
-  // that do not exist yet, and a palette that offers a command it cannot run is
-  // worse than one that offers fewer.
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line px-4">
