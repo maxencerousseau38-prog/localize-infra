@@ -19,4 +19,4 @@ test-results/
 .env*
 
 # Scratch directory for design-audit screenshots (Playwright).
-apps/web/.audit/
+apps/*/.audit/

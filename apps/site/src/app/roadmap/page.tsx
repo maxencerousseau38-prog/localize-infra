@@ -68,9 +68,17 @@ const STAGES: {
   },
 ];
 
-const TONE: Record<Status, 'confident' | 'ambiguous' | 'neutral'> = {
+/**
+ * Only shipped capability carries colour (DESIGN.md §6.2, §6.3).
+ *
+ * `building` was Iris, which in this system means one thing — your judgement is
+ * required — and a roadmap item requires nothing of the reader. Spending the
+ * ambiguity colour on maturity state is the same leak that was already removed
+ * from the landing page's status board, and it had spread to four more pages.
+ */
+const TONE: Record<Status, 'confident' | 'neutral'> = {
   shipped: 'confident',
-  building: 'ambiguous',
+  building: 'neutral',
   planned: 'neutral',
 };
 

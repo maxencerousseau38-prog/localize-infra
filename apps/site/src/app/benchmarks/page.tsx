@@ -1,3 +1,4 @@
+import { EvidenceSection } from '@/components/evidence-section';
 import { PageHeader } from '@/components/page-header';
 import { RateCell } from '@/components/rate-cell';
 import {
@@ -124,25 +125,22 @@ export default function BenchmarksPage() {
           </div>
         </section>
 
-        <section aria-labelledby="results" className="mt-14">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2
-              id="results"
-              className="font-display text-headline font-semibold text-primary"
-            >
-              Results
-            </h2>
-            <Badge tone="confident">Deterministic</Badge>
-          </div>
-          <p className="mt-3 max-w-[64ch] text-prose text-secondary">
-            Every check below is a program, not a judgement. Each runs over the
-            same {BENCHMARKS.corpus.entries} strings in both conditions.
-            Denominators differ per check because a check only counts entries it
-            applies to — and where nothing applies, the result is{' '}
-            <em>no data</em>, not a pass.
-          </p>
-
-          <div className="mt-8 overflow-x-auto">
+        <EvidenceSection
+          id="results"
+          title="Results"
+          badge={<Badge tone="confident">Deterministic</Badge>}
+          className="mt-14 border-t border-subtle pt-12 sm:pt-14"
+          aside={
+            <p>
+              Every check is a program, not a judgement. Each runs over the same{' '}
+              {BENCHMARKS.corpus.entries} strings in both conditions.
+              Denominators differ per check because a check only counts entries
+              it applies to — and where nothing applies, the result is{' '}
+              <em>no data</em>, not a pass.
+            </p>
+          }
+        >
+          <div className="overflow-x-auto">
             {/* The description column collapses into the first cell below
                 `sm`. Keeping five columns at phone width pushed the results —
                 the only reason this table exists — off-screen behind a
@@ -214,7 +212,7 @@ export default function BenchmarksPage() {
             defect. They are not excluded silently: that is what this sentence
             is for.
           </p>
-        </section>
+        </EvidenceSection>
 
         {/* The one finding worth stating as a finding. Computed from the
             artifact, so it cannot drift from the table above it. */}
@@ -255,21 +253,20 @@ export default function BenchmarksPage() {
           </section>
         ) : null}
 
-        <section aria-labelledby="per-locale" className="mt-14">
-          <h2
-            id="per-locale"
-            className="font-display text-headline font-semibold text-primary"
-          >
-            Placeholder integrity per language
-          </h2>
-          <p className="mt-3 max-w-[64ch] text-prose text-secondary">
-            Broken out because an average hides the language that fails. Here it
-            hides nothing — but the breakdown is published either way, so that
-            when a language does fail there is no decision to make about
-            publishing it.
-          </p>
-
-          <div className="mt-8 overflow-x-auto">
+        <EvidenceSection
+          id="per-locale"
+          title="Placeholder integrity per language"
+          className="mt-14 border-t border-subtle pt-12 sm:pt-14"
+          aside={
+            <p>
+              Broken out because an average hides the language that fails. Here
+              it hides nothing — but the breakdown is published either way, so
+              that when a language does fail there is no decision to make about
+              publishing it.
+            </p>
+          }
+        >
+          <div className="overflow-x-auto">
             <table className="w-full min-w-[34rem] border-collapse">
               <caption className="sr-only">
                 Placeholder integrity by target language, both conditions
@@ -332,12 +329,12 @@ export default function BenchmarksPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </EvidenceSection>
 
         {/* Placed before the method, not after it: a reader who stops halfway
             down must still have seen the limits. */}
         <section aria-labelledby="not-measured" className="mt-14">
-          <StateRule tone="ambiguous" className="max-w-[70ch]">
+          <StateRule tone="neutral" className="max-w-[70ch]">
             <div className="flex flex-wrap items-center gap-3">
               <h2
                 id="not-measured"
@@ -345,7 +342,7 @@ export default function BenchmarksPage() {
               >
                 What these numbers do not tell you
               </h2>
-              <Badge tone="ambiguous">Not measured</Badge>
+              <Badge tone="neutral">Not measured</Badge>
             </div>
             <ul className="mt-4 space-y-3">
               {BENCHMARKS.notMeasured.map((item) => (

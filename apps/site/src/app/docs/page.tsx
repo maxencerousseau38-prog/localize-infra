@@ -214,9 +214,9 @@ export default function DocsPage() {
             <Section
               id="status"
               title="Before you start"
-              badge={<Badge tone="ambiguous">Pre-alpha</Badge>}
+              badge={<Badge tone="neutral">Pre-alpha</Badge>}
             >
-              <StateRule tone="ambiguous">
+              <StateRule tone="neutral">
                 <p>
                   <strong className="font-medium text-primary">
                     The CLI is not published to npm yet.

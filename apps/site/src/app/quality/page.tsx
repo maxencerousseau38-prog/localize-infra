@@ -1,3 +1,4 @@
+import { EvidenceSection } from '@/components/evidence-section';
 import { PageHeader } from '@/components/page-header';
 import { RateCell } from '@/components/rate-cell';
 import { BENCHMARKS, type Check, conditionBy } from '@/lib/benchmarks';
@@ -64,36 +65,37 @@ export default function QualityPage() {
       />
 
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
-        <section aria-labelledby="mechanical">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2
-              id="mechanical"
-              className="font-display text-headline font-semibold text-primary"
-            >
-              Mechanical correctness
-            </h2>
-            <Badge tone="confident">Verified every build</Badge>
-          </div>
-          <p className="mt-3 max-w-[64ch] text-prose text-secondary">
-            These are the failures that silently break a running app: a dropped{' '}
-            <code className="font-mono text-small">{'{count}'}</code>, an ICU
-            block that no longer parses, a plural form that does not exist in
-            the target language. They are checked deterministically against the
-            corpus below, and the build fails if the rate drops under 99.5%.
-          </p>
-          <p className="mt-3 max-w-[64ch] text-prose text-secondary">
-            Results are for the context-rich condition — the one the CLI
-            actually uses. The{' '}
-            <Link
-              href="/benchmarks"
-              className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              benchmarks page
-            </Link>{' '}
-            compares it against the same model with no context at all.
-          </p>
-
-          <div className="mt-8 overflow-x-auto">
+        <EvidenceSection
+          id="mechanical"
+          title="Mechanical correctness"
+          badge={<Badge tone="confident">Verified every build</Badge>}
+          className=""
+          aside={
+            <>
+              <p>
+                These are the failures that silently break a running app: a
+                dropped{' '}
+                <code className="font-mono text-small">{'{count}'}</code>, an
+                ICU block that no longer parses, a plural form that does not
+                exist in the target language. They are checked deterministically
+                against the corpus, and the build fails if the rate drops under
+                99.5%.
+              </p>
+              <p>
+                Results are for the context-rich condition — the one the CLI
+                actually uses. The{' '}
+                <Link
+                  href="/benchmarks"
+                  className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  benchmarks page
+                </Link>{' '}
+                compares it against the same model with no context at all.
+              </p>
+            </>
+          }
+        >
+          <div className="overflow-x-auto">
             {/* Description folds into the first cell below `sm`, so the
                 result column stays on screen. */}
             <table className="w-full min-w-[20rem] border-collapse sm:min-w-[34rem]">
@@ -146,7 +148,7 @@ export default function QualityPage() {
             </table>
           </div>
 
-          <p className="mt-4 max-w-[64ch] text-small leading-6 text-tertiary">
+          <p className="mt-4 text-small leading-6 text-tertiary">
             Two rows read <strong className="text-secondary">No data</strong>{' '}
             rather than a percentage. The corpus contains no ICU plural or
             select messages, so those two checks had nothing to run against.
@@ -155,13 +157,13 @@ export default function QualityPage() {
             unearned number this page exists to avoid. Extending the corpus to
             cover them is outstanding work.
           </p>
-        </section>
+        </EvidenceSection>
 
         {/* The unmeasured half. Publishing "not yet measured" is more credible
             than a number we cannot source, and it pre-commits us publicly to
             publishing results that may be unflattering. */}
         <section aria-labelledby="human" className="mt-14">
-          <StateRule tone="ambiguous" className="max-w-[70ch]">
+          <StateRule tone="neutral" className="max-w-[70ch]">
             <div className="flex flex-wrap items-center gap-3">
               <h2
                 id="human"
@@ -169,7 +171,7 @@ export default function QualityPage() {
               >
                 Human preference
               </h2>
-              <Badge tone="ambiguous">Not yet measured</Badge>
+              <Badge tone="neutral">Not yet measured</Badge>
             </div>
             <p className="mt-3 text-prose text-secondary">
               Mechanical correctness says a translation is well-formed. It says

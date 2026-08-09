@@ -111,12 +111,12 @@ export default function PricingPage() {
 
         {/* Publishing unmodelled prices would contradict the same honesty this
             page is arguing for. The commitment is firm; the numbers are not. */}
-        <StateRule tone="ambiguous" className="mt-16 max-w-[72ch]">
+        <StateRule tone="neutral" className="mt-16 max-w-[72ch]">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-title font-semibold text-primary">
               Paid plans are not priced yet
             </h2>
-            <Badge tone="ambiguous">In development</Badge>
+            <Badge tone="neutral">In development</Badge>
           </div>
           <p className="mt-3 text-prose text-secondary">
             There is no billing system, and nothing is charged today. We could
