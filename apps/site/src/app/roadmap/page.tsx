@@ -1,5 +1,5 @@
 import { PageHeader } from '@/components/page-header';
-import { Badge } from '@localize-infra/ui';
+import { Badge, StatusDot } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -107,16 +107,32 @@ export default function RoadmapPage() {
                 </h2>
                 <Badge tone={TONE[stage.status]}>{stage.items.length}</Badge>
               </div>
-              <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:gap-8">
+              {/*
+               * Rows, not a grid of bordered cards.
+               *
+               * This was `rounded-lg border p-5` repeated in two columns, which
+               * is the repetitive-card shape the landing page moved away from:
+               * a border around every item groups nothing, because every item
+               * is already in a list under a heading that names the group.
+               *
+               * It also matches the status board on the landing page now. That
+               * board and this page are the same information at two depths, and
+               * they were drawn as unrelated things — a dotted list there, a
+               * card grid here. One language: a marker carrying state, a title,
+               * and the reasoning beside it.
+               */}
+              <ul className="mt-5 border-t border-subtle">
                 {stage.items.map((item) => (
                   <li
                     key={item.title}
-                    className="rounded-lg border border-subtle p-5"
+                    className="grid gap-x-10 gap-y-1.5 border-b border-subtle py-4 lg:grid-cols-12"
                   >
-                    <h3 className="text-subtitle font-semibold text-primary">
-                      {item.title}
+                    <h3 className="lg:col-span-4">
+                      <StatusDot tone={TONE[stage.status]}>
+                        <span className="font-medium">{item.title}</span>
+                      </StatusDot>
                     </h3>
-                    <p className="mt-2 text-body leading-6 text-secondary">
+                    <p className="text-body leading-6 text-secondary lg:col-span-8">
                       {item.body}
                     </p>
                   </li>

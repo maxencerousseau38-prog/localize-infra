@@ -91,7 +91,7 @@ export default function SecurityPage() {
               {NOT_SENT.map((item) => (
                 <li
                   key={item}
-                  className="text-body leading-6 text-secondary before:me-2 before:text-confident before:content-['—']"
+                  className="text-body leading-6 text-secondary before:me-2 before:text-tertiary before:content-['—']"
                 >
                   {item}
                 </li>
@@ -199,11 +199,11 @@ export default function SecurityPage() {
               nothing else.
             </p>
             <ul className="mt-5 space-y-2.5 text-body leading-6 text-secondary">
-              <li className="before:me-2 before:text-confident before:content-['—']">
+              <li className="before:me-2 before:text-tertiary before:content-['—']">
                 <code className="font-mono text-small">contents: write</code> —
                 create a branch and commit locale files
               </li>
-              <li className="before:me-2 before:text-confident before:content-['—']">
+              <li className="before:me-2 before:text-tertiary before:content-['—']">
                 <code className="font-mono text-small">
                   pull_requests: write
                 </code>{' '}

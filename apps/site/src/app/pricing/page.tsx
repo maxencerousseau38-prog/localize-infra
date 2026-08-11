@@ -51,7 +51,11 @@ export default function PricingPage() {
               {NEVER_METERED.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <X
-                    className="mt-0.5 size-4 shrink-0 text-failed"
+                    // Graphite, not crimson. Crimson means a run failed; "we will never
+                    // charge for words" is a commitment, not a failure state, and
+                    // spending the failure colour on it is the same leak that put
+                    // Iris on roadmap items (DESIGN.md §6.3).
+                    className="mt-0.5 size-4 shrink-0 text-tertiary"
                     aria-hidden="true"
                   />
                   <span className="text-subtitle text-secondary">{item}</span>
@@ -73,7 +77,8 @@ export default function PricingPage() {
                 <div key={axis}>
                   <dt className="flex items-center gap-2 text-subtitle font-medium text-primary">
                     <Check
-                      className="size-4 text-confident"
+                      // Jade means verified or current. A pricing axis is neither.
+                      className="size-4 text-tertiary"
                       aria-hidden="true"
                     />
                     {axis}
