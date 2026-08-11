@@ -87,3 +87,35 @@ test('the mobile menu closes on selection and restores focus', async ({
   // Landing back on the trigger is what makes the sheet usable by keyboard.
   await expect(trigger).toBeFocused();
 });
+
+/**
+ * Overlays are audited open, and audited *settled*.
+ *
+ * The dialog animates in, and running axe immediately after the click reported
+ * five contrast failures that do not exist — it was measuring colours
+ * mid-transition. Waiting for the animation is not a workaround here; an
+ * assertion about a frame nobody sees is simply not an assertion about the
+ * product.
+ */
+for (const scheme of ['light', 'dark'] as const) {
+  test(`the open conversion dialog has no axe violations (${scheme})`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto('/');
+    await page
+      .getByRole('button', { name: 'Run it on your repository' })
+      .click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveCSS('opacity', '1');
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    expect(
+      results.violations.map((v) => `${v.id}: ${v.nodes.length} node(s)`),
+    ).toEqual([]);
+  });
+}

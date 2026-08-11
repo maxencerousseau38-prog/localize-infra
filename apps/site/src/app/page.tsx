@@ -1,3 +1,4 @@
+import { GatedAction } from '@/components/conversion-dialog';
 import { BuildStatus } from '@/components/landing/build-status';
 import { Commitments } from '@/components/landing/commitments';
 import { Ecosystem } from '@/components/landing/ecosystem';
@@ -44,15 +45,20 @@ export default function HomePage() {
            * command's real home is the install section of the docs it points
            * at.
            */}
+          {/*
+           * The conversion point sits here, at the foot of the page, not at the
+           * top of it. By this line a visitor has seen the artefact, the real
+           * merged pull request, the four pipeline steps and a status board
+           * naming what is not built — they have a reason to want the thing
+           * before anything asks them for something.
+           *
+           * GatedAction checks entitlement first: a viewer who already has
+           * access never sees a dialog at all.
+           */}
           <div className="mx-auto mt-9 flex max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
-            <Button
-              asChild
-              variant="primary"
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              <Link href="/docs#install">Read the install guide</Link>
-            </Button>
+            <GatedAction className="w-full sm:w-auto">
+              Run it on your repository
+            </GatedAction>
             <Button
               asChild
               variant="secondary"

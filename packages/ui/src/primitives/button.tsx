@@ -54,6 +54,13 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   /** Render as the child element (e.g. an `<a>`) while keeping button styling. */
   asChild?: boolean;
+  /**
+   * React 19 passes `ref` as an ordinary prop to function components, but it
+   * still has to be declared to be typed. Needed by callers that own focus
+   * restoration themselves — a dialog opened from state rather than through a
+   * Radix trigger has nothing to return focus to unless it keeps this.
+   */
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 export function Button({

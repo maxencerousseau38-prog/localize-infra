@@ -78,9 +78,14 @@ export function CopyCommand({
             'inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1',
             'text-caption font-medium',
             'transition-colors duration-(--duration-micro)',
+            // `secondary`, not `tertiary`: this control sits on its own tinted
+            // ground, where tertiary at 12px measured 4.03:1 — under AA. The
+            // route-level axe runs never caught it because the failure depends
+            // on what the command box is placed on, and it took putting one
+            // inside a dialog to surface it.
             state === 'copied'
               ? 'text-confident-text'
-              : 'text-tertiary group-hover:text-secondary',
+              : 'text-secondary group-hover:text-primary',
           )}
         >
           {state === 'copied' ? (
