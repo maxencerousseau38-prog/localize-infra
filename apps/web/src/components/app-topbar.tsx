@@ -230,7 +230,10 @@ export function AppTopbar() {
         {/* The shortcut is shown, not hidden: a palette nobody knows about is a
             palette nobody uses. Hidden where there is no keyboard to press it
             with. */}
-        <kbd className="hidden font-mono text-micro text-tertiary sm:inline">
+        {/* `text-secondary`, not tertiary: at 11px this measured 4.54:1, which
+            clears AA by four hundredths — a coincidence rather than a margin,
+            and this is the one affordance telling a reader the palette exists. */}
+        <kbd className="hidden font-mono text-micro text-secondary sm:inline">
           ⌘K
         </kbd>
       </button>

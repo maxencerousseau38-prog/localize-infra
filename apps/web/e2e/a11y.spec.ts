@@ -217,3 +217,98 @@ test('touch targets in the navigation sheet meet the minimum size', async ({
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(24);
   }
 });
+
+/**
+ * Contrast of the primitives added during the transformation.
+ *
+ * axe checks contrast against what it can resolve, but these are small text on
+ * tinted grounds where the margin matters: the keyboard hint measured 4.54:1
+ * before this — over the 4.5 threshold by four hundredths, which is a
+ * coincidence rather than a margin, and any token adjustment would have broken
+ * it silently.
+ */
+for (const scheme of ['light', 'dark'] as const) {
+  test(`keyboard hints stay legible (${scheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto('/ambiguity');
+
+    // Every keyboard hint on the page, not the first. The first version of
+    // this measured whichever `kbd` came first in the DOM and reported it as
+    // though it covered the primitive — it was in fact reading the topbar's
+    // ⌘K badge, a different element with a different colour.
+    const ratios = await page.locator('kbd').evaluateAll((els) =>
+      els.map((el) => {
+        const luminance = (colour: string) => {
+          const [r = 0, g = 0, b = 0] = colour
+            .match(/[\d.]+/g)!
+            .slice(0, 3)
+            .map((v) => Number(v) / 255)
+            .map((v) =>
+              v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4,
+            );
+          return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        };
+        // Walk up for the first opaque ancestor background.
+        let node: Element | null = el;
+        let background = getComputedStyle(el).backgroundColor;
+        while (
+          (background === 'rgba(0, 0, 0, 0)' || background === 'transparent') &&
+          (node = node.parentElement)
+        ) {
+          background = getComputedStyle(node).backgroundColor;
+        }
+        const a = luminance(getComputedStyle(el).color);
+        const b = luminance(background);
+        const [hi, lo] = a > b ? [a, b] : [b, a];
+        return (hi + 0.05) / (lo + 0.05);
+      }),
+    );
+
+    expect(ratios.length).toBeGreaterThan(0);
+    // 11px is normal-size text for contrast purposes, so AA is 4.5.
+    for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5);
+  });
+}
+
+test('the breadcrumb marks which segment is the current page', async ({
+  page,
+}) => {
+  await page.goto('/runs');
+  // Without this a screen reader hears the trail but not where it stops. The
+  // hand-rolled breadcrumb this replaced never set it.
+  const current = page.locator(
+    'nav[aria-label="Breadcrumb"] [aria-current="page"]',
+  );
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveText('Runs');
+});
+
+test('nothing animates under reduced motion', async ({ browser }) => {
+  // The site pins this; the application did not, and it is the surface with
+  // the overlays, sheets and row transitions.
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await context.newPage();
+
+  for (const route of ['/', '/runs', '/ambiguity', '/design']) {
+    await page.goto(route);
+    const animating = await page.evaluate(
+      () =>
+        [...document.querySelectorAll('*')].filter((el) => {
+          const style = getComputedStyle(el);
+          return [
+            ...style.animationDuration.split(','),
+            ...style.transitionDuration.split(','),
+          ]
+            .map((v) =>
+              v.trim().endsWith('ms')
+                ? Number.parseFloat(v)
+                : Number.parseFloat(v) * 1000,
+            )
+            .some((ms) => ms > 1);
+        }).length,
+    );
+    expect(animating, `${route} under reduced motion`).toBe(0);
+  }
+
+  await context.close();
+});

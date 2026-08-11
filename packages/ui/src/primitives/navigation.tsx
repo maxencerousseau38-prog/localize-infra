@@ -104,7 +104,11 @@ export function Kbd({ className, ...props }: React.ComponentProps<'kbd'>) {
       className={cn(
         'inline-flex h-5 min-w-5 items-center justify-center rounded-sm px-1.5',
         'border border-subtle bg-surface',
-        'font-mono text-micro font-medium text-secondary',
+        // `text-primary`, not `text-secondary`: at 11px this is normal-size
+        // text for contrast purposes, and secondary measured 4.54:1 — over the
+        // 4.5 threshold by four hundredths, which is not a margin, it is a
+        // coincidence. A key is meant to be read at a glance.
+        'font-mono text-micro font-medium text-primary',
         className,
       )}
       {...props}
