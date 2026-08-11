@@ -121,3 +121,48 @@ test('page titles step down below sm (DESIGN.md §3.4)', async ({ page }) => {
   expect(small).toBe(20);
   expect(large).toBe(28);
 });
+
+/**
+ * URL-addressable state (DESIGN.md §9).
+ *
+ * The rule has been in the design document since its first draft and lived
+ * nowhere in the code: filter and sort were `useState`, so no view could be
+ * shared, bookmarked, or survive a refresh — on a product whose users work by
+ * sending each other links. Pinned here because it is invisible to every other
+ * check: the surface looks and behaves identically until you reload it.
+ */
+test('filter and sort survive a reload and can be shared as a link', async ({
+  page,
+}) => {
+  await page.goto('/runs');
+  const filter = page.getByRole('group', { name: 'Filter runs by status' });
+
+  // Defaults are never written — a pristine surface has a clean address bar.
+  expect(new URL(page.url()).search).toBe('');
+
+  await filter.getByText('Failed', { exact: true }).click();
+  await expect(page.getByRole('radio', { name: 'Failed' })).toBeChecked();
+  expect(new URL(page.url()).search).toContain('status=failed');
+
+  // The actual requirement: a fresh load of that URL reproduces the view.
+  const shared = page.url();
+  await page.goto(shared);
+  await expect(page.getByRole('radio', { name: 'Failed' })).toBeChecked();
+  await expect(page.locator('tbody tr')).toHaveCount(1);
+
+  // Returning to the default drops the parameter rather than pinning it.
+  await filter.getByText('All', { exact: true }).click();
+  await expect(page.getByRole('radio', { name: 'All' })).toBeChecked();
+  expect(new URL(page.url()).search).not.toContain('status=');
+});
+
+test('a sort order can be linked to directly', async ({ page }) => {
+  await page.goto('/locales');
+  const byCoverage = await page.locator('tbody tr td').first().textContent();
+
+  await page.goto('/locales?sort=language&dir=asc');
+  const byLanguage = await page.locator('tbody tr td').first().textContent();
+
+  expect(byLanguage).not.toBe(byCoverage);
+  expect(byLanguage).toContain('Arabic');
+});

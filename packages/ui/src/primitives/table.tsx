@@ -6,21 +6,31 @@ import { cn } from '../lib/cn';
  * Zebra striping is deliberately absent (design system §4.3): alternating row
  * fills compete with the State Rule, which is the system's primary signal for
  * the state of a piece of copy. Borders separate rows instead.
+ *
+ * Density is inverted from where it started (DESIGN.md §11).
+ *
+ * Rows were 44px by default and `dense` (36px) existed but was used by no
+ * table in the product — which is how a tool meant to be read for hours ended
+ * up leaving a third of its primary surface empty. Dense is now the default and
+ * `comfortable` is the exception, justified by a row carrying two lines.
+ *
+ * Density is expressed once, here, rather than threaded through every cell.
  */
 export function Table({
   className,
-  dense = false,
+  comfortable = false,
   ...props
-}: React.TableHTMLAttributes<HTMLTableElement> & { dense?: boolean }) {
+}: React.TableHTMLAttributes<HTMLTableElement> & {
+  /** 44px rows. Only for rows that genuinely carry two lines of content. */
+  comfortable?: boolean;
+}) {
   return (
     <div className="w-full overflow-x-auto">
       <table
-        data-dense={dense || undefined}
+        data-comfortable={comfortable || undefined}
         className={cn(
           'w-full border-collapse text-start',
-          // Density is expressed once, here, rather than threaded through
-          // every cell as a prop.
-          '[&[data-dense]_td]:h-9 [&[data-dense]_th]:h-8',
+          '[&[data-comfortable]_td]:h-11 [&[data-comfortable]_th]:h-9',
           className,
         )}
         {...props}
@@ -78,7 +88,7 @@ export function TH({
     <th
       scope="col"
       className={cn(
-        'h-9 px-2 align-middle sm:px-3',
+        'h-8 px-2 align-middle sm:px-3',
         'text-caption font-medium uppercase tracking-wide text-tertiary',
         numeric ? 'text-end' : 'text-start',
         className,
@@ -97,7 +107,7 @@ export function TD({
     <td
       data-numeric={numeric || undefined}
       className={cn(
-        'h-11 px-2 text-body leading-5 text-secondary sm:px-3',
+        'h-9 px-2 text-body leading-5 text-secondary sm:px-3',
         numeric ? 'text-end' : 'text-start',
         className,
       )}
@@ -140,13 +150,13 @@ export function SortableTH({
             ? 'descending'
             : 'none'
       }
-      className={cn('h-9 px-0 align-middle', className)}
+      className={cn('h-8 px-0 align-middle', className)}
     >
       <button
         type="button"
         onClick={onSort}
         className={cn(
-          'flex h-9 w-full items-center gap-1.5 px-3',
+          'flex h-8 w-full items-center gap-1.5 px-3',
           'text-caption font-medium uppercase tracking-wide text-tertiary',
           'transition-colors hover:text-secondary',
           'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',

@@ -4,6 +4,11 @@ import { SidebarNav } from '@/components/app-sidebar';
 import { SampleChip } from '@/components/sample';
 import { ALL_ROUTES, resolveRoute } from '@/lib/nav';
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
   type CommandItem,
   CommandPalette,
   DialogRoot,
@@ -157,19 +162,26 @@ export function AppTopbar() {
         </SheetContent>
       </DialogRoot>
 
-      <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
-        <ol className="flex items-center gap-1.5 text-small">
+      {/* The shared Breadcrumb primitive rather than a local `nav > ol`. The
+          hand-rolled version never marked the current segment with
+          `aria-current="page"`, so a screen reader heard the trail but not
+          which part of it was here — the one thing a breadcrumb exists to
+          say. */}
+      <Breadcrumb className="min-w-0 flex-1">
+        <BreadcrumbList>
           {/* The root segment is dropped on narrow screens rather than
               truncated: the last segment is the one that says where you are. */}
-          <li className="hidden text-tertiary sm:block">Localize Infra</li>
+          <BreadcrumbItem className="hidden sm:inline-flex">
+            Localize Infra
+          </BreadcrumbItem>
           {current ? (
             <>
-              <li aria-hidden="true" className="hidden text-tertiary sm:block">
+              <BreadcrumbSeparator className="hidden sm:inline-flex">
                 /
-              </li>
+              </BreadcrumbSeparator>
               {/* On a detail page the parent stays a link, so the breadcrumb
                   is a way back rather than a label. */}
-              <li className="truncate">
+              <BreadcrumbItem className="truncate">
                 {detail ? (
                   <Link
                     href={current.href}
@@ -178,32 +190,30 @@ export function AppTopbar() {
                     {current.label}
                   </Link>
                 ) : (
-                  <span className="font-medium text-primary">
-                    {current.label}
-                  </span>
+                  <BreadcrumbPage>{current.label}</BreadcrumbPage>
                 )}
-              </li>
+              </BreadcrumbItem>
               {detail ? (
                 <>
-                  <li aria-hidden="true" className="text-tertiary">
-                    /
-                  </li>
-                  <li className="truncate font-mono font-medium text-primary">
-                    {detail}
-                  </li>
+                  <BreadcrumbSeparator>/</BreadcrumbSeparator>
+                  <BreadcrumbItem className="truncate">
+                    <BreadcrumbPage className="font-mono">
+                      {detail}
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
                 </>
               ) : null}
               {/* Third of the three sample markers. Present on every sample
                   route, so a reader who lands mid-app still sees it. */}
               {current.sample ? (
-                <li>
+                <BreadcrumbItem>
                   <SampleChip />
-                </li>
+                </BreadcrumbItem>
               ) : null}
             </>
           ) : null}
-        </ol>
-      </nav>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <button
         type="button"

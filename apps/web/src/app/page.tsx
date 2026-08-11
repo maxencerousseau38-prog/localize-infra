@@ -5,8 +5,20 @@ import {
   SAMPLE_LOCALES,
   SAMPLE_REVIEW,
   SAMPLE_RUNS,
+  type SampleRun,
 } from '@/lib/sample';
-import { Badge, Button, cn } from '@localize-infra/ui';
+import {
+  Badge,
+  Button,
+  TBody,
+  TD,
+  TH,
+  THead,
+  TR,
+  Table,
+  type Tone,
+  cn,
+} from '@localize-infra/ui';
 import { ArrowRight, FileText, TriangleAlert } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -76,6 +88,12 @@ function BlockedCard({
   );
 }
 
+const RUN_STATE: Record<SampleRun['state'], { tone: Tone; label: string }> = {
+  succeeded: { tone: 'confident', label: 'Succeeded' },
+  partial: { tone: 'degraded', label: 'Partial' },
+  failed: { tone: 'failed', label: 'Failed' },
+};
+
 export default function HomePage() {
   const behind = SAMPLE_LOCALES.filter((l) => l.translated < l.total).length;
 
@@ -128,37 +146,50 @@ export default function HomePage() {
             </Button>
           }
         >
-          <ul className="divide-y divide-subtle rounded-lg border border-subtle">
-            {SAMPLE_RUNS.map((run) => (
-              <li
-                key={run.id}
-                className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3"
-              >
-                <Badge
-                  tone={
-                    run.state === 'succeeded'
-                      ? 'confident'
-                      : run.state === 'partial'
-                        ? 'degraded'
-                        : 'failed'
-                  }
-                >
-                  {run.state === 'succeeded'
-                    ? 'Succeeded'
-                    : run.state === 'partial'
-                      ? 'Partial'
-                      : 'Failed'}
-                </Badge>
-                <span className="min-w-0 flex-1 truncate font-mono text-caption text-secondary">
-                  {run.trigger}
-                </span>
-                <span className="text-small tabular-nums text-tertiary">
-                  {run.locales - run.localesFailed}/{run.locales} locales
-                </span>
-                <span className="text-small text-tertiary">{run.when}</span>
-              </li>
-            ))}
-          </ul>
+          {/* A run is a table row here exactly as it is on /runs (DESIGN.md
+              §8). This was a bordered list of flex rows — the same domain
+              object wearing a second geometry, which teaches the reader that
+              the difference means something when it does not. Column count is
+              allowed to differ between surfaces; the shape is not. */}
+          <Table>
+            <THead>
+              <TR>
+                <TH>Status</TH>
+                <TH>Trigger</TH>
+                <TH numeric className="hidden sm:table-cell">
+                  Locales
+                </TH>
+                <TH>When</TH>
+              </TR>
+            </THead>
+            <TBody>
+              {SAMPLE_RUNS.map((run) => {
+                const state = RUN_STATE[run.state];
+                return (
+                  <TR key={run.id} className="relative">
+                    <TD>
+                      <Badge tone={state.tone}>{state.label}</Badge>
+                    </TD>
+                    <TD>
+                      <Link
+                        href={`/runs/${run.id}`}
+                        aria-label={`Run ${run.id.replace('run-', '')}, ${state.label.toLowerCase()}`}
+                        className="block max-w-[12rem] truncate font-mono text-caption text-secondary after:absolute after:inset-0 hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus sm:max-w-none"
+                      >
+                        {run.trigger}
+                      </Link>
+                    </TD>
+                    <TD numeric className="hidden tabular-nums sm:table-cell">
+                      {run.locales - run.localesFailed}/{run.locales}
+                    </TD>
+                    <TD className="whitespace-nowrap text-tertiary">
+                      {run.when}
+                    </TD>
+                  </TR>
+                );
+              })}
+            </TBody>
+          </Table>
         </PageSection>
       </SampleRegion>
     </Page>

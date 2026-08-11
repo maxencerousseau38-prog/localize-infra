@@ -2,6 +2,7 @@
 
 import { DataSearch, DataToolbar } from '@/components/data-toolbar';
 import type { ConfidenceState, SampleLocale } from '@/lib/sample';
+import { useTableQuery } from '@/lib/use-table-query';
 import {
   Badge,
   EmptyState,
@@ -52,11 +53,11 @@ type SortKey = 'coverage' | 'language';
 export function LocalesTable({
   locales,
 }: { locales: readonly SampleLocale[] }) {
-  const [query, setQuery] = React.useState('');
-  const [sort, setSort] = React.useState<{ key: SortKey; desc: boolean }>({
-    key: 'coverage',
-    desc: true,
-  });
+  // Search and sort live in the URL, not component state (DESIGN.md §9).
+  const { query, sort, desc, setQuery, toggleSort, reset } = useTableQuery<
+    'all',
+    SortKey
+  >({ filter: 'all', sort: 'coverage', desc: true });
 
   const rows = React.useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -70,21 +71,17 @@ export function LocalesTable({
       .slice()
       .sort((a, b) => {
         const value =
-          sort.key === 'coverage'
+          sort === 'coverage'
             ? a.translated / a.total - b.translated / b.total
             : localeDisplayName(a.code).localeCompare(
                 localeDisplayName(b.code),
               );
-        return sort.desc ? -value : value;
+        return desc ? -value : value;
       });
-  }, [locales, query, sort]);
+  }, [locales, query, sort, desc]);
 
-  const toggle = (key: SortKey) =>
-    setSort((current) =>
-      current.key === key ? { key, desc: !current.desc } : { key, desc: true },
-    );
   const direction = (key: SortKey) =>
-    sort.key === key ? (sort.desc ? 'desc' : 'asc') : null;
+    sort === key ? (desc ? 'desc' : 'asc') : null;
 
   return (
     <>
@@ -103,14 +100,14 @@ export function LocalesTable({
             <SortableTH
               label="Language"
               direction={direction('language')}
-              onSort={() => toggle('language')}
+              onSort={() => toggleSort('language')}
             />
             <TH className="hidden lg:table-cell">Specimen</TH>
             <SortableTH
               label="Coverage"
               numeric
               direction={direction('coverage')}
-              onSort={() => toggle('coverage')}
+              onSort={() => toggleSort('coverage')}
             />
             <TH numeric className="hidden sm:table-cell">
               Translated
@@ -128,7 +125,7 @@ export function LocalesTable({
                 action={
                   <button
                     type="button"
-                    onClick={() => setQuery('')}
+                    onClick={reset}
                     className="rounded-sm text-body text-link underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                   >
                     Show all languages

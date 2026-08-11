@@ -2,6 +2,7 @@
 
 import { DataFilter, DataSearch, DataToolbar } from '@/components/data-toolbar';
 import type { SampleRun } from '@/lib/sample';
+import { useTableQuery } from '@/lib/use-table-query';
 import {
   Badge,
   EmptyState,
@@ -47,19 +48,25 @@ function duration(ms: number): string {
  * their `when` values are human strings ("2 hours ago"), which do not sort.
  */
 export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
-  const [filter, setFilter] = React.useState<Filter>('all');
-  const [query, setQuery] = React.useState('');
-  const [sort, setSort] = React.useState<{ key: SortKey; desc: boolean }>({
-    key: 'when',
-    desc: true,
-  });
+  /*
+   * Filter, search and sort live in the URL (DESIGN.md §9), not in component
+   * state. This surface's whole audience works by sending each other links —
+   * "here are the failed runs from this week" is a URL or it is a screenshot.
+   * It was `useState` until now, so no view was shareable or survived a reload.
+   */
+  const { filter, query, sort, desc, setFilter, setQuery, toggleSort, reset } =
+    useTableQuery<Filter, SortKey>({
+      filter: 'all',
+      sort: 'when',
+      desc: true,
+    });
 
   const rows = React.useMemo(() => {
     const needle = query.trim().toLowerCase();
     const value = (run: SampleRun, index: number) =>
-      sort.key === 'duration'
+      sort === 'duration'
         ? run.durationMs
-        : sort.key === 'strings'
+        : sort === 'strings'
           ? run.strings
           : runs.length - index;
 
@@ -69,16 +76,12 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
       .filter(
         ({ run }) => !needle || run.trigger.toLowerCase().includes(needle),
       )
-      .sort((a, b) => (sort.desc ? b.order - a.order : a.order - b.order))
+      .sort((a, b) => (desc ? b.order - a.order : a.order - b.order))
       .map(({ run }) => run);
-  }, [runs, filter, query, sort]);
+  }, [runs, filter, query, sort, desc]);
 
-  const toggle = (key: SortKey) =>
-    setSort((current) =>
-      current.key === key ? { key, desc: !current.desc } : { key, desc: true },
-    );
   const direction = (key: SortKey) =>
-    sort.key === key ? (sort.desc ? 'desc' : 'asc') : null;
+    sort === key ? (desc ? 'desc' : 'asc') : null;
 
   return (
     <>
@@ -109,21 +112,21 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
               label="Strings"
               numeric
               direction={direction('strings')}
-              onSort={() => toggle('strings')}
+              onSort={() => toggleSort('strings')}
               className="hidden sm:table-cell"
             />
             <SortableTH
               label="Duration"
               numeric
               direction={direction('duration')}
-              onSort={() => toggle('duration')}
+              onSort={() => toggleSort('duration')}
               className="hidden md:table-cell"
             />
             <TH className="hidden md:table-cell">Output</TH>
             <SortableTH
               label="When"
               direction={direction('when')}
-              onSort={() => toggle('when')}
+              onSort={() => toggleSort('when')}
             />
           </TR>
         </THead>
@@ -136,10 +139,7 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
                 action={
                   <button
                     type="button"
-                    onClick={() => {
-                      setFilter('all');
-                      setQuery('');
-                    }}
+                    onClick={reset}
                     className="rounded-sm text-body text-link underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                   >
                     Show all runs

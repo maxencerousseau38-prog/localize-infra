@@ -63,6 +63,15 @@ export {
 export { Field, FormColumn, useFieldControl } from './primitives/field';
 export { Input, Textarea } from './primitives/input';
 export {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  Kbd,
+  Pagination,
+} from './primitives/navigation';
+export {
   MenuCheckboxItem,
   MenuContent,
   MenuGroup,

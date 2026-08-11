@@ -128,7 +128,12 @@ export function PageSection({
       {title ? (
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-subtitle font-semibold tracking-[-0.01em] text-primary sm:text-title">
+            {/* DESIGN.md §3.5: two steps below the page title, not one.
+                `display` 28 over `title` 20 is a single step doing display
+                duty, and the two read as siblings. At `subtitle` 16 semibold
+                the ranking is unambiguous, and the section header stops
+                spending 20px of vertical space it had not earned. */}
+            <h2 className="text-subtitle font-semibold tracking-[-0.01em] text-primary">
               {title}
             </h2>
             {description ? (

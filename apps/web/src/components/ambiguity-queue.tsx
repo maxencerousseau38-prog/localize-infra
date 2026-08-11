@@ -2,9 +2,9 @@
 
 import type { SampleAmbiguity } from '@/lib/sample';
 import {
-  Badge,
   Button,
   EmptyState,
+  Kbd,
   LocaleChip,
   StateRule,
   cn,
@@ -85,12 +85,23 @@ export function AmbiguityQueue({ items }: { items: SampleAmbiguity[] }) {
 
   return (
     <>
-      <p className="mb-3 text-small text-tertiary">
-        <kbd className="font-mono text-caption">j</kbd> /{' '}
-        <kbd className="font-mono text-caption">k</kbd> to move,{' '}
-        <kbd className="font-mono text-caption">1</kbd>–
-        <kbd className="font-mono text-caption">9</kbd> to choose,{' '}
-        <kbd className="font-mono text-caption">Enter</kbd> to resolve.
+      {/* Keys rendered as keys. This was bare mono text, which reads as prose
+          and gets skipped; DESIGN.md §9 requires shortcuts to be shown, and
+          showing them is what makes them scannable. */}
+      <p className="mb-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-caption text-tertiary">
+        <Kbd>j</Kbd>
+        <Kbd>k</Kbd>
+        <span>move</span>
+        <span aria-hidden="true" className="px-1 text-subtle">
+          ·
+        </span>
+        <Kbd>1</Kbd>–<Kbd>9</Kbd>
+        <span>choose</span>
+        <span aria-hidden="true" className="px-1 text-subtle">
+          ·
+        </span>
+        <Kbd>Enter</Kbd>
+        <span>resolve</span>
       </p>
       {/* No tabIndex: the candidate radios inside are already focusable, and
           keydown bubbles here from whichever one has focus. A focusable <ol>
@@ -166,9 +177,13 @@ function AmbiguityCard({
           </div>
         </div>
 
-        {/* The question is the point of this surface, so it gets reading size
-            and its own ground rather than being a caption. */}
-        <p className="mt-3 rounded-md bg-raised px-3 py-2 text-body leading-6 text-secondary">
+        {/* The question is the point of this surface, so it gets reading size.
+            It used to sit on its own filled ground, which made this card three
+            containers deep — card, question block, candidate boxes — for one
+            string and two options (DESIGN.md §5.5). The fill is gone; the
+            candidates below are bordered because they are click targets, and
+            that is the one level of nesting this card is allowed. */}
+        <p className="mt-2.5 text-body leading-6 text-secondary">
           {item.question}
         </p>
 
@@ -235,7 +250,12 @@ function AmbiguityCard({
           </div>
         </fieldset>
 
-        <div className="mt-3 flex items-center gap-2">
+        {/* The "Needs a decision" badge that used to sit beside this button is
+            gone. Every card on this surface carries that state — the page is
+            the ambiguity queue and each card already wears the Iris State Rule,
+            so the badge repeated the same fact a third time and competed with
+            the one control that matters (DESIGN.md §6.2). */}
+        <div className="mt-3 flex items-center gap-3">
           <Button
             size="sm"
             variant="primary"
@@ -245,7 +265,12 @@ function AmbiguityCard({
             <Check aria-hidden="true" />
             Use this reading
           </Button>
-          <Badge tone="ambiguous">{item.stateLabel}</Badge>
+          {chosen === undefined ? (
+            <span className="text-caption text-tertiary">
+              Pick a reading, or press <Kbd>1</Kbd>–
+              <Kbd>{String(item.candidates.length)}</Kbd>
+            </span>
+          ) : null}
         </div>
       </StateRule>
     </li>

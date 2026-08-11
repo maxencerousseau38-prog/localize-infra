@@ -176,6 +176,22 @@ title at 1920 is undersized for the space. Fixed display type is a defect.
 
 Body, small, caption and micro never scale — a 14px row must be 14px.
 
+### 3.5 Hierarchy contrast
+
+A scale with eleven steps is worthless if a surface uses three adjacent ones.
+**Where two heading levels appear on the same surface, they must be at least two
+steps apart, or separated by weight and colour as well as size.**
+
+The audit found the application running `display` 28 → `title` 20 → `body` 14 —
+a 2.0× span from page title to body doing the work of a display hierarchy. That
+is not a spacing problem and no amount of padding fixes it. Either the title
+takes a larger step, or the levels below it recede in colour and weight so the
+ranking is unambiguous.
+
+Corollary: **never** express hierarchy through size alone when the sizes are
+close. Weight (500 vs 600), colour (`primary` vs `secondary` vs `tertiary`) and
+letter-spacing carry ranking more reliably at these scales than two pixels do.
+
 ---
 
 ## 4. Layout system
@@ -217,7 +233,56 @@ full-bleed inverted band → connected pipeline → full-bleed rail → editoria
 rows → status board → centred close. **A page where every section is
 heading-then-content is a document, not a composition.**
 
-### 4.5 Breakpoints
+That prohibition was too vague to enforce and two sections drifted into the
+same shape anyway. The testable form:
+
+**No two adjacent sections may share the same structural signature.** A
+signature is the tuple *(column split, whether the section is full-bleed,
+whether its payload is prose or evidence)*. Commitments and Build status were
+both `(4/8 split, contained, prose)` — different content, identical structure,
+and the page read as one long list through both.
+
+At least one section in the first three must be **full-bleed and inverted**,
+and at least one must carry **evidence rather than prose** — a diff, a table, a
+file, real output. A page of seven prose sections is a brochure.
+
+### 4.5 The fold
+
+The first viewport is the only one every visitor sees. It is governed, not
+left to whatever the hero happens to produce.
+
+1. **The strongest evidence available goes above the fold.** The audit found
+   the reverse: a light, low-contrast abstraction in the hero, with the real
+   merged pull request — the product's actual deliverable and its best
+   argument — in the section below it.
+2. **No dead zone.** In an asymmetric split, the short column's slack is
+   composed away (the artifact grows, the columns re-balance, or the section
+   shortens). ~300px of empty right-hand column at 1440 is a defect, not
+   whitespace.
+3. **The primary action must be an action that works today.** Where the
+   nominal primary action is unavailable — an unpublished package, a
+   gated beta — it is demoted to secondary and the strongest *working* action
+   is promoted. A prominent CTA followed by a disclaimer explaining that it
+   does not work spends the visitor's trust at the exact moment it is highest.
+4. **Never repeat a non-working CTA.** Once is an honest limitation; twice on
+   one page reads as the product's main message.
+
+### 4.6 Vertical density — application
+
+An application surface should **fill its first viewport with information or
+explain why it cannot.** The audit measured `/runs` ending at 590px of a 900px
+viewport — a third of the screen blank on the product's primary data surface,
+with no loading state, no pagination, and nothing below the fold.
+
+Where a surface genuinely has little to show, the empty region carries a
+designed empty state. Where it has more, it shows more. Blankness is never the
+default outcome of a layout.
+
+Chrome must earn its space against that budget: a non-dismissible banner, a
+page header and a toolbar together should not consume more than roughly a
+third of the first viewport before the first row of real content.
+
+### 4.7 Breakpoints
 
 `sm 640` · `md 768` · `lg 1024` · `xl 1280` · `2xl 1536` · wide `1680`.
 
@@ -253,6 +318,22 @@ comfortable, 36 dense. Topbar 48. Sidebar item 32.
 
 `canvas` page · `surface` sidebar and inset bands · `raised` cards on surface ·
 `overlay` scrims. **Never more than two surface steps on one screen.**
+
+### 5.5 Containment depth
+
+**A bordered or filled container may not contain another bordered or filled
+container more than one level deep.** Two levels is the hard ceiling; three is
+a defect.
+
+The ambiguity queue reached three — a State Rule card, holding a filled
+question block, holding individually bordered candidate boxes — to present one
+string, one question and two options. Each border was locally defensible and
+the result was a nest of boxes in which nothing was dominant.
+
+When a third level feels necessary, the answer is almost always that the
+*content* needs ranking, not that the container needs a border: use spacing,
+weight, a rule, or the leading edge instead. Borders are the most expensive way
+to group and the easiest to overuse.
 
 ---
 
@@ -347,9 +428,24 @@ Empty state inside the body. **Below `lg`, secondary columns fold into the row
 header; they are relocated, never dropped.** ≥1000 rows virtualised.
 
 **A data surface is incomplete without:** a result count, a filter or search
-affordance, sortable columns where more than one order is meaningful, and a
-designed empty, loading and error state. This is a hard requirement, not a
-nicety.
+affordance, sortable columns where more than one order is meaningful,
+pagination once rows exceed one screen, URL-addressable filter and sort state,
+and a designed empty, loading and error state. This is a hard requirement, not
+a nicety.
+
+**Choice sets.** Where a surface presents N options and the user must pick one,
+**each option is itself the control.** A single action button placed beneath a
+list of candidates does not say which candidate it applies to — the ambiguity
+queue shipped exactly that, one "Use this reading" under two readings, on the
+surface the product is built around. Selection and confirmation may be one step
+(click the option) or two (select, then confirm), but the target must always be
+unambiguous, and keyboard selection must map to the same targets.
+
+**One object, one geometry.** A domain object rendered on two surfaces uses the
+same component in both. Runs appeared as bordered rows inside a card on Home and
+as table rows on `/runs` — the same object wearing two geometries, which teaches
+the reader that the difference means something when it does not. Density and
+column count may vary by surface; the shape may not.
 
 **Dialogs / sheets.** Radix throughout — focus trap, Esc, focus restoration,
 scroll lock. Dialog centred 480/560/720. Sheet: trailing edge for detail,
@@ -371,7 +467,17 @@ Keyboard-first: `⌘K` palette, `j`/`k` list traversal, `1`–`9` selection, `En
 confirm, `Esc` cancel and restore focus. Shortcuts are shown, not hidden.
 
 URL-addressable: filters, tabs, selections and pagination live in the URL and
-survive reload and sharing.
+survive reload and sharing. This has been stated since the first draft and was
+never implemented — filter and sort live in component state, so no view a
+developer builds can be linked to a colleague. It is a hard requirement and
+must be pinned by test, not restated.
+
+**Chrome earns its place.** Space in the sidebar and topbar is the most
+expensive in the product; it is paid for on every screen, forever. Rank by
+frequency of use: a control touched once ever does not outrank the work. The
+theme switcher currently occupies a three-segment control in the topbar of
+every page — that is a settings-level concern wearing navigation-level
+prominence, while no surface offers a global primary action at all.
 
 System status is always visible: what ran, when, whether it succeeded, what is
 waiting on a human. Never a spinner without a subject.
@@ -410,8 +516,14 @@ dense, quiet, fast. Shared tokens, primitives, State Rule, and voice.
 **Navigation:** flat until organisations exist. Two badges maximum, ever —
 ambiguity and review, both meaning a human is blocked. No badge on Runs.
 
-**Density:** rows 44/36. Page header carries title, purpose, metadata row and
-the single primary action, closed by a rule.
+**Density:** rows 36px by default, 44px only where a row carries two lines of
+content. The scale has always allowed both and every table shipped at 44 with
+`dense` used nowhere, which is how a tool meant to be read for hours ended up
+with a third of its primary surface empty. Dense is the default for a developer
+product; comfortable is the exception that must be justified by content.
+
+Page header carries title, purpose, metadata row and the single primary action,
+closed by a rule.
 
 **Surfaces:** Home answers "is anything waiting for me?" — not a dashboard.
 Ambiguity is the differentiator and gets the most attention. Review is
@@ -479,7 +591,36 @@ own geometry.
 
 ---
 
-## 15. Governance
+## 15. External primitives
+
+`packages/ui` is the product's component library. External sources — shadcn
+chief among them — are a **parts supplier, never a design system.**
+
+The order of authority is: this document → the Localize Infra design language →
+`packages/ui` architecture → external primitives.
+
+Adopt an external primitive only when it clears all four:
+
+1. **It does not already exist here.** `packages/ui` is already a complete Radix
+   set — dialog, sheet, menu, popover, tooltip, select, tabs, field, table,
+   command palette. Re-importing any of them buys nothing and creates a second
+   system with different geometry.
+2. **It solves accessibility or interaction we would otherwise hand-roll** —
+   focus management, roving tabindex, scroll locking, collision detection. This
+   is the real reason to take a dependency; a hand-rolled radiogroup already
+   shipped here and was broken.
+3. **It is re-skinned to these tokens on the way in.** No imported component
+   keeps its own radius, height, colour or focus ring. If it arrives with a
+   token layer, that layer is deleted, not merged.
+4. **It is vendored into `packages/ui` and re-exported**, so consumers import
+   from one place and the boundary stays auditable.
+
+Never install a component "to see what it looks like." Never let an external
+library's defaults set a value this document specifies.
+
+---
+
+## 16. Governance
 
 This document is the contract. A pull request that introduces a value not
 found here is incomplete: either it uses an existing token, or it amends this
