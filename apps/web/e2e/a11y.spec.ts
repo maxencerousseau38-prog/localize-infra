@@ -188,7 +188,7 @@ test('translated strings declare their language and direction', async ({
 test('the open navigation sheet has no axe violations', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /open navigation/i }).click();
+  await page.getByRole('button', { name: /toggle sidebar/i }).click();
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible();
 
   const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
@@ -202,7 +202,7 @@ test('touch targets in the navigation sheet meet the minimum size', async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /open navigation/i }).click();
+  await page.getByRole('button', { name: /toggle sidebar/i }).click();
 
   const links = page
     .getByRole('navigation', { name: 'Main' })

@@ -1,7 +1,8 @@
 'use client';
 
-import { SidebarNav } from '@/components/app-sidebar';
 import { SampleChip } from '@/components/sample';
+import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ALL_ROUTES, resolveRoute } from '@/lib/nav';
 import {
   Breadcrumb,
@@ -11,10 +12,6 @@ import {
   BreadcrumbSeparator,
   type CommandItem,
   CommandPalette,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
-  SheetContent,
   ThemeToggle,
   cn,
   setTheme,
@@ -24,7 +21,6 @@ import {
   BookOpen,
   GitBranch,
   GitPullRequest,
-  Menu,
   Monitor,
   Moon,
   Search,
@@ -45,7 +41,6 @@ export function AppTopbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [paletteOpen, setPaletteOpen] = React.useState(false);
-  const [navOpen, setNavOpen] = React.useState(false);
 
   useCommandPaletteHotkey(() => setPaletteOpen((open) => !open));
 
@@ -131,36 +126,13 @@ export function AppTopbar() {
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line px-4">
-      <DialogRoot open={navOpen} onOpenChange={setNavOpen}>
-        <DialogTrigger
-          className={cn(
-            '-ms-1 rounded-md p-1.5 text-secondary lg:hidden',
-            'transition-colors hover:bg-surface hover:text-primary',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
-          )}
-        >
-          <Menu className="size-4" aria-hidden="true" />
-          <span className="sr-only">Open navigation</span>
-        </DialogTrigger>
-        {/* Navigation comes from the leading edge, where a reader already
-            expects it — and `side="start"` is logical, so it arrives from the
-            right in an RTL interface. */}
-        <SheetContent
-          side="start"
-          size="sm"
-          aria-describedby={undefined}
-          className="bg-surface"
-        >
-          <DialogTitle className="flex h-12 shrink-0 items-center px-4 text-body font-semibold text-primary">
-            Localize Infra
-          </DialogTitle>
-          {/* The sheet IS the navigation landmark at this width; the persistent
-              sidebar that normally carries that role is not rendered. */}
-          <nav aria-label="Main">
-            <SidebarNav onNavigate={() => setNavOpen(false)} />
-          </nav>
-        </SheetContent>
-      </DialogRoot>
+      {/* The sidebar owns its own mobile presentation now, so the second copy
+          of the navigation that used to live in this bar — a Dialog wrapping a
+          duplicate of the sidebar's links — is gone. This trigger toggles the
+          rail on desktop and opens the sheet on a phone, and SidebarProvider
+          binds ⌘B to it. */}
+      <SidebarTrigger className="-ms-1" />
+      <Separator orientation="vertical" className="me-1 h-4" />
 
       {/* The shared Breadcrumb primitive rather than a local `nav > ol`. The
           hand-rolled version never marked the current segment with

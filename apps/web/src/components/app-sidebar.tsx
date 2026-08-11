@@ -1,123 +1,173 @@
 'use client';
 
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  SidebarSeparator,
+  useSidebar,
+} from '@/components/ui/sidebar';
 import { type NavRoute, PRIMARY_NAV, SECONDARY_NAV } from '@/lib/nav';
-import { cn } from '@localize-infra/ui';
+import { FlaskConical } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-function NavLink({
+/**
+ * The application shell's navigation, built on shadcn's Sidebar.
+ *
+ * This replaces a hand-rolled 240px column plus a separate sheet in the topbar
+ * that duplicated the same links. What the shadcn component brings is not
+ * styling — every colour here is a Localize Infra token — but behaviour that
+ * was never going to be written by hand and kept correct: collapse to an icon
+ * rail, a ⌘B shortcut, the collapsed state persisted across sessions, the rail
+ * as a drag target, and an automatic Sheet presentation below the mobile
+ * breakpoint with its own focus management.
+ *
+ * The identity work is in the mapping: `--sidebar` resolves to our surface,
+ * `--sidebar-accent` to our active ground, `--sidebar-ring` to the Iris focus
+ * ring. shadcn's generated defaults shipped a blue ring, which this product's
+ * colour discipline does not allow.
+ */
+function NavItem({
   route,
-  active,
-  onNavigate,
-}: {
-  route: NavRoute;
-  active: boolean;
-  onNavigate?: () => void;
-}) {
-  const Icon = route.icon;
-  return (
-    <li>
-      <Link
-        href={route.href}
-        aria-current={active ? 'page' : undefined}
-        onClick={onNavigate}
-        className={cn(
-          'flex h-8 items-center gap-2.5 rounded-md px-2',
-          'text-body leading-5',
-          'transition-colors duration-(--duration-micro)',
-          'focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-focus',
-          active
-            ? 'bg-surface font-medium text-primary'
-            : 'text-secondary hover:bg-surface hover:text-primary',
-        )}
-      >
-        <Icon className="size-4 shrink-0 text-tertiary" aria-hidden="true" />
-        <span className="truncate">{route.label}</span>
-        {/* Only ambiguity and review carry a count, and both mean a human is
-            blocked. The number is sample data like the surface it points at,
-            so it is rendered in the same dashed chrome rather than as a solid
-            badge that would read as a real figure. */}
-        {route.count !== undefined ? (
-          <span className="ms-auto rounded-sm border border-dashed border-strong px-1.5 font-mono text-micro tabular-nums text-tertiary">
-            {route.count}
-          </span>
-        ) : null}
-      </Link>
-    </li>
-  );
-}
-
-/**
- * The navigation itself, shared by the persistent sidebar and the sheet it
- * becomes below 1024px. One source: a mobile nav that drifts from the desktop
- * one is a bug that only ever gets caught on a phone.
- *
- * `onNavigate` lets the sheet close itself on selection. The persistent
- * sidebar passes nothing, because there is nothing to close.
- */
-export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+  collapsedLabel,
+}: { route: NavRoute; collapsedLabel: string }) {
   const pathname = usePathname();
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href);
+  const { setOpenMobile } = useSidebar();
+  const active =
+    route.href === '/' ? pathname === '/' : pathname.startsWith(route.href);
+  const Icon = route.icon;
 
   return (
-    <>
-      <p className="px-3 pb-1.5 pt-1 text-micro font-medium uppercase tracking-wide text-tertiary">
-        Workspace
-      </p>
-      <ul className="flex flex-col gap-0.5 px-2">
-        {PRIMARY_NAV.map((route) => (
-          <NavLink
-            key={route.href}
-            route={route}
-            active={isActive(route.href)}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </ul>
-
-      <hr className="mx-3 my-3 border-subtle" />
-
-      <p className="px-3 pb-1.5 text-micro font-medium uppercase tracking-wide text-tertiary">
-        System
-      </p>
-      <ul className="flex flex-col gap-0.5 px-2">
-        {SECONDARY_NAV.map((route) => (
-          <NavLink
-            key={route.href}
-            route={route}
-            active={isActive(route.href)}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </ul>
-    </>
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        asChild
+        isActive={active}
+        tooltip={collapsedLabel}
+        className="data-[active=true]:font-medium"
+      >
+        <Link
+          href={route.href}
+          aria-current={active ? 'page' : undefined}
+          // On a phone the navigation is a sheet over the page. shadcn does not
+          // dismiss it on selection, so without this the reader arrives at the
+          // new route with the menu still covering it.
+          onClick={() => setOpenMobile(false)}
+        >
+          <Icon aria-hidden="true" />
+          <span className="truncate">{route.label}</span>
+          {/* Only ambiguity and review carry a count, and both mean a human is
+              blocked. Still dashed rather than a solid badge: the number is
+              sample data like the surface it points at, and the dashed chrome
+              is the third of this product's three sample markers. It is hidden
+              when the rail collapses, where the tooltip carries it instead. */}
+          {route.count !== undefined ? (
+            <span className="ms-auto rounded-sm border border-dashed border-strong px-1.5 font-mono text-micro tabular-nums text-tertiary group-data-[collapsible=icon]:hidden">
+              {route.count}
+            </span>
+          ) : null}
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 }
 
-/**
- * 240px persistent sidebar (layout contract, docs/product/04-wireframes.md §0).
- *
- * Hidden below 1024px, where the same navigation is presented as a sheet from
- * the topbar. Maximum two levels of nesting, ever: a sidebar that scrolls is a
- * sidebar that has failed.
- */
 export function AppSidebar() {
   return (
-    <nav
-      aria-label="Main"
-      className="hidden w-60 shrink-0 flex-col border-e border-line bg-surface lg:flex"
-    >
-      <div className="flex h-12 shrink-0 items-center px-4">
+    <Sidebar collapsible="icon" className="border-e border-line">
+      <SidebarHeader className="h-12 justify-center px-3">
         <Link
           href="/"
-          className="rounded-[4px] text-body font-semibold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          className="flex items-center gap-2.5 rounded-md text-body font-semibold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
-          Localize Infra
+          {/* The mark: three rules of descending width, echoing the State Rule
+              the product uses to carry confidence. Graphite throughout — Iris
+              means one thing here and chrome does not get to borrow it. */}
+          <span
+            aria-hidden="true"
+            className="flex size-4 shrink-0 flex-col justify-between py-[1px]"
+          >
+            <span className="block h-[2px] w-full rounded-full bg-primary" />
+            <span className="block h-[2px] w-3/4 rounded-full bg-strong" />
+            <span className="block h-[2px] w-1/2 rounded-full bg-line" />
+          </span>
+          <span className="truncate group-data-[collapsible=icon]:hidden">
+            Localize&nbsp;Infra
+          </span>
         </Link>
-      </div>
+      </SidebarHeader>
 
-      <SidebarNav />
-    </nav>
+      {/* shadcn's SidebarContent is a plain div, so wrapping the groups in a
+          nav restores the single "Main" landmark this application has always
+          exposed. Without it the sidebar is a pile of links with no landmark
+          to jump to, which is a regression a screen-reader user would feel
+          immediately and a sighted reviewer would never see. */}
+      <SidebarContent>
+        <nav aria-label="Main" className="flex min-h-0 flex-1 flex-col gap-2">
+          <SidebarGroup>
+            <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {PRIMARY_NAV.map((route) => (
+                  <NavItem
+                    key={route.href}
+                    route={route}
+                    collapsedLabel={
+                      route.count !== undefined
+                        ? `${route.label} (${route.count})`
+                        : route.label
+                    }
+                  />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarSeparator />
+
+          <SidebarGroup>
+            <SidebarGroupLabel>System</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {SECONDARY_NAV.map((route) => (
+                  <NavItem
+                    key={route.href}
+                    route={route}
+                    collapsedLabel={route.label}
+                  />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </nav>
+      </SidebarContent>
+
+      {/* The footer states what the shell is connected to, which is nothing.
+          The sidebar previously ended in empty space; saying "no project
+          connected" is both the honest answer and the thing a reader most
+          needs to know before trusting a number on screen. */}
+      <SidebarFooter className="group-data-[collapsible=icon]:hidden">
+        <div className="flex items-start gap-2 rounded-md border border-dashed border-strong px-2.5 py-2">
+          <FlaskConical
+            className="mt-0.5 size-3.5 shrink-0 text-tertiary"
+            aria-hidden="true"
+            strokeWidth={1.5}
+          />
+          <p className="text-micro leading-4 text-tertiary">
+            No project connected. Everything shown is sample data.
+          </p>
+        </div>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
   );
 }

@@ -4,3 +4,109 @@
    outside this app's root, so it must be registered explicitly or its utilities
    are tree-shaken away. */
 @source '../../../../packages/ui/src';
+
+/*
+ * shadcn's semantic layer, expressed entirely in Localize Infra's tokens.
+ *
+ * shadcn components are written against a fixed vocabulary — `bg-background`,
+ * `text-muted-foreground`, `border-input`, `ring-ring`. Installing them without
+ * this bridge would have created the second design system DESIGN.md §15 exists
+ * to prevent: two palettes, two radii, two focus rings, drifting apart.
+ *
+ * Instead every one of those names is defined here as an alias of a token this
+ * product already owns. The result is that a shadcn Button, Sidebar or Command
+ * menu renders in graphite, uses the Iris focus ring, and flips to dark mode
+ * through our scale — without a single line of shadcn's own colour surviving.
+ * The components bring their behaviour; the identity stays ours.
+ *
+ * Because our tokens already redefine themselves under `.dark`, this mapping is
+ * declared once and inherits the theme switch for free. There is deliberately
+ * no `.dark` block here: a second one would be a place for the two schemes to
+ * disagree.
+ *
+ * The generated defaults this replaced included `--sidebar-ring: hsl(217 91%
+ * 60%)` — a generic blue, in a product whose entire colour discipline is that
+ * chrome is neutral and colour means state.
+ */
+:root {
+  /* Ground */
+  --background: var(--bg-canvas);
+  --foreground: var(--text-primary);
+  --card: var(--bg-canvas);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-canvas);
+  --popover-foreground: var(--text-primary);
+
+  /* Actions. Primary is graphite, never Iris: a coloured primary button would
+     make every screen shout the same colour the ambiguity queue uses. */
+  --primary: var(--text-primary);
+  --primary-foreground: var(--text-inverse);
+  --secondary: var(--bg-surface);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-surface);
+  --muted-foreground: var(--text-tertiary);
+  --accent: var(--bg-active);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--state-failed);
+  --destructive-foreground: var(--text-inverse);
+
+  /* Lines and focus */
+  --border: var(--border-subtle);
+  --input: var(--border-default);
+  --ring: var(--border-focus);
+
+  /* shadcn derives its radii from this single value; ours is the control
+     radius from DESIGN.md §5.1. */
+  --radius: 6px;
+
+  /* The application shell. Surface rather than canvas, so the sidebar reads as
+     chrome and the content area as the document. */
+  --sidebar: var(--bg-surface);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--text-primary);
+  --sidebar-primary-foreground: var(--text-inverse);
+  --sidebar-accent: var(--bg-active);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-subtle);
+  --sidebar-ring: var(--border-focus);
+}
+
+@theme inline {
+  /*
+   * Deliberately absent: --color-primary, --color-secondary, --color-tertiary
+   * and the radius scale. tokens.css already owns those names, where they mean
+   * TEXT colours, and redefining --color-secondary here as shadcn's background
+   * turned every `text-secondary` in the application into near-white on white.
+   * It rendered as a page that had half-loaded.
+   *
+   * shadcn's `bg-primary` still resolves correctly, because our
+   * --color-primary is graphite-12 — the same value its primary fill wants.
+   * Its `secondary` variants are simply not used here; ours are.
+   */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}

@@ -297,7 +297,7 @@ test.describe('responsive shell', () => {
     // screen reader announces two navigations with identical names.
     await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: /open navigation/i }).click();
+    await page.getByRole('button', { name: /toggle sidebar/i }).click();
     const nav = page.getByRole('navigation', { name: 'Main' });
     await expect(nav).toBeVisible();
     await expect(nav).toHaveCount(1);
@@ -315,8 +315,8 @@ test.describe('responsive shell', () => {
 
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible();
     await expect(
-      page.getByRole('button', { name: /open navigation/i }),
-    ).toBeHidden();
+      page.getByRole('button', { name: /toggle sidebar/i }),
+    ).toBeVisible();
   });
 
   for (const width of [390, 768, 1024, 1440]) {

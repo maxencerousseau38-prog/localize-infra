@@ -1,5 +1,6 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppTopbar } from '@/components/app-topbar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { ThemeScript, TooltipProvider } from '@localize-infra/ui';
 import type { Metadata, Viewport } from 'next';
 import {
@@ -122,16 +123,21 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
+        {/* SidebarProvider owns the collapse state, the ⌘B shortcut, and the
+            switch to a Sheet below the mobile breakpoint. The shell was a bare
+            flex row with a hand-rolled column and a second copy of the
+            navigation living in the topbar; all of that is now one component
+            tree with one source of truth. */}
         <TooltipProvider delayDuration={400}>
-          <div className="flex h-dvh overflow-hidden">
+          <SidebarProvider className="h-dvh min-h-0">
             <AppSidebar />
-            <div className="flex min-w-0 flex-1 flex-col">
+            <SidebarInset className="min-w-0 overflow-hidden">
               <AppTopbar />
               <main id="main" className="flex-1 overflow-y-auto">
                 {children}
               </main>
-            </div>
-          </div>
+            </SidebarInset>
+          </SidebarProvider>
         </TooltipProvider>
       </body>
     </html>
