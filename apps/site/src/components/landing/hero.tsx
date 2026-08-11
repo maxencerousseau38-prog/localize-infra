@@ -1,6 +1,6 @@
 import { EXAMPLE_PR_URL, INSTALL_COMMAND } from '@/lib/constants';
-import { CopyCommand, StateRule } from '@localize-infra/ui';
-import { ArrowRight } from 'lucide-react';
+import { Button, CopyCommand, StateRule } from '@localize-infra/ui';
+import { ArrowRight, GitPullRequest } from 'lucide-react';
 import Link from 'next/link';
 
 /**
@@ -35,7 +35,13 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-subtle">
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24">
-        <div className="grid items-start gap-14 lg:grid-cols-12 lg:gap-10">
+        {/* `items-center` rather than `items-start`: the argument column is
+            taller than the artifact, and top-aligning them pooled every pixel
+            of that difference into one dead block beneath the artifact
+            (DESIGN.md §4.5). Centring distributes the slack above and below,
+            so the artifact reads as balanced against the copy instead of
+            hanging from the top of an empty column. */}
+        <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-7">
             <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
               Localization infrastructure
@@ -54,7 +60,34 @@ export function Hero() {
               database.
             </p>
 
-            <div className="mt-9 max-w-lg">
+            {/*
+             * CTA hierarchy inverted (DESIGN.md §4.5).
+             *
+             * The prominent action used to be a command that 404s for every
+             * visitor who copies it, immediately followed by a sentence
+             * explaining that it does not work — spending trust at the moment
+             * it is highest. The rule now says the primary action must be one
+             * that works today, so the real merged pull request takes that
+             * place and the command is demoted to what it honestly is: where
+             * this is going.
+             */}
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Button asChild variant="primary" size="lg">
+                <a
+                  href={EXAMPLE_PR_URL}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <GitPullRequest aria-hidden="true" />
+                  See the pull request it opened
+                </a>
+              </Button>
+              <Button asChild variant="secondary" size="lg">
+                <Link href="/docs#install">Run it on your repository</Link>
+              </Button>
+            </div>
+
+            <div className="mt-7 max-w-lg border-t border-subtle pt-5">
               <CopyCommand command={INSTALL_COMMAND} />
               <p className="mt-2.5 text-small leading-6 text-tertiary">
                 Not published to npm yet — this is where it is going. Today it
@@ -68,19 +101,6 @@ export function Hero() {
                 .
               </p>
             </div>
-
-            <a
-              href={EXAMPLE_PR_URL}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="group mt-7 inline-flex items-center gap-1.5 rounded-sm text-body font-medium text-link transition-colors hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              See a real pull request
-              <ArrowRight
-                className="size-3.5 transition-transform duration-(--duration-micro) group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-                aria-hidden="true"
-              />
-            </a>
           </div>
 
           {/* The artifact. Bleeds right past the container on lg so the
@@ -137,6 +157,43 @@ export function Hero() {
                   ))}
                 </ul>
               </div>
+
+              {/*
+               * The artifact ends where the product ends: a pull request.
+               *
+               * It used to stop at the translations, leaving roughly 300px of
+               * empty column beneath it at 1440 — the dead zone DESIGN.md §4.5
+               * now forbids. The fix is not padding: it is that the run has one
+               * more step, and showing it both fills the space and puts the
+               * product's actual deliverable above the fold instead of in the
+               * section below.
+               *
+               * No file or line counts are claimed here. The link goes to the
+               * real pull request, which is where those numbers live.
+               */}
+              <a
+                href={EXAMPLE_PR_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="group flex items-center gap-2.5 border-t border-subtle px-4 py-3 transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+              >
+                <GitPullRequest
+                  className="size-4 shrink-0 text-confident"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-body font-medium text-primary">
+                    Opened as a pull request
+                  </span>
+                  <span className="block text-caption text-tertiary">
+                    Reviewed and merged, like every other change
+                  </span>
+                </span>
+                <ArrowRight
+                  className="size-3.5 shrink-0 text-tertiary transition-transform duration-(--duration-micro) group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                  aria-hidden="true"
+                />
+              </a>
             </figure>
           </div>
         </div>

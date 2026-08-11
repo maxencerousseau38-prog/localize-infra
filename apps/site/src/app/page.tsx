@@ -4,8 +4,8 @@ import { Ecosystem } from '@/components/landing/ecosystem';
 import { Hero } from '@/components/landing/hero';
 import { HowItWorks } from '@/components/landing/how-it-works';
 import { PrProof } from '@/components/landing/pr-proof';
-import { INSTALL_COMMAND } from '@/lib/constants';
-import { CopyCommand } from '@localize-infra/ui';
+import { EXAMPLE_PR_URL } from '@/lib/constants';
+import { Button } from '@localize-infra/ui';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -33,17 +33,39 @@ export default function HomePage() {
             your machine until you ask for a translation.
           </p>
 
-          <div className="mx-auto mt-9 max-w-xl text-start">
-            <CopyCommand command={INSTALL_COMMAND} />
+          {/*
+           * This used to repeat the hero's `npx` command verbatim, with the
+           * same "not on npm yet" disclaimer underneath — the second time on
+           * one page that the most prominent thing offered was something that
+           * does not work. DESIGN.md §4.5: once is an honest limitation, twice
+           * reads as the product's main message.
+           *
+           * The close now asks for the action that exists today, and the
+           * command's real home is the install section of the docs it points
+           * at.
+           */}
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <Button asChild variant="primary" size="lg">
+              <Link href="/docs#install">Read the install guide</Link>
+            </Button>
+            <Button asChild variant="secondary" size="lg">
+              <a
+                href={EXAMPLE_PR_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                See the pull request
+              </a>
+            </Button>
           </div>
 
-          <p className="mt-4 text-small text-tertiary">
-            Not on npm yet —{' '}
+          <p className="mt-5 text-small text-tertiary">
+            The CLI runs from a clone today.{' '}
             <Link
-              href="/docs#install"
+              href="/roadmap"
               className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
-              run it from a clone
+              What is shipping next
             </Link>
             .
           </p>
