@@ -44,11 +44,21 @@ export default function HomePage() {
            * command's real home is the install section of the docs it points
            * at.
            */}
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild variant="primary" size="lg">
+          <div className="mx-auto mt-9 flex max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
+            <Button
+              asChild
+              variant="primary"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               <Link href="/docs#install">Read the install guide</Link>
             </Button>
-            <Button asChild variant="secondary" size="lg">
+            <Button
+              asChild
+              variant="secondary"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               <a
                 href={EXAMPLE_PR_URL}
                 target="_blank"

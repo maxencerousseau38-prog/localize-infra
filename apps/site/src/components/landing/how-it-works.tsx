@@ -1,4 +1,4 @@
-import type { PipelineStageId } from '@localize-infra/ui';
+import { PIPELINE_STAGES, type PipelineStageId } from '@localize-infra/ui';
 
 /**
  * The pipeline, in the marketing register.
@@ -46,6 +46,13 @@ const STEPS: Array<{
   },
 ];
 
+/** The durable outputs of the stages a step covers, in pipeline order. */
+function artifactsFor(stages: PipelineStageId[]): string[] {
+  return PIPELINE_STAGES.filter(
+    (stage) => stages.includes(stage.id) && stage.artifact,
+  ).map((stage) => stage.artifact as string);
+}
+
 export function HowItWorks() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
@@ -87,6 +94,26 @@ export function HowItWorks() {
               <p className="mt-2 text-body leading-6 text-secondary">
                 {step.body}
               </p>
+
+              {/*
+               * What you have after the step, not only what the step does.
+               *
+               * The section was four columns of roughly sixty words each — a
+               * wall of prose in the one place a reader is trying to work out
+               * what actually lands in their repository. The artifacts come
+               * from PIPELINE_STAGES, the same definition the application reads
+               * (DESIGN.md §1.4), so this cannot drift from what a run really
+               * produces.
+               */}
+              {artifactsFor(step.stages).map((artifact) => (
+                <p
+                  key={artifact}
+                  className="mt-3 flex items-baseline gap-2 text-caption text-tertiary"
+                >
+                  <span aria-hidden="true">→</span>
+                  <span className="font-mono">{artifact}</span>
+                </p>
+              ))}
             </div>
           </li>
         ))}

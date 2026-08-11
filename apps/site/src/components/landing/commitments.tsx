@@ -60,30 +60,39 @@ export function Commitments() {
         </h2>
       </div>
 
+      {/*
+       * Single-column rows, not a 5/7 split (DESIGN.md §4.4).
+       *
+       * This section and the status board that follows it were both
+       * twelve-column rail-and-content layouts carrying prose — different
+       * content, identical structural signature, and the page read as one long
+       * two-column list through both of them. The rule now forbids adjacent
+       * sections from sharing that signature.
+       *
+       * Rows suit three promises better than a split does anyway: the claim and
+       * the honest qualifier belong on the same reading line, not in separate
+       * columns the eye has to pair up. The status board keeps the split, and
+       * the two now look like different kinds of thing — which they are: three
+       * arguments here, eleven measured facts there.
+       */}
       <ul className="mt-12">
         {COMMITMENTS.map(({ title, body, tone, status, detail }) => (
           <li key={title} className="border-t border-subtle first:border-t-0">
             <StateRule tone={tone} className="py-8">
-              <div className="grid gap-5 lg:grid-cols-12 lg:gap-10">
-                <div className="lg:col-span-5">
-                  <h3 className="text-title font-semibold tracking-[-0.01em] text-primary">
-                    {title}
-                  </h3>
-                  <div className="mt-3">
-                    <Badge tone={tone}>{status}</Badge>
-                  </div>
-                </div>
-                <div className="lg:col-span-7">
-                  <p className="max-w-[62ch] text-prose text-secondary">
-                    {body}
-                  </p>
-                  {detail ? (
-                    <p className="mt-3 max-w-[62ch] text-small leading-6 text-tertiary">
-                      {detail}
-                    </p>
-                  ) : null}
-                </div>
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                <h3 className="font-display text-title font-semibold tracking-[-0.02em] text-primary">
+                  {title}
+                </h3>
+                <Badge tone={tone}>{status}</Badge>
               </div>
+              <p className="mt-4 max-w-[68ch] text-prose text-secondary">
+                {body}
+              </p>
+              {detail ? (
+                <p className="mt-3 max-w-[68ch] text-small leading-6 text-tertiary">
+                  {detail}
+                </p>
+              ) : null}
             </StateRule>
           </li>
         ))}

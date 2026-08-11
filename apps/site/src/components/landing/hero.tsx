@@ -71,8 +71,16 @@ export function Hero() {
              * place and the command is demoted to what it honestly is: where
              * this is going.
              */}
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Button asChild variant="primary" size="lg">
+            {/* Full-width and stacked below sm (DESIGN.md §12): at 390 these
+                sat at their intrinsic width against a full-bleed column, which
+                is the scaled-down-desktop tell rather than a designed tier. */}
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <Button
+                asChild
+                variant="primary"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
                 <a
                   href={EXAMPLE_PR_URL}
                   target="_blank"
@@ -82,7 +90,12 @@ export function Hero() {
                   See the pull request it opened
                 </a>
               </Button>
-              <Button asChild variant="secondary" size="lg">
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
                 <Link href="/docs#install">Run it on your repository</Link>
               </Button>
             </div>
