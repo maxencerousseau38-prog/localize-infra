@@ -29,7 +29,12 @@
       "packages/eval/src/corpus/data/**",
       "packages/eval/src/human-eval/export/**",
       "packages/eval/src/report/benchmarks.json",
-      "**/dist/**"
+      "**/dist/**",
+      "package.json",
+      ".mcp.json",
+      ".agents/**",
+      ".claude/**",
+      "skills-lock.json"
     ]
   }
 }
