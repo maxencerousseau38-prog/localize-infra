@@ -371,15 +371,31 @@ test.describe('SEO', () => {
 });
 
 test.describe('ecosystem rail', () => {
-  test('names what the product works alongside', async ({ page }) => {
+  test('separates the one integration from what it leaves alone', async ({
+    page,
+  }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    const rail = page.getByRole('list', {
+
+    // The section's whole point is this distinction, and as a scrolling logo
+    // strip it was the one thing the layout did not show.
+    const integrations = page.getByRole('list', {
+      name: /systems this integrates with/i,
+    });
+    await expect(integrations.getByRole('listitem')).toHaveCount(1);
+    await expect(
+      integrations.getByText('GitHub', { exact: true }),
+    ).toBeVisible();
+
+    const alongside = page.getByRole('list', {
       name: /technologies this works alongside/i,
     });
-
-    for (const name of ['GitHub', 'Next.js', 'React', 'TypeScript', 'Vite']) {
-      await expect(rail.getByText(name, { exact: true }).first()).toBeVisible();
+    for (const name of ['Next.js', 'React', 'TypeScript', 'Vite']) {
+      await expect(
+        alongside.getByText(name, { exact: true }).first(),
+      ).toBeVisible();
     }
+    // GitHub must not appear here: it is not left alone, it is written to.
+    await expect(alongside.getByText('GitHub', { exact: true })).toHaveCount(0);
   });
 
   test('states that GitHub is the only integration', async ({ page }) => {
@@ -408,27 +424,16 @@ test.describe('ecosystem rail', () => {
     }
   });
 
-  test('the marquee loops seamlessly and pauses on hover', async ({ page }) => {
+  test('presents the marks without implying endorsement', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    const track = page.locator('.animate-marquee');
 
-    // Rendered twice and translated by exactly -50%: that identity is what
-    // makes the loop seamless rather than jumping at the wrap.
-    const names = await track.locator('li >> text=GitHub').count();
-    expect(names).toBeGreaterThanOrEqual(2);
-
-    // Hover the container, which is static and exactly viewport width. The
-    // track itself is both wider than the viewport and continuously moving,
-    // so neither its centre point nor any logo on it is a stable hover target.
-    await page.locator('[data-marquee]').hover();
-    await expect(track).toHaveCSS('animation-play-state', 'paused');
-  });
-
-  test('does not animate under reduced motion', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/', { waitUntil: 'networkidle' });
-    const track = page.locator('.animate-marquee');
-    await expect(track).toHaveCSS('animation-name', 'none');
+    // The marquee this replaced was read as "trusted by" before anyone reached
+    // the caption saying otherwise — the device argued against its own words.
+    // Nothing here may move, and nothing may be presented as a customer.
+    await expect(page.locator('.animate-marquee')).toHaveCount(0);
+    await expect(
+      page.getByText(/none of these projects endorse this one/i),
+    ).toBeVisible();
   });
 
   for (const width of [390, 768, 1440]) {

@@ -114,19 +114,51 @@ const MARKS: Mark[] = [
   },
 ];
 
-function Logo({ mark }: { mark: Mark }) {
+const INTEGRATION = MARKS.find((m) => m.name === 'GitHub') as Mark;
+const UNTOUCHED = MARKS.filter((m) => m.name !== 'GitHub');
+
+function Logo({
+  mark,
+  tone = 'untouched',
+  children,
+}: {
+  mark: Mark;
+  tone?: 'integration' | 'untouched';
+  children?: React.ReactNode;
+}) {
   return (
-    <li className="group flex shrink-0 items-center gap-2.5 px-7">
+    <li
+      className={
+        tone === 'integration'
+          ? 'flex items-start gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5'
+          : 'group flex shrink-0 items-center gap-2.5'
+      }
+    >
       <svg
         viewBox={mark.viewBox ?? '0 0 24 24'}
         aria-hidden="true"
-        className="size-5 shrink-0 fill-current text-tertiary transition-colors duration-(--duration-standard) group-hover:text-primary motion-reduce:transition-none"
+        className={
+          tone === 'integration'
+            ? 'mt-0.5 size-5 shrink-0 fill-current text-primary'
+            : 'size-4 shrink-0 fill-current text-tertiary transition-colors duration-(--duration-standard) group-hover:text-secondary motion-reduce:transition-none'
+        }
       >
         {mark.path}
       </svg>
-      <span className="text-body font-medium text-tertiary transition-colors duration-(--duration-standard) group-hover:text-primary motion-reduce:transition-none">
-        {mark.name}
-      </span>
+      {tone === 'integration' ? (
+        <span className="min-w-0">
+          <span className="block text-body font-medium text-primary">
+            {mark.name}
+          </span>
+          <span className="mt-0.5 block text-small leading-5 text-secondary">
+            {children}
+          </span>
+        </span>
+      ) : (
+        <span className="text-body text-tertiary transition-colors duration-(--duration-standard) group-hover:text-secondary motion-reduce:transition-none">
+          {mark.name}
+        </span>
+      )}
     </li>
   );
 }
@@ -161,31 +193,54 @@ export function Ecosystem() {
         </div>
       </div>
 
-      {/* Full-bleed and masked at both edges so the rail reads as continuing
-          past the viewport rather than stopping at a container. */}
-      <div
-        data-marquee
-        className="group relative mt-12 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]"
-      >
-        <ul
-          aria-label="Technologies this works alongside"
-          className="flex w-max animate-marquee items-center group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused] motion-reduce:animate-none motion-reduce:justify-center motion-reduce:flex-wrap motion-reduce:w-full"
-        >
-          {MARKS.map((mark) => (
-            <Logo key={mark.name} mark={mark} />
-          ))}
-          {/* An exact duplicate is what makes the loop seamless: the animation
-              translates by precisely -50%, so the copy lands where the original
-              began with no jump. Hidden from assistive technology, which should
-              hear the list once. */}
-          <li aria-hidden="true" className="contents">
-            <ul className="flex items-center motion-reduce:hidden">
-              {MARKS.map((mark) => (
-                <Logo key={`${mark.name}-repeat`} mark={mark} />
-              ))}
-            </ul>
-          </li>
-        </ul>
+      {/*
+       * Two named groups, not a scrolling logo strip.
+       *
+       * The copy always said GitHub is the only integration and that nothing
+       * here endorses this product — but a row of brand marks sliding past is
+       * read as "trusted by" before anyone reaches a sentence, so the device
+       * was working against its own caption. Worse, it made the one fact this
+       * section exists to convey — what the tool touches versus what it leaves
+       * alone — the one thing the layout did not show.
+       *
+       * Stated as two groups it is information rather than decoration: a
+       * visitor learns the integration surface is exactly one system, and that
+       * adopting this costs them no other change.
+       */}
+      <div className="mx-auto mt-10 grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12">
+        <div className="lg:col-span-5">
+          <h3 className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+            Integrates with
+          </h3>
+          <ul
+            aria-label="Systems this integrates with"
+            className="mt-4 flex flex-col gap-3"
+          >
+            <Logo mark={INTEGRATION} tone="integration">
+              Where the pull request goes. Installed as a GitHub App you
+              control.
+            </Logo>
+          </ul>
+        </div>
+
+        <div className="lg:col-span-7">
+          <h3 className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+            Detected, then left alone
+          </h3>
+          <ul
+            aria-label="Technologies this works alongside"
+            className="mt-4 flex flex-wrap gap-x-6 gap-y-3"
+          >
+            {UNTOUCHED.map((mark) => (
+              <Logo key={mark.name} mark={mark} />
+            ))}
+          </ul>
+          <p className="mt-4 max-w-[60ch] text-small leading-6 text-tertiary">
+            The CLI recognises these where they are present and writes nothing
+            to them. Your framework, host and database carry on exactly as they
+            were.
+          </p>
+        </div>
       </div>
     </section>
   );

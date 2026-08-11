@@ -65,58 +65,70 @@ export function HowItWorks() {
         </h2>
       </div>
 
-      {/* Drawn as a connected pipeline rather than equal columns of
-          prose. The steps are a genuine sequence, and this is the same visual
-          language the application uses on run detail — so the site and the
-          product read as one thing rather than two designs that share a
-          palette. */}
-      <ol className="mt-14 grid gap-10 lg:grid-cols-4 lg:gap-6">
-        {STEPS.map((step, index) => (
-          <li key={step.n} className="relative flex gap-4 lg:flex-col lg:gap-0">
-            {index < STEPS.length - 1 ? (
+      {/*
+       * A vertical spine, not four columns.
+       *
+       * As columns this was four stacks of roughly sixty words side by side —
+       * a wall of prose in the one section a reader consults to find out what
+       * actually happens to their repository, and one where the connector rules
+       * between steps were too short to read as a sequence at all.
+       *
+       * Down the page the sequence is legible: one continuous rule, each step
+       * on its own line, the stage name and what it leaves behind aligned in
+       * columns so the artifacts form a second readable column of their own.
+       * It is also the same shape the application draws on run detail, so the
+       * site and the product speak once rather than twice.
+       */}
+      <ol className="mt-12 sm:mt-14">
+        {STEPS.map((step, index) => {
+          const artifacts = artifactsFor(step.stages);
+          return (
+            <li key={step.n} className="relative flex gap-5 pb-10 last:pb-0">
+              {index < STEPS.length - 1 ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute start-[15px] top-9 h-[calc(100%-1.5rem)] w-px bg-subtle"
+                />
+              ) : null}
+
               <span
                 aria-hidden="true"
-                className="absolute bg-subtle left-[15px] top-9 h-[calc(100%-1rem)] w-px lg:left-auto lg:top-[15px] lg:h-px lg:w-full lg:translate-x-9"
-              />
-            ) : null}
+                className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border border-line bg-canvas font-mono text-caption text-secondary"
+              >
+                {step.n}
+              </span>
 
-            <span
-              aria-hidden="true"
-              className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border border-line bg-canvas font-mono text-caption text-secondary"
-            >
-              {step.n}
-            </span>
+              <div className="grid min-w-0 flex-1 gap-x-10 gap-y-3 pt-1 lg:grid-cols-12">
+                <div className="lg:col-span-5">
+                  <h3 className="font-display text-subtitle font-semibold tracking-[-0.01em] text-primary">
+                    {step.title}
+                  </h3>
+                  {/* What the step leaves behind, from PIPELINE_STAGES — the
+                      same definition run detail reads, so it cannot drift from
+                      what a run really produces. Escalate shows none: it
+                      produces a question, not a file. */}
+                  {artifacts.length > 0 ? (
+                    <ul className="mt-2.5 flex flex-col gap-1">
+                      {artifacts.map((artifact) => (
+                        <li
+                          key={artifact}
+                          className="flex items-baseline gap-2 text-caption text-tertiary"
+                        >
+                          <span aria-hidden="true">&rarr;</span>
+                          <span className="font-mono">{artifact}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
 
-            <div className="min-w-0 pb-2 lg:mt-6 lg:pe-8">
-              <h3 className="text-subtitle font-semibold tracking-[-0.01em] text-primary">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-body leading-6 text-secondary">
-                {step.body}
-              </p>
-
-              {/*
-               * What you have after the step, not only what the step does.
-               *
-               * The section was four columns of roughly sixty words each — a
-               * wall of prose in the one place a reader is trying to work out
-               * what actually lands in their repository. The artifacts come
-               * from PIPELINE_STAGES, the same definition the application reads
-               * (DESIGN.md §1.4), so this cannot drift from what a run really
-               * produces.
-               */}
-              {artifactsFor(step.stages).map((artifact) => (
-                <p
-                  key={artifact}
-                  className="mt-3 flex items-baseline gap-2 text-caption text-tertiary"
-                >
-                  <span aria-hidden="true">→</span>
-                  <span className="font-mono">{artifact}</span>
+                <p className="text-body leading-6 text-secondary lg:col-span-7">
+                  {step.body}
                 </p>
-              ))}
-            </div>
-          </li>
-        ))}
+              </div>
+            </li>
+          );
+        })}
       </ol>
 
       {/* Disclosed on the landing page, not buried in a privacy policy: source
