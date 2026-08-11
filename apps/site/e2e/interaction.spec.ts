@@ -217,9 +217,11 @@ test.describe('the install claim is qualified', () => {
   }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await expect(page.getByText(/not published to npm yet/i)).toBeVisible();
-    await expect(
-      page.getByRole('link', { name: /see the docs/i }),
-    ).toBeVisible();
+    // The disclaimer must hand the reader somewhere that works. The link's
+    // label moved from "see the docs" to "Install guide" when the hero was
+    // recomposed; what matters is that the route is reachable from the
+    // sentence, not the wording, so this asserts the destination.
+    await expect(page.locator('a[href="/docs#install"]').first()).toBeVisible();
   });
 
   test('/docs leads with the same limitation', async ({ page }) => {

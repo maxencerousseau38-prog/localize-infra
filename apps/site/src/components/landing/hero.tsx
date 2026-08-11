@@ -6,20 +6,24 @@ import Link from 'next/link';
 /**
  * The hero.
  *
- * The previous version was the default developer-SaaS split: copy left,
- * boxed terminal right, both the same visual weight, headline small enough to
- * read as a paragraph. Nothing about it was wrong and nothing about it was
- * memorable.
+ * Recomposed from a 7/5 split — argument left, artifact in a narrow card on the
+ * right — into a headline band over a full-width product panel.
  *
- * This one commits to one idea instead. The most characteristic thing in this
- * product's world is a *string becoming five strings*, so that transformation
- * is the hero artifact — rendered in the real script of each language, with the
- * State Rule down the leading edge. It is the product's atom shown at full
- * size, not a screenshot of a terminal.
+ * The split was the problem. This product's whole claim is a transformation you
+ * can see, and putting that transformation in five columns beside a 68px
+ * headline made the claim compete with its own evidence and lose: the artifact
+ * read as an illustration next to the copy rather than as the thing being sold.
+ * Every serious developer tool resolves this the same way, by letting the
+ * product occupy the full measure and putting the words above it.
  *
- * The grid is deliberately asymmetric — 7 columns of argument against 5 of
- * artifact — and the artifact bleeds past the container to the right on large
- * screens, so the first viewport has direction instead of symmetry.
+ * So the panel is now the widest element on the page and shows the whole run in
+ * one frame — the file it found the string in, the string, the five files it
+ * wrote, and the pull request it opened. A visitor who reads nothing still sees
+ * what the product does.
+ *
+ * The `npx` command moves below the panel. It is honest and it belongs on the
+ * page, but it was the third competing element in a column that already had a
+ * headline and two buttons, and it is a command that does not work yet.
  */
 const TRANSLATIONS: Array<{ locale: string; text: string; dir?: 'rtl' }> = [
   { locale: 'de', text: 'Änderungen speichern' },
@@ -32,192 +36,178 @@ const TRANSLATIONS: Array<{ locale: string; text: string; dir?: 'rtl' }> = [
 const FONT_FOR: Record<string, string> = { ja: 'font-jp', ar: 'font-ar' };
 
 export function Hero() {
-  // No bottom rule on this section. The artifact ends on "Opened as a pull
+  // No bottom rule on this section. The panel ends on "Opened as a pull
   // request" and the very next thing on the page is the dark band showing that
   // pull request — a hairline between them reads as a boundary between two
-  // topics when it is one argument continuing. The change of ground separates
-  // them, and it does it better than a line.
+  // topics when it is one argument continuing.
   return (
-    <section className="relative overflow-hidden">
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24">
-        {/* `items-center` rather than `items-start`: the argument column is
-            taller than the artifact, and top-aligning them pooled every pixel
-            of that difference into one dead block beneath the artifact
-            (DESIGN.md §4.5). Centring distributes the slack above and below,
-            so the artifact reads as balanced against the copy instead of
-            hanging from the top of an empty column. */}
-        <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-7">
-            <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
-              Localization infrastructure
-            </p>
+    <section className="relative">
+      <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20">
+        {/* The words. Held to a narrow measure and left-aligned against the
+            same grid the panel below uses, so the two read as one block rather
+            than as a centred banner sitting on a product shot. */}
+        <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+          Localization infrastructure
+        </p>
 
-            {/* The measure is capped near 15ch so the line breaks land where
-                the argument does, rather than wherever the container ends. */}
-            <h1 className="mt-5 max-w-[15ch] font-display text-display-xl font-semibold tracking-[-0.035em] text-primary lg:text-display-2xl">
-              Your copy is a build artifact.
-            </h1>
+        <h1 className="mt-5 max-w-[16ch] font-display text-display-xl font-semibold tracking-[-0.035em] text-primary lg:text-display-2xl">
+          Your copy is a build artifact.
+        </h1>
 
-            <p className="mt-6 max-w-[46ch] text-prose text-secondary">
-              Localize Infra extracts the hardcoded strings from your codebase,
-              translates them in context, and opens a pull request. The
-              translations live in your repository — not in someone else&rsquo;s
-              database.
-            </p>
+        <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <p className="max-w-[52ch] text-prose text-secondary">
+            Localize Infra extracts the hardcoded strings from your codebase,
+            translates them in context, and opens a pull request. The
+            translations live in your repository — not in someone else&rsquo;s
+            database.
+          </p>
 
-            {/*
-             * CTA hierarchy inverted (DESIGN.md §4.5).
-             *
-             * The prominent action used to be a command that 404s for every
-             * visitor who copies it, immediately followed by a sentence
-             * explaining that it does not work — spending trust at the moment
-             * it is highest. The rule now says the primary action must be one
-             * that works today, so the real merged pull request takes that
-             * place and the command is demoted to what it honestly is: where
-             * this is going.
-             */}
-            {/* Full-width and stacked below sm (DESIGN.md §12): at 390 these
-                sat at their intrinsic width against a full-bleed column, which
-                is the scaled-down-desktop tell rather than a designed tier. */}
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <Button
-                asChild
-                variant="primary"
-                size="lg"
-                className="w-full sm:w-auto"
-              >
-                <a
-                  href={EXAMPLE_PR_URL}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <GitPullRequest aria-hidden="true" />
-                  See the pull request it opened
-                </a>
-              </Button>
-              <Button
-                asChild
-                variant="secondary"
-                size="lg"
-                className="w-full sm:w-auto"
-              >
-                <Link href="/docs#install">Run it on your repository</Link>
-              </Button>
-            </div>
-
-            <div className="mt-7 max-w-lg border-t border-subtle pt-5">
-              <CopyCommand command={INSTALL_COMMAND} />
-              <p className="mt-2.5 text-small leading-6 text-tertiary">
-                Not published to npm yet — this is where it is going. Today it
-                runs from a clone:{' '}
-                <Link
-                  href="/docs#install"
-                  className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-                >
-                  see the docs
-                </Link>
-                .
-              </p>
-            </div>
-          </div>
-
-          {/* The artifact bleeds past the container from xl up, not lg.
-              At 1024 the container is already the full viewport, so a negative
-              inline-end margin pushed 40px of the card off the screen and
-              `overflow-hidden` quietly clipped it — losing content rather than
-              creating direction. The bleed now starts where there is genuine
-              slack to bleed into. */}
-          <div className="lg:col-span-5 xl:-me-16 2xl:-me-28">
-            <figure className="rounded-lg border border-line bg-surface/60">
-              <figcaption className="flex items-center justify-between border-b border-subtle px-4 py-2.5">
-                <span className="font-mono text-caption text-tertiary">
-                  src/components/Form.tsx
-                </span>
-                <span className="font-mono text-micro uppercase tracking-wide text-tertiary">
-                  1 string
-                </span>
-              </figcaption>
-
-              <div className="px-4 py-4">
-                <p className="text-caption uppercase tracking-wide text-tertiary">
-                  Found
-                </p>
-                <p className="mt-1.5 text-subtitle font-medium text-primary">
-                  &ldquo;Save changes&rdquo;
-                </p>
-              </div>
-
-              <div className="border-t border-subtle px-4 py-4">
-                <p className="text-caption uppercase tracking-wide text-tertiary">
-                  Written to your repository
-                </p>
-                <ul className="mt-3 flex flex-col gap-2.5">
-                  {TRANSLATIONS.map((t) => (
-                    <li key={t.locale}>
-                      {/* The State Rule primitive, not a hand-rolled copy of
-                          it. This card previously drew its own at 2px while the
-                          system's is 3px — the signature element rendered wrong
-                          on the most prominent surface in the product, which is
-                          exactly the local reinvention DESIGN.md §5 calls a
-                          defect. */}
-                      <StateRule
-                        tone="confident"
-                        className="flex items-baseline gap-3 ps-3"
-                      >
-                        <span className="w-12 shrink-0 font-mono text-micro uppercase text-tertiary">
-                          {t.locale}
-                        </span>
-                        <span
-                          lang={t.locale}
-                          dir={t.dir ?? 'ltr'}
-                          className={`min-w-0 text-body text-primary ${FONT_FOR[t.locale] ?? ''}`}
-                        >
-                          {t.text}
-                        </span>
-                      </StateRule>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/*
-               * The artifact ends where the product ends: a pull request.
-               *
-               * It used to stop at the translations, leaving roughly 300px of
-               * empty column beneath it at 1440 — the dead zone DESIGN.md §4.5
-               * now forbids. The fix is not padding: it is that the run has one
-               * more step, and showing it both fills the space and puts the
-               * product's actual deliverable above the fold instead of in the
-               * section below.
-               *
-               * No file or line counts are claimed here. The link goes to the
-               * real pull request, which is where those numbers live.
-               */}
+          {/*
+           * The primary action is the one that works today (DESIGN.md §4.5).
+           * Full-width and stacked below sm, where intrinsic-width buttons
+           * against a full-bleed column are the scaled-down-desktop tell.
+           */}
+          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              asChild
+              variant="primary"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               <a
                 href={EXAMPLE_PR_URL}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="group flex items-center gap-2.5 border-t border-subtle px-4 py-3 transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
               >
-                <GitPullRequest
-                  className="size-4 shrink-0 text-confident"
-                  aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-body font-medium text-primary">
-                    Opened as a pull request
-                  </span>
-                  <span className="block text-caption text-tertiary">
-                    Reviewed and merged, like every other change
-                  </span>
-                </span>
-                <ArrowRight
-                  className="size-3.5 shrink-0 text-tertiary transition-transform duration-(--duration-micro) group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-                  aria-hidden="true"
-                />
+                <GitPullRequest aria-hidden="true" />
+                See the pull request it opened
               </a>
-            </figure>
+            </Button>
+            <Button
+              asChild
+              variant="secondary"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <Link href="/docs#install">Read the docs</Link>
+            </Button>
           </div>
+        </div>
+
+        {/* The panel. One run, end to end, at full measure. */}
+        <figure className="mt-12 overflow-hidden rounded-lg border border-line bg-surface/50 sm:mt-14">
+          <figcaption className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-subtle px-4 py-2.5 sm:px-5">
+            <span className="font-mono text-caption text-secondary">
+              src/components/Form.tsx
+            </span>
+            <span className="font-mono text-micro uppercase tracking-wide text-tertiary">
+              1 string found
+            </span>
+          </figcaption>
+
+          <div className="grid gap-px bg-subtle sm:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+            {/* What it found.
+                The framework line sits at the foot of the cell rather than
+                leaving it short against five translation rows beside it — and
+                it is information, not filler: detection is the first pipeline
+                stage, and Vite + React is the stack of the fixture repository
+                the linked pull request was actually opened against. */}
+            <div className="flex flex-col justify-between bg-canvas px-4 py-5 sm:px-5">
+              <div>
+                <p className="text-caption uppercase tracking-wide text-tertiary">
+                  Found in your source
+                </p>
+                <p className="mt-3 text-title font-medium tracking-[-0.01em] text-primary">
+                  &ldquo;Save changes&rdquo;
+                </p>
+                <p className="mt-3 font-mono text-caption text-tertiary">
+                  locales/en.json
+                </p>
+              </div>
+              <dl className="mt-6 flex items-baseline gap-2 border-t border-subtle pt-3">
+                <dt className="text-caption uppercase tracking-wide text-tertiary">
+                  Detected
+                </dt>
+                <dd className="font-mono text-caption text-secondary">
+                  Vite + React
+                </dd>
+              </dl>
+            </div>
+
+            {/* What it wrote. The State Rule carries confidence per line, in
+                each language's own script and direction — a localization
+                product rendering Arabic in a Latin fallback would be arguing
+                against itself. */}
+            <div className="bg-canvas px-4 py-5 sm:px-5">
+              <p className="text-caption uppercase tracking-wide text-tertiary">
+                Written to your repository
+              </p>
+              <ul className="mt-3 flex flex-col gap-2.5">
+                {TRANSLATIONS.map((t) => (
+                  <li key={t.locale}>
+                    <StateRule
+                      tone="confident"
+                      className="flex items-baseline gap-3 ps-3"
+                    >
+                      <span className="w-14 shrink-0 font-mono text-micro uppercase text-tertiary">
+                        {t.locale}
+                      </span>
+                      <span
+                        lang={t.locale}
+                        dir={t.dir ?? 'ltr'}
+                        className={`min-w-0 text-body text-primary ${FONT_FOR[t.locale] ?? ''}`}
+                      >
+                        {t.text}
+                      </span>
+                    </StateRule>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* The run ends where the product ends. No counts are claimed here —
+              the link goes to the real pull request, which is where they live. */}
+          <a
+            href={EXAMPLE_PR_URL}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="group flex items-center gap-3 border-t border-subtle px-4 py-3.5 transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus sm:px-5"
+          >
+            <GitPullRequest
+              className="size-4 shrink-0 text-confident"
+              aria-hidden="true"
+            />
+            <span className="min-w-0 flex-1 text-body text-primary">
+              <span className="font-medium">Opened as a pull request</span>
+              <span className="text-secondary">
+                {' '}
+                — reviewed and merged, like every other change
+              </span>
+            </span>
+            <ArrowRight
+              className="size-3.5 shrink-0 text-tertiary transition-transform duration-(--duration-micro) group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+              aria-hidden="true"
+            />
+          </a>
+        </figure>
+
+        {/* Below the panel, where it does not compete. Honest about what it is:
+            a command that is not published yet. */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+          <div className="w-full sm:max-w-md">
+            <CopyCommand command={INSTALL_COMMAND} />
+          </div>
+          <p className="text-small leading-6 text-tertiary">
+            Not published to npm yet — today it runs from a clone.{' '}
+            <Link
+              href="/docs#install"
+              className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              Install guide
+            </Link>
+            .
+          </p>
         </div>
       </div>
     </section>
