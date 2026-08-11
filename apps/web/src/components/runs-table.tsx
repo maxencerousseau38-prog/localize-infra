@@ -4,9 +4,9 @@ import { DataFilter, DataSearch, DataToolbar } from '@/components/data-toolbar';
 import type { SampleRun } from '@/lib/sample';
 import { useTableQuery } from '@/lib/use-table-query';
 import {
-  Badge,
   EmptyState,
   SortableTH,
+  StatusDot,
   TBody,
   TD,
   TH,
@@ -15,7 +15,9 @@ import {
   Table,
   TableEmpty,
   type Tone,
+  cn,
 } from '@localize-infra/ui';
+import { GitPullRequest } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 
@@ -105,9 +107,11 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
       <Table className="mt-1">
         <THead>
           <TR>
-            <TH>Status</TH>
-            <TH className="hidden lg:table-cell">Trigger</TH>
-            <TH numeric>Locales</TH>
+            <TH className="w-[7.5rem]">Status</TH>
+            <TH>Run</TH>
+            <TH numeric className="hidden lg:table-cell">
+              Locales
+            </TH>
             <SortableTH
               label="Strings"
               numeric
@@ -151,33 +155,33 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
             rows.map((run) => {
               const state = STATE[run.state];
               return (
-                <TR key={run.id} className="relative">
+                <TR key={run.id} className="group relative">
                   <TD>
-                    <Badge tone={state.tone}>{state.label}</Badge>
-                    {/* The trigger folds in here below lg rather than being
-                        dropped: it is how you recognise the run. */}
-                    {/* 9rem, not 11: at 390 the folded trigger pushed the table 19px past
-                        its container, so the three columns that survive the fold
-                        still needed a horizontal scroll to read. The command is
-                        truncated either way; the question is only whether the
-                        row fits. */}
-                    <span className="mt-1 block max-w-[9rem] truncate font-mono text-caption text-tertiary sm:max-w-[18rem] lg:hidden">
-                      {run.trigger}
-                    </span>
+                    {/* A dot and a word, not a pill. At three rows a badge per
+                        row looks considered; at thirty it is a column of
+                        coloured rectangles competing with the thing the reader
+                        is actually scanning for. */}
+                    <StatusDot tone={state.tone}>{state.label}</StatusDot>
                   </TD>
-                  <TD className="hidden lg:table-cell">
-                    {/* One focus stop per row, and the whole row is the click
-                        target. The accessible name says which run, because
-                        "localize-infra init" repeats down the column. */}
+                  <TD>
+                    {/* The command is the row's identity, so it leads rather
+                        than hiding behind a status column until lg. One focus
+                        stop per row and the whole row is the click target; the
+                        accessible name carries the run id, because
+                        "localize-infra init" repeats down the column.
+
+                        The width cap still matters at 390 — an uncapped command
+                        pushed the table past its container — but the column is
+                        no longer dropped and re-folded at a breakpoint. */}
                     <Link
                       href={`/runs/${run.id}`}
                       aria-label={`Run ${run.id.replace('run-', '')}, ${state.label.toLowerCase()}`}
-                      className="font-mono text-caption text-secondary after:absolute after:inset-0 hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                      className="block max-w-[9rem] truncate font-mono text-caption text-secondary after:absolute after:inset-0 group-hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus sm:max-w-[20rem] lg:max-w-none"
                     >
                       {run.trigger}
                     </Link>
                   </TD>
-                  <TD numeric>
+                  <TD numeric className="hidden tabular-nums lg:table-cell">
                     {run.localesFailed > 0 ? (
                       <span className="text-degraded-text">
                         {run.locales - run.localesFailed}/{run.locales}
@@ -186,23 +190,45 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
                       `${run.locales}`
                     )}
                   </TD>
-                  <TD numeric className="hidden sm:table-cell">
+                  <TD numeric className="hidden tabular-nums sm:table-cell">
                     {run.strings || '—'}
                   </TD>
-                  <TD numeric className="hidden md:table-cell">
+                  <TD
+                    numeric
+                    className="hidden font-mono tabular-nums md:table-cell"
+                  >
                     {duration(run.durationMs)}
                   </TD>
+                  {/* The pull request is what a run is for (invariant 2), so it
+                      reads as an artefact rather than as a number in a column.
+                      An absent one is a quiet dash: no PR is information, not
+                      an error, and "None" in full weight read as one. */}
                   <TD className="hidden md:table-cell">
                     {run.prNumber ? (
-                      <span className="text-link">
-                        #{run.prNumber}
-                        {run.prMerged ? ' · merged' : ''}
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                        <GitPullRequest
+                          className={cn(
+                            'size-3.5 shrink-0',
+                            run.prMerged ? 'text-confident' : 'text-tertiary',
+                          )}
+                          aria-hidden="true"
+                        />
+                        <span className="font-mono text-caption text-secondary">
+                          #{run.prNumber}
+                        </span>
+                        {run.prMerged ? (
+                          <span className="text-caption text-tertiary">
+                            merged
+                          </span>
+                        ) : null}
                       </span>
                     ) : (
-                      <span className="text-tertiary">None</span>
+                      <span className="text-tertiary">—</span>
                     )}
                   </TD>
-                  <TD className="whitespace-nowrap">{run.when}</TD>
+                  <TD className="whitespace-nowrap text-tertiary">
+                    {run.when}
+                  </TD>
                 </TR>
               );
             })

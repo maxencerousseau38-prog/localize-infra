@@ -48,15 +48,25 @@ describe('app (real index.ts route wiring)', () => {
     return mod.app;
   }
 
-  it('returns 401 for /v1/translate with no Authorization header', async () => {
-    const app = await loadApp();
-    const res = await app.request('/v1/translate', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({}),
-    });
-    expect(res.status).toBe(401);
-  });
+  // This is the first test to call `loadApp()`, so it pays for the dynamic
+  // import of the whole route tree — roughly 400ms alone, but over 8s when
+  // `turbo run test --force` has every other workspace compiling on the same
+  // cores. It flaked three times that way and passed on every isolated run.
+  // The work is not slow; the default 5s ceiling is just too close to it under
+  // load, so this one test gets room rather than the suite getting a retry.
+  it(
+    'returns 401 for /v1/translate with no Authorization header',
+    { timeout: 30_000 },
+    async () => {
+      const app = await loadApp();
+      const res = await app.request('/v1/translate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      expect(res.status).toBe(401);
+    },
+  );
 
   it('returns 401 for /v1/open-pr with no Authorization header', async () => {
     const app = await loadApp();

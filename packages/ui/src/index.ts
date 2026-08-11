@@ -99,6 +99,7 @@ export {
   SelectValue,
 } from './primitives/select';
 export { StateRule, type StateRuleProps } from './primitives/state-rule';
+export { StatusDot } from './primitives/status-dot';
 export {
   SortableTH,
   TBody,

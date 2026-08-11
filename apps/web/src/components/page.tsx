@@ -65,8 +65,19 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <header className="border-b border-subtle py-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    /*
+     * The metadata row moves up beside the title instead of sitting on its own
+     * line below the purpose (DESIGN.md §4.6).
+     *
+     * The header was spending three stacked bands — title, purpose, meta — plus
+     * a rule, before a data surface showed its first row. On /runs that put the
+     * first row at 35% of the viewport on a page whose entire job is rows. The
+     * facts in the meta row are short and scannable; they belong on the title's
+     * baseline, where they read as a status line rather than as a third
+     * paragraph.
+     */
+    <header className="border-b border-subtle pb-4 pt-6">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
         <div className="min-w-0">
           {/* DESIGN.md §3.4: display type steps down below sm. 28px was
               constant from 390 to 1920, which on a phone spends a third of the
@@ -80,13 +91,15 @@ export function PageHeader({
             </p>
           ) : null}
         </div>
-        {action ? <div className="shrink-0">{action}</div> : null}
+        <div className="flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-2">
+          {meta ? (
+            <dl className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+              {meta}
+            </dl>
+          ) : null}
+          {action}
+        </div>
       </div>
-      {meta ? (
-        <dl className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
-          {meta}
-        </dl>
-      ) : null}
     </header>
   );
 }

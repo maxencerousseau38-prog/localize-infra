@@ -1,6 +1,7 @@
 import { Avatar, Progress, Separator, Tabs } from 'radix-ui';
 import type * as React from 'react';
 import { cn } from '../lib/cn';
+import type { Tone } from './badge';
 
 /**
  * Skeletons mirror the final geometry exactly — same heights, same widths — so
@@ -58,15 +59,34 @@ export function SkeletonTableRows({
  * total). Indeterminate progress belongs at the top of the content area as a
  * 2px bar, never as a full-screen spinner.
  */
+/**
+ * `tone` exists so a bar can carry the same state as the row it sits in.
+ *
+ * Coverage on the locales table is the reader's actual question — "which
+ * language is behind?" — and a percentage answers it only after you read and
+ * compare five numbers. The bar answers it pre-attentively, and colouring it by
+ * the locale's state means the bar is encoding state rather than decorating a
+ * number, which is the only thing DESIGN.md §6.2 allows colour to do.
+ */
+const INDICATOR: Record<Tone, string> = {
+  neutral: 'bg-tertiary',
+  ambiguous: 'bg-ambiguous',
+  confident: 'bg-confident',
+  degraded: 'bg-degraded',
+  failed: 'bg-failed',
+};
+
 export function ProgressBar({
   value,
   max = 100,
   label,
+  tone = 'neutral',
   className,
 }: {
   value: number;
   max?: number;
   label: string;
+  tone?: Tone;
   className?: string;
 }) {
   const pct = Math.min(100, Math.max(0, (value / max) * 100));
@@ -81,7 +101,10 @@ export function ProgressBar({
       )}
     >
       <Progress.Indicator
-        className="h-full rounded-full bg-primary transition-transform duration-(--duration-standard) ease-(--ease-standard) motion-reduce:transition-none"
+        className={cn(
+          'h-full rounded-full transition-transform duration-(--duration-standard) ease-(--ease-standard) motion-reduce:transition-none',
+          INDICATOR[tone],
+        )}
         style={{ transform: `translateX(-${100 - pct}%)` }}
       />
     </Progress.Root>

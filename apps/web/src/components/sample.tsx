@@ -20,24 +20,36 @@ export function SampleBanner({
   className?: string;
 }) {
   return (
+    /*
+     * One line, not a panel.
+     *
+     * This was a filled, bordered block roughly 80px tall sitting between the
+     * page header and the first row of content — on a surface whose entire job
+     * is to show rows. The shell now carries a persistent "no project
+     * connected" notice in the sidebar footer, so this is the second time a
+     * reader is told, and it does not need to be the loudest element on screen
+     * to be honest.
+     *
+     * The contract is unchanged and still enforced by test: the sentence is
+     * present and visible on every sample route, the breadcrumb keeps its chip,
+     * and the region keeps its dashed edge and accessible name. Only the weight
+     * changed.
+     */
     <div
       className={cn(
-        'flex items-start gap-3 rounded-lg border border-dashed border-strong',
-        'bg-surface px-4 py-3',
+        'flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-b border-dashed border-strong pb-2.5',
         className,
       )}
     >
       <FlaskConical
-        className="mt-0.5 size-4 shrink-0 text-tertiary"
+        className="size-3.5 shrink-0 translate-y-0.5 text-tertiary"
         aria-hidden="true"
         strokeWidth={1.5}
       />
-      <div className="min-w-0">
-        <p className="text-body font-medium text-primary">
-          Sample data — this is not your project
-        </p>
-        <p className="mt-0.5 text-small text-secondary">{children}</p>
-      </div>
+      <p className="text-small font-medium text-primary">
+        Sample data — this is not your project
+      </p>
+      <p className="min-w-0 text-small text-tertiary">{children}</p>
     </div>
   );
 }

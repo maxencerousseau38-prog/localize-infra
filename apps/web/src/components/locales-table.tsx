@@ -4,9 +4,10 @@ import { DataSearch, DataToolbar } from '@/components/data-toolbar';
 import type { ConfidenceState, SampleLocale } from '@/lib/sample';
 import { useTableQuery } from '@/lib/use-table-query';
 import {
-  Badge,
   EmptyState,
+  ProgressBar,
   SortableTH,
+  StatusDot,
   TBody,
   TD,
   TH,
@@ -170,16 +171,36 @@ export function LocalesTable({
                       {SPECIMEN[locale.code]}
                     </span>
                   </TD>
-                  <TD numeric>
-                    <span className="tabular-nums">{pct}%</span>
+                  {/* The percentage plus the shape of it. The reader's question
+                      on this surface is "which language is behind?", and five
+                      bare numbers answer that only after you read and compare
+                      all five. The bar is encoding the gap, not decorating the
+                      number, and it takes the row's state colour so it says the
+                      same thing the badge did. */}
+                  <TD numeric className="w-40">
+                    <span className="flex items-center justify-end gap-2.5">
+                      <ProgressBar
+                        value={locale.translated}
+                        max={locale.total}
+                        tone={tone.tone}
+                        label={`${localeDisplayName(locale.code)} coverage`}
+                        className="h-1 w-16 shrink-0"
+                      />
+                      <span className="w-9 shrink-0 text-end font-mono tabular-nums text-secondary">
+                        {pct}%
+                      </span>
+                    </span>
                   </TD>
-                  <TD numeric className="hidden sm:table-cell">
+                  <TD
+                    numeric
+                    className="hidden font-mono tabular-nums text-tertiary sm:table-cell"
+                  >
                     {locale.translated}/{locale.total}
                   </TD>
                   <TD>
-                    <Badge tone={tone.tone}>{tone.label}</Badge>
+                    <StatusDot tone={tone.tone}>{tone.label}</StatusDot>
                   </TD>
-                  <TD className="hidden whitespace-nowrap md:table-cell">
+                  <TD className="hidden whitespace-nowrap text-tertiary md:table-cell">
                     {locale.lastRun}
                   </TD>
                 </TR>

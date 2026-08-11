@@ -229,17 +229,25 @@ function AmbiguityCard({
                     >
                       {index + 1}
                     </span>
+                    {/* The candidate translation is the subject of this whole
+                        surface — it is the thing being chosen — and it sat at
+                        `body` with its rationale at `small`, one step apart.
+                        DESIGN.md §1.5 says the string is the hero and §3.5 says
+                        one step is not a hierarchy. The reading now leads at
+                        `subtitle` in its own script, and the reasoning recedes
+                        to tertiary where it belongs: it supports the decision,
+                        it is not the decision. */}
                     <span className="min-w-0">
                       <span
                         {...localeTextProps(item.targetLocale)}
                         className={cn(
-                          'block text-body font-medium text-primary',
+                          'block text-subtitle font-medium leading-6 text-primary',
                           localeFontClass(item.targetLocale),
                         )}
                       >
                         {candidate.text}
                       </span>
-                      <span className="mt-0.5 block text-small leading-5 text-secondary">
+                      <span className="mt-1 block text-small leading-5 text-tertiary">
                         {candidate.rationale}
                       </span>
                     </span>
