@@ -156,7 +156,12 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
                     <Badge tone={state.tone}>{state.label}</Badge>
                     {/* The trigger folds in here below lg rather than being
                         dropped: it is how you recognise the run. */}
-                    <span className="mt-1 block max-w-[11rem] truncate font-mono text-caption text-tertiary sm:max-w-[18rem] lg:hidden">
+                    {/* 9rem, not 11: at 390 the folded trigger pushed the table 19px past
+                        its container, so the three columns that survive the fold
+                        still needed a horizontal scroll to read. The command is
+                        truncated either way; the question is only whether the
+                        row fits. */}
+                    <span className="mt-1 block max-w-[9rem] truncate font-mono text-caption text-tertiary sm:max-w-[18rem] lg:hidden">
                       {run.trigger}
                     </span>
                   </TD>

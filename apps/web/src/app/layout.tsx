@@ -118,7 +118,7 @@ export default async function RootLayout({
             users should not have to traverse the whole shell to reach content. */}
         <a
           href="#main"
-          className="sr-only rounded-md bg-primary px-4 py-2 text-inverse focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50"
+          className="sr-only rounded-md bg-primary px-4 text-inverse focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:flex focus:h-8 focus:items-center"
         >
           Skip to content
         </a>

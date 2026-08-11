@@ -49,7 +49,7 @@ export function Hero() {
 
             {/* The measure is capped near 15ch so the line breaks land where
                 the argument does, rather than wherever the container ends. */}
-            <h1 className="mt-5 max-w-[15ch] font-display text-display-xl font-semibold tracking-[-0.035em] text-primary sm:text-display-2xl">
+            <h1 className="mt-5 max-w-[15ch] font-display text-display-xl font-semibold tracking-[-0.035em] text-primary lg:text-display-2xl">
               Your copy is a build artifact.
             </h1>
 
@@ -116,9 +116,13 @@ export function Hero() {
             </div>
           </div>
 
-          {/* The artifact. Bleeds right past the container on lg so the
-              composition has a direction; contained below that. */}
-          <div className="lg:col-span-5 lg:-me-16 xl:-me-28">
+          {/* The artifact bleeds past the container from xl up, not lg.
+              At 1024 the container is already the full viewport, so a negative
+              inline-end margin pushed 40px of the card off the screen and
+              `overflow-hidden` quietly clipped it — losing content rather than
+              creating direction. The bleed now starts where there is genuine
+              slack to bleed into. */}
+          <div className="lg:col-span-5 xl:-me-16 2xl:-me-28">
             <figure className="rounded-lg border border-line bg-surface/60">
               <figcaption className="flex items-center justify-between border-b border-subtle px-4 py-2.5">
                 <span className="font-mono text-caption text-tertiary">
