@@ -32,8 +32,13 @@ const TRANSLATIONS: Array<{ locale: string; text: string; dir?: 'rtl' }> = [
 const FONT_FOR: Record<string, string> = { ja: 'font-jp', ar: 'font-ar' };
 
 export function Hero() {
+  // No bottom rule on this section. The artifact ends on "Opened as a pull
+  // request" and the very next thing on the page is the dark band showing that
+  // pull request — a hairline between them reads as a boundary between two
+  // topics when it is one argument continuing. The change of ground separates
+  // them, and it does it better than a line.
   return (
-    <section className="relative overflow-hidden border-b border-subtle">
+    <section className="relative overflow-hidden">
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24">
         {/* `items-center` rather than `items-start`: the argument column is
             taller than the artifact, and top-aligning them pooled every pixel

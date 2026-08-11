@@ -135,7 +135,7 @@ export function Ecosystem() {
   return (
     <section
       aria-labelledby="ecosystem"
-      className="border-y border-subtle py-16 sm:py-20"
+      className="border-y border-subtle bg-surface/40 py-16 sm:py-20"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="max-w-2xl">
