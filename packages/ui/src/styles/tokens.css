@@ -15,6 +15,13 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Translucency is an enhancement, never what legibility depends on. Any surface
+   using `backdrop-blur` must state its opaque fallback with this variant — a
+   frosted bar over scrolling text is unreadable for a user who asked the system
+   to reduce transparency, and unlike reduced-motion there is no global escape
+   hatch that can supply the right background for them. */
+@custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
+
 /* ─────────────────────────────────────────────────────────────
    Layer 1 — raw palette, light
    Graphite is near-neutral with a faint cool cast. Chrome only.

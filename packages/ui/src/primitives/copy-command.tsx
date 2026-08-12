@@ -61,6 +61,11 @@ export function CopyCommand({
           'bg-surface px-4 py-3.5 text-start',
           'transition-colors duration-(--duration-micro) ease-(--ease-standard)',
           'hover:border-strong hover:bg-raised',
+          // Pressed. The result of a copy is asynchronous — the "Copied" swap
+          // waits on the clipboard promise — so without this the most important
+          // control on the public site answers a tap with nothing at all. One
+          // step past hover, which is the step Button already uses.
+          'active:bg-active',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
         )}
       >

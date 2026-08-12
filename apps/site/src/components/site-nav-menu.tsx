@@ -39,7 +39,7 @@ export function SiteNavMenu({
       <DialogTrigger
         className={cn(
           '-me-1 rounded-md p-2 text-secondary sm:hidden',
-          'transition-colors hover:bg-surface hover:text-primary',
+          'transition-colors hover:bg-surface hover:text-primary active:bg-raised',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
         )}
       >
@@ -59,7 +59,11 @@ export function SiteNavMenu({
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-md px-2 py-3 text-subtitle font-medium text-primary transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-focus"
+                  /* These rows exist only below sm, so `hover:` — which Tailwind
+                     gates behind a hover-capable pointer — never reaches the
+                     users who see them. The pressed state is the only feedback
+                     a tap here can produce before the route changes. */
+                  className="block rounded-md px-2 py-3 text-subtitle font-medium text-primary transition-colors hover:bg-surface active:bg-raised focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-focus"
                 >
                   {item.label}
                 </Link>

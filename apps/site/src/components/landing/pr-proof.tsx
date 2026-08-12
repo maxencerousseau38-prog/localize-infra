@@ -91,34 +91,38 @@ export function PrProof() {
 
               {/* Focusable: restoring the long value to one line made this
                   block scroll, and a scroll region a keyboard cannot reach is
-                  an axe violation. */}
-              <pre
-                className="overflow-x-auto px-4 py-3 text-caption leading-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                  an axe violation. The scroll lives on the wrapper so the
+                  element carrying it can be a `section` — `pre` cannot take the
+                  region role without the semantics rule objecting. */}
+              <section
+                className="overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                // biome-ignore lint/a11y/noNoninteractiveTabindex: scroll containers must take focus
                 tabIndex={0}
-                role="region"
                 aria-label="Contents of locales/es.json"
               >
-                <code className="font-mono">
-                  {DIFF_LINES.map((line) => (
-                    <span
-                      key={line.text}
-                      className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-2"
-                    >
+                <pre className="px-4 py-3 text-caption leading-6">
+                  <code className="font-mono">
+                    {DIFF_LINES.map((line) => (
                       <span
-                        aria-hidden="true"
-                        className="select-none text-confident-text/70"
+                        key={line.text}
+                        className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-2"
                       >
-                        +
-                      </span>
-                      {/* Spanish content: marked so screen readers switch voice
+                        <span
+                          aria-hidden="true"
+                          className="select-none text-confident-text/70"
+                        >
+                          +
+                        </span>
+                        {/* Spanish content: marked so screen readers switch voice
                           rather than reading it with an English pronunciation. */}
-                      <span lang="es" className="text-primary">
-                        {line.text}
+                        <span lang="es" className="text-primary">
+                          {line.text}
+                        </span>
                       </span>
-                    </span>
-                  ))}
-                </code>
-              </pre>
+                    ))}
+                  </code>
+                </pre>
+              </section>
             </div>
             <figcaption className="mt-3 text-small text-inverse/70">
               Output of <code className="font-mono">init --open-pr</code> on a

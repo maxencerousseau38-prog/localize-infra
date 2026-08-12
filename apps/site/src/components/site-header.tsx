@@ -1,7 +1,10 @@
+'use client';
+
 import { SiteNavMenu } from '@/components/site-nav-menu';
 import { GITHUB_REPO_URL } from '@/lib/constants';
-import { Button, ThemeToggle } from '@localize-infra/ui';
+import { Button, ThemeToggle, cn } from '@localize-infra/ui';
 import Link from 'next/link';
+import * as React from 'react';
 
 const NAV = [
   { href: '/docs', label: 'Docs' },
@@ -23,10 +26,69 @@ const NAV = [
  * version spent Iris on its top rule, and Iris means one thing in this system —
  * your judgement is required. Chrome does not get to borrow it, on the landing
  * page or anywhere else.
+ *
+ * The bar carries no divider and no backdrop until the page has actually
+ * scrolled. Both were previously painted at rest, where there is nothing
+ * underneath to separate — a hairline against the top of an unscrolled page is
+ * chrome asserting itself rather than a response to content. They now
+ * materialise when content passes beneath, which is the only moment they do any
+ * work.
  */
+
+/**
+ * True once the page has scrolled far enough for content to sit under the bar.
+ *
+ * Reads on mount as well as on scroll: a restored scroll position or a load
+ * straight to an anchor starts the page mid-document, where the bar has to be
+ * materialised already rather than waiting for the user to move.
+ */
+function useScrolledUnder(threshold = 1) {
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    let frame = 0;
+
+    const read = () => {
+      frame = 0;
+      setScrolled(window.scrollY > threshold);
+    };
+
+    // Scroll fires far more often than the screen paints; coalescing to one
+    // read per frame keeps this off the input path, which is the whole point.
+    const onScroll = () => {
+      if (frame === 0) frame = window.requestAnimationFrame(read);
+    };
+
+    read();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame !== 0) window.cancelAnimationFrame(frame);
+    };
+  }, [threshold]);
+
+  return scrolled;
+}
+
 export function SiteHeader() {
+  const scrolled = useScrolledUnder();
+
   return (
-    <header className="sticky top-0 z-40 border-b border-subtle bg-canvas/85 backdrop-blur-md">
+    <header
+      data-scrolled={scrolled || undefined}
+      className={cn(
+        'sticky top-0 z-40',
+        // The border is always present and merely transparent at rest, so the
+        // layout never shifts by a pixel when it appears.
+        'border-b border-transparent bg-transparent',
+        'transition-colors duration-(--duration-standard) ease-(--ease-standard)',
+        scrolled && [
+          'border-subtle bg-canvas/85 backdrop-blur-md',
+          // The frosted bar is the enhancement; this is what it degrades to.
+          'reduced-transparency:bg-canvas reduced-transparency:backdrop-blur-none',
+        ],
+      )}
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6">
         <Link
           href="/"

@@ -121,10 +121,13 @@ export function HeroArtifact() {
               this column and a scroll region a keyboard cannot reach is an axe
               violation — `scrollable-region-focusable`, which this panel
               introduced the moment it started showing unwrapped code. */}
-          <div
+          <section
             className="overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+            // This rule and axe's `scrollable-region-focusable` disagree here.
+            // The test is the one with a user behind it: without focus, nothing
+            // reaches the hidden content from a keyboard.
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: scroll containers must take focus
             tabIndex={0}
-            role="region"
             aria-label="Source of src/App.tsx"
           >
             <table className="w-full border-collapse font-mono text-caption">
@@ -159,7 +162,7 @@ export function HeroArtifact() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </section>
         </div>
 
         {/* What it wrote. Dual gutters, because an added line has no old
@@ -174,10 +177,10 @@ export function HeroArtifact() {
             </span>
           </div>
 
-          <div
+          <section
             className="overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: scroll containers must take focus
             tabIndex={0}
-            role="region"
             aria-label="Diff of locales/en.json"
           >
             <table className="w-full border-collapse font-mono text-caption">
@@ -212,7 +215,7 @@ export function HeroArtifact() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </section>
         </div>
       </div>
 
@@ -226,7 +229,7 @@ export function HeroArtifact() {
         rel="noreferrer noopener"
         className={cn(
           'group flex items-center gap-3 border-t border-subtle px-4 py-3.5',
-          'transition-colors hover:bg-surface',
+          'transition-colors hover:bg-surface active:bg-raised',
           'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
         )}
       >

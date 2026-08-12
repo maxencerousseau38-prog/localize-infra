@@ -89,7 +89,7 @@ export function ThemeToggle() {
                 'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-focus',
                 selected
                   ? 'bg-canvas text-primary shadow-e1'
-                  : 'text-tertiary hover:text-secondary',
+                  : 'text-tertiary hover:text-secondary active:bg-raised',
               )}
             >
               {/* pointer-events-none so a click always lands on the label and
