@@ -34,7 +34,7 @@ export default function HomePage() {
        */}
       <section className="border-t border-subtle">
         <div className="mx-auto max-w-6xl px-4 py-24 text-center sm:px-6 sm:py-32">
-          <h2 className="mx-auto max-w-[22ch] font-display text-display font-semibold tracking-[-0.03em] text-primary sm:text-display-lg">
+          <h2 className="mx-auto max-w-[22ch] font-display text-display font-semibold text-primary sm:text-display-lg">
             Run it on a real repository
           </h2>
           <p className="mx-auto mt-5 max-w-[52ch] text-prose text-secondary">

@@ -82,7 +82,7 @@ export function PageHeader({
           {/* DESIGN.md §3.4: display type steps down below sm. 28px was
               constant from 390 to 1920, which on a phone spends a third of the
               width on the title before any content appears. */}
-          <h1 className="font-display text-title font-semibold tracking-[-0.02em] text-primary sm:text-display">
+          <h1 className="font-display text-title font-semibold text-primary sm:text-display">
             {title}
           </h1>
           {purpose ? (
@@ -146,7 +146,7 @@ export function PageSection({
                 duty, and the two read as siblings. At `subtitle` 16 semibold
                 the ranking is unambiguous, and the section header stops
                 spending 20px of vertical space it had not earned. */}
-            <h2 className="text-subtitle font-semibold tracking-[-0.01em] text-primary">
+            <h2 className="text-subtitle font-semibold text-primary">
               {title}
             </h2>
             {description ? (

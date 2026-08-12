@@ -58,7 +58,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
-            <p className="font-display text-title font-semibold tracking-[-0.02em] text-primary">
+            <p className="font-display text-title font-semibold text-primary">
               Your translations are files in your repository.
             </p>
             <p className="mt-3 max-w-[42ch] text-body leading-6 text-secondary">
@@ -87,7 +87,7 @@ export function SiteFooter() {
           <div className="grid gap-8 sm:grid-cols-3 lg:col-span-6 lg:col-start-7">
             {GROUPS.map((group) => (
               <nav key={group.title} aria-label={group.title}>
-                <h2 className="text-caption font-medium uppercase tracking-[0.12em] text-tertiary">
+                <h2 className="text-eyebrow font-medium uppercase text-tertiary">
                   {group.title}
                 </h2>
                 <ul className="mt-4 space-y-2.5">

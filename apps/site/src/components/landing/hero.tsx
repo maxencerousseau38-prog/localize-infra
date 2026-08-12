@@ -38,11 +38,11 @@ export function Hero() {
         {/* The words. Held to a narrow measure and left-aligned against the
             same grid the panel below uses, so the two read as one block rather
             than as a centred banner sitting on a product shot. */}
-        <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+        <p className="text-eyebrow font-medium uppercase text-tertiary">
           Localization infrastructure
         </p>
 
-        <h1 className="mt-5 max-w-[16ch] font-display text-display-xl font-semibold tracking-[-0.035em] text-primary lg:text-display-2xl">
+        <h1 className="mt-5 max-w-[16ch] font-display text-display-xl font-semibold text-primary lg:text-display-2xl">
           Your copy is a build artifact.
         </h1>
 

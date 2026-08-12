@@ -36,10 +36,10 @@ export function PrProof() {
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
           <div>
-            <p className="text-caption font-medium uppercase tracking-[0.14em] text-inverse/70">
+            <p className="text-eyebrow font-medium uppercase text-inverse/70">
               The deliverable
             </p>
-            <h2 className="mt-3 font-display text-headline font-semibold tracking-[-0.02em] text-inverse">
+            <h2 className="mt-3 font-display text-headline font-semibold text-inverse">
               A pull request, not a dashboard
             </h2>
             <p className="mt-4 text-prose text-inverse/70">

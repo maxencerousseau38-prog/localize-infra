@@ -96,10 +96,10 @@ export function BuildStatus() {
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+            <p className="text-eyebrow font-medium uppercase text-tertiary">
               Status
             </p>
-            <h2 className="mt-3 font-display text-headline font-semibold tracking-[-0.02em] text-primary">
+            <h2 className="mt-3 font-display text-headline font-semibold text-primary">
               What actually works today
             </h2>
             <p className="mt-4 text-prose text-secondary">

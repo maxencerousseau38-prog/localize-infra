@@ -57,10 +57,10 @@ export function HowItWorks() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
       <div className="max-w-2xl">
-        <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+        <p className="text-eyebrow font-medium uppercase text-tertiary">
           How it works
         </p>
-        <h2 className="mt-3 font-display text-headline font-semibold tracking-[-0.02em] text-primary">
+        <h2 className="mt-3 font-display text-headline font-semibold text-primary">
           One command, four steps, no new tab
         </h2>
       </div>
@@ -100,7 +100,7 @@ export function HowItWorks() {
 
               <div className="grid min-w-0 flex-1 gap-x-10 gap-y-3 pt-1 lg:grid-cols-12">
                 <div className="lg:col-span-5">
-                  <h3 className="font-display text-subtitle font-semibold tracking-[-0.01em] text-primary">
+                  <h3 className="font-display text-subtitle font-semibold text-primary">
                     {step.title}
                   </h3>
                   {/* What the step leaves behind, from PIPELINE_STAGES — the

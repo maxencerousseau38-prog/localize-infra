@@ -96,7 +96,7 @@ export default function PricingPage() {
               <h2 className="text-prose font-semibold text-primary">
                 Public repositories
               </h2>
-              <p className="mt-2 font-display text-headline font-semibold tracking-tight text-primary">
+              <p className="mt-2 font-display text-headline font-semibold text-primary">
                 Free
               </p>
               <p className="mt-2 text-body leading-6 text-secondary">

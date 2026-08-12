@@ -306,11 +306,21 @@
      structure at large sizes. Titles only; never body copy. */
   --font-display: var(--font-archivo), var(--font-inter), sans-serif;
 
-  /* Type scale — the application register. Eight steps here, three more for
-     the editorial register below; nothing outside the eleven.
+  /* Type scale — the application register. Eight steps here, four more for
+     the editorial register below; nothing outside the twelve.
      Replaces 15 ad-hoc pixel sizes across 256 occurrences; a test enforces it.
      Sizes stay in px because this is a data-dense product where a 14px row has
-     to be 14px, not 14px scaled by a root the user changed. */
+     to be 14px, not 14px scaled by a root the user changed.
+
+     Tracking is part of the step, not a decision each component makes.
+     It was the one axis that escaped this file: six different hand-written
+     values across the site, and the same role written two ways — section
+     headings at `-0.02em` in six places, untracked in thirteen, and
+     `tracking-tight` in one. Letters read further apart as they grow, so the
+     value belongs to the size, and binding it here is what stops the next
+     component picking a seventh. Steps below `subtitle` stay at the face's
+     natural fit: body copy near zero is correct, and those sizes are shared
+     with code, keys and table cells that must not inherit a heading's fit. */
   --text-micro: 11px;
   --text-micro--line-height: 1.3;
   --text-caption: 12px;
@@ -321,36 +331,51 @@
   --text-body--line-height: 1.5;
   --text-subtitle: 16px;
   --text-subtitle--line-height: 1.5;
+  --text-subtitle--letter-spacing: -0.01em;
   --text-title: 20px;
   --text-title--line-height: 1.3;
+  --text-title--letter-spacing: -0.02em;
   --text-display: 28px;
   --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.03em;
   --text-display-lg: 40px;
   --text-display-lg--line-height: 1.05;
+  --text-display-lg--letter-spacing: -0.03em;
 
   /* Editorial register — the marketing site only (design direction §20: one
      design system, two registers). The app never uses these: a 52px hero or a
      1.65 prose measure would be wrong on a data surface, and forcing the site
      into the app's eight steps would flatten the hero and squash long-form
-     reading. Three steps, each earning its place:
+     reading. Four steps, each earning its place:
 
      prose      long-form body copy. Absorbs the site's 15/17/18px, all of
                 which were the same job at three sizes. 17/1.65 reads better
                 than the 15/1.87 it replaces.
+     eyebrow    the small uppercase label above a heading. Caption-sized, but
+                a step of its own because its tracking is the opposite sign:
+                widely spaced uppercase is a distinct role, and hanging it off
+                `caption` would have pushed 0.14em onto file paths, key names
+                and row counts, which are the same size and must stay tight.
      headline   section headings. Absorbs 22px (14 uses), 26px (5) and 28px
                 (1) — three sizes doing one job across the site.
      display-xl the landing hero, and nothing else. */
   --text-prose: 17px;
   --text-prose--line-height: 1.65;
+  --text-eyebrow: 12px;
+  --text-eyebrow--line-height: 1.35;
+  --text-eyebrow--letter-spacing: 0.14em;
   --text-headline: 24px;
   --text-headline--line-height: 1.25;
+  --text-headline--letter-spacing: -0.02em;
   --text-display-xl: 52px;
   --text-display-xl--line-height: 1.02;
+  --text-display-xl--letter-spacing: -0.035em;
   /* The landing hero, and only that. 52px was too polite for a first
      viewport at 1440 — the headline read as a paragraph rather than a
      statement. Steps down to display-xl below sm. */
   --text-display-2xl: 68px;
   --text-display-2xl--line-height: 0.98;
+  --text-display-2xl--letter-spacing: -0.035em;
 
   /* 8px base. 4px and 2px exist only for optical alignment in controls. */
   --spacing: 4px;

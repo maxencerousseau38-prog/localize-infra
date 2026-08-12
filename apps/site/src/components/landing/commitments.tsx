@@ -52,10 +52,10 @@ export function Commitments() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
       <div className="max-w-2xl">
-        <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+        <p className="text-eyebrow font-medium uppercase text-tertiary">
           Commitments
         </p>
-        <h2 className="mt-3 font-display text-headline font-semibold tracking-[-0.02em] text-primary">
+        <h2 className="mt-3 font-display text-headline font-semibold text-primary">
           Three promises, and whether we keep them yet
         </h2>
       </div>
@@ -80,7 +80,7 @@ export function Commitments() {
           <li key={title} className="border-t border-subtle first:border-t-0">
             <StateRule tone={tone} className="py-8">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-                <h3 className="font-display text-title font-semibold tracking-[-0.02em] text-primary">
+                <h3 className="font-display text-title font-semibold text-primary">
                   {title}
                 </h3>
                 <Badge tone={tone}>{status}</Badge>

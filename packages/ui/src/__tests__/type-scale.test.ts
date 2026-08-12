@@ -11,9 +11,15 @@ import { describe, expect, it } from 'vitest';
  * nothing stopped the next component inventing a sixteenth size, and nothing
  * did stop it.
  *
- * The scale is eleven named steps across two registers — eight the app uses
- * and three the site adds (docs/design/09-app-design-direction.md §7).
+ * The scale is twelve named steps across two registers — eight the app uses
+ * and four the site adds (docs/design/09-app-design-direction.md §7).
  * Anything outside them is a defect, in either direction.
+ *
+ * Tracking is now part of a step rather than a per-component decision, and is
+ * guarded the same way the sizes are. It had drifted exactly as the sizes once
+ * did: six hand-written values, section headings tracked in six places and
+ * untracked in thirteen, and the eyebrow label written as both 0.14em and
+ * 0.12em. Nothing would have caught a seventh value.
  *
  * apps/site is now in scope too. It carries the editorial register — three
  * further steps (prose, headline, display-xl) that the app never uses — but it
@@ -84,6 +90,7 @@ describe('type scale', () => {
       'display',
       'display-lg',
       'prose',
+      'eyebrow',
       'headline',
       'display-xl',
       'display-2xl',
@@ -94,6 +101,61 @@ describe('type scale', () => {
         `--text-${step}--line-height:`,
       );
     }
+  });
+
+  /*
+   * Every step big enough to set headings carries its own tracking, because
+   * letters read further apart as they grow and the correction belongs to the
+   * size. The steps below `subtitle` deliberately do not: those sizes are
+   * shared with code, key names and table cells, which must keep the face's
+   * natural fit rather than inherit a heading's.
+   */
+  it('binds tracking to every step that sets headings', () => {
+    const tokens = readFileSync(
+      join(REPO_ROOT, 'packages/ui/src/styles/tokens.css'),
+      'utf8',
+    );
+
+    for (const step of [
+      'subtitle',
+      'title',
+      'display',
+      'display-lg',
+      'eyebrow',
+      'headline',
+      'display-xl',
+      'display-2xl',
+    ]) {
+      expect(tokens, `--text-${step}--letter-spacing`).toContain(
+        `--text-${step}--letter-spacing:`,
+      );
+    }
+  });
+
+  /**
+   * Two exceptions, both because the element's size step is shared with text
+   * that must not inherit its fit: the site wordmark sits at `body`, which is
+   * every paragraph and button in both apps, and the app sidebar's uppercase
+   * group label sits at `micro`, which carries row counts and numeric chips.
+   *
+   * Listed exactly rather than counted, so a new hand-written value fails here
+   * instead of quietly becoming the seventh.
+   */
+  it('leaves no hand-written tracking outside the two documented exceptions', () => {
+    const offenders: string[] = [];
+
+    for (const file of files) {
+      if (file.endsWith('type-scale.test.ts')) continue;
+      const source = readFileSync(file, 'utf8');
+      if (/tracking-\[/.test(source)) {
+        offenders.push(file.replace(REPO_ROOT, '').replace(/\\/g, '/'));
+      }
+    }
+
+    expect(offenders.sort()).toEqual([
+      '/apps/site/src/components/site-header.tsx',
+      '/apps/web/src/components/ui/sidebar.tsx',
+    ]);
   });
 
   it('keeps the editorial steps out of the application', () => {

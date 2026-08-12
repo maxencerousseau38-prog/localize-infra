@@ -90,6 +90,11 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6">
+        {/* The one tracking value on the site that is not carried by its type
+            step. The wordmark is `body`-sized, and `body` is every paragraph,
+            button and table cell in both apps — binding a wordmark's fit to it
+            would push this onto all of them. A mark is a mark, so it keeps its
+            own. */}
         <Link
           href="/"
           className="flex shrink-0 items-center gap-2.5 rounded-sm text-body font-semibold tracking-[-0.01em] text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"

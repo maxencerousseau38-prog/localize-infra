@@ -19,7 +19,7 @@ export function PageHeader({
              section eyebrows. This was `text-small` with `tracking-wide`, so
              the same element read at two different sizes depending on which
              page you were on. */
-          <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+          <p className="text-eyebrow font-medium uppercase text-tertiary">
             {eyebrow}
           </p>
         ) : null}
@@ -33,7 +33,7 @@ export function PageHeader({
          * it was one misplaced prefix from working, and nothing in the suite
          * could see it.
          */}
-        <h1 className="mt-3 max-w-[22ch] font-display text-display font-semibold tracking-[-0.02em] text-primary sm:text-display-lg">
+        <h1 className="mt-3 max-w-[22ch] font-display text-display font-semibold text-primary sm:text-display-lg">
           {title}
         </h1>
         {lede ? (

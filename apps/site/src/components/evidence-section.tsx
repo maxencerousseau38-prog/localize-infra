@@ -47,7 +47,7 @@ export function EvidenceSection({
           <div className="flex flex-wrap items-center gap-3">
             <h2
               id={id}
-              className="font-display text-title font-semibold tracking-[-0.02em] text-primary sm:text-headline"
+              className="font-display text-title font-semibold text-primary sm:text-headline"
             >
               {title}
             </h2>

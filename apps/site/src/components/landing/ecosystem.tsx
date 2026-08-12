@@ -171,12 +171,12 @@ export function Ecosystem() {
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="max-w-2xl">
-          <p className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+          <p className="text-eyebrow font-medium uppercase text-tertiary">
             Compatibility
           </p>
           <h2
             id="ecosystem"
-            className="mt-3 font-display text-headline font-semibold tracking-[-0.02em] text-primary"
+            className="mt-3 font-display text-headline font-semibold text-primary"
           >
             Nothing else in your stack has to change
           </h2>
@@ -209,7 +209,7 @@ export function Ecosystem() {
        */}
       <div className="mx-auto mt-10 grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-5">
-          <h3 className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+          <h3 className="text-eyebrow font-medium uppercase text-tertiary">
             Integrates with
           </h3>
           <ul
@@ -224,7 +224,7 @@ export function Ecosystem() {
         </div>
 
         <div className="lg:col-span-7">
-          <h3 className="text-caption font-medium uppercase tracking-[0.14em] text-tertiary">
+          <h3 className="text-eyebrow font-medium uppercase text-tertiary">
             Detected, then left alone
           </h3>
           <ul
