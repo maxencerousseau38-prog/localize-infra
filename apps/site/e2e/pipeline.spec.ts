@@ -60,15 +60,36 @@ test('the steps are numbered in pipeline order', async ({ page }) => {
  * The State Rule is the design system's signature (DESIGN.md §1.4, §5.2) and is
  * 3px. The hero drew its own at 2px for as long as it existed — invisible in
  * review, because 2px and 3px look identical until measured side by side.
+ *
+ * The hero no longer carries a State Rule at all: its panel became a source
+ * file and a diff, and a hand-rolled rule there would have been the same bug in
+ * a new place. So this now sweeps every page that does use the rule, and it
+ * catches a local copy wherever one appears rather than only in the hero.
+ *
+ * The band is the whole point. Anything drawing a leading edge thicker than a
+ * hairline is trying to be the signature, so it has to measure 3px exactly;
+ * genuine 1px hairlines are ignored, and a 2px copy cannot hide.
  */
-test('the hero uses the 3px State Rule, not a local copy', async ({ page }) => {
-  await page.goto('/');
-  const rules = page.locator('figure li > div');
-  await expect(rules.first()).toBeVisible();
+const RULE_PAGES = ['/benchmarks', '/docs', '/pricing', '/quality'];
 
-  const widths = await rules.evaluateAll((nodes) =>
-    nodes.map((n) => getComputedStyle(n).borderInlineStartWidth),
-  );
-  expect(widths.length).toBeGreaterThan(0);
-  for (const width of widths) expect(width).toBe('3px');
-});
+for (const path of RULE_PAGES) {
+  test(`${path} draws the 3px State Rule, not a local copy`, async ({
+    page,
+  }) => {
+    await page.goto(path);
+
+    const widths = await page.evaluate(() =>
+      [...document.querySelectorAll('*')]
+        .map((el) => getComputedStyle(el).borderInlineStartWidth)
+        .filter((w) => {
+          const px = Number.parseFloat(w);
+          return px > 1 && px < 6;
+        }),
+    );
+
+    // Non-vacuous: each of these pages renders at least one State Rule, so an
+    // empty result means the sweep stopped seeing them, not that all is well.
+    expect(widths.length, `leading rules found on ${path}`).toBeGreaterThan(0);
+    for (const width of widths) expect(width).toBe('3px');
+  });
+}

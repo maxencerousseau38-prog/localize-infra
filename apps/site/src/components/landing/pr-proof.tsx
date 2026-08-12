@@ -10,15 +10,17 @@ import { ArrowUpRight, GitPullRequest } from 'lucide-react';
  * Showing the real artefact is the section's entire argument: every competitor
  * can claim a GitHub workflow, and none of them link to the output.
  */
+/*
+ * One entry per line in the file. The long value used to be broken across two
+ * entries so it would fit the column, which gave it two `+` markers and made a
+ * 5-line addition render as 6 — the count beside the filename said "+6" to
+ * match. GitHub reports `+5`. The line is whole again and the block scrolls.
+ */
 const DIFF_LINES: { text: string; kind: 'add' | 'context' }[] = [
   { text: '{', kind: 'add' },
   { text: '  "src.App.get_started": "Comenzar",', kind: 'add' },
   {
-    text: '  "src.App.this_is_a_throwaway_project_used_to_vali": "Este es un proyecto',
-    kind: 'add',
-  },
-  {
-    text: '    desechable que se utiliza para validar la CLI de localize-infra.",',
+    text: '  "src.App.this_is_a_throwaway_project_used_to_vali": "Este es un proyecto desechable que se utiliza para validar la CLI de localize-infra.",',
     kind: 'add',
   },
   {
@@ -70,7 +72,9 @@ export function PrProof() {
                 <span className="text-body font-medium text-primary">
                   Add translations (de, ja, es, ar, pt-BR)
                 </span>
-                <Badge tone="confident">Merged</Badge>
+                {/* Open, not merged. Nobody has reviewed it — claiming a merge
+                    would claim a review that never happened. */}
+                <Badge tone="neutral">Open</Badge>
               </div>
 
               <div className="flex items-center justify-between border-b border-subtle px-4 py-2">
@@ -81,11 +85,19 @@ export function PrProof() {
                   className="font-mono text-caption text-confident-text"
                   data-numeric
                 >
-                  +6
+                  +{DIFF_LINES.length}
                 </span>
               </div>
 
-              <pre className="overflow-x-auto px-4 py-3 text-caption leading-6">
+              {/* Focusable: restoring the long value to one line made this
+                  block scroll, and a scroll region a keyboard cannot reach is
+                  an axe violation. */}
+              <pre
+                className="overflow-x-auto px-4 py-3 text-caption leading-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                tabIndex={0}
+                role="region"
+                aria-label="Contents of locales/es.json"
+              >
                 <code className="font-mono">
                   {DIFF_LINES.map((line) => (
                     <span
