@@ -53,8 +53,15 @@ for (const surface of SURFACES) {
 
       await page.getByLabel(surface.search).fill(surface.miss);
 
+      // Scoped to the table. /runs renders the same rows a second way below
+      // `md` — records rather than a truncated table — so the empty copy and
+      // its reset action now exist twice in the document, once hidden at this
+      // viewport. An unscoped lookup resolves to whichever comes first and
+      // asserts visibility against a `display: none` node.
+      const table = page.getByRole('table');
+
       // The empty state renders inside the body so the headers survive.
-      await expect(page.getByText(surface.empty)).toBeVisible();
+      await expect(table.getByText(surface.empty)).toBeVisible();
       await expect(page.locator('thead')).toBeVisible();
     });
 
@@ -66,7 +73,10 @@ for (const surface of SURFACES) {
       // search", which is already the accessible name of the input's own X.
       // Two controls sharing one name on a single screen is ambiguous to
       // anyone navigating by name.
-      await page.getByRole('button', { name: surface.reset }).click();
+      await page
+        .getByRole('table')
+        .getByRole('button', { name: surface.reset })
+        .click();
       await expect(page.locator('tbody tr')).toHaveCount(surface.total);
     });
 
@@ -165,4 +175,37 @@ test('a sort order can be linked to directly', async ({ page }) => {
 
   expect(byLanguage).not.toBe(byCoverage);
   expect(byLanguage).toContain('Arabic');
+});
+
+/**
+ * The small-screen arrangement carries the whole record.
+ *
+ * /runs used to drop columns at breakpoints until a 390px screen showed status,
+ * command and a relative time. Locales, strings, duration and the pull request
+ * were not scrolled off — they were `display: none`, so a developer checking a
+ * run from a phone could not reach them at all. Pinned because nothing else
+ * catches it: the desktop table is unchanged and every other check runs wide.
+ */
+test('a run exposes every fact at 390 (DESIGN.md §3.4)', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('/runs');
+
+  // The table is the desktop arrangement and must be out of the way here.
+  await expect(page.getByRole('table')).toBeHidden();
+
+  const record = page.getByRole('listitem').filter({ hasText: 'Succeeded' });
+  await expect(record).toBeVisible();
+
+  for (const fact of ['Locales', 'Strings', 'Duration', 'Output']) {
+    await expect(
+      record.getByText(fact, { exact: true }),
+      `a run record hides ${fact} at 390`,
+    ).toBeVisible();
+  }
+
+  // The command still reaches its detail page from here.
+  await expect(record.getByRole('link')).toHaveAttribute(
+    'href',
+    '/runs/run-8f2a',
+  );
 });

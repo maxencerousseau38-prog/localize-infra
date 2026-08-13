@@ -41,6 +41,26 @@ function duration(ms: number): string {
   return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
 }
 
+/** One labelled fact in the small-screen record. */
+function Fact({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <dt className="text-micro font-medium uppercase tracking-[0.1em] text-tertiary">
+        {label}
+      </dt>
+      <dd className="mt-0.5 font-mono text-caption tabular-nums text-primary">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
 /**
  * The run history as an actual data surface (DESIGN.md §8).
  *
@@ -102,9 +122,100 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
         />
       </DataToolbar>
 
+      {/*
+       * Below md the table becomes records, not a narrower table.
+       *
+       * The columns used to drop at breakpoints until a 390px screen showed
+       * status, command and a relative time — locales, strings, duration and
+       * the pull request were not scrolled off, they were `display: none`. A
+       * developer checking a run from a phone got the three least useful facts
+       * and no way to reach the rest.
+       *
+       * Same rows, same links, same accessible names; only the arrangement
+       * changes, so the desktop table keeps its real `table` semantics and
+       * sortable headers rather than both surfaces settling for a compromise.
+       */}
+      <ul className="mt-1 md:hidden">
+        {rows.length === 0 ? (
+          <li className="border-t border-subtle py-10">
+            <EmptyState
+              title="No runs match"
+              description="No run in this sample has that status or command."
+              action={
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="rounded-sm text-body text-link underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  Show all runs
+                </button>
+              }
+            />
+          </li>
+        ) : (
+          rows.map((run) => {
+            const state = STATE[run.state];
+            return (
+              <li
+                key={run.id}
+                className="group relative border-t border-subtle"
+              >
+                <div className="flex items-baseline justify-between gap-3 pt-3">
+                  <StatusDot tone={state.tone}>{state.label}</StatusDot>
+                  <span className="shrink-0 text-caption text-tertiary">
+                    {run.when}
+                  </span>
+                </div>
+
+                <Link
+                  href={`/runs/${run.id}`}
+                  aria-label={`Run ${run.id.replace('run-', '')}, ${state.label.toLowerCase()}`}
+                  className="mt-1.5 block font-mono text-caption text-secondary after:absolute after:inset-0 group-hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                >
+                  {run.trigger}
+                </Link>
+
+                <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 pb-3.5">
+                  <Fact label="Locales">
+                    {run.localesFailed > 0 ? (
+                      <span className="text-degraded-text">
+                        {run.locales - run.localesFailed}/{run.locales}
+                      </span>
+                    ) : (
+                      run.locales
+                    )}
+                  </Fact>
+                  <Fact label="Strings">{run.strings || '—'}</Fact>
+                  <Fact label="Duration">{duration(run.durationMs)}</Fact>
+                  <Fact label="Output">
+                    {run.prNumber ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <GitPullRequest
+                          className={cn(
+                            'size-3.5 shrink-0',
+                            run.prMerged ? 'text-confident' : 'text-tertiary',
+                          )}
+                          aria-hidden="true"
+                        />
+                        #{run.prNumber}
+                        {run.prMerged ? (
+                          <span className="text-tertiary">merged</span>
+                        ) : null}
+                      </span>
+                    ) : (
+                      <span className="text-tertiary">—</span>
+                    )}
+                  </Fact>
+                </dl>
+              </li>
+            );
+          })
+        )}
+      </ul>
+
       {/* No chart. A run-history chart would be decoration; the table is the
           information, and it is scannable in one pass. */}
-      <Table className="mt-1">
+      <Table className="mt-1 hidden md:table">
         <THead>
           <TR>
             <TH className="w-[7.5rem]">Status</TH>
