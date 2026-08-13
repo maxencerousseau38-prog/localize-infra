@@ -27,21 +27,23 @@ const COMMITMENTS: Array<{
 }> = [
   {
     title: 'Cancel and keep everything',
-    body: 'Your translations are committed to your repository as ordinary JSON. There is no export step, because there is nothing to export from. Delete your account and run git pull — everything is still there.',
+    body: 'Translations are committed to your repository as ordinary JSON. There is no export step because there is nothing to export from — delete the account, run git pull, everything is still there.',
     tone: 'confident',
     status: 'Working today',
   },
   {
+    // The "Close" example that used to carry this promise now lives in How it
+    // works, where it is shown rather than described. Repeating it here spent
+    // sixty words re-arguing a point the reader has already seen demonstrated.
     title: 'It tells you when it doesn’t know',
-    body: '“Close” is a verb on a button and an adjective in a sentence, and German needs a different word for each. Guessing produces plausible, wrong copy that nobody catches. Strings the model could not resolve are reported, never silently filled in.',
+    body: 'Strings the model could not resolve are reported as questions, never silently filled in.',
     tone: 'degraded',
     status: 'Partly working',
-    detail:
-      'Unresolved strings are reported today. The queue for resolving them is in development.',
+    detail: 'Reported today. The queue for resolving them is in development.',
   },
   {
     title: 'No counters, ever',
-    body: 'We will not meter words, characters, keys, or seats. Pricing is flat, per project and active language, so your bill does not change shape when your product succeeds. Public repositories are free, permanently.',
+    body: 'Never metered by word, character, key or seat. Your bill does not change shape when your product succeeds. Public repositories are free, permanently.',
     tone: 'neutral',
     status: 'Not built yet',
     detail: 'A commitment, not a feature. Nothing is charged today.',
@@ -61,35 +63,31 @@ export function Commitments() {
       </div>
 
       {/*
-       * Single-column rows, not a 5/7 split (DESIGN.md §4.4).
+       * Three abreast, not three stacked essays.
        *
-       * This section and the status board that follows it were both
-       * twelve-column rail-and-content layouts carrying prose — different
-       * content, identical structural signature, and the page read as one long
-       * two-column list through both of them. The rule now forbids adjacent
-       * sections from sharing that signature.
+       * As full-width rows these were three ~200px blocks of prose in a page
+       * that already had two text sections either side of them, and the middle
+       * third of the landing read as one continuous document. Three promises do
+       * not need three paragraphs each — they need to be scannable and honest
+       * about their state, which is what the rule colour and the badge do.
        *
-       * Rows suit three promises better than a split does anyway: the claim and
-       * the honest qualifier belong on the same reading line, not in separate
-       * columns the eye has to pair up. The status board keeps the split, and
-       * the two now look like different kinds of thing — which they are: three
-       * arguments here, eleven measured facts there.
+       * The status board below keeps its rail-and-content split, so the two
+       * adjacent sections no longer share a structural signature (DESIGN.md
+       * §4.4): three arguments here, eleven measured facts there.
        */}
-      <ul className="mt-12">
+      <ul className="mt-10 grid gap-px overflow-hidden rounded-lg border border-subtle bg-subtle md:grid-cols-3">
         {COMMITMENTS.map(({ title, body, tone, status, detail }) => (
-          <li key={title} className="border-t border-subtle first:border-t-0">
-            <StateRule tone={tone} className="py-8">
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-                <h3 className="font-display text-title font-semibold text-primary">
+          <li key={title} className="bg-canvas">
+            <StateRule tone={tone} className="h-full py-6 pe-5">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                <h3 className="text-subtitle font-semibold text-primary">
                   {title}
                 </h3>
                 <Badge tone={tone}>{status}</Badge>
               </div>
-              <p className="mt-4 max-w-[68ch] text-prose text-secondary">
-                {body}
-              </p>
+              <p className="mt-3 text-small leading-6 text-secondary">{body}</p>
               {detail ? (
-                <p className="mt-3 max-w-[68ch] text-small leading-6 text-tertiary">
+                <p className="mt-2 text-caption leading-5 text-tertiary">
                   {detail}
                 </p>
               ) : null}

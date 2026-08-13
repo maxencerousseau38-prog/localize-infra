@@ -1,4 +1,4 @@
-import { HeroArtifact } from '@/components/landing/hero-artifact';
+import { RunArtifact } from '@/components/landing/run-artifact';
 import { EXAMPLE_PR_URL, INSTALL_COMMAND } from '@/lib/constants';
 import { Button, CopyCommand } from '@localize-infra/ui';
 import { GitPullRequest } from 'lucide-react';
@@ -7,58 +7,39 @@ import Link from 'next/link';
 /**
  * The hero.
  *
- * Recomposed from a 7/5 split — argument left, artifact in a narrow card on the
- * right — into a headline band over a full-width product panel.
+ * Previously: headline, then a product panel sitting on the same white ground
+ * as the six sections beneath it, then the install line. It was composed
+ * correctly and had no focal point — the page opened at the same visual
+ * temperature it held for the next five thousand pixels, and the artifact read
+ * as one more card rather than as the thing being sold.
  *
- * The split was the problem. This product's whole claim is a transformation you
- * can see, and putting that transformation in five columns beside a 68px
- * headline made the claim compete with its own evidence and lose: the artifact
- * read as an illustration next to the copy rather than as the thing being sold.
- * Every serious developer tool resolves this the same way, by letting the
- * product occupy the full measure and putting the words above it.
- *
- * So the panel is now the widest element on the page and shows the run in one
- * frame — the source file, the three strings it found there, the locale file it
- * wrote, and the pull request it opened. A visitor who reads nothing still sees
- * what the product does.
- *
- * The `npx` command moves below the panel. It is honest and it belongs on the
- * page, but it was the third competing element in a column that already had a
- * headline and two buttons, and it is a command that does not work yet.
+ * Now the words and the product are on different grounds. The argument stays on
+ * canvas at a narrow measure; the run drops onto a full-bleed dark band and is
+ * the first thing on the page with any weight to it. That band also absorbs the
+ * old PrProof section, which showed the same repository a second time further
+ * down — one run, shown once, at the moment it does the most work.
  */
-
 export function Hero() {
-  // No bottom rule on this section. The panel ends on "Opened as a pull
-  // request" and the very next thing on the page is the dark band showing that
-  // pull request — a hairline between them reads as a boundary between two
-  // topics when it is one argument continuing.
   return (
-    <section className="relative">
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20">
-        {/* The words. Held to a narrow measure and left-aligned against the
-            same grid the panel below uses, so the two read as one block rather
-            than as a centred banner sitting on a product shot. */}
+    <>
+      <section className="mx-auto max-w-6xl px-4 pb-12 pt-16 sm:px-6 sm:pb-14 sm:pt-20">
         <p className="text-eyebrow font-medium uppercase text-tertiary">
           Localization infrastructure
         </p>
 
-        <h1 className="mt-5 max-w-[16ch] font-display text-display-xl font-semibold text-primary lg:text-display-2xl">
+        <h1 className="mt-5 max-w-[15ch] font-display text-display-xl font-semibold text-primary lg:text-display-2xl">
           Your copy is a build artifact.
         </h1>
 
         <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <p className="max-w-[52ch] text-prose text-secondary">
-            Localize Infra extracts the hardcoded strings from your codebase,
-            translates them in context, and opens a pull request. The
-            translations live in your repository — not in someone else&rsquo;s
-            database.
+          {/* One sentence. The panel below is the explanation; a second
+              paragraph here only delays it. */}
+          <p className="max-w-[46ch] text-prose text-secondary">
+            Point the CLI at your repository. It finds the strings you
+            hardcoded, translates them in context, and opens a pull request —
+            leaving everything else in your stack exactly where it was.
           </p>
 
-          {/*
-           * The primary action is the one that works today (DESIGN.md §4.5).
-           * Full-width and stacked below sm, where intrinsic-width buttons
-           * against a full-bleed column are the scaled-down-desktop tell.
-           */}
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
             <Button
               asChild
@@ -85,15 +66,27 @@ export function Hero() {
             </Button>
           </div>
         </div>
+      </section>
 
-        {/* The panel: one run, shown as the repository it changed. */}
-        <div className="mt-12 sm:mt-14">
-          <HeroArtifact />
+      {/* The run, on its own ground. Full-bleed and dark: this is the one
+          moment the page asks the reader to stop and look at the product. */}
+      <section
+        aria-label="A run against a real repository"
+        className="border-y border-subtle bg-primary"
+      >
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+          <RunArtifact />
+
+          <p className="mt-4 text-small text-inverse/60">
+            A real run against a real repository, linked above. Nothing on this
+            page is a mockup.
+          </p>
         </div>
+      </section>
 
-        {/* Below the panel, where it does not compete. Honest about what it is:
-            a command that is not published yet. */}
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+      {/* Honest about what it is: a command that is not published yet. */}
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
           <div className="w-full sm:max-w-md">
             <CopyCommand command={INSTALL_COMMAND} />
           </div>
@@ -108,7 +101,7 @@ export function Hero() {
             .
           </p>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

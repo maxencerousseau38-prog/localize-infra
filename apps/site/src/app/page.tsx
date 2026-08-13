@@ -4,7 +4,6 @@ import { Commitments } from '@/components/landing/commitments';
 import { Ecosystem } from '@/components/landing/ecosystem';
 import { Hero } from '@/components/landing/hero';
 import { HowItWorks } from '@/components/landing/how-it-works';
-import { PrProof } from '@/components/landing/pr-proof';
 import { EXAMPLE_PR_URL } from '@/lib/constants';
 import { Button } from '@localize-infra/ui';
 import Link from 'next/link';
@@ -12,8 +11,11 @@ import Link from 'next/link';
 export default function HomePage() {
   return (
     <>
+      {/* PrProof used to sit between these two. It showed the same repository
+          and the same diff the hero already shows, one screen later — the page
+          made its strongest argument twice and neither time at full strength.
+          The run now appears once, in the hero, on its own dark ground. */}
       <Hero />
-      <PrProof />
       <HowItWorks />
       <Ecosystem />
       <Commitments />
@@ -32,67 +34,67 @@ export default function HomePage() {
        * surface, canvas — so a reader feels sections change rather than
        * scrolling through an undifferentiated field.
        */}
-      <section className="border-t border-subtle">
-        <div className="mx-auto max-w-6xl px-4 py-24 text-center sm:px-6 sm:py-32">
-          <h2 className="mx-auto max-w-[22ch] font-display text-display font-semibold text-primary sm:text-display-lg">
-            Run it on a real repository
-          </h2>
-          <p className="mx-auto mt-5 max-w-[52ch] text-prose text-secondary">
-            Extraction runs locally and writes a file you own. Nothing leaves
-            your machine until you ask for a translation.
-          </p>
+      {/*
+       * The close bookends the hero.
+       *
+       * The page opens with a run against our fixture repository, on a dark
+       * band; it ends by asking for a run against theirs, on the same ground.
+       * That pairing is the argument — you have seen exactly what arrives, now
+       * point it at your own code — and it reads as a deliberate return rather
+       * than the centred call-to-action every developer site ends on.
+       *
+       * By this line the reader has seen the artefact, the five stages, an
+       * escalation, what the CLI leaves alone and a board naming what is not
+       * built. Conversion is asked for after the value, never before it.
+       */}
+      <section className="border-t border-subtle bg-primary">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-end lg:gap-16">
+            <div>
+              <p className="text-eyebrow font-medium uppercase text-inverse/60">
+                Your turn
+              </p>
+              <h2 className="mt-3 max-w-[18ch] font-display text-display font-semibold text-inverse sm:text-display-lg">
+                Now point it at yours
+              </h2>
+              <p className="mt-4 max-w-[46ch] text-prose text-inverse/70">
+                Extraction runs locally and writes a file you own. Nothing
+                leaves your machine until you ask for a translation.
+              </p>
+            </div>
 
-          {/*
-           * This used to repeat the hero's `npx` command verbatim, with the
-           * same "not on npm yet" disclaimer underneath — the second time on
-           * one page that the most prominent thing offered was something that
-           * does not work. DESIGN.md §4.5: once is an honest limitation, twice
-           * reads as the product's main message.
-           *
-           * The close now asks for the action that exists today, and the
-           * command's real home is the install section of the docs it points
-           * at.
-           */}
-          {/*
-           * The conversion point sits here, at the foot of the page, not at the
-           * top of it. By this line a visitor has seen the artefact, the real
-           * merged pull request, the four pipeline steps and a status board
-           * naming what is not built — they have a reason to want the thing
-           * before anything asks them for something.
-           *
-           * GatedAction checks entitlement first: a viewer who already has
-           * access never sees a dialog at all.
-           */}
-          <div className="mx-auto mt-9 flex max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
-            <GatedAction className="w-full sm:w-auto">
-              Run it on your repository
-            </GatedAction>
-            <Button
-              asChild
-              variant="secondary"
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              <a
-                href={EXAMPLE_PR_URL}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                See the pull request
-              </a>
-            </Button>
+            <div className="lg:pb-1">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                <GatedAction className="w-full sm:w-auto">
+                  Run it on your repository
+                </GatedAction>
+                <Button
+                  asChild
+                  variant="secondary"
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
+                  <a
+                    href={EXAMPLE_PR_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    See the pull request
+                  </a>
+                </Button>
+              </div>
+              <p className="mt-5 text-small text-inverse/60">
+                The CLI runs from a clone today.{' '}
+                <Link
+                  href="/roadmap"
+                  className="rounded-sm text-inverse underline underline-offset-2 decoration-inverse/40 hover:decoration-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  What is shipping next
+                </Link>
+                .
+              </p>
+            </div>
           </div>
-
-          <p className="mt-5 text-small text-tertiary">
-            The CLI runs from a clone today.{' '}
-            <Link
-              href="/roadmap"
-              className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              What is shipping next
-            </Link>
-            .
-          </p>
         </div>
       </section>
     </>

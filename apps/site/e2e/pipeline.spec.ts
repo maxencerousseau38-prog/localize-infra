@@ -16,12 +16,16 @@ import { expect, test } from '@playwright/test';
  * test and still fail the reader.
  */
 
-/** The section, located by its heading — "How it works" above it is an eyebrow. */
+/**
+ * The stage rail, by its accessible name.
+ *
+ * It used to be found by filtering lists for the text "Detect and extract".
+ * The hero's run artifact now draws the same five stages, so a text filter
+ * matches that one first and this would silently assert against the wrong
+ * element. Both lists are named; this one asks for the one it means.
+ */
 function steps(page: import('@playwright/test').Page) {
-  return page
-    .getByRole('list')
-    .filter({ hasText: 'Detect and extract' })
-    .first();
+  return page.getByRole('list', { name: 'The five pipeline stages' });
 }
 
 test('how it works explains every canonical pipeline stage', async ({
@@ -29,7 +33,7 @@ test('how it works explains every canonical pipeline stage', async ({
 }) => {
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: /One command, four steps/i }),
+    page.getByRole('heading', { name: /One command, five stages/i }),
   ).toBeVisible();
 
   const text = ((await steps(page).textContent()) ?? '').toLowerCase();
@@ -44,8 +48,10 @@ test('how it works explains every canonical pipeline stage', async ({
 
 test('the steps are numbered in pipeline order', async ({ page }) => {
   await page.goto('/');
+  // One step per canonical stage. The section used to collapse detect and
+  // extract into a single numbered step; drawing the rail removed the reason to.
   const items = steps(page).locator('> li');
-  await expect(items).toHaveCount(4);
+  await expect(items).toHaveCount(PIPELINE_STAGES.length);
 
   // Escalate must come after Translate: you cannot escalate an ambiguity you
   // have not yet tried to resolve, and the order is the argument.
