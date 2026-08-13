@@ -91,7 +91,22 @@ export function PageHeader({
             </p>
           ) : null}
         </div>
-        <div className="flex shrink-0 flex-wrap items-baseline gap-x-6 gap-y-2">
+        {/*
+         * No `shrink-0` here.
+         *
+         * It used to carry one, which meant this column refused to narrow below
+         * the intrinsic width of its contents — so the `flex-wrap` inside it
+         * never got the chance to fire. On a header with both metadata and an
+         * action, that forced the whole page to its widest content: the run
+         * detail measured 828px inside a 390px viewport, and `Pull request
+         * #142` — the point of the entire page — sat at x=678, off-screen and
+         * reachable only by a horizontal scroll nothing advertised.
+         *
+         * It went unnoticed because the overflow was contained by `main`, whose
+         * own `overflow-y-auto` also scrolls it sideways, so the document
+         * reported no overflow at all.
+         */}
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-6 gap-y-2">
           {meta ? (
             <dl className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
               {meta}

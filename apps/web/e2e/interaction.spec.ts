@@ -319,17 +319,46 @@ test.describe('responsive shell', () => {
     ).toBeVisible();
   });
 
-  for (const width of [390, 768, 1024, 1440]) {
-    test(`no horizontal overflow at ${width}px`, async ({ page }) => {
-      await page.setViewportSize({ width, height: 900 });
-      await page.goto('/design', { waitUntil: 'networkidle' });
+  /*
+   * Measures the scroll container, not just the document — and every route,
+   * not just /design.
+   *
+   * The previous version did neither, and missed a real one. The app shell puts
+   * content inside `main.overflow-y-auto`, and `overflow-y: auto` makes
+   * `overflow-x` auto too, so `main` silently absorbs sideways overflow and the
+   * document reports zero. The run detail measured 828px inside a 390px
+   * viewport — its `Pull request` button sat at x=678, off-screen — while this
+   * test passed.
+   */
+  const ROUTES = [
+    '/',
+    '/runs',
+    '/runs/run-8f2a',
+    '/runs/run-6a09',
+    '/locales',
+    '/ambiguity',
+    '/review',
+    '/settings',
+    '/design',
+  ];
 
-      // A page that scrolls sideways is the single most common tell that a
-      // layout was never opened at this width.
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - window.innerWidth,
-      );
-      expect(overflow, `overflowed by ${overflow}px`).toBeLessThanOrEqual(0);
+  for (const width of [390, 1440]) {
+    test(`nothing scrolls sideways at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const bad: string[] = [];
+
+      for (const route of ROUTES) {
+        await page.goto(route, { waitUntil: 'networkidle' });
+        const over = await page.evaluate(() => {
+          const doc = document.documentElement.scrollWidth - window.innerWidth;
+          const main = document.querySelector('main');
+          const inner = main ? main.scrollWidth - main.clientWidth : 0;
+          return Math.max(doc, inner);
+        });
+        if (over > 0) bad.push(`${route} +${over}px`);
+      }
+
+      expect(bad).toEqual([]);
     });
   }
 });

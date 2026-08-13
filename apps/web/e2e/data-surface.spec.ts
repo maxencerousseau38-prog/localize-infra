@@ -247,3 +247,39 @@ test('a locale exposes its state and counts at 390 (DESIGN.md §3.4)', async ({
   );
   expect(clipped, 'records clipping their own content').toBe(0);
 });
+
+/**
+ * The run detail keeps its primary action reachable at 390.
+ *
+ * `PageHeader` carried `shrink-0` on the column holding the metadata and the
+ * action, so that column never narrowed and its `flex-wrap` never fired. The
+ * page rendered 828px wide inside a 390px viewport and the pull request link —
+ * the thing a run exists to produce — sat at x=678, off-screen behind a
+ * horizontal scroll nothing advertised.
+ */
+test('the run detail keeps its pull request reachable at 390', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('/runs/run-8f2a');
+
+  const link = page.getByRole('link', { name: /pull request/i }).first();
+  await expect(link).toBeVisible();
+
+  const box = await link.boundingBox();
+  expect(box, 'pull request link has no box').not.toBeNull();
+  expect(
+    (box?.x ?? 0) + (box?.width ?? 0),
+    'pull request link extends past the viewport',
+  ).toBeLessThanOrEqual(390);
+
+  // Every header fact wrapped into view rather than being pushed off it.
+  for (const label of ['Status', 'Duration', 'Commit', 'When']) {
+    await expect(page.getByText(label, { exact: true })).toBeVisible();
+  }
+
+  // Per-locale results become records; the four-column table is desktop-only.
+  await expect(page.getByRole('table')).toBeHidden();
+  const record = page.getByRole('listitem').filter({ hasText: 'German' });
+  await expect(record.getByText('Escalated')).toBeVisible();
+});

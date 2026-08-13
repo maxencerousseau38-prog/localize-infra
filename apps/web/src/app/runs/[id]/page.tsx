@@ -121,7 +121,47 @@ export default async function RunDetailPage({ params }: Params) {
           title="Locales"
           description="One row per target language, and what it produced."
         >
-          <Table>
+          {/* Records below md, the same move /runs and /locales made. Four
+              columns do not fit 390: `Escalated` rendered as "ESCALATE" against
+              the edge and its values were cut off entirely, while a long
+              language name wrapped to three lines. */}
+          <ul className="md:hidden">
+            {run.localeResults.map((locale) => {
+              const tone = LOCALE_STATE[locale.state];
+              return (
+                <li
+                  key={locale.code}
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-t border-subtle py-3"
+                >
+                  <span className="min-w-0">
+                    <span className="font-medium text-primary">
+                      {localeDisplayName(locale.code)}
+                    </span>{' '}
+                    <span className="font-mono text-caption text-tertiary">
+                      {locale.code}
+                    </span>
+                  </span>
+                  <Badge tone={tone.tone}>{tone.label}</Badge>
+                  <dl className="flex w-full gap-x-6">
+                    <div className="flex items-baseline gap-1.5">
+                      <dt className="text-caption text-tertiary">Strings</dt>
+                      <dd className="font-mono text-caption tabular-nums text-primary">
+                        {locale.strings || '—'}
+                      </dd>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <dt className="text-caption text-tertiary">Escalated</dt>
+                      <dd className="font-mono text-caption tabular-nums text-primary">
+                        {locale.escalated || '—'}
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
+              );
+            })}
+          </ul>
+
+          <Table className="hidden md:table">
             <THead>
               <TR>
                 <TH>Language</TH>
