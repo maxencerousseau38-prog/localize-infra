@@ -78,17 +78,14 @@ utilitaires alors que la mise en page tient encore — donc ça ne se voit pas a
 premier coup d'œil. `docs/releasing.md` couvre la publication npm (rien n'est
 publié).
 
-`packages/core` et `packages/cli` existent aussi (M1 Phase 1) : détection de
-framework local, extraction de chaînes en dur, et diff/merge de fichiers de
-locale. Voir `docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et
+M1 Phase 1 (`packages/core`, `packages/cli`) — voir
+`docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et
 `docs/superpowers/plans/2026-08-02-m1-phase1-core-cli.md`.
 
-`apps/api` et `services/github-app` existent désormais (M1 Phase 2) :
-traduction réelle via Anthropic/OpenAI (`POST /v1/translate`) et ouverture
-de PR via une GitHub App (`POST /v1/open-pr`), consommés par
-`packages/cli`'s `init`. En attente de la GitHub App créée par un humain
-(Task 6 — voir `docs/superpowers/plans/2026-08-02-m1-phase2-api-github-app.md`)
-avant un premier run bout-en-bout réel contre un vrai repo.
+M1 Phase 2 (`apps/api`, `services/github-app`) — **en attente de la GitHub App
+créée par un humain** (Task 6, voir
+`docs/superpowers/plans/2026-08-02-m1-phase2-api-github-app.md`) avant un
+premier run bout-en-bout réel contre un vrai repo.
 
 **Écart connu à l'invariant 5 (résidence des données UE) :** cette phase
 envoie du contexte extrait du code source (chemins de fichiers, noms de
