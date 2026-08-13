@@ -57,7 +57,19 @@ Ne jamais simuler ces fonctionnalités dans l'interface.
 Voir `docs/product/`, `docs/design/`, `docs/frontend/` (PRD → jalons), et
 `docs/product/08-critique.md` pour ce qui n'est pas encore solide.
 
-**Rien n'est déployé.** `docs/deploying.md` donne les réglages Vercel et le
+**`apps/site` est déployé** sur https://localize-infra-site.vercel.app (projet
+Vercel `localize-infra-site`, suivi de `master`). Rien d'autre ne l'est :
+`apps/web`, `apps/api` et `services/github-app` restent locaux.
+
+Aucun domaine personnalisé n'est attaché. `SITE_URL`
+(`apps/site/src/lib/routes.ts`) porte cette origine, et tout ce que le site
+déclare sur lui-même en découle — canonique, `metadataBase`, sitemap, robots.
+Y attacher un domaine, c'est changer cette seule ligne : la laisser périmée est
+exactement ce qui a fait pointer la canonique de chaque page vers
+`localize-infra.dev`, un domaine jamais enregistré, pendant tout le premier
+déploiement.
+
+`docs/deploying.md` donne les réglages Vercel et le
 piège qui casse le site en silence : sans « Include source files outside of the
 Root Directory », la directive `@source` de Tailwind ne trouve plus
 `packages/ui/src`. Le build passe au vert et **30 % de la feuille de style

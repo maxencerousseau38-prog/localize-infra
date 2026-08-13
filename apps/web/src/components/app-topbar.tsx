@@ -93,8 +93,12 @@ export function AppTopbar() {
         section: 'Help',
         icon: BookOpen,
         keywords: 'cli flags init guide',
+        // The marketing site's origin, spelled out because `apps/web` cannot
+        // import from `apps/site`. It pointed at `localize-infra.dev` — a
+        // domain that was never registered — so this entry opened a blank tab.
+        // Keep in step with `SITE_URL` in apps/site/src/lib/routes.ts.
         onSelect: () =>
-          window.open('https://localize-infra.dev/docs', '_blank'),
+          window.open('https://localize-infra-site.vercel.app/docs', '_blank'),
       },
       {
         id: 'help-repo',

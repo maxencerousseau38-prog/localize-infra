@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { SITE_URL } from '../src/lib/routes';
 
 const ROUTES = [
   '/',
@@ -328,18 +329,32 @@ test.describe('responsive', () => {
 });
 
 test.describe('SEO', () => {
+  /*
+   * Derived from `SITE_URL` rather than spelled out again. The host used to be
+   * written here as well, so the origin the site publishes lived in two places
+   * and the test asserted the duplicate rather than the source.
+   */
   test('the sitemap lists every public route', async ({ request }) => {
     const xml = await (await request.get('/sitemap.xml')).text();
     for (const route of ROUTES) {
       expect(xml, `sitemap missing ${route}`).toContain(
-        `https://localize-infra.dev${route === '/' ? '/' : route}`,
+        `${SITE_URL}${route === '/' ? '/' : route}`,
       );
     }
   });
 
   test('robots.txt points at the sitemap', async ({ request }) => {
     const txt = await (await request.get('/robots.txt')).text();
-    expect(txt).toContain('Sitemap: https://localize-infra.dev/sitemap.xml');
+    expect(txt).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`);
+  });
+
+  /*
+   * Deriving means a malformed `SITE_URL` would agree with itself everywhere,
+   * so the shape is pinned here. Whether the host actually resolves is a
+   * deploy-time question — `docs/deploying.md` smoke-checks that.
+   */
+  test('the published origin is a bare absolute https origin', () => {
+    expect(SITE_URL).toMatch(/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/);
   });
 
   test('every page declares a canonical URL and a unique description', async ({

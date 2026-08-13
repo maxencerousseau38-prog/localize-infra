@@ -15,4 +15,19 @@ export const PUBLIC_ROUTES = [
   { path: '/roadmap', priority: 0.5 },
 ] as const;
 
-export const SITE_URL = 'https://localize-infra.dev';
+/**
+ * The origin the site publishes itself under: canonical tags, `metadataBase`,
+ * the sitemap and the robots record all derive from it.
+ *
+ * This was `https://localize-infra.dev` for as long as nothing was deployed,
+ * and that domain was never registered — it has no DNS record at all. Once the
+ * site went live, every page was telling search engines its canonical address
+ * was a host that does not resolve, and the sitemap advertised seven more.
+ * Nothing caught it because a canonical tag is not wrong in any way a build,
+ * a type check or a rendered page can show.
+ *
+ * So it names the origin actually serving the site. When a custom domain is
+ * attached, this is the single line that changes — and `docs/deploying.md`
+ * carries a smoke check for exactly the failure above.
+ */
+export const SITE_URL = 'https://localize-infra-site.vercel.app';

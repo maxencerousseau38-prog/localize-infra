@@ -1,7 +1,19 @@
 # Deploying
 
-Nothing in this repository is deployed today. This is the configuration a
-deployment needs, and the failure it will hit if one setting is wrong.
+`apps/site` is deployed, at **https://localize-infra-site.vercel.app**, from
+the Vercel project `localize-infra-site` tracking `master`. Nothing else in
+this repository is deployed: `apps/web`, `apps/api` and `services/github-app`
+all still run locally only.
+
+This page is the configuration that deployment needs, and the failures it hits
+if one setting is wrong.
+
+No custom domain is attached. `SITE_URL` in `apps/site/src/lib/routes.ts` names
+the origin above, and everything the site publishes about itself — canonical
+tags, `metadataBase`, the sitemap, the robots record — derives from that one
+line. Attaching a domain means changing it and redeploying; leaving it stale is
+how the site spent its first deployment canonicalising every page to
+`localize-infra.dev`, a host that was never registered and has no DNS record.
 
 ## What is deployable
 
@@ -98,6 +110,12 @@ curl -sS "https://<deployment-url>${CSS}" | grep -c 'animate-shimmer'   # must b
 
 # 3. Are the published benchmark numbers on the page?
 curl -sS https://<deployment-url>/benchmarks | grep -c '413/413'
+
+# 4. Does the canonical host resolve? The page declares where it lives, and a
+#    build cannot tell that the answer is a domain nobody registered. Extract
+#    the canonical and ask DNS for it — expect 200, not 000.
+CANON=$(curl -sS https://<deployment-url>/ | grep -o 'rel="canonical" href="[^"]*"' | cut -d'"' -f4)
+curl -sS -o /dev/null -m 10 -w '%{http_code}\n' "$CANON/"
 ```
 
 The repository's own E2E suite covers the equivalent checks locally
