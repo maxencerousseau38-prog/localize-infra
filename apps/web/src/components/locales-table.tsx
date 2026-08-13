@@ -95,7 +95,92 @@ export function LocalesTable({
         />
       </DataToolbar>
 
-      <Table className="mt-1">
+      {/*
+       * Below md a language becomes a record, the same move /runs made.
+       *
+       * As a narrowed table this was the worse of the two: `State` — the column
+       * that answers the page's own question, "which language is behind?" — ran
+       * off the right edge and read as "Needs a dec…", while `Translated` and
+       * `Last run` were `display: none` entirely. The specimen folded under the
+       * language name and wrapped to two lines, so five rows became a ragged
+       * stack of eleven.
+       *
+       * Here the specimen gets its own line at full width, which it deserves:
+       * it is the product demonstrating it renders each script and direction
+       * properly, and it is the one thing on this surface a reader cannot get
+       * from a number.
+       */}
+      <ul className="mt-1 md:hidden">
+        {rows.length === 0 ? (
+          <li className="border-t border-subtle py-10">
+            <EmptyState
+              title="No languages match"
+              description="No language in this sample has that name or code."
+              action={
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="rounded-sm text-body text-link underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  Show all languages
+                </button>
+              }
+            />
+          </li>
+        ) : (
+          rows.map((locale) => {
+            const pct = Math.round((locale.translated / locale.total) * 100);
+            const tone = TONE[locale.state];
+            return (
+              <li key={locale.code} className="border-t border-subtle py-3.5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <span className="min-w-0">
+                    <span className="font-medium text-primary">
+                      {localeDisplayName(locale.code)}
+                    </span>{' '}
+                    <span className="font-mono text-caption text-tertiary">
+                      {locale.code}
+                    </span>
+                  </span>
+                  <StatusDot tone={tone.tone}>{tone.label}</StatusDot>
+                </div>
+
+                <p
+                  {...localeTextProps(locale.code)}
+                  className={cn(
+                    'mt-1.5 text-body text-secondary',
+                    localeFontClass(locale.code),
+                  )}
+                >
+                  {SPECIMEN[locale.code]}
+                </p>
+
+                <div className="mt-3 flex items-center gap-3">
+                  <ProgressBar
+                    value={locale.translated}
+                    max={locale.total}
+                    tone={tone.tone}
+                    label={`${localeDisplayName(locale.code)} coverage`}
+                    className="h-1 min-w-0 flex-1"
+                  />
+                  <span className="shrink-0 font-mono text-caption tabular-nums text-secondary">
+                    {pct}%
+                  </span>
+                  <span className="shrink-0 font-mono text-caption tabular-nums text-tertiary">
+                    {locale.translated}/{locale.total}
+                  </span>
+                </div>
+
+                <p className="mt-2 text-caption text-tertiary">
+                  Last run {locale.lastRun}
+                </p>
+              </li>
+            );
+          })
+        )}
+      </ul>
+
+      <Table className="mt-1 hidden md:table">
         <THead>
           <TR>
             <SortableTH

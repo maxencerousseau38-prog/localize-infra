@@ -209,3 +209,41 @@ test('a run exposes every fact at 390 (DESIGN.md §3.4)', async ({ page }) => {
     '/runs/run-8f2a',
   );
 });
+
+/**
+ * The same arrangement for /locales, pinned on the failure that was specific
+ * to it: `State` — the column answering this page's own question, "which
+ * language is behind?" — was cut off mid-word at 390 ("Needs a dec…"), while
+ * `Translated` and `Last run` were `display: none`. The specimen also wrapped
+ * under the language name, turning five rows into eleven ragged lines.
+ */
+test('a locale exposes its state and counts at 390 (DESIGN.md §3.4)', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('/locales');
+
+  await expect(page.getByRole('table')).toBeHidden();
+
+  const record = page
+    .getByRole('listitem')
+    .filter({ hasText: 'Brazilian Portuguese' });
+  await expect(record).toBeVisible();
+
+  // The full label, not a truncation of it.
+  await expect(record.getByText('Needs a decision')).toBeVisible();
+  await expect(record.getByText('126/128')).toBeVisible();
+  await expect(record.getByText(/Last run/)).toBeVisible();
+
+  // The specimen renders in its own script, on its own line.
+  await expect(record.getByText('Salvar alterações')).toBeVisible();
+
+  // Nothing may overflow its own record box at this width.
+  const clipped = await page.evaluate(
+    () =>
+      [...document.querySelectorAll('li')].filter(
+        (el) => el.scrollWidth > el.clientWidth + 1,
+      ).length,
+  );
+  expect(clipped, 'records clipping their own content').toBe(0);
+});
