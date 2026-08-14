@@ -1,3 +1,8 @@
+---
+name: awesome-design-md
+description: A library of 74 company DESIGN.md references (stripe, linear.app, vercel, framer, apple, supabase, raycast, resend, replicate, mintlify, notion, sentry and more) covering layout, hierarchy, density, composition and interaction patterns. Use when making substantial UI, landing-page, marketing-site or app-shell design decisions and prior art would help. Not a visual identity generator — the references inform structure, never colors, typography or branding.
+---
+
 # Awesome Design MD
 
 Use this skill as a design-reference library, not as a visual identity generator.
