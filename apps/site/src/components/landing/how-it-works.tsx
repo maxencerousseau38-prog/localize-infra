@@ -2,7 +2,6 @@ import {
   PIPELINE_STAGES,
   type PipelineStageId,
   StateRule,
-  cn,
 } from '@localize-infra/ui';
 
 /**
@@ -21,8 +20,17 @@ import {
  * translation API, and it is the only claim on the page that needs an example
  * to land.
  *
- * That example is the one place Iris appears on this site. It means your
- * judgement is required, and here it is: nobody has answered this question yet.
+ * That example carries no Iris, and the reason is worth keeping next to the
+ * code rather than only at the call site: it depicts an unresolved string, so
+ * Iris looks like the honest choice, but nobody reading a marketing page is
+ * being asked to resolve anything. Spending the product's one
+ * judgement-required signal on an illustration of itself is the dilution
+ * §1.4 forbids, and a site-wide test enforces the absence.
+ *
+ * This docstring used to claim the opposite — "the one place Iris appears on
+ * this site" — describing a version that shipped before the tone was changed
+ * to neutral, twenty lines above an implementation comment saying exactly the
+ * reverse.
  */
 
 /** What each stage leaves behind, shown as the reader would see it. */
@@ -50,7 +58,7 @@ export function HowItWorks() {
           same sequence either way, never two rows that read as two pipelines. */}
       <ol
         aria-label="The five pipeline stages"
-        className="mt-10 grid gap-y-8 lg:grid-cols-5 lg:gap-x-6"
+        className="mt-10 grid gap-y-6 lg:grid-cols-5 lg:gap-x-6"
       >
         {PIPELINE_STAGES.map((stage, i) => {
           const last = i === PIPELINE_STAGES.length - 1;
@@ -60,23 +68,52 @@ export function HowItWorks() {
               {!last && (
                 <span
                   aria-hidden="true"
-                  className="absolute start-[7px] top-4 bottom-[-2rem] w-px bg-subtle lg:start-4 lg:top-[7px] lg:bottom-auto lg:h-px lg:w-[calc(100%+1.5rem)]"
+                  // -1.5rem tracks the list's row gap exactly: the spine has to
+                  // reach the next node, and a connector that stops short of it
+                  // draws five separate items rather than one sequence.
+                  className="absolute start-[7px] top-4 bottom-[-1.5rem] w-px bg-subtle lg:start-4 lg:top-[7px] lg:bottom-auto lg:h-px lg:w-[calc(100%+1.5rem)]"
                 />
               )}
+              {/*
+               * Every node the same neutral, including the first.
+               *
+               * Detect's node was `border-confident` and the other four
+               * `border-strong`. Jade means one thing in this system —
+               * verified, current, merged, passing (§6.1) — and nothing here
+               * has run: this is a diagram of what the five stages *are*, not
+               * a run in progress. §2.4 settles it in one line: a screen with
+               * no state on it has no colour on it.
+               *
+               * It was worse than decorative. The hero's run artifact sits a
+               * screen above this and marks all five stages jade because that
+               * run genuinely completed all five, so a reader arrives here
+               * having just learned that a jade node means "this stage
+               * finished" — and meets a pipeline where only Detect is jade,
+               * which reads as a run that stops after stage one. The e2e suite
+               * guards Iris against exactly this misuse and has no equivalent
+               * for jade, which is how it survived.
+               */}
               <span
                 aria-hidden="true"
-                className={cn(
-                  'absolute start-0 top-1 size-3.5 rounded-full border-2 bg-canvas lg:top-0',
-                  i === 0 ? 'border-confident' : 'border-strong',
-                )}
+                className="absolute start-0 top-1 size-3.5 rounded-full border-2 border-strong bg-canvas lg:top-0"
               />
 
-              <p className="font-mono text-micro uppercase tracking-wide text-tertiary">
-                {String(i + 1).padStart(2, '0')}
-              </p>
-              <h3 className="mt-1.5 text-subtitle font-semibold text-primary">
-                {stage.name}
-              </h3>
+              {/*
+               * The ordinal sits with the name rather than on a line of its
+               * own. It was one full text line of chrome per stage, five times
+               * over, to carry two mono characters — and §2.3 asks for density
+               * bought by removing chrome, not by shrinking type. Nothing is
+               * lost: the number is still visible, still in document order,
+               * and the list is still an `ol`.
+               */}
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-micro uppercase tracking-wide text-tertiary">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3 className="text-subtitle font-semibold text-primary">
+                  {stage.name}
+                </h3>
+              </div>
               <p className="mt-1.5 text-small leading-6 text-secondary">
                 {stage.summary}
               </p>
