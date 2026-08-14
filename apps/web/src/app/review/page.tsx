@@ -32,7 +32,21 @@ export default function ReviewPage() {
       </div>
 
       <SampleRegion label="Suggestions awaiting review" className="mt-6">
-        <ul className="flex flex-col gap-3">
+        {/*
+         * Held to a reading measure (DESIGN.md §4.2).
+         *
+         * This surface was designed on a phone and never checked on a desktop,
+         * where it became a mobile layout stretched to 1132px. `StringCard`
+         * pushes the locale chip to the far edge with `justify-between`, so on
+         * a wide screen the `FR` label sat some 900px from "Bon retour" — the
+         * two are only related by proximity, and there was none left. Six short
+         * strings also spent the whole viewport.
+         *
+         * The content here is a short string, its translation and one line of
+         * context: prose-shaped, not tabular. §4.2 already says reading
+         * surfaces gain nothing from more width; this applies it.
+         */}
+        <ul className="flex max-w-3xl flex-col gap-3">
           {SAMPLE_REVIEW.map((item) => (
             <li
               key={item.id}
