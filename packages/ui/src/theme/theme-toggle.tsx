@@ -1,8 +1,15 @@
 'use client';
 
 import { Monitor, Moon, Sun } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '../lib/cn';
+import {
+  MenuContent,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuRoot,
+  MenuTrigger,
+} from '../primitives/menu';
 import {
   type Theme,
   applyTheme,
@@ -11,27 +18,44 @@ import {
   subscribeToTheme,
 } from './theme';
 
-const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
+type Option = { value: Theme; label: string; Icon: typeof Sun };
+
+/** Named rather than reached for by index, so the fallback below is total. */
+const SYSTEM: Option = { value: 'system', label: 'System', Icon: Monitor };
+
+const OPTIONS: Option[] = [
   { value: 'light', label: 'Light', Icon: Sun },
   { value: 'dark', label: 'Dark', Icon: Moon },
-  { value: 'system', label: 'System', Icon: Monitor },
+  SYSTEM,
 ];
 
 /**
  * Three explicit states rather than a light/dark switch: a user whose OS is
  * dark may still want this product light, and a binary toggle silently removes
- * that choice.
+ * that choice. That has not changed — what changed is how much room the three
+ * states are allowed to take.
  *
- * Built on native radio inputs rather than buttons with `role="radio"`. The
- * native element gives correct radiogroup semantics for free — arrow keys move
- * within the group, Tab moves past it, and screen readers announce "Light,
- * radio button, 1 of 3, selected". Reimplementing that with buttons means
- * hand-rolling roving tabindex and getting it subtly wrong.
+ * This shipped as a three-segment radiogroup pinned to the topbar of every
+ * page, which DESIGN.md §9 named as an open defect in its own words: a
+ * settings-level concern wearing navigation-level prominence, on the most
+ * expensive real estate in the product, while no surface offers a global
+ * primary action at all. Chrome is ranked by frequency of use, and a control
+ * most people touch once outranked the work on every screen forever.
+ *
+ * It is now one 28px control that shows the current choice and opens the same
+ * three options. All three survive; the cost falls from three segments to one.
+ * Radix's radio group supplies `menuitemradio`, roving tabindex and type-ahead
+ * — the same reasoning that put the old version on native radio inputs rather
+ * than hand-rolled buttons, applied to a menu.
+ *
+ * The trigger carries the current theme in its accessible name rather than
+ * only in its icon, because the menu's items do not exist in the DOM while it
+ * is closed. Another surface — the command palette — can change the
+ * preference, and the trigger has to be able to report that on its own.
  */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>('system');
   const [mounted, setMounted] = useState(false);
-  const name = useId();
 
   useEffect(() => {
     setMounted(true);
@@ -55,54 +79,41 @@ export function ThemeToggle() {
     persistTheme(next);
   }
 
+  // Before hydration the stored preference is unknown. `system` is the default
+  // the theme script assumes, so rendering its icon is the honest placeholder
+  // rather than briefly showing a state the user did not choose.
+  const current = OPTIONS.find((o) => o.value === theme) ?? SYSTEM;
+  const Icon = mounted ? current.Icon : Monitor;
+
   return (
-    // `fieldset` alone maps to role="group". For a radio-only group,
-    // role="radiogroup" is the more precise mapping and is what assistive
-    // technology announces, so it is stated explicitly.
-    <fieldset
-      role="radiogroup"
-      aria-label="Colour theme"
-      className="inline-flex items-center gap-0.5 rounded-md border border-line bg-surface p-0.5"
-    >
-      <legend className="sr-only">Colour theme</legend>
-      {OPTIONS.map(({ value, label, Icon }) => {
-        // Before hydration the stored preference is unknown; showing nothing as
-        // selected avoids briefly rendering the wrong state.
-        const selected = mounted && theme === value;
-        return (
-          <div key={value} className="contents">
-            <input
-              type="radio"
-              id={`${name}-${value}`}
-              name={name}
-              value={value}
-              checked={selected}
-              onChange={() => select(value)}
-              className="peer sr-only"
-            />
-            <label
-              htmlFor={`${name}-${value}`}
-              title={label}
-              className={cn(
-                'inline-flex size-7 cursor-pointer items-center justify-center rounded-[4px]',
-                'transition-colors duration-(--duration-micro)',
-                'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-focus',
-                selected
-                  ? 'bg-canvas text-primary shadow-e1'
-                  : 'text-tertiary hover:text-secondary active:bg-raised',
-              )}
-            >
-              {/* pointer-events-none so a click always lands on the label and
-                  toggles the input, rather than being swallowed by the icon. */}
-              <Icon
-                className="pointer-events-none size-3.5"
-                aria-hidden="true"
-              />
-              <span className="sr-only">{label}</span>
-            </label>
-          </div>
-        );
-      })}
-    </fieldset>
+    <MenuRoot>
+      <MenuTrigger
+        aria-label={mounted ? `Colour theme: ${current.label}` : 'Colour theme'}
+        className={cn(
+          'inline-flex size-7 items-center justify-center rounded-md',
+          'border border-line bg-surface text-tertiary',
+          'transition-colors duration-(--duration-micro)',
+          'hover:text-secondary active:bg-raised',
+          'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus',
+          'data-[state=open]:bg-raised data-[state=open]:text-primary',
+        )}
+      >
+        <Icon className="size-3.5" aria-hidden="true" />
+      </MenuTrigger>
+
+      <MenuContent align="end" className="min-w-[9rem]">
+        <MenuRadioGroup
+          value={theme}
+          onValueChange={(next) => select(next as Theme)}
+        >
+          {OPTIONS.map(({ value, label, Icon: OptionIcon }) => (
+            <MenuRadioItem key={value} value={value}>
+              <OptionIcon aria-hidden="true" />
+              {label}
+            </MenuRadioItem>
+          ))}
+        </MenuRadioGroup>
+      </MenuContent>
+    </MenuRoot>
   );
 }

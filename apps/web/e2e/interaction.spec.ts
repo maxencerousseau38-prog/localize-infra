@@ -160,7 +160,8 @@ test('the skip link is the first thing a keyboard user reaches', async ({
 
 test('theme choice persists across navigation', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
-  await page.getByTitle('Dark', { exact: true }).click();
+  await page.getByRole('button', { name: /^colour theme/i }).click();
+  await page.getByRole('menuitemradio', { name: 'Dark' }).click();
   await expect(page.locator('html')).toHaveClass(/dark/);
 
   await page.goto('/design', { waitUntil: 'networkidle' });
@@ -456,7 +457,15 @@ test.describe('command palette actions', () => {
 
     // Two surfaces can set the theme. Before they shared a store, the toggle
     // read localStorage once on mount and kept showing the old value.
-    await expect(page.getByRole('radio', { name: 'Dark' })).toBeChecked();
+    //
+    // Asserted on the trigger's accessible name rather than a checked option:
+    // the toggle is one control with a menu now (DESIGN.md §9), and its
+    // options are not in the DOM while it is closed. This is the stronger
+    // check anyway — it is what a screen reader reads without opening
+    // anything.
+    await expect(
+      page.getByRole('button', { name: /^colour theme/i }),
+    ).toHaveAccessibleName('Colour theme: Dark');
   });
 
   test('the theme survives a reload after a palette change', async ({

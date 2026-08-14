@@ -77,6 +77,8 @@ export {
   MenuGroup,
   MenuItem,
   MenuLabel,
+  MenuRadioGroup,
+  MenuRadioItem,
   MenuRoot,
   MenuSeparator,
   MenuShortcut,

@@ -474,10 +474,17 @@ must be pinned by test, not restated.
 
 **Chrome earns its place.** Space in the sidebar and topbar is the most
 expensive in the product; it is paid for on every screen, forever. Rank by
-frequency of use: a control touched once ever does not outrank the work. The
-theme switcher currently occupies a three-segment control in the topbar of
-every page — that is a settings-level concern wearing navigation-level
-prominence, while no surface offers a global primary action at all.
+frequency of use: a control touched once ever does not outrank the work.
+
+The theme switcher was the standing example: a three-segment control in the
+topbar of every page, a settings-level concern wearing navigation-level
+prominence. It is now a single control that reports the current choice and
+opens the same three options, so the preference costs one slot rather than
+three. All three states remain — a user whose OS is dark may still want this
+product light, and a binary toggle removes that choice silently.
+
+The second half of that finding still stands: **no surface offers a global
+primary action.** Chrome was reclaimed; nothing has yet been promoted into it.
 
 System status is always visible: what ran, when, whether it succeeded, what is
 waiting on a human. Never a spinner without a subject.

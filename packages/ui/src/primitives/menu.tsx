@@ -82,6 +82,35 @@ export function MenuCheckboxItem({
   );
 }
 
+/**
+ * A mutually-exclusive choice inside a menu.
+ *
+ * The checkbox item above is the wrong shape for a set where exactly one
+ * option holds at a time: it announces each entry independently, so a reader
+ * hears three unrelated checkboxes rather than one choice with three
+ * positions. Radix's radio group gives `menuitemradio` and the roving
+ * tabindex that goes with it.
+ */
+export const MenuRadioGroup = DropdownMenu.RadioGroup;
+
+export function MenuRadioItem({
+  className,
+  children,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DropdownMenu.RadioItem>) {
+  return (
+    <DropdownMenu.RadioItem
+      className={cn(itemBase, 'pe-8', className)}
+      {...props}
+    >
+      {children}
+      <DropdownMenu.ItemIndicator className="absolute end-2">
+        <Check className="size-3.5" aria-hidden="true" />
+      </DropdownMenu.ItemIndicator>
+    </DropdownMenu.RadioItem>
+  );
+}
+
 export function MenuLabel({
   className,
   ...props

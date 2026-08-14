@@ -89,20 +89,28 @@ test('theme choice persists and applies before first paint', async ({
   page,
 }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
-  await expect(
-    page.getByRole('radiogroup', { name: /colour theme/i }),
-  ).toBeVisible();
 
-  // Click the label, which is what a user does: the input is visually hidden by
-  // design so the control can be styled, and its text label is screen-reader
-  // only. Targeting by title resolves the clickable label itself.
-  await page.getByTitle('Dark', { exact: true }).click();
+  // One trigger, not three segments (DESIGN.md §9). Its accessible name
+  // carries the current choice, because the options only exist in the DOM
+  // while the menu is open and another surface can change the preference.
+  const trigger = page.getByRole('button', { name: /^colour theme/i });
+  await expect(trigger).toBeVisible();
+
+  await trigger.click();
+  await page.getByRole('menuitemradio', { name: 'Dark' }).click();
   await expect(page.locator('html')).toHaveClass(/dark/);
-  await expect(page.getByRole('radio', { name: 'Dark' })).toBeChecked();
+  await expect(trigger).toHaveAccessibleName('Colour theme: Dark');
 
   await page.reload({ waitUntil: 'networkidle' });
   await expect(page.locator('html')).toHaveClass(/dark/);
-  await expect(page.getByRole('radio', { name: 'Dark' })).toBeChecked();
+  await expect(trigger).toHaveAccessibleName('Colour theme: Dark');
+
+  // The choice is still a choice: all three states are reachable, and the
+  // selected one is the one reported.
+  await trigger.click();
+  const options = page.getByRole('menuitemradio');
+  await expect(options).toHaveCount(3);
+  await expect(page.getByRole('menuitemradio', { name: 'Dark' })).toBeChecked();
 });
 
 test('remains usable with reduced motion', async ({ page }) => {
