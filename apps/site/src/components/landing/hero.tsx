@@ -50,7 +50,11 @@ export function Hero() {
          * panel stacks full width, where it has more room than any split gave
          * it.
          */}
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:items-start xl:gap-10">
+        {/* gap-6 below xl: this is now the space between the action row and a
+            single-line terminal strip that belongs with it, not the space
+            between two blocks. gap-10 at xl is a column gutter, a different
+            job. */}
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:items-start xl:gap-10">
           <div>
             <p className="text-eyebrow font-medium uppercase text-tertiary">
               Localization infrastructure
@@ -106,32 +110,47 @@ export function Hero() {
            * button and this sits in a quiet panel saying what it is.
            */}
           {/*
-           * The panel chrome is xl-only, and that is a size decision rather
-           * than a stylistic one.
+           * Two arrangements, because the tiers are genuinely different
+           * problems rather than one problem at two sizes.
            *
-           * At xl this is a column beside the headline and needs an edge to
-           * read as one. Below xl it stacks, where the same border and padding
-           * bought nothing and cost ~70px — a 576px box drawn around a 448px
-           * control, which measured as an empty band and pushed the run
-           * further down exactly where vertical space is scarcest.
+           * At xl this is a column beside the headline: panel chrome, label
+           * above, command and note stacked. It costs nothing vertically —
+           * measured at 1280 the left block is 366px and this is 150px, so it
+           * sits inside the space the argument already occupies.
+           *
+           * From 1024 to 1279 it cannot be a column at all. The left column
+           * needs 584px (the width at which the 68px display headline breaks
+           * in two) and the command box needs ~448px not to truncate, which is
+           * 1064px before the gap — against a 976px container. Measured, not
+           * guessed. So it stacks, and as a stacked block it was costing
+           * 32px of gap plus 116px of height: the entire 148px by which this
+           * tier's hero exceeded 1280's, pushing the run that much further
+           * below the fold.
+           *
+           * Stacked it is therefore a strip, not a block — command and note
+           * side by side, no label, because a heading on a control sitting
+           * directly beneath the actions it belongs to is a label for
+           * something already obvious.
            */}
-          <div className="max-w-xl xl:mt-2 xl:max-w-none xl:rounded-lg xl:border xl:border-line xl:bg-surface/60 xl:p-4">
-            <p className="text-micro font-medium uppercase tracking-[0.12em] text-tertiary">
+          <div className="xl:mt-2 xl:rounded-lg xl:border xl:border-line xl:bg-surface/60 xl:p-4">
+            <p className="hidden text-micro font-medium uppercase tracking-[0.12em] text-tertiary xl:block">
               From your terminal
             </p>
-            <div className="mt-3">
-              <CopyCommand command={INSTALL_COMMAND} />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5 xl:mt-3 xl:flex-col xl:items-stretch xl:gap-3">
+              <div className="w-full sm:max-w-md xl:max-w-none">
+                <CopyCommand command={INSTALL_COMMAND} />
+              </div>
+              <p className="text-small leading-6 text-tertiary">
+                Not published to npm yet — today it runs from a clone.{' '}
+                <Link
+                  href="/docs#install"
+                  className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  Install guide
+                </Link>
+                .
+              </p>
             </div>
-            <p className="mt-3 text-small leading-6 text-tertiary">
-              Not published to npm yet — today it runs from a clone.{' '}
-              <Link
-                href="/docs#install"
-                className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-              >
-                Install guide
-              </Link>
-              .
-            </p>
           </div>
         </div>
       </section>
