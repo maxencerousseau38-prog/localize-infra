@@ -283,3 +283,28 @@ test('the run detail keeps its pull request reachable at 390', async ({
   const record = page.getByRole('listitem').filter({ hasText: 'German' });
   await expect(record.getByText('Escalated')).toBeVisible();
 });
+
+/**
+ * The escalation context survives a narrow viewport.
+ *
+ * The origin line carried `truncate`: a no-op at desktop width, destructive
+ * below it. "src/components/Toolbar.tsx · Button label beside Save and Close"
+ * cut to "…besi…" at 390 — and the context is the half that answers the
+ * question, since whether "Open" is the verb or the adjective is decided by it
+ * sitting on a button next to Save and Close. The evidence disappeared at the
+ * width where the reader had least of it.
+ */
+test('an escalation keeps its context readable at 390', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('/ambiguity');
+
+  const context = page.getByText('Button label beside Save and Close');
+  await expect(context).toBeVisible();
+
+  // Visible is not enough: `truncate` leaves the node visible and clips it.
+  const clipped = await context.evaluate((el) => {
+    const line = el.closest('p');
+    return line ? line.scrollWidth > line.clientWidth + 1 : true;
+  });
+  expect(clipped, 'the origin line is clipping its own text').toBe(false);
+});

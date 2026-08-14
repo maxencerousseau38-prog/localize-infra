@@ -164,7 +164,17 @@ function AmbiguityCard({
             >
               {item.source}
             </p>
-            <p className="mt-1 truncate font-mono text-caption text-tertiary">
+            {/* Wraps rather than truncating.
+
+                `truncate` was a no-op at desktop width and destructive below
+                it: the line reads "src/components/Toolbar.tsx · Button label
+                beside Save and Close", and at 390 it cut to "…besi…". The
+                context is the half that answers the question — whether "Open"
+                is the verb or the adjective is decided by it sitting on a
+                button next to Save and Close — so truncating it removes the
+                evidence at exactly the width where the reader has least of it.
+                Both parts are short; wrapping costs a line. */}
+            <p className="mt-1 font-mono text-caption text-tertiary">
               {item.origin}
               {item.context ? (
                 <span className="font-sans"> · {item.context}</span>
