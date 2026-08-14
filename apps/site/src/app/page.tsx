@@ -64,15 +64,30 @@ export default function HomePage() {
             </div>
 
             <div className="lg:pb-1">
+              {/*
+               * Both buttons are re-toned for an inverse band.
+               *
+               * `primary` paints itself `bg-primary` — the same token this band
+               * uses — so on it the button had a 1:1 background contrast with
+               * its own ground in *both* themes, and read as bare text rather
+               * than a control. `secondary` paints `bg-canvas`, which on an
+               * inverse band is the high-contrast treatment, so it was quietly
+               * louder than the primary action beside it.
+               *
+               * The roles swap to match the ground: the primary action takes
+               * the solid canvas fill, and the secondary becomes an outline in
+               * the band's own foreground colour. Both track the theme, because
+               * every token here is the semantic pair, not a fixed colour.
+               */}
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                <GatedAction className="w-full sm:w-auto">
+                <GatedAction className="w-full bg-canvas text-primary hover:bg-surface active:bg-raised sm:w-auto">
                   Run it on your repository
                 </GatedAction>
                 <Button
                   asChild
                   variant="secondary"
                   size="lg"
-                  className="w-full sm:w-auto"
+                  className="w-full border-inverse/30 bg-transparent text-inverse hover:bg-inverse/10 active:bg-inverse/15 sm:w-auto"
                 >
                   <a
                     href={EXAMPLE_PR_URL}
