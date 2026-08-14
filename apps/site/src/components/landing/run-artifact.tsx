@@ -105,7 +105,12 @@ function StageRail() {
           <li
             key={stage.id}
             className={cn(
-              'relative flex min-w-0 flex-1 flex-col gap-1 px-3 py-2.5 sm:px-4',
+              // No `min-w-0`: it existed to let these cells shrink below their
+              // content so `truncate` had something to do. With the text no
+              // longer truncating, it was the remaining reason Detect's
+              // "Vite + React" still lost 17px — a flex item may not shrink
+              // under its content unless you say so, and this said so.
+              'relative flex flex-1 flex-col gap-1 px-3 py-2.5 sm:px-4',
               i > 0 && 'border-s border-subtle',
             )}
           >
@@ -117,11 +122,27 @@ function StageRail() {
                   state.done ? 'bg-confident' : 'bg-subtle',
                 )}
               />
-              <span className="truncate text-caption font-medium text-primary">
+              {/*
+               * `whitespace-nowrap`, never `truncate`.
+               *
+               * These cells carried `truncate`, which combined with `flex-1`
+               * capped every stage at ~101px at 390px and clipped two of them
+               * even though the rail was already scrolling: the stage name
+               * "Pull request" lost 6px and Detect's "Vite + React" lost 17px.
+               * A rail that scrolls *and* truncates is the worst of both — the
+               * reader pans across and still cannot read the cell. Stage names
+               * are the product's identity (DESIGN.md §1.4) and clipping one to
+               * "Pull reques…" drops the word as surely as renaming it would.
+               *
+               * With no truncation the `min-w-max` on the list gives each cell
+               * its natural width and the existing scroll container does the
+               * work it was always there to do.
+               */}
+              <span className="whitespace-nowrap text-caption font-medium text-primary">
                 {stage.name}
               </span>
             </span>
-            <span className="truncate ps-3.5 font-mono text-micro text-tertiary">
+            <span className="whitespace-nowrap ps-3.5 font-mono text-micro text-tertiary">
               {state.note}
             </span>
           </li>
