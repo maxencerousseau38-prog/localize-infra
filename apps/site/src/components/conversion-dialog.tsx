@@ -215,26 +215,37 @@ function UpgradeBranch({ email }: { email: string }) {
 }
 
 /**
- * The gated primary action.
+ * The gated action.
  *
  * Checks entitlement before opening anything: a viewer who already has access
  * goes straight to the destination and never sees a dialog. That is the whole
  * point of the check living here rather than inside the dialog.
+ *
+ * `variant` exists because the weight this deserves depends on whether it can
+ * do what it says. For a viewer with access it is a working action and can be
+ * filled; for everyone else it opens a dialog explaining that hosted accounts
+ * are not built, which DESIGN.md §4.5.3 calls a gated beta and demotes to
+ * secondary. The caller decides, because the caller knows what else is on the
+ * page competing for the one primary slot §10 allows.
  */
 export function GatedAction({
   children,
   className,
   href = '/docs#install',
+  variant = 'primary',
 }: {
   children: React.ReactNode;
   className?: string;
   href?: string;
+  variant?: 'primary' | 'secondary';
 }) {
   const [open, setOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const viewer = readViewer();
 
   if (hasAccess(viewer)) {
+    // Entitled: this genuinely navigates, so it is allowed to be filled
+    // regardless of how the caller styles the gated case.
     return (
       <Button asChild variant="primary" size="lg" className={className}>
         <Link href={href}>{children}</Link>
@@ -246,7 +257,7 @@ export function GatedAction({
     <>
       <Button
         ref={triggerRef}
-        variant="primary"
+        variant={variant}
         size="lg"
         className={className}
         onClick={() => setOpen(true)}

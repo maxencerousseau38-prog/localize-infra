@@ -5,7 +5,6 @@ import { Ecosystem } from '@/components/landing/ecosystem';
 import { Hero } from '@/components/landing/hero';
 import { HowItWorks } from '@/components/landing/how-it-works';
 import { EXAMPLE_PR_URL } from '@/lib/constants';
-import { Button } from '@localize-infra/ui';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -79,32 +78,51 @@ export default function HomePage() {
                * the band's own foreground colour. Both track the theme, because
                * every token here is the semantic pair, not a fixed colour.
                */}
+              {/*
+               * One filled action on the page, and it is not this one.
+               *
+               * This band used to carry a canvas-filled "Run it on your
+               * repository" — the loudest control on the dark ground — while
+               * the hero carried a graphite-filled link to the pull request.
+               * Two primaries, where DESIGN.md §10 allows one.
+               *
+               * §4.5.3 settles which survives rather than leaving it to taste:
+               * the primary must be an action that works today, and where the
+               * nominal one is unavailable — it names a gated beta explicitly —
+               * it is demoted and the strongest working action promoted. This
+               * button opens a dialog explaining that hosted accounts are not
+               * built. The pull request is real and open. So the fold keeps the
+               * fill and this becomes an outline.
+               *
+               * The pull request link goes with it, from a second button to
+               * plain text. It is the same destination the hero already sends
+               * people to at full weight; a second button for it here competed
+               * with the one thing this section exists to ask.
+               */}
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                <GatedAction className="w-full bg-canvas text-primary hover:bg-surface active:bg-raised sm:w-auto">
-                  Run it on your repository
-                </GatedAction>
-                <Button
-                  asChild
+                <GatedAction
                   variant="secondary"
-                  size="lg"
                   className="w-full border-inverse/30 bg-transparent text-inverse hover:bg-inverse/10 active:bg-inverse/15 sm:w-auto"
                 >
-                  <a
-                    href={EXAMPLE_PR_URL}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
-                    See the pull request
-                  </a>
-                </Button>
+                  Run it on your repository
+                </GatedAction>
               </div>
               <p className="mt-5 text-small text-inverse/60">
-                The CLI runs from a clone today.{' '}
+                The CLI runs from a clone today. Read{' '}
+                <a
+                  href={EXAMPLE_PR_URL}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="rounded-sm text-inverse underline underline-offset-2 decoration-inverse/40 hover:decoration-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                >
+                  the pull request it opened
+                </a>{' '}
+                or{' '}
                 <Link
                   href="/roadmap"
                   className="rounded-sm text-inverse underline underline-offset-2 decoration-inverse/40 hover:decoration-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
-                  What is shipping next
+                  what is shipping next
                 </Link>
                 .
               </p>
