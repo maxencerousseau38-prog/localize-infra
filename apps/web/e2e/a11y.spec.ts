@@ -239,8 +239,11 @@ for (const scheme of ['light', 'dark'] as const) {
     const ratios = await page.locator('kbd').evaluateAll((els) =>
       els.map((el) => {
         const luminance = (colour: string) => {
-          const [r = 0, g = 0, b = 0] = colour
-            .match(/[\d.]+/g)!
+          // `?? []` rather than `!`: a colour string that does not parse falls
+          // through to the 0/0/0 defaults below instead of throwing inside the
+          // page, where the failure would surface as an opaque evaluate error
+          // rather than a contrast number.
+          const [r = 0, g = 0, b = 0] = (colour.match(/[\d.]+/g) ?? [])
             .slice(0, 3)
             .map((v) => Number(v) / 255)
             .map((v) =>
@@ -248,13 +251,17 @@ for (const scheme of ['light', 'dark'] as const) {
             );
           return 0.2126 * r + 0.7152 * g + 0.0722 * b;
         };
-        // Walk up for the first opaque ancestor background.
+        // Walk up for the first opaque ancestor background. The walk used to
+        // assign inside the loop condition, which reads as a typo and is what
+        // `noAssignInExpressions` objects to; the step is now explicit and the
+        // termination condition is the same.
+        const transparent = (colour: string) =>
+          colour === 'rgba(0, 0, 0, 0)' || colour === 'transparent';
+
         let node: Element | null = el;
         let background = getComputedStyle(el).backgroundColor;
-        while (
-          (background === 'rgba(0, 0, 0, 0)' || background === 'transparent') &&
-          (node = node.parentElement)
-        ) {
+        while (transparent(background) && node.parentElement) {
+          node = node.parentElement;
           background = getComputedStyle(node).backgroundColor;
         }
         const a = luminance(getComputedStyle(el).color);

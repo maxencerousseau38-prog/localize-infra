@@ -10,8 +10,10 @@ import { cn } from '@/lib/utils';
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   return (
+    // No `role="navigation"`: <nav> already carries it, and stating it again
+    // is the redundancy `noRedundantRoles` flags. The label is what does the
+    // work here, since a page may hold more than one landmark.
     <nav
-      role="navigation"
       aria-label="pagination"
       data-slot="pagination"
       className={cn('mx-auto flex w-full justify-center', className)}

@@ -89,9 +89,14 @@ function SidebarProvider({
   );
 
   // Helper to toggle the sidebar.
+  //
+  // `setOpenMobile` is a useState setter and is referentially stable for the
+  // life of the component, so listing it buys nothing and Biome flags it. It
+  // stays out of both dependency arrays in this file for the same reason.
+  // `setOpen` is not a setter — it is the useCallback above — so it stays.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-  }, [isMobile, setOpen, setOpenMobile]);
+  }, [isMobile, setOpen]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
@@ -123,7 +128,7 @@ function SidebarProvider({
       setOpenMobile,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, openMobile, toggleSidebar],
   );
 
   return (

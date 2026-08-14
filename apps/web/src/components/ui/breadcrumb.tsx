@@ -51,10 +51,14 @@ function BreadcrumbLink({
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   return (
+    // The current page is not a link — it goes nowhere. shadcn ships this as
+    // `role="link" aria-disabled="true"`, which announces "link, disabled" for
+    // the page you are already on and is not focusable, so it fails
+    // `useFocusableInteractive`. `packages/ui`'s own BreadcrumbPage already
+    // names this as the most common breadcrumb defect and drops both
+    // attributes; this copy now matches it.
     <span
       data-slot="breadcrumb-page"
-      role="link"
-      aria-disabled="true"
       aria-current="page"
       className={cn('font-normal text-foreground', className)}
       {...props}
