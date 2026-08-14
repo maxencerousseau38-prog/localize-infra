@@ -16,8 +16,7 @@
 - `packages/core` + `packages/cli` — détection de framework, extraction AST,
   moteur de fusion des fichiers de locale, commande `init` (M1 Phase 1).
 - `apps/api` (propriétaire) — `POST /v1/translate`, `POST /v1/open-pr`,
-  auth bearer. Ne fonctionne qu'en local : il existe aussi un déploiement
-  Vercel, mais il répond 500 sur toutes les routes (voir plus bas).
+  auth bearer, en local uniquement.
 - `services/github-app` (propriétaire) — ouverture de PR via Octokit.
 - Validé de bout en bout : une vraie PR ouverte en 22 s sur un dépôt réel.
 
@@ -58,26 +57,24 @@ Ne jamais simuler ces fonctionnalités dans l'interface.
 Voir `docs/product/`, `docs/design/`, `docs/frontend/` (PRD → jalons), et
 `docs/product/08-critique.md` pour ce qui n'est pas encore solide.
 
-**Deux projets Vercel** suivent `master`, tous deux sur le compte
-`drive-os-s-projects`, tous deux reconstruits à chaque push :
+**`apps/site` est déployé** sur https://localize-infra-site.vercel.app (projet
+Vercel `localize-infra-site`, compte `drive-os-s-projects`, suivi de `master`).
+C'est le **seul** projet Vercel du dépôt. `apps/web`, `apps/api` et
+`services/github-app` restent locaux.
 
-- **`localize-infra-site`** → https://localize-infra-site.vercel.app —
-  `apps/site`. Sain et servi ; c'est le seul déploiement qui fonctionne.
-- **`localize-infra-api`** → https://localize-infra-api.vercel.app —
-  `apps/api`. Le build passe, le déploiement est **Ready**, et pourtant
-  **chaque requête répond 500** (`FUNCTION_INVOCATION_FAILED`) :
-  `API_AUTH_TOKEN` n'est pas défini côté Vercel et `apps/api/src/index.ts`
-  refuse de démarrer sans lui. C'est le fail-closed voulu — l'API ne tourne
-  jamais non authentifiée — mais le résultat est une URL publique, redéployée
-  à chaque push, qui ne sert rien. Deux issues seulement : lui donner ses
-  variables d'environnement, ou supprimer le projet. La laisser ainsi fait
-  mentir toute affirmation « l'API reste locale ». Et lui donner ses variables
-  n'est pas neutre : cela expose publiquement un service qui envoie du contexte
-  extrait du code source à des fournisseurs LLM hors UE — l'écart connu à
-  l'invariant 5, décrit plus bas, cesserait alors d'être confiné au poste du
-  développeur.
+Cette phrase a déjà été fausse, et pas qu'un peu : un projet
+`localize-infra-api` a existé sur le même compte et redéployait `apps/api` à
+chaque push pendant que ce fichier affirmait « reste local ». Il répondait 500
+sur toutes les routes — `API_AUTH_TOKEN` absent côté Vercel, et
+`apps/api/src/index.ts` refuse de démarrer sans lui : le fail-closed voulu, qui
+a transformé l'oubli en URL publique morte plutôt qu'en API ouverte. Projet
+supprimé le 2026-08-14.
 
-`apps/web` et `services/github-app` ne sont pas déployés.
+Redéployer `apps/api` un jour n'est donc pas un geste neutre : cela exposerait
+publiquement un service qui envoie du contexte extrait du code source à des
+fournisseurs LLM hors UE, faisant sortir l'écart connu à l'invariant 5 (décrit
+plus bas) du poste du développeur. Si ça arrive, ce paragraphe se met à jour
+dans le même commit.
 
 Aucun domaine personnalisé n'est attaché. `SITE_URL`
 (`apps/site/src/lib/routes.ts`) porte cette origine, et tout ce que le site
