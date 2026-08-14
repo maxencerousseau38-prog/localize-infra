@@ -22,48 +22,116 @@ import Link from 'next/link';
 export function Hero() {
   return (
     <>
-      <section className="mx-auto max-w-6xl px-4 pb-12 pt-16 sm:px-6 sm:pb-14 sm:pt-20">
-        <p className="text-eyebrow font-medium uppercase text-tertiary">
-          Localization infrastructure
-        </p>
+      <section className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-14">
+        {/*
+         * An asymmetric split, not a headline with a void beside it.
+         *
+         * Measured at 1440: the argument occupied the left half and the right
+         * half held nothing for roughly 300px of height, with the action row
+         * pushed to the far edge of that emptiness — the dead zone DESIGN.md
+         * §4.5.2 names as a defect rather than whitespace. The slack is now
+         * composed away with content that was already on the page: the
+         * terminal path, which used to sit in an orphaned strip *below* the
+         * run and interrupted the page's strongest moment to do it.
+         *
+         * The section is also ~180px shorter, which is the point. The run
+         * artifact is the best argument this page has, and it began below the
+         * fold on every desktop viewport (DESIGN.md §4.5.1).
+         */}
+        {/*
+         * The split starts at xl, not lg, and the terminal column is 30rem.
+         *
+         * Both numbers were measured rather than chosen. `CopyCommand`
+         * truncates rather than overflows, and the install command needs 28rem
+         * of *inner* width at `subtitle` mono — so 28rem here silently ate
+         * `init`, because this panel spends 1rem of padding on each side. And
+         * at lg the container is only 976px, which would leave the headline
+         * 466px: enough to break a 68px display line three ways. Below xl the
+         * panel stacks full width, where it has more room than any split gave
+         * it.
+         */}
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:items-start xl:gap-10">
+          <div>
+            <p className="text-eyebrow font-medium uppercase text-tertiary">
+              Localization infrastructure
+            </p>
 
-        <h1 className="mt-5 max-w-[15ch] font-display text-display-xl font-semibold text-primary lg:text-display-2xl">
-          Your copy is a build artifact.
-        </h1>
+            <h1 className="mt-4 max-w-[15ch] font-display text-display-xl font-semibold text-primary lg:text-display-2xl">
+              Your copy is a build artifact.
+            </h1>
 
-        <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          {/* One sentence. The panel below is the explanation; a second
-              paragraph here only delays it. */}
-          <p className="max-w-[46ch] text-prose text-secondary">
-            Point the CLI at your repository. It finds the strings you
-            hardcoded, translates them in context, and opens a pull request —
-            leaving everything else in your stack exactly where it was.
-          </p>
+            {/* One sentence. The run below is the explanation; a second
+                paragraph here only delays it. */}
+            <p className="mt-5 max-w-[46ch] text-prose text-secondary">
+              Point the CLI at your repository. It finds the strings you
+              hardcoded, translates them in context, and opens a pull request —
+              leaving everything else in your stack exactly where it was.
+            </p>
 
-          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
-            <Button
-              asChild
-              variant="primary"
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              <a
-                href={EXAMPLE_PR_URL}
-                target="_blank"
-                rel="noreferrer noopener"
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Button
+                asChild
+                variant="primary"
+                size="lg"
+                className="w-full sm:w-auto"
               >
-                <GitPullRequest aria-hidden="true" />
-                See the pull request it opened
-              </a>
-            </Button>
-            <Button
-              asChild
-              variant="secondary"
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              <Link href="/docs#install">Read the docs</Link>
-            </Button>
+                <a
+                  href={EXAMPLE_PR_URL}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <GitPullRequest aria-hidden="true" />
+                  See the pull request it opened
+                </a>
+              </Button>
+              <Button
+                asChild
+                variant="secondary"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
+                <Link href="/docs#install">Read the docs</Link>
+              </Button>
+            </div>
+          </div>
+
+          {/*
+           * The terminal path, demoted on purpose.
+           *
+           * `npx @localize-infra/cli init` is the action this product is
+           * heading for, and it does not work today — the package is not
+           * published. DESIGN.md §4.5.3 is explicit that an unavailable
+           * nominal primary action is demoted and the strongest *working*
+           * action promoted, which is why the pull request keeps the filled
+           * button and this sits in a quiet panel saying what it is.
+           */}
+          {/*
+           * The panel chrome is xl-only, and that is a size decision rather
+           * than a stylistic one.
+           *
+           * At xl this is a column beside the headline and needs an edge to
+           * read as one. Below xl it stacks, where the same border and padding
+           * bought nothing and cost ~70px — a 576px box drawn around a 448px
+           * control, which measured as an empty band and pushed the run
+           * further down exactly where vertical space is scarcest.
+           */}
+          <div className="max-w-xl xl:mt-2 xl:max-w-none xl:rounded-lg xl:border xl:border-line xl:bg-surface/60 xl:p-4">
+            <p className="text-micro font-medium uppercase tracking-[0.12em] text-tertiary">
+              From your terminal
+            </p>
+            <div className="mt-3">
+              <CopyCommand command={INSTALL_COMMAND} />
+            </div>
+            <p className="mt-3 text-small leading-6 text-tertiary">
+              Not published to npm yet — today it runs from a clone.{' '}
+              <Link
+                href="/docs#install"
+                className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              >
+                Install guide
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </section>
@@ -80,25 +148,6 @@ export function Hero() {
           <p className="mt-4 text-small text-inverse/60">
             A real run against a real repository, linked above. Nothing on this
             page is a mockup.
-          </p>
-        </div>
-      </section>
-
-      {/* Honest about what it is: a command that is not published yet. */}
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-          <div className="w-full sm:max-w-md">
-            <CopyCommand command={INSTALL_COMMAND} />
-          </div>
-          <p className="text-small leading-6 text-tertiary">
-            Not published to npm yet — today it runs from a clone.{' '}
-            <Link
-              href="/docs#install"
-              className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              Install guide
-            </Link>
-            .
           </p>
         </div>
       </section>
