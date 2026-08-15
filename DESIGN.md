@@ -356,16 +356,57 @@ Components may use only these. Referencing a raw palette value is a defect.
 
 ### 6.2 When colour is allowed
 
-Only to express **the state of a piece of copy, a run, or a locale**; to mark a
-link; or to indicate focus. Six coloured marks on a status board of eleven
-items means exactly six things are in that state.
+Only to express **the state of something that exists** — a piece of copy, a
+run, a locale, a capability that ships today, a commitment the product is
+currently keeping — or to mark a link, or to indicate focus. Six coloured marks
+on a status board of eleven items means exactly six things are in that state.
 
 ### 6.3 When colour is forbidden
 
-Chrome. Logos and brand marks. Roadmap or maturity state. Decoration.
-Primary buttons — these are graphite, so nothing competes with the state
-signal. Section backgrounds, except the single inverted band on the landing
-page. Data visualisation that is not encoding state.
+Chrome. Logos and brand marks. Decoration. Primary buttons — these are
+graphite, so nothing competes with the state signal. Section backgrounds,
+except the single inverted band on the landing page. Data visualisation that is
+not encoding state.
+
+And **a position on a plan**, which is the clause that needed saying properly.
+
+It read "Roadmap or maturity state", and that was too blunt to apply. By its
+letter every row of `/roadmap`, every capability on the status board and every
+commitment on the landing page is a maturity state, so colouring any of them
+was a defect — including "Working today", which reports the current behaviour
+of code that shipped. Read that way the rule forbids the product's most useful
+signal; read loosely it forbids nothing. Either way it could not be enforced,
+and a rule that cannot be applied is how the Iris leak reached five pages.
+
+The line is not whether the subject is maturity. It is whether there is
+something whose state can be reported at all:
+
+| Subject | Colour |
+|---|---|
+| Exists, and works | `confident` |
+| Exists, and partly works, or has a known gap | `degraded` |
+| Exists, and fails, refuses, or is irreversible | `failed` |
+| Exists, and needs a human decision | `ambiguous` |
+| **Does not exist yet** — planned, in development, not built, not measured | **none** |
+
+A thing that has not been built has no state. Painting it amber says its
+behaviour is degraded; painting it Iris says a human must decide about it. Both
+report on the absence of a feature rather than the state of one, which is
+exactly what went wrong when Iris spread onto "Not yet measured", "Pre-alpha"
+and "In development".
+
+This is not a new rule. It is the one the product already follows in four
+places written independently of each other — the status board (`working` jade;
+`building` and `unmeasured` neutral), the roadmap (`shipped` jade; `building`
+and `planned` neutral), the landing commitments ("Working today" jade, "Partly
+working" amber, "Not built yet" neutral), and the residency gap on `/security`
+(amber, because the gap is real and present today). The document was the only
+place it was written down wrongly.
+
+Partly enforced by `apps/site/e2e/colour-semantics.spec.ts`: Iris nowhere on
+the marketing site, crimson only where the CLI's real refusals are quoted, and
+amber nowhere on `/roadmap`, `/benchmarks`, `/quality` or `/pricing` — the
+pages where a plan position would most tempt it.
 
 ### 6.4 Dark mode
 
@@ -635,8 +676,17 @@ document first with the reasoning.
 
 Enforced by test today: the type scale (no ad-hoc sizes, both registers,
 editorial steps kept out of the app), token contrast in both schemes, axe on
-every route, ARIA ownership, reduced motion, responsive overflow, and the
-sample-data contract.
+every route, ARIA ownership, reduced motion, responsive overflow, the
+sample-data contract, and the §6.3 rule that colour reports the state of
+something that exists.
+
+That last one is enforced in both directions, and the second direction is the
+one that keeps it honest. A test forbidding a colour can always be satisfied by
+deleting the colour, including from the surface that had earned it — so each
+absolute is paired with a check that the honest marks are still there: the run
+artifact still marks five completed stages, `/docs` still marks its refusals,
+`/security` still marks the residency gap. An absolute won by removing evidence
+is worse than no rule, because it looks like compliance.
 
 Not yet enforced and therefore requiring review discipline: radius and control
 height usage, motion budget, and the data-surface completeness rule in §8.
