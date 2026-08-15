@@ -13,7 +13,19 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      # `npm install`, not `npm ci`, and only until the lockfile is regenerated
+      # on Linux.
+      #
+      # package-lock.json was generated on Windows and npm pruned the optional
+      # platform packages that did not match it (npm/cli#4828). It carries
+      # @rollup/rollup-win32-x64-{gnu,msvc} and @esbuild/win32-x64 and no Linux
+      # equivalents, while every other native package in the tree — Next's swc,
+      # tailwind oxide, lightningcss, biome, sharp — has its full matrix. So
+      # `npm ci` installed a tree with no rollup binary, vitest could not start,
+      # and this job failed at the first test package for at least five days
+      # before anyone read it. `npm install` still honours the pinned versions
+      # in the lockfile; it just fetches the platform binaries npm left out.
+      - run: npm install
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
@@ -22,6 +34,11 @@ jobs:
   # that catches the failures the others structurally cannot — a CSP that
   # blocks every script, an ARIA structure axe does not inspect, a page that
   # builds green and never hydrates. All three have shipped in this repo.
+  #
+  # This job kept passing throughout the outage above, because Next's Linux swc
+  # binaries are in the lockfile and its build never touches rollup. A green
+  # e2e badge beside a red unit badge is exactly how the failure stayed
+  # invisible.
   e2e:
     runs-on: ubuntu-latest
     steps:
@@ -30,6 +47,6 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

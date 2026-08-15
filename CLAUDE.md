@@ -143,6 +143,38 @@ Le cœur ouvert doit être utilisable seul.
 Intégrité placeholders/ICU ≥ 99,5 % (packages/eval, condition B).
 Harnais d'éval rejoué à chaque changement de modèle ou de prompt.
 
+## Les gates — `npm run gates`
+
+**Une seule commande, dans cet ordre : lint → typecheck → test → test:e2e.**
+Lancer les quatre. Pas trois.
+
+Ce script existe parce que la mémoire ne suffit pas : une session entière a
+tourné en lançant lint, typecheck et les deux suites e2e après chaque
+changement, sans jamais rejouer les tests unitaires. Un test de `packages/ui`
+est resté rouge pendant deux commits.
+
+Deux pièges rendent un gate vert alors qu'il ne l'est pas. Les deux ont
+frappé, les deux sont désormais corrigés à la cause — mais il faut savoir
+qu'ils existent, parce que leur symptôme est **un succès**, jamais une erreur.
+
+1. **Le cache turbo.** `type-scale.test.ts` (packages/ui) lit `apps/site/src`
+   et `apps/web/src`, alors que la clé de cache par défaut ne couvre que
+   `packages/ui`. Une violation commise dans une app ne déplaçait pas la clé et
+   turbo rejouait le dernier succès. Corrigé par `packages/ui/turbo.json`, qui
+   déclare ces répertoires en `inputs`. En cas de doute : `--force`.
+2. **Un serveur resté vivant.** Les deux configs Playwright ont
+   `reuseExistingServer` hors CI, donc un `next start` oublié répond encore —
+   et si un build a réécrit `.next` sous lui, la suite échoue partout pour des
+   raisons sans rapport avec le diff, ou pire, passe sur du code qui n'est plus
+   là. Tuer les ports 3210/3211 avant une campagne e2e.
+
+CI (`.github/workflows/ci.yml`) fait tourner les mêmes gates, mais **CI n'a
+jamais été verte** : le job `test` mourait au démarrage de vitest, faute de
+binaires rollup/esbuild Linux dans un `package-lock.json` généré sous Windows
+(npm/cli#4828). `npm ci` y est remplacé par `npm install` en attendant que le
+lockfile soit régénéré sous Linux. Le job `e2e` passait pendant tout ce temps,
+ce qui rendait la panne invisible.
+
 ## Frontend defaults
 
 For every website, landing page, dashboard, marketing page, or React/Next.js frontend:
