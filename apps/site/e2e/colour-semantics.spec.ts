@@ -212,3 +212,103 @@ test('the run artifact does claim state, because it really ran', async ({
     'the hero rail depicts a run that completed all five stages; if it stops marking them, the test above has been satisfied by removing the colour rather than by fixing the diagram',
   ).toBeGreaterThan(0);
 });
+
+/** Every element on the page painting one state family. */
+async function familyOnPage(
+  page: import('@playwright/test').Page,
+  path: string,
+  family: string,
+) {
+  await page.goto(path);
+  const painted = await statePaintedWithin(page, 'body');
+  return painted.filter((entry) => entry.startsWith(family));
+}
+
+/**
+ * Crimson means failed, destructive, irreversible (§6.1).
+ *
+ * A marketing site performs no destructive operation and nothing on it can
+ * fail, so the only honest red is *quoted output* — the four refusal messages
+ * on /docs, which are the CLI's real stderr text: no supported framework, a
+ * locale file it will not overwrite, a missing API token, an --open-pr call
+ * without owner and repo. That makes the rule an absolute everywhere else,
+ * which is the same reason the Iris sweep above can be one.
+ *
+ * The regression this exists to catch is not subtle and is easy to commit:
+ * a red "unsupported" chip, a red "no" column in a comparison table, a
+ * destructive-looking badge on a page where nothing is destructive.
+ */
+const NO_CRIMSON = [
+  '/',
+  '/benchmarks',
+  '/quality',
+  '/security',
+  '/pricing',
+  '/roadmap',
+];
+
+for (const path of NO_CRIMSON) {
+  test(`${path} spends no crimson, because nothing here fails`, async ({
+    page,
+  }) => {
+    expect(
+      await familyOnPage(page, path, 'failed'),
+      'crimson marks a failure, a destructive action, or something irreversible; this page has none of the three',
+    ).toEqual([]);
+  });
+}
+
+test('/docs does mark the real refusals in crimson', async ({ page }) => {
+  // The counterweight. Without it every test above is satisfied by deleting
+  // the refusal examples, which would take the site's only honest red with it.
+  expect(
+    await familyOnPage(page, '/docs', 'failed'),
+    'the "When it refuses" examples quote the CLI\'s real error output; if they stop being marked as failures the absolutes above have been won by removing evidence',
+  ).not.toEqual([]);
+});
+
+/**
+ * Amber means partial, stale, behind, missing (§6.1).
+ *
+ * Unlike crimson this is not absent site-wide, and the three places it appears
+ * are load-bearing admissions rather than decoration: "Partly working" on the
+ * commitment whose resolution queue is not built, the extraction gap on /docs,
+ * and the data-residency gap on /security. Each names something that is
+ * genuinely incomplete today.
+ *
+ * The four pages below carry none, and the rule that keeps them clean is §6.3:
+ * colour is forbidden on roadmap and maturity state. /roadmap is the whole
+ * hazard in one page — every row on it is a maturity state, and painting them
+ * amber is the most tempting change anyone will ever make to this site.
+ * /benchmarks and /quality publish measured numbers, where a colour would be
+ * read as a verdict the harness has not issued.
+ *
+ * If a future measurement genuinely warrants amber, this fails and the author
+ * decides deliberately. That is the point of it, not a defect in it.
+ */
+const NO_AMBER = ['/benchmarks', '/quality', '/pricing', '/roadmap'];
+
+for (const path of NO_AMBER) {
+  test(`${path} spends no amber on maturity or measurement`, async ({
+    page,
+  }) => {
+    expect(
+      await familyOnPage(page, path, 'degraded'),
+      'amber marks something partial, stale or missing; on this page it would be painting a roadmap position or a measured result, which §6.3 forbids',
+    ).toEqual([]);
+  });
+}
+
+for (const path of ['/', '/security']) {
+  test(`${path} does mark what is genuinely partial in amber`, async ({
+    page,
+  }) => {
+    // The counterweight again: these two pages admit something incomplete —
+    // a half-built commitment and the EU residency gap — and the absolutes
+    // above must not be winnable by quietly dropping the admission.
+    expect(
+      await familyOnPage(page, path, 'degraded'),
+      'this page states something that is only partly true today; losing the mark would make the page read as though it were wholly true',
+    ).not.toEqual([]);
+  });
+}
