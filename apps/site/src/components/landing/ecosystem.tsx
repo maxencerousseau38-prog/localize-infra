@@ -11,9 +11,15 @@ import type * as React from 'react';
  * Vercel or Supabase claims nothing untrue and makes a real point — adopting
  * this costs you no other change.
  *
- * Monochrome by default so the rail never becomes the focus, and so six brand
+ * Monochrome throughout, so the rail never becomes the focus and six brand
  * palettes cannot compete with the state colours that carry the product's
- * actual meaning. Colour arrives only on hover, as an acknowledgement.
+ * actual meaning. Hover lifts a mark from `tertiary` to `secondary` — a step
+ * in the neutral ramp, not a colour.
+ *
+ * This said "Colour arrives only on hover, as an acknowledgement", which
+ * described something the code has never done and §6.3 forbids outright:
+ * colour on logos and brand marks. The implementation was right and the
+ * comment invited someone to break it.
  */
 type Mark = { name: string; path: React.ReactNode; viewBox?: string };
 
