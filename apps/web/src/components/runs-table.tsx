@@ -51,7 +51,7 @@ function Fact({
 }) {
   return (
     <div>
-      <dt className="text-micro font-medium uppercase tracking-[0.1em] text-tertiary">
+      <dt className="text-eyebrow font-medium uppercase text-tertiary">
         {label}
       </dt>
       <dd className="mt-0.5 font-mono text-caption tabular-nums text-primary">

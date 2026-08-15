@@ -133,7 +133,11 @@ export function Hero() {
            * something already obvious.
            */}
           <div className="xl:mt-2 xl:rounded-lg xl:border xl:border-line xl:bg-surface/60 xl:p-4">
-            <p className="hidden text-micro font-medium uppercase tracking-[0.12em] text-tertiary xl:block">
+            {/* `text-eyebrow`, which carries its own 0.14em. The hand-written
+                tracking this replaced was a seventh copy of a value the scale
+                already defines (§3.3), and packages/ui's type-scale test
+                enumerates the two files allowed to do that. */}
+            <p className="hidden text-eyebrow font-medium uppercase text-tertiary xl:block">
               From your terminal
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5 xl:mt-3 xl:flex-col xl:items-stretch xl:gap-3">

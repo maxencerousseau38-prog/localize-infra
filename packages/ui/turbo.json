@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "//": "type-scale.test.ts is the only test in this repo that reads outside its own package: it walks apps/site/src and apps/web/src to enforce one scale across both registers. Turbo's default cache key for this package covers packages/ui alone, so a violation committed in an app did not move the key and the last pass replayed from cache — the gate reported green through two commits that had broken it. Naming the directories the test actually reads keeps the caching and fixes the key.",
+  "tasks": {
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/site/src/**",
+        "$TURBO_ROOT$/apps/web/src/**"
+      ]
+    }
+  }
+}

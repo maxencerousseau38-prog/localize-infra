@@ -198,7 +198,7 @@ export function RunArtifact() {
         {/* Files touched. The column that makes this a repository rather than
             two code samples side by side. */}
         <div className="border-b border-subtle bg-surface/30 px-3 py-3 lg:border-b-0 lg:border-e">
-          <p className="px-1 pb-2 text-micro font-medium uppercase tracking-[0.12em] text-tertiary">
+          <p className="px-1 pb-2 text-eyebrow font-medium uppercase text-tertiary">
             Files touched
           </p>
           <ul className="flex flex-col">
