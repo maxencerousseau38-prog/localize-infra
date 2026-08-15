@@ -19,10 +19,19 @@ import { ArrowUpRight, GitPullRequest } from 'lucide-react';
  * not: no dots travelling the connectors forever, no invented counters, no
  * accent colour spent on decoration. Every value here is from the linked run.
  *
- * Colour follows DESIGN.md §1.4. Jade marks a stage that completed. Escalate is
- * neutral and reads `0 raised`, because this run raised none — Iris means your
- * judgement is required, and claiming it where nothing is pending would spend
- * the one signal the product is built around.
+ * Colour follows DESIGN.md §6.3: it reports the state of something that
+ * exists. Jade marks a stage that completed, and all five did — Escalate
+ * included, which ran and reads `0 raised`. A stage that finished having found
+ * nothing to raise has still finished.
+ *
+ * What Escalate is *not* is Iris (§1.4). Iris means your judgement is required,
+ * and claiming it where nothing is pending would spend the one signal the
+ * product is built around — so the note carries the nuance in words instead.
+ *
+ * This paragraph used to state that argument as "Escalate is neutral", which
+ * was the right reasoning about Iris written as a false claim about the
+ * colour: `escalate: { done: true }` has always painted it jade, like the four
+ * stages either side of it.
  */
 
 /** What the linked run actually did at each stage. */
