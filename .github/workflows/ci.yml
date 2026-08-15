@@ -13,19 +13,29 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      # `npm install`, not `npm ci`, and only until the lockfile is regenerated
-      # on Linux.
+      # The lockfile cannot install this job on Linux, so this job resolves
+      # without it. That is a real trade and it is made deliberately.
       #
-      # package-lock.json was generated on Windows and npm pruned the optional
-      # platform packages that did not match it (npm/cli#4828). It carries
-      # @rollup/rollup-win32-x64-{gnu,msvc} and @esbuild/win32-x64 and no Linux
-      # equivalents, while every other native package in the tree — Next's swc,
-      # tailwind oxide, lightningcss, biome, sharp — has its full matrix. So
-      # `npm ci` installed a tree with no rollup binary, vitest could not start,
-      # and this job failed at the first test package for at least five days
-      # before anyone read it. `npm install` still honours the pinned versions
-      # in the lockfile; it just fetches the platform binaries npm left out.
-      - run: npm install
+      # package-lock.json is generated on Windows, and npm prunes the optional
+      # platform packages that do not match the machine that wrote it
+      # (npm/cli#4828). It carries @rollup/rollup-win32-x64-{gnu,msvc} and
+      # @esbuild/win32-x64 and no Linux equivalents, so `npm ci` produced a tree
+      # with no rollup binary and vitest died before its first assertion — for
+      # at least five days, unread. `npm install` alone does not help: it still
+      # honours the pruned tree. Regenerating the lockfile does not help either
+      # while the machine writing it is Windows; deleting it and rebuilding from
+      # scratch on this repo still yields win32-only entries.
+      #
+      # So the lockfile is dropped for this job and npm resolves fresh, which is
+      # what npm's own error message advises. Versions here float within the
+      # ranges in package.json rather than being pinned, and a transitive
+      # regression could therefore reach this job before it reaches a developer.
+      # The e2e job below still installs from the lockfile, so the two jobs
+      # disagreeing is itself a signal worth reading.
+      #
+      # The fix that retires this: commit a lockfile generated on Linux, then
+      # restore `npm ci` here.
+      - run: rm -f package-lock.json && npm install
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
@@ -35,10 +45,11 @@ jobs:
   # blocks every script, an ARIA structure axe does not inspect, a page that
   # builds green and never hydrates. All three have shipped in this repo.
   #
-  # This job kept passing throughout the outage above, because Next's Linux swc
-  # binaries are in the lockfile and its build never touches rollup. A green
-  # e2e badge beside a red unit badge is exactly how the failure stayed
-  # invisible.
+  # This job keeps `npm ci`, because it has been passing on it throughout the
+  # outage above: Next builds with swc, whose Linux binaries are in the
+  # lockfile, and it never loads rollup. A green badge here beside a red one
+  # there is exactly how the breakage stayed invisible, so the difference is
+  # left in place and named rather than smoothed over.
   e2e:
     runs-on: ubuntu-latest
     steps:
@@ -47,6 +58,6 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm install
+      - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

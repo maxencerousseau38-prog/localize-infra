@@ -171,9 +171,19 @@ qu'ils existent, parce que leur symptôme est **un succès**, jamais une erreur.
 CI (`.github/workflows/ci.yml`) fait tourner les mêmes gates, mais **CI n'a
 jamais été verte** : le job `test` mourait au démarrage de vitest, faute de
 binaires rollup/esbuild Linux dans un `package-lock.json` généré sous Windows
-(npm/cli#4828). `npm ci` y est remplacé par `npm install` en attendant que le
-lockfile soit régénéré sous Linux. Le job `e2e` passait pendant tout ce temps,
-ce qui rendait la panne invisible.
+(npm/cli#4828). Le job `e2e` passait pendant tout ce temps — Next compile avec
+swc, dont les binaires Linux sont bien dans le lockfile — ce qui rendait la
+panne invisible : un badge vert à côté d'un badge rouge.
+
+Le job `test` supprime donc le lockfile et résout à neuf, ce que conseille le
+message d'erreur de npm lui-même. **C'est un compromis, pas une correction :**
+les versions y flottent dans les plages de `package.json`, donc une régression
+transitive peut atteindre CI avant un développeur. `npm install` seul ne suffit
+pas (il respecte l'arbre élagué), et régénérer le lockfile depuis Windows non
+plus — même reconstruit de zéro, il ne contient que du win32.
+
+**La vraie correction : générer le lockfile sous Linux, le commiter, et
+remettre `npm ci`.** Tant que ce n'est pas fait, ce paragraphe reste vrai.
 
 ## Frontend defaults
 
