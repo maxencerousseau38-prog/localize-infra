@@ -196,14 +196,31 @@ badge `test` rouge, et personne ne l'a lu. Le signal existait ; ce qui manquait
 était l'obligation de le regarder. Exiger les deux, et pas seulement l'un,
 c'est précisément ce qui empêche qu'une moitié verte serve d'alibi à l'autre.
 
-**`enforce_admins` est à `false` :** le propriétaire pousse encore directement
-sur `master`, comme tout l'historique du dépôt. La protection mord donc sur les
-PR, pas sur ces pushes — c'est délibéré, pour ne pas casser le flux existant,
-et c'est aussi sa limite. Pour la rendre absolue, y compris pour le
-propriétaire :
+**`enforce_admins` est à `true`.** La règle s'applique au propriétaire comme à
+tout le monde : **`git push origin master` est refusé**, y compris pour un
+admin. Tout passe désormais par une branche et une pull request. Tout
+l'historique du dépôt jusqu'à `4ece793` a été poussé en direct ; ce n'est plus
+possible.
+
+Le flux :
 
 ```
-gh api -X PATCH repos/maxencerousseau38-prog/localize-infra/branches/master/protection/enforce_admins
+git switch -c <branche>
+git push -u origin <branche>
+gh pr create --fill
+gh pr checks --watch      # test + e2e doivent passer
+gh pr merge --squash --delete-branch
+```
+
+**Le piège à connaître, parce qu'il s'est déjà produit ici :** si CI casse pour
+une raison d'infrastructure — c'est arrivé cinq jours durant, le job `test` ne
+démarrait même pas — alors *plus rien ne peut être fusionné*, y compris le
+correctif de CI lui-même. La sortie est de désactiver temporairement la
+contrainte, fusionner le correctif, la remettre :
+
+```
+gh api -X DELETE repos/.../branches/master/protection/enforce_admins
+gh api -X POST   repos/.../branches/master/protection/enforce_admins
 ```
 
 `strict` est à `false` : une branche n'a pas besoin d'être à jour avec `master`
