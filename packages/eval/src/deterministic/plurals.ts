@@ -4,8 +4,40 @@ import {
   parse,
 } from '@formatjs/icu-messageformat-parser';
 
+/**
+ * CLDR's canonical order. Not decoration — it is the order the categories are
+ * defined in, the order they read in, and the order a plural message is
+ * conventionally written in.
+ */
+const CLDR_ORDER = ['zero', 'one', 'two', 'few', 'many', 'other'];
+
+/**
+ * The plural categories a locale requires, in a fixed order.
+ *
+ * `Intl.PluralRules` guarantees the *set* and not the sequence, and the
+ * platforms disagree: Node 26 on Windows returns Arabic as zero · one · two ·
+ * few · many · other, and Node 20 on Linux returns the same six sorted
+ * alphabetically. This function returned that array untouched, so its output
+ * changed shape depending on the machine — which is why the same test passed
+ * locally and failed in CI, and why it stayed hidden for as long as CI could
+ * not run.
+ *
+ * The set is whatever ICU says; only the order is ours. Anything ICU reports
+ * outside the canonical six is appended rather than dropped, so a future CLDR
+ * category cannot vanish here silently.
+ */
 export function expectedPluralCategories(locale: string): string[] {
-  return new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
+  const reported = new Intl.PluralRules(locale).resolvedOptions()
+    .pluralCategories as string[];
+
+  const canonical = CLDR_ORDER.filter((category) =>
+    reported.includes(category),
+  );
+  const unrecognised = reported
+    .filter((category) => !CLDR_ORDER.includes(category))
+    .sort();
+
+  return [...canonical, ...unrecognised];
 }
 
 function findPluralArms(ast: MessageFormatElement[]): string[] {
