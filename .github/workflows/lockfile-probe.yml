@@ -28,8 +28,8 @@ jobs:
             console.log('BEFORE esbuild:', JSON.stringify(m('@esbuild/')));
             console.log('BEFORE biome  :', JSON.stringify(m('@biomejs/cli-')).slice(0,180));
           "
-      - name: Regenerate on Linux
-        run: rm -f package-lock.json && npm install --package-lock-only
+      - name: Add missing platform entries without re-resolving versions
+        run: npm install --package-lock-only
       - name: Inventory the regenerated lockfile
         run: |
           node -e "
@@ -42,6 +42,8 @@ jobs:
             console.log('AFTER biome  :', JSON.stringify(m('@biomejs/cli-')).slice(0,180));
             console.log('VERDICT keeps-win32:', r.some(x=>x.includes('win32')) && e.some(x=>x.includes('win32')));
             console.log('VERDICT has-linux  :', r.some(x=>x.includes('linux')) && e.some(x=>x.includes('linux')));
+            const o=require('child_process').execSync('git diff --numstat package-lock.json').toString();
+            console.log('VERDICT lockdiff  :', o.trim()||'(none)');
           "
       - uses: actions/upload-artifact@v4
         with:
