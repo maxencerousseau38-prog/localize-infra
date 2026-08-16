@@ -13,29 +13,21 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      # The lockfile cannot install this job on Linux, so this job resolves
-      # without it. That is a real trade and it is made deliberately.
+      # `npm ci` again, on a lockfile generated on Linux.
       #
-      # package-lock.json is generated on Windows, and npm prunes the optional
-      # platform packages that do not match the machine that wrote it
-      # (npm/cli#4828). It carries @rollup/rollup-win32-x64-{gnu,msvc} and
+      # It used to be impossible here: package-lock.json was written on Windows,
+      # where npm prunes the optional platform packages that do not match the
+      # writing machine (npm/cli#4828). It carried @rollup/rollup-win32-* and
       # @esbuild/win32-x64 and no Linux equivalents, so `npm ci` produced a tree
       # with no rollup binary and vitest died before its first assertion — for
-      # at least five days, unread. `npm install` alone does not help: it still
-      # honours the pruned tree. Regenerating the lockfile does not help either
-      # while the machine writing it is Windows; deleting it and rebuilding from
-      # scratch on this repo still yields win32-only entries.
+      # five days, unread.
       #
-      # So the lockfile is dropped for this job and npm resolves fresh, which is
-      # what npm's own error message advises. Versions here float within the
-      # ranges in package.json rather than being pinned, and a transitive
-      # regression could therefore reach this job before it reaches a developer.
-      # The e2e job below still installs from the lockfile, so the two jobs
-      # disagreeing is itself a signal worth reading.
-      #
-      # The fix that retires this: commit a lockfile generated on Linux, then
-      # restore `npm ci` here.
-      - run: rm -f package-lock.json && npm install
+      # The lockfile is now generated on Linux and carries the full matrix for
+      # both toolchains, win32 included, so it installs on either platform.
+      # Verified by probe before adopting: a Linux-written lockfile keeps the
+      # Windows binaries, which is what makes this safe rather than a swap of
+      # one broken platform for the other.
+      - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test

@@ -168,22 +168,34 @@ qu'ils existent, parce que leur symptôme est **un succès**, jamais une erreur.
    raisons sans rapport avec le diff, ou pire, passe sur du code qui n'est plus
    là. Tuer les ports 3210/3211 avant une campagne e2e.
 
-CI (`.github/workflows/ci.yml`) fait tourner les mêmes gates, mais **CI n'a
-jamais été verte** : le job `test` mourait au démarrage de vitest, faute de
-binaires rollup/esbuild Linux dans un `package-lock.json` généré sous Windows
-(npm/cli#4828). Le job `e2e` passait pendant tout ce temps — Next compile avec
-swc, dont les binaires Linux sont bien dans le lockfile — ce qui rendait la
-panne invisible : un badge vert à côté d'un badge rouge.
+CI (`.github/workflows/ci.yml`) fait tourner les mêmes gates, avec `npm ci`
+dans les deux jobs.
 
-Le job `test` supprime donc le lockfile et résout à neuf, ce que conseille le
-message d'erreur de npm lui-même. **C'est un compromis, pas une correction :**
-les versions y flottent dans les plages de `package.json`, donc une régression
-transitive peut atteindre CI avant un développeur. `npm install` seul ne suffit
-pas (il respecte l'arbre élagué), et régénérer le lockfile depuis Windows non
-plus — même reconstruit de zéro, il ne contient que du win32.
+**`package-lock.json` doit être généré sous Linux.** C'est la seule contrainte
+non évidente de ce dépôt côté dépendances, et elle a coûté cinq jours de CI
+rouge : npm élague les paquets optionnels de plateforme qui ne correspondent
+pas à la machine qui écrit le lockfile (npm/cli#4828). Généré sous Windows, il
+ne contenait que `@rollup/rollup-win32-*` et `@esbuild/win32-x64` ; `npm ci`
+sous Linux installait donc un arbre sans binaire rollup, et vitest mourait
+avant sa première assertion. Le job `e2e` passait pendant tout ce temps — Next
+compile avec swc, présent en Linux dans le lockfile — d'où un badge vert à côté
+d'un badge rouge, que personne n'a lu.
 
-**La vraie correction : générer le lockfile sous Linux, le commiter, et
-remettre `npm ci`.** Tant que ce n'est pas fait, ce paragraphe reste vrai.
+L'asymétrie n'est pas réciproque, et c'est ce qui rend la règle utilisable : un
+lockfile écrit sous **Linux** contient la matrice complète des deux
+chaînes — win32 compris — donc il s'installe sur les deux plateformes. Vérifié
+par sonde avant adoption, puis par un `npm ci` réel sous Windows.
+
+Deux impasses, pour ne pas les refaire :
+
+- `npm install --package-lock-only` sur un lockfile existant **n'ajoute pas**
+  les entrées manquantes, sous Linux comme sous Windows ;
+- `--os=linux --cpu=x64` ne produit aucun diff.
+
+Seule une régénération complète fonctionne, et elle **re-résout les versions**
+dans les plages de `package.json`. Celle-ci en a déplacé 77, dont
+`@hono/node-server` 1.19.17 → 2.1.1 (majeure). Les gates passent, mais si un
+jour vous régénérez : lisez le diff, il n'est jamais uniquement plateforme.
 
 ### Protection de branche
 
