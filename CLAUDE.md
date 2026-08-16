@@ -185,6 +185,30 @@ plus — même reconstruit de zéro, il ne contient que du win32.
 **La vraie correction : générer le lockfile sous Linux, le commiter, et
 remettre `npm ci`.** Tant que ce n'est pas fait, ce paragraphe reste vrai.
 
+### Protection de branche
+
+`master` exige les deux checks — `test` **et** `e2e` — avant qu'une pull
+request puisse être fusionnée. Force-push et suppression de la branche sont
+bloqués.
+
+Le pourquoi : pendant cinq jours le badge `e2e` est resté vert à côté d'un
+badge `test` rouge, et personne ne l'a lu. Le signal existait ; ce qui manquait
+était l'obligation de le regarder. Exiger les deux, et pas seulement l'un,
+c'est précisément ce qui empêche qu'une moitié verte serve d'alibi à l'autre.
+
+**`enforce_admins` est à `false` :** le propriétaire pousse encore directement
+sur `master`, comme tout l'historique du dépôt. La protection mord donc sur les
+PR, pas sur ces pushes — c'est délibéré, pour ne pas casser le flux existant,
+et c'est aussi sa limite. Pour la rendre absolue, y compris pour le
+propriétaire :
+
+```
+gh api -X PATCH repos/maxencerousseau38-prog/localize-infra/branches/master/protection/enforce_admins
+```
+
+`strict` est à `false` : une branche n'a pas besoin d'être à jour avec `master`
+avant fusion. Sur un dépôt à un seul auteur, l'exiger ne force que des rebases.
+
 ## Frontend defaults
 
 For every website, landing page, dashboard, marketing page, or React/Next.js frontend:
