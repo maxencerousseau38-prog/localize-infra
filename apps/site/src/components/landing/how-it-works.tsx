@@ -54,11 +54,31 @@ export function HowItWorks() {
         </h2>
       </div>
 
-      {/* The rail. A row of connected nodes above lg, a spine below it — the
-          same sequence either way, never two rows that read as two pipelines. */}
+      {/*
+       * Three arrangements, because one column of five is wasteful at tablet
+       * width and two columns of five are unreadable at phone width.
+       *
+       *   <640    one column, connected spine
+       *   640…1023 two columns, no spine
+       *   ≥1024   five columns, horizontal rail
+       *
+       * The middle tier is the one that needed care. This section was 1477px
+       * at 768 with the rail alone taking 487 of it — five stages stacked down
+       * a 720px-wide column, each about 360px narrower than it had room for.
+       *
+       * The spine is *removed* there rather than duplicated, and that is the
+       * whole design. A vertical connector drawn down two columns is literally
+       * two pipelines side by side, which is the failure the previous version
+       * of this comment refused to risk — rightly. Without it the ordinals do
+       * the work they were always for: 01…05 in reading order, no line
+       * implying a flow the layout cannot honour.
+       *
+       * Below 640 the columns would be ~171px, too narrow for a stage summary
+       * plus a mono artifact path, so that tier keeps the spine unchanged.
+       */}
       <ol
         aria-label="The five pipeline stages"
-        className="mt-10 grid gap-y-6 lg:grid-cols-5 lg:gap-x-6"
+        className="mt-10 grid gap-y-6 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-5 lg:gap-x-6"
       >
         {PIPELINE_STAGES.map((stage, i) => {
           const last = i === PIPELINE_STAGES.length - 1;
@@ -71,7 +91,12 @@ export function HowItWorks() {
                   // -1.5rem tracks the list's row gap exactly: the spine has to
                   // reach the next node, and a connector that stops short of it
                   // draws five separate items rather than one sequence.
-                  className="absolute start-[7px] top-4 bottom-[-1.5rem] w-px bg-subtle lg:start-4 lg:top-[7px] lg:bottom-auto lg:h-px lg:w-[calc(100%+1.5rem)]"
+                  //
+                  // `sm:hidden lg:block` is the two-column tier opting out. A
+                  // spine there would run down each column independently and
+                  // read as two pipelines, and item 04's connector would point
+                  // at empty space rather than at 05.
+                  className="absolute start-[7px] top-4 bottom-[-1.5rem] w-px bg-subtle sm:hidden lg:block lg:start-4 lg:top-[7px] lg:bottom-auto lg:h-px lg:w-[calc(100%+1.5rem)]"
                 />
               )}
               {/*
