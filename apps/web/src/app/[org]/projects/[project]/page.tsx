@@ -2,6 +2,7 @@ import { Page, PageHeader, PageMeta } from '@/components/page';
 import {
   findOrganization,
   findProject,
+  listRuns,
   requireSession,
 } from '@/lib/data/workspace';
 import { isGitHubConfigured, isOperator } from '@/lib/github/config';
@@ -10,6 +11,7 @@ import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { RepositorySection } from './repository-section';
+import { RunsSection } from './runs-section';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -34,6 +36,16 @@ export default async function ProjectPage({
   const operator = isOperator(session.email);
   const available =
     gitHubConfigured && operator ? await listInstallationRepositories() : [];
+
+  const runs = await listRuns(project.id);
+  const connected = Boolean(
+    project.repository_owner && project.repository_name,
+  );
+  const runReason = !operator
+    ? 'Running the pipeline is limited to this deployment’s operators while the GitHub App installation is shared.'
+    : !connected
+      ? 'Connect a repository before running.'
+      : null;
 
   return (
     <Page>
@@ -90,6 +102,27 @@ export default async function ProjectPage({
         available={available}
         isOperator={operator}
         gitHubConfigured={gitHubConfigured}
+      />
+
+      <RunsSection
+        orgSlug={org}
+        projectSlug={project.slug}
+        canRun={operator && connected}
+        reason={runReason}
+        runs={runs.map((run) => ({
+          id: run.id,
+          status: run.status,
+          stage: run.stage,
+          framework: run.framework,
+          keysExtracted: run.keys_extracted,
+          keysTranslated: run.keys_translated,
+          localesSucceeded: run.locales_succeeded,
+          localesFailed: run.locales_failed,
+          error: run.error,
+          prUrl: run.pr_url,
+          prNumber: run.pr_number,
+          createdAt: run.created_at,
+        }))}
       />
     </Page>
   );

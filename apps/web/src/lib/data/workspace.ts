@@ -140,3 +140,34 @@ export function toSlug(input: string): string | null {
 
   return slug.length >= 2 ? slug : null;
 }
+
+export interface RunRecord {
+  id: string;
+  status: 'queued' | 'running' | 'succeeded' | 'partial' | 'failed';
+  stage: string;
+  framework: string | null;
+  keys_extracted: number;
+  keys_translated: number;
+  locales_succeeded: number;
+  locales_failed: number;
+  error: string | null;
+  pr_url: string | null;
+  pr_number: number | null;
+  created_at: string;
+}
+
+/** Runs for a project, newest first. Scoped by RLS like everything else. */
+export async function listRuns(projectId: string): Promise<RunRecord[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('runs')
+    .select(
+      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at',
+    )
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) throw new Error(`Could not load runs: ${error.message}`);
+  return (data ?? []) as RunRecord[];
+}
