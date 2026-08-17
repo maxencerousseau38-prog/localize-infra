@@ -35,7 +35,9 @@ export default async function ProjectPage({
   const gitHubConfigured = isGitHubConfigured();
   const operator = isOperator(session.email);
   const available =
-    gitHubConfigured && operator ? await listInstallationRepositories() : [];
+    gitHubConfigured && operator
+      ? await listInstallationRepositories(organization.id)
+      : [];
 
   const runs = await listRuns(project.id);
   const connected = Boolean(
