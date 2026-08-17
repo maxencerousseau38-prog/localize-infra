@@ -42,9 +42,21 @@ test.describe('workspace', () => {
     page,
   }) => {
     await signIn(page);
-    // `/` is a signpost once a database exists: everything the sample home
-    // shows is still unbuilt, so a signed-in user goes to real data instead.
-    await expect(page).toHaveURL(/\/acceptance\/projects$/);
+    /*
+     * `/` is a signpost once a database exists: everything the sample home
+     * shows is still unbuilt, so a signed-in user goes to real data instead.
+     *
+     * The generous timeout is not padding. signIn only waits for the URL to
+     * leave /login, and landing on `/` costs a second round trip — the page
+     * queries the caller's organizations and redirects again. Under a fully
+     * parallel suite that second hop is slower than the default 5s assertion
+     * window, which is how this failed once and passed on the next run. A
+     * retry would have hidden it; waiting for the thing that is actually
+     * still happening does not.
+     */
+    await expect(page).toHaveURL(/\/acceptance\/projects$/, {
+      timeout: 20_000,
+    });
   });
 
   test('the project list shows what is actually in the database', async ({
