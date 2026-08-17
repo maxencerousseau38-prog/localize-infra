@@ -59,8 +59,41 @@ Voir `docs/product/`, `docs/design/`, `docs/frontend/` (PRD → jalons), et
 
 **`apps/site` est déployé** sur https://localize-infra-site.vercel.app (projet
 Vercel `localize-infra-site`, compte `drive-os-s-projects`, suivi de `master`).
-C'est le **seul** projet Vercel du dépôt. `apps/web`, `apps/api` et
+
+**`apps/web` est déployé** sur https://localize-infra-web.vercel.app (projet
+Vercel `localize-infra-web`, même compte, Root Directory `apps/web`, fonctions
+en `cdg1`). Ce sont les **deux** projets Vercel du dépôt. `apps/api` et
 `services/github-app` restent locaux.
+
+`apps/web` n'est **pas** relié à Git : le déploiement est une archive envoyée
+par la CLI **depuis la racine du dépôt**, avec `VERCEL_PROJECT_ID` en surcharge
+parce que le lien `.vercel` de la racine appartient au site. C'est ce qui fait
+que la directive `@source` de Tailwind trouve `packages/ui/src` — tout le dépôt
+est envoyé. Relier ce projet à Git changerait ça et rendrait le réglage
+« Include source files outside of the Root Directory » indispensable. Voir
+`apps/web/DEPLOYING.md`, qui donne la commande exacte et le contrôle à rejouer
+(des classes présentes dans `packages/ui/src` et absentes d'`apps/web/src`
+doivent apparaître dans le CSS servi).
+
+Seuls `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` sont configurés. Ni la clé
+privée de la GitHub App, ni `LOCALIZE_API_*` : le pipeline pointerait sur
+`127.0.0.1:8787`, et l'activer ferait sortir l'écart connu à l'invariant 5 du
+poste du développeur vers une URL publique. L'interface le dit au lieu
+d'échouer bizarrement.
+
+**Problème ouvert :** la production partage le projet Supabase du
+développement, qui contient le compte semé par `supabase/seeds/dev-user.sql` —
+mot de passe écrit dans ce dépôt, fichier qui précise « NOT for production ».
+`acceptance@localize-infra.dev` s'authentifie aujourd'hui contre le déploiement
+public, vérifié. La RLS tient et borne ce compte à son seul workspace, sans
+secret et sans pipeline activable ; c'est donc un point d'appui, pas une
+brèche. Il ne devrait pas exister pour autant. Aucun correctif n'est appliqué
+ici parce que les trois options engagent une décision humaine : supprimer le
+compte détruit en cascade l'historique du premier run réel (PR #2), changer le
+mot de passe casse les tests d'acceptation et le prochain re-seed le remet, et
+la vraie réponse — un projet Supabase distinct pour la production — est un
+arbitrage de coût et de migration. D'ici là, ce déploiement est une
+démonstration, pas un endroit où mettre des données client.
 
 Cette phrase a déjà été fausse, et pas qu'un peu : un projet
 `localize-infra-api` a existé sur le même compte et redéployait `apps/api` à
