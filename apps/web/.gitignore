@@ -1,1 +1,4 @@
 .review/
+
+.vercel
+.env*
