@@ -1,3 +1,4 @@
+import { updateSession } from '@/lib/supabase/session';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -38,7 +39,20 @@ function contentSecurityPolicy(nonce: string): string {
   ].join('; ');
 }
 
-export function proxy(request: NextRequest) {
+/**
+ * Async now, because it authenticates.
+ *
+ * The order matters: the CSP is built and attached first so that every
+ * response carries it — including the redirect an unauthenticated request
+ * receives — and the session check runs second, able to replace that response
+ * with a redirect while keeping the header.
+ *
+ * `connect-src 'self'` is deliberately unchanged. Every Supabase call in this
+ * app is made from the server, so the browser has no origin to reach and the
+ * policy did not have to be widened to add authentication. That is the payoff
+ * for doing sign-in as a Server Action rather than from the client.
+ */
+export async function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID().replace(/-/g, '');
   const csp = contentSecurityPolicy(nonce);
 
@@ -50,7 +64,12 @@ export function proxy(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('Content-Security-Policy', csp);
-  return response;
+
+  // Refresh the session and enforce authentication. Returns either this
+  // response with refreshed cookies, or a redirect to /login.
+  const authed = await updateSession(request, response);
+  authed.headers.set('Content-Security-Policy', csp);
+  return authed;
 }
 
 export const config = {
