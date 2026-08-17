@@ -81,19 +81,29 @@ privée de la GitHub App, ni `LOCALIZE_API_*` : le pipeline pointerait sur
 poste du développeur vers une URL publique. L'interface le dit au lieu
 d'échouer bizarrement.
 
-**Problème ouvert :** la production partage le projet Supabase du
-développement, qui contient le compte semé par `supabase/seeds/dev-user.sql` —
-mot de passe écrit dans ce dépôt, fichier qui précise « NOT for production ».
-`acceptance@localize-infra.dev` s'authentifie aujourd'hui contre le déploiement
-public, vérifié. La RLS tient et borne ce compte à son seul workspace, sans
-secret et sans pipeline activable ; c'est donc un point d'appui, pas une
-brèche. Il ne devrait pas exister pour autant. Aucun correctif n'est appliqué
-ici parce que les trois options engagent une décision humaine : supprimer le
-compte détruit en cascade l'historique du premier run réel (PR #2), changer le
-mot de passe casse les tests d'acceptation et le prochain re-seed le remet, et
-la vraie réponse — un projet Supabase distinct pour la production — est un
-arbitrage de coût et de migration. D'ici là, ce déploiement est une
-démonstration, pas un endroit où mettre des données client.
+**Deux projets Supabase, séparés depuis le 2026-08-17.** Développement et
+tests d'acceptation : `localize-infra` (`aguwalokxfgtqbzmdjbs`). Production :
+`localize-infra-prod` (`ijgheekdihgssktyweyy`). Les deux en `eu-west-3`, les
+onze migrations appliquées de part et d'autre.
+
+Ils n'en formaient qu'un, et ce n'était pas un détail : le compte semé par
+`supabase/seeds/dev-user.sql` — mot de passe écrit dans ce dépôt, fichier qui
+précise « NOT for production » — s'authentifiait contre le déploiement public.
+Vérifié, puis re-vérifié après la bascule : le même appel renvoie désormais
+`Invalid login credentials`. La base de production ne contient aucun compte.
+
+La phrase « NOT for production » n'empêchait rien, donc la règle est maintenant
+appliquée et non plus écrite. La base de production porte une marque posée hors
+migration — `comment on database postgres is 'localize-infra-production'` ;
+hors migration parce qu'une migration se rejoue aussi en développement et ne
+distinguerait donc pas les deux. Le seed lit cette marque et refuse de
+s'exécuter. Testé dans les deux sens : il lève une exception sur la production,
+il passe sur le développement.
+
+Le troisième emplacement de projet a été libéré en **suspendant** le projet
+ReFrame (`ngbxfpsfmjagauavbuhd`, vide — 0 ligne sur ses six tables). C'est
+réversible par `restore_project` ; si ReFrame en a de nouveau besoin, il faudra
+arbitrer l'emplacement.
 
 Cette phrase a déjà été fausse, et pas qu'un peu : un projet
 `localize-infra-api` a existé sur le même compte et redéployait `apps/api` à
