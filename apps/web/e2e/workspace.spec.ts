@@ -77,21 +77,25 @@ test.describe('workspace', () => {
     await expect(page.getByText('de', { exact: true })).toBeVisible();
   });
 
-  test('the repository section says why it cannot connect yet', async ({
+  test('a connected repository is reported as fact, not as intent', async ({
     page,
   }) => {
     await signIn(page, '/acceptance/projects/demo');
 
-    // The honest boundary: no "Connect repository" button that cannot work.
-    await expect(
-      page.getByRole('heading', { name: 'Repository' }),
-    ).toBeVisible();
-    await expect(
-      page.getByText(/GitHub App, which has not been created/i),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: /connect repository/i }),
-    ).toHaveCount(0);
+    // Either state is legitimate depending on whether the seed has been
+    // connected, but the badge and the detail must agree: a "Connected" badge
+    // with no repository underneath would be the kind of claim this product
+    // exists not to make.
+    const connected = await page
+      .getByText('Connected', { exact: true })
+      .isVisible()
+      .catch(() => false);
+
+    if (connected) {
+      await expect(page.getByText(/^[\w.-]+\/[\w.-]+$/)).toBeVisible();
+    } else {
+      await expect(page.getByText('Not connected')).toBeVisible();
+    }
   });
 
   test('a workspace that is not yours is a 404, not a 403', async ({
@@ -108,6 +112,37 @@ test.describe('workspace', () => {
     // Indistinguishable from a workspace that does not exist. A 403 would
     // confirm the slug is taken, which is an enumeration oracle.
     expect(response?.status()).toBe(404);
+  });
+
+  /*
+   * The gate that matters. One GitHub App installation is shared by the whole
+   * deployment, so a non-operator being able to connect a repository would let
+   * one tenant point a project at another's code and open pull requests
+   * against it.
+   *
+   * These assert the interface. The control itself is the isOperator() check
+   * at the top of connectRepository, before anything is read or written.
+   */
+  test('a non-operator is not offered the connection at all', async ({
+    page,
+  }) => {
+    await page.goto(
+      `${AUTH_URL}/login?next=${encodeURIComponent('/intruder-co/projects/theirs')}`,
+      { waitUntil: 'networkidle' },
+    );
+    await page.getByLabel('Email').fill('intruder@localize-infra.dev');
+    await page.getByLabel('Password').fill('intruder-test-pw-8chars');
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.waitForURL((url) => !url.pathname.startsWith('/login'), {
+      timeout: 15_000,
+    });
+
+    await expect(page.locator('select[name="repository"]')).toHaveCount(0);
+    await expect(
+      page.getByRole('button', { name: /connect repository/i }),
+    ).toHaveCount(0);
+    // Told why, rather than shown a disabled control.
+    await expect(page.getByText(/limited to its operators/i)).toBeVisible();
   });
 
   test('a project slug from another workspace is also a 404', async ({

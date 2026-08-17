@@ -4,9 +4,12 @@ import {
   findProject,
   requireSession,
 } from '@/lib/data/workspace';
+import { isGitHubConfigured, isOperator } from '@/lib/github/config';
+import { listInstallationRepositories } from '@/lib/github/repositories';
 import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { RepositorySection } from './repository-section';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -15,7 +18,7 @@ export default async function ProjectPage({
 }: {
   params: Promise<{ org: string; project: string }>;
 }) {
-  await requireSession();
+  const session = await requireSession();
   const { org, project: projectSlug } = await params;
 
   const organization = await findOrganization(org);
@@ -23,6 +26,14 @@ export default async function ProjectPage({
 
   const project = await findProject(organization.id, projectSlug);
   if (!project) notFound();
+
+  // The list is only fetched for an operator on a configured deployment.
+  // Calling GitHub to render a section that will say "not available" would be
+  // a network round trip to produce a sentence.
+  const gitHubConfigured = isGitHubConfigured();
+  const operator = isOperator(session.email);
+  const available =
+    gitHubConfigured && operator ? await listInstallationRepositories() : [];
 
   return (
     <Page>
@@ -64,33 +75,22 @@ export default async function ProjectPage({
         </div>
       </dl>
 
-      {/*
-       * The honest boundary. Everything above this line is real, persisted and
-       * scoped to the caller; everything below it needs the GitHub App, which
-       * does not exist yet — so the page says so rather than showing a
-       * "Connect repository" button that cannot work.
-       *
-       * This is the sample-data contract applied to a capability rather than to
-       * rows: a control that appears operational and is not is worse than an
-       * empty section (DESIGN.md §11).
-       */}
-      <section
-        aria-labelledby="repository"
-        className="mt-8 rounded-lg border border-line bg-surface/40 px-5 py-6"
-      >
-        <h2
-          id="repository"
-          className="text-subtitle font-semibold text-primary"
-        >
-          Repository
-        </h2>
-        <p className="mt-2 max-w-[64ch] text-small leading-6 text-secondary">
-          Connecting a repository needs the GitHub App, which has not been
-          created yet. Until it exists there is no way to authorise access to
-          your code, so this project cannot extract or open a pull request from
-          this surface. The CLI still works against a local clone.
-        </p>
-      </section>
+      <RepositorySection
+        orgSlug={org}
+        projectSlug={project.slug}
+        connected={
+          project.repository_owner && project.repository_name
+            ? {
+                owner: project.repository_owner,
+                name: project.repository_name,
+                branch: project.repository_branch,
+              }
+            : null
+        }
+        available={available}
+        isOperator={operator}
+        gitHubConfigured={gitHubConfigured}
+      />
     </Page>
   );
 }

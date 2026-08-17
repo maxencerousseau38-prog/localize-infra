@@ -70,6 +70,10 @@ export interface Database {
           name: string;
           organization_id: string;
           slug: string;
+          repository_branch: string | null;
+          repository_connected_at: string | null;
+          repository_name: string | null;
+          repository_owner: string | null;
           source_locale: string;
           target_locales: string[];
           updated_at: string;
@@ -80,6 +84,10 @@ export interface Database {
           name: string;
           organization_id: string;
           slug: string;
+          repository_branch?: string | null;
+          repository_connected_at?: string | null;
+          repository_name?: string | null;
+          repository_owner?: string | null;
           source_locale?: string;
           target_locales?: string[];
           updated_at?: string;
@@ -90,6 +98,10 @@ export interface Database {
           name?: string;
           organization_id?: string;
           slug?: string;
+          repository_branch?: string | null;
+          repository_connected_at?: string | null;
+          repository_name?: string | null;
+          repository_owner?: string | null;
           source_locale?: string;
           target_locales?: string[];
           updated_at?: string;
