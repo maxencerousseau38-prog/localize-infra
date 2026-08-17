@@ -150,10 +150,21 @@ export function AppSidebar() {
         </nav>
       </SidebarContent>
 
-      {/* The footer states what the shell is connected to, which is nothing.
-          The sidebar previously ended in empty space; saying "no project
-          connected" is both the honest answer and the thing a reader most
-          needs to know before trusting a number on screen. */}
+      {/*
+       * Scoped to the screens listed above, because it stopped being true of
+       * the application as a whole.
+       *
+       * It read "No project connected. Everything shown is sample data." That
+       * was correct when nothing was real. It is now a false claim on four
+       * surfaces — the workspace, its projects, a project's runs and billing —
+       * which read from the database, are scoped to the caller and persist. A
+       * banner asserting that real data is invented is the same defect as
+       * presenting invented data as real, pointing the other way, and this
+       * product cannot afford either.
+       *
+       * The routes in the nav above genuinely are still stubs, so the sentence
+       * survives with its subject narrowed rather than being deleted.
+       */}
       <SidebarFooter className="group-data-[collapsible=icon]:hidden">
         <div className="flex items-start gap-2 rounded-md border border-dashed border-strong px-2.5 py-2">
           <FlaskConical
@@ -162,7 +173,8 @@ export function AppSidebar() {
             strokeWidth={1.5}
           />
           <p className="text-micro leading-4 text-tertiary">
-            No project connected. Everything shown is sample data.
+            The screens listed above show sample data. Your workspace, projects
+            and runs are real.
           </p>
         </div>
       </SidebarFooter>

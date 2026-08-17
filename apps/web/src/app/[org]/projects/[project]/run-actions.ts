@@ -5,10 +5,12 @@ import { join } from 'node:path';
 import {
   findOrganization,
   findProject,
+  mayUsePrivateRepositories,
   requireSession,
 } from '@/lib/data/workspace';
 import { isOperator } from '@/lib/github/config';
 import { materialiseRepository } from '@/lib/github/materialise';
+import { canReachRepository } from '@/lib/github/repositories';
 import { createClient } from '@/lib/supabase/server';
 import {
   buildKeyCatalog,
@@ -62,6 +64,30 @@ export async function startRun(
   if (!project) return { error: 'That project is not available.' };
   if (!project.repository_owner || !project.repository_name) {
     return { error: 'Connect a repository before running.' };
+  }
+
+  /*
+   * Checked again here, not only at connect time.
+   *
+   * An entitlement can lapse after a repository was connected — a subscription
+   * ends, a grant is withdrawn — and a check that only ran once would leave the
+   * capability permanently attached to whoever had it first. Public
+   * repositories are unaffected: /pricing promises those are free and
+   * unlimited, so there is nothing to check for them.
+   */
+  const repository = await canReachRepository(
+    project.repository_owner,
+    project.repository_name,
+    organization.id,
+  );
+  if (
+    repository?.private &&
+    !(await mayUsePrivateRepositories(organization.id))
+  ) {
+    return {
+      error:
+        'This project points at a private repository, which needs a paid plan. Public repositories are free and unlimited.',
+    };
   }
 
   const supabase = await createClient();

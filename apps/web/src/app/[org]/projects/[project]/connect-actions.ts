@@ -3,6 +3,7 @@
 import {
   findOrganization,
   findProject,
+  mayUsePrivateRepositories,
   requireSession,
 } from '@/lib/data/workspace';
 import { isOperator } from '@/lib/github/config';
@@ -57,6 +58,25 @@ export async function connectRepository(
     return {
       error: `The GitHub App installation cannot reach ${owner}/${name}.`,
     };
+  }
+
+  /*
+   * The one entitlement this product has, checked server-side.
+   *
+   * /pricing promises public repositories are free and unlimited — no language
+   * cap, no string cap, no seat cap — so there is deliberately no check here
+   * for a public one. Private repositories are the paid capability, and the
+   * check is a boolean rather than a counter because invariant 3 forbids
+   * metering.
+   */
+  if (repository.private) {
+    const allowed = await mayUsePrivateRepositories(organization.id);
+    if (!allowed) {
+      return {
+        error:
+          'Private repositories need a paid plan. Public repositories are free and unlimited. Paid plans are not priced yet, so this cannot be upgraded today.',
+      };
+    }
   }
 
   const supabase = await createClient();
