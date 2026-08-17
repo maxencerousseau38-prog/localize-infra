@@ -12,6 +12,38 @@
 -- Every column GoTrue expects is written explicitly. Leaving the token columns
 -- NULL produces a row that looks correct in psql and then fails the password
 -- grant with "Invalid login credentials", which costs an hour to diagnose.
+
+-- "NOT for production" used to be a sentence in a comment, and a sentence in a
+-- comment does not stop anything. It did not stop this: while production and
+-- development shared one Supabase project, this account authenticated against
+-- the public deployment, and the file saying it should not still sat right
+-- here. The two databases are now separate, and the rule is enforced rather
+-- than written down.
+--
+-- The production database is stamped out of band, not by a migration —
+-- migrations replay into development too, so a marker created by one could not
+-- tell the two apart:
+--
+--   comment on database postgres is 'localize-infra-production';
+--
+-- A database with no stamp is assumed to be development, which is the safe
+-- default: a forgotten stamp costs a refused seed on a real database only if
+-- someone also forgot to stamp it, whereas the reverse default would let an
+-- unstamped production database be seeded silently.
+do $$
+begin
+  if coalesce(
+       shobj_description(
+         (select oid from pg_database where datname = current_database()),
+         'pg_database'),
+       '') = 'localize-infra-production'
+  then
+    raise exception
+      'refusing to seed: this database is stamped as production (%). This seed writes a password that is committed to the repository.',
+      current_database();
+  end if;
+end $$;
+
 delete from auth.users where email = 'acceptance@localize-infra.dev';
 
 insert into auth.users (

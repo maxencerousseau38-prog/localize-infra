@@ -85,33 +85,37 @@ updated in the same commit — the last time a deployment and the documentation
 disagreed here, `apps/api` sat on a public URL for days while CLAUDE.md called
 it local.
 
-## Open problem: production shares the development database
+## Production has its own database
 
-`SUPABASE_URL` points at the same Supabase project used for local development
-and acceptance tests. That project contains the account seeded by
-`supabase/seeds/dev-user.sql`, whose password is written in that file, in this
-repository. The seed says "NOT for production". It is now reachable from a
-public URL: `acceptance@localize-infra.dev` authenticates against the live
-deployment today, verified.
+Production points at `localize-infra-prod` (`ijgheekdihgssktyweyy`, eu-west-3).
+Development and the acceptance suite keep `localize-infra`
+(`aguwalokxfgtqbzmdjbs`). Only the **production** Vercel environment was
+repointed; preview and development still resolve to the development project, so
+a preview deployment cannot write to customer data.
 
-What that account can reach is bounded by RLS, and the bound holds — it sees
-one workspace, one project and its runs, and nothing belonging to anyone else.
-There are no secrets in those rows, and with the GitHub App unset the pipeline
-cannot be triggered from production. So this is a foothold, not a breach.
+This split closed a real exposure rather than a tidiness complaint. The two
+shared one database, and `supabase/seeds/dev-user.sql` writes an account whose
+password is committed to this repository — so it authenticated against the
+public deployment. Verified before, and verified again after: the same request
+now returns `Invalid login credentials`, and the production database holds no
+accounts at all.
 
-It should still not exist. It is not fixed here because every fix is somebody
-else's call:
+Verified end to end, not inferred from the environment variable: a confirmed
+user created **only** in the new production database signed in on
+`localize-infra-web.vercel.app` and landed on `/onboarding` — "Create a
+workspace" — which is the correct screen for a database with zero
+organizations. That probe user was deleted afterwards; production is empty.
 
-- **Deleting the account** cascades to the Acceptance workspace, its project and
-  its run history — including the record of the first real end-to-end run that
-  opened PR #2. That is evidence worth keeping, not a disposable fixture.
-- **Rotating the password** breaks local acceptance tests until the seed is
-  re-run, and the next re-seed puts the known password straight back.
-- **A separate Supabase project for production** is the actual answer, and it
-  is a decision about cost and data migration.
+"NOT for production" was a sentence in a comment, and a sentence in a comment
+stops nothing. The rule is now enforced: the production database carries a
+stamp applied out of band —
+`comment on database postgres is 'localize-infra-production'` — and the seed
+reads it and refuses. Out of band because a migration replays into development
+too and so could not distinguish the two. `supabase/README.md` has the detail.
 
-Until one is chosen, treat this deployment as a demonstration, not as somewhere
-to put real customer data.
+The remaining caveat is the plan, not the data: `localize-infra-prod` is on the
+free tier, which pauses on inactivity and is not where a real customer database
+should live long-term.
 
 ## Signup is open
 
