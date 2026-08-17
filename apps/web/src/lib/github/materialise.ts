@@ -1,7 +1,7 @@
 import 'server-only';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join, sep } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { App } from 'octokit';
 import { readGitHubConfig } from './config';
 
@@ -32,6 +32,39 @@ const SKIP =
 
 /** A blob larger than this is not hand-written source. */
 const MAX_BLOB_BYTES = 512 * 1024;
+
+/**
+ * Resolves a repository-relative path inside `dir`, or returns null.
+ *
+ * The path comes from GitHub's tree API, which reports what is in the tree
+ * object — and a tree can be written with git's plumbing, so its contents are
+ * attacker-controlled by whoever owns the repository. That was tolerable while
+ * the only reachable repositories were ours. It stops being tolerable the
+ * moment a customer installs the App on a repository they wrote, which is the
+ * next thing this product does.
+ *
+ * `join(dir, '../../x')` happily escapes the temporary directory and the write
+ * lands wherever it points. So containment is checked after resolution rather
+ * than by inspecting the string: `resolve` collapses the traversal first, and
+ * `relative` then answers the only question that matters — is the result still
+ * under `dir`.
+ */
+export function safeTargetPath(dir: string, repoPath: string): string | null {
+  // A NUL truncates the path at the syscall boundary, so "a\0../../x" can be
+  // one thing to this check and another to the filesystem.
+  if (repoPath.includes('\0')) return null;
+
+  const segments = repoPath.split('/');
+  if (segments.some((segment) => segment === '..')) return null;
+  if (isAbsolute(repoPath) || /^[A-Za-z]:/.test(repoPath)) return null;
+
+  const target = resolve(dir, segments.join(sep));
+  const inside = relative(dir, target);
+  if (inside === '' || inside.startsWith('..') || isAbsolute(inside)) {
+    return null;
+  }
+  return target;
+}
 
 export async function materialiseRepository(
   owner: string,
@@ -72,10 +105,16 @@ export async function materialiseRepository(
       { owner, repo, file_sha: entry.sha },
     );
 
+    // Refused rather than sanitised: a repository containing a traversing path
+    // is not a repository this product should quietly half-extract.
+    const target = safeTargetPath(dir, entry.path);
+    if (!target) {
+      throw new Error(
+        `Refusing to extract ${entry.path}: it resolves outside the working directory.`,
+      );
+    }
+
     const contents = Buffer.from(blob.content, 'base64');
-    // Normalise the separator so a POSIX path from the API is written correctly
-    // on Windows, where this is developed.
-    const target = join(dir, entry.path.split('/').join(sep));
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, contents);
     written += 1;
