@@ -1,4 +1,29 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Next loads apps/web/.env.local for the server it runs; the test process does
+ * not see it. auth.spec.ts decides whether to run by looking for SUPABASE_URL,
+ * so without this it skipped itself on the very machine that can run it.
+ *
+ * Deliberately does not overwrite anything already set: CI passes real values
+ * through the environment, and a stray checked-out file must not win over them.
+ */
+function loadLocalEnv(): void {
+  const path = join(__dirname, '.env.local');
+  if (!existsSync(path)) return;
+
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    const match = /^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/.exec(line);
+    if (!match) continue;
+    const [, key, rawValue] = match;
+    if (!key || process.env[key]) continue;
+    process.env[key] = (rawValue ?? '').replace(/^["']|["']$/g, '');
+  }
+}
+
+loadLocalEnv();
 
 /**
  * Observed once, not reproduced: on 2026-08-08 a single `turbo run test:e2e`
@@ -21,13 +46,53 @@ export default defineConfig({
   reporter: [['list']],
   use: { baseURL: 'http://127.0.0.1:3211', trace: 'off' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: 'npx next start -p 3211',
-    url: 'http://127.0.0.1:3211',
-    // Never reuse in CI. A stale server left on this port would answer every
-    // request and the suite would pass against code that is not the code under
-    // test — a failure this repo has already paid for once.
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer: [
+    {
+      command: 'npx next start -p 3211',
+      url: 'http://127.0.0.1:3211',
+      // Never reuse in CI. A stale server left on this port would answer every
+      // request and the suite would pass against code that is not the code under
+      // test — a failure this repo has already paid for once.
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+      /*
+       * Started with no database on purpose, and stated rather than inherited.
+       *
+       * This suite tests the application shell: navigation, the command palette,
+       * tables, sample-data honesty, axe, responsive behaviour. None of it is
+       * about authentication, and all of it lives behind a login the moment
+       * SUPABASE_URL is set — 52 of these tests began redirecting to /login the
+       * hour auth landed.
+       *
+       * Setting the variables to empty here overrides apps/web/.env.local, so a
+       * developer with a working local database and CI without one run the same
+       * suite against the same configuration. The alternative — inheriting
+       * whatever the machine happens to have — is how a suite passes for one
+       * person and fails for another.
+       *
+       * Authentication itself is covered by e2e/auth.spec.ts, which starts its
+       * own server with a real database and skips when there is none.
+       */
+      env: { SUPABASE_URL: '', SUPABASE_PUBLISHABLE_KEY: '' },
+    },
+    /*
+     * The same build, with a real database, on its own port.
+     *
+     * auth.spec.ts targets this one. It is a second server rather than a flag
+     * on the first because the two suites need opposite configurations: the
+     * shell suite must not be behind a login, and the auth suite is entirely
+     * about being behind one.
+     *
+     * Inherits the ambient environment, so it is configured on a machine with
+     * apps/web/.env.local and unconfigured in CI. The spec skips itself when
+     * there is no database rather than failing, and says so in the skip
+     * reason — a red suite for a missing secret teaches nothing.
+     */
+    {
+      command: 'npx next start -p 3212',
+      url: 'http://127.0.0.1:3212',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    },
+  ],
 });
