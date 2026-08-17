@@ -171,3 +171,25 @@ export async function listRuns(projectId: string): Promise<RunRecord[]> {
   if (error) throw new Error(`Could not load runs: ${error.message}`);
   return (data ?? []) as RunRecord[];
 }
+
+export interface GitHubInstallation {
+  installation_id: number;
+  account_login: string;
+  account_type: string;
+  connected_at: string;
+}
+
+/** The workspace's own GitHub installation, if it has connected one. */
+export async function findGitHubInstallation(
+  organizationId: string,
+): Promise<GitHubInstallation | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('organization_github_installations')
+    .select('installation_id,account_login,account_type,connected_at')
+    .eq('organization_id', organizationId)
+    .maybeSingle();
+
+  if (error) return null;
+  return (data as GitHubInstallation | null) ?? null;
+}

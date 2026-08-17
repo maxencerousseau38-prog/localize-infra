@@ -1,4 +1,5 @@
 import 'server-only';
+import { createClient } from '@/lib/supabase/server';
 import { App } from 'octokit';
 import { readGitHubConfig } from './config';
 
@@ -19,14 +20,43 @@ export interface AvailableRepository {
  * set of reachable repositories a matter of what someone guessed rather than
  * what the installation was granted.
  */
-export async function listInstallationRepositories(): Promise<
-  AvailableRepository[]
-> {
+/**
+ * The installation to act as for a given workspace.
+ *
+ * A workspace that has installed the App itself gets its own installation, and
+ * therefore reaches its own repositories and nobody else's. Falling back to the
+ * shared environment installation is what the operator path uses, and is the
+ * reason that path is gated: the shared token reaches whatever it was ever
+ * granted, regardless of who is asking.
+ */
+export async function installationIdFor(
+  organizationId: string | null,
+): Promise<number | null> {
+  if (organizationId) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from('organization_github_installations')
+      .select('installation_id')
+      .eq('organization_id', organizationId)
+      .maybeSingle();
+
+    if (data?.installation_id) return Number(data.installation_id);
+  }
+
+  return readGitHubConfig()?.installationId ?? null;
+}
+
+export async function listInstallationRepositories(
+  organizationId: string | null = null,
+): Promise<AvailableRepository[]> {
   const config = readGitHubConfig();
   if (!config) return [];
 
+  const installationId = await installationIdFor(organizationId);
+  if (!installationId) return [];
+
   const app = new App({ appId: config.appId, privateKey: config.privateKey });
-  const octokit = await app.getInstallationOctokit(config.installationId);
+  const octokit = await app.getInstallationOctokit(installationId);
 
   // Paginated: an installation with more than 30 repositories would otherwise
   // silently show the first page and look like a complete list.
@@ -57,8 +87,9 @@ export async function listInstallationRepositories(): Promise<
 export async function canReachRepository(
   owner: string,
   name: string,
+  organizationId: string | null = null,
 ): Promise<AvailableRepository | null> {
-  const repositories = await listInstallationRepositories();
+  const repositories = await listInstallationRepositories(organizationId);
   return (
     repositories.find(
       (repo) =>

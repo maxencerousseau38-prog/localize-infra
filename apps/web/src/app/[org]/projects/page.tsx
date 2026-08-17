@@ -1,14 +1,17 @@
 import { Page, PageHeader, PageMeta } from '@/components/page';
 import {
   currentRole,
+  findGitHubInstallation,
   findOrganization,
   listProjects,
   requireSession,
 } from '@/lib/data/workspace';
+import { readGitHubConfig } from '@/lib/github/config';
 import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { GitHubConnection } from './github-connection';
 import { NewProject } from './new-project';
 
 export const metadata: Metadata = { title: 'Projects' };
@@ -33,10 +36,17 @@ export default async function ProjectsPage({
   // must be indistinguishable from one that does not exist.
   if (!organization) notFound();
 
-  const [projects, role] = await Promise.all([
+  const [projects, role, installation] = await Promise.all([
     listProjects(organization.id),
     currentRole(organization.id),
+    findGitHubInstallation(organization.id),
   ]);
+
+  // The slug is public (it is in the install URL), so reading it from the App
+  // rather than hardcoding it keeps the two from drifting.
+  const appSlug = readGitHubConfig()
+    ? (process.env.GITHUB_APP_SLUG ?? null)
+    : null;
 
   return (
     <Page>
@@ -50,6 +60,12 @@ export default async function ProjectsPage({
           </>
         }
         action={<NewProject orgSlug={org} />}
+      />
+
+      <GitHubConnection
+        organizationId={organization.id}
+        appSlug={appSlug}
+        connected={installation}
       />
 
       {projects.length === 0 ? (

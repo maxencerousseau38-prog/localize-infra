@@ -52,7 +52,7 @@ export async function connectRepository(
   const project = await findProject(organization.id, projectSlug);
   if (!project) return { error: 'That project is not available.' };
 
-  const repository = await canReachRepository(owner, name);
+  const repository = await canReachRepository(owner, name, organization.id);
   if (!repository) {
     return {
       error: `The GitHub App installation cannot reach ${owner}/${name}.`,

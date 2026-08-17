@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { App } from 'octokit';
 import { readGitHubConfig } from './config';
+import { installationIdFor } from './repositories';
 
 /**
  * Copies a repository into a temporary directory so packages/core can read it.
@@ -70,12 +71,21 @@ export async function materialiseRepository(
   owner: string,
   repo: string,
   ref: string,
+  organizationId: string | null = null,
 ): Promise<Materialised> {
   const config = readGitHubConfig();
   if (!config) throw new Error('No GitHub App configured');
 
+  // The workspace's own installation when it has one. Reading a customer's
+  // repository through the shared installation would work only for
+  // repositories the operator was granted, and would be the wrong token to use
+  // even then.
+  const installationId = await installationIdFor(organizationId);
+  if (!installationId)
+    throw new Error('No GitHub installation for this workspace');
+
   const app = new App({ appId: config.appId, privateKey: config.privateKey });
-  const octokit = await app.getInstallationOctokit(config.installationId);
+  const octokit = await app.getInstallationOctokit(installationId);
 
   const { data: tree } = await octokit.request(
     'GET /repos/{owner}/{repo}/git/trees/{tree_sha}',
