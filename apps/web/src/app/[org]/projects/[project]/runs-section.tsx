@@ -21,6 +21,31 @@ export interface RunRow {
   createdAt: string;
 }
 
+/**
+ * Whether a stored value may become a live link.
+ *
+ * The database now constrains pr_url to a github.com pull request URL, so this
+ * is the second lock rather than the only one. It exists because the first
+ * version rendered `href={run.prUrl}` directly, and finish_run is callable by
+ * any member of the organization — a stored `javascript:` URL was one click
+ * away from running in a colleague's session.
+ *
+ * Parsed rather than pattern-matched: `new URL` resolves the scheme the way
+ * the browser will, which is the only opinion that matters here.
+ */
+function asGitHubPullRequest(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') return null;
+    if (url.hostname !== 'github.com') return null;
+    if (!/^\/[^/]+\/[^/]+\/pull\/\d+$/.test(url.pathname)) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 const STATUS: Record<RunRow['status'], { tone: Tone; label: string }> = {
   queued: { tone: 'neutral', label: 'Queued' },
   running: { tone: 'neutral', label: 'Running' },
@@ -93,6 +118,7 @@ export function RunsSection({
         <ul className="mt-4 border-t border-subtle">
           {runs.map((run) => {
             const status = STATUS[run.status];
+            const prHref = asGitHubPullRequest(run.prUrl);
             return (
               <li
                 key={run.id}
@@ -115,9 +141,9 @@ export function RunsSection({
                   {run.localesFailed > 0 ? `, ${run.localesFailed} failed` : ''}
                 </span>
 
-                {run.prUrl ? (
+                {prHref ? (
                   <a
-                    href={run.prUrl}
+                    href={prHref}
                     target="_blank"
                     rel="noreferrer noopener"
                     className="rounded-sm font-mono text-caption text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
