@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { passwordProblem } from '@localize-infra/schemas';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -63,11 +64,15 @@ export async function signUp(
   const password = String(formData.get('password') ?? '');
 
   if (!email || !password) return { error: 'Email and password are required.' };
-  // Supabase enforces its own minimum; stating ours up front avoids a
-  // round-trip to be told the same thing.
-  if (password.length < 8) {
-    return { error: 'Use at least 8 characters.' };
-  }
+
+  // The policy is enforced here, on the server, because the client cannot be
+  // trusted to have run it — this action is reachable without the form.
+  //
+  // Only on sign-up. Applying a minimum to `signIn` would lock out anyone whose
+  // password predates the rule, which is an outage wearing a security
+  // improvement's clothes.
+  const problem = passwordProblem(password, { email });
+  if (problem) return { error: problem };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({ email, password });

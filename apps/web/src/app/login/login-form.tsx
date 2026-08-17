@@ -1,5 +1,6 @@
 'use client';
 
+import { MINIMUM_PASSWORD_LENGTH } from '@localize-infra/schemas';
 import { Button, Field, Input } from '@localize-infra/ui';
 import { useActionState } from 'react';
 import { type AuthState, signIn, signUp } from './actions';
@@ -44,12 +45,29 @@ export function LoginForm({
         />
       </Field>
 
-      <Field label="Password" required help="At least 8 characters.">
+      {/* No `minLength` on the input, and that is deliberate rather than an
+          omission.
+
+          One field serves both buttons. A `minLength` here is enforced by the
+          browser on *whichever* submit is pressed, so raising it to the new
+          minimum would stop an existing account from signing in with the
+          password it already has — the browser would refuse to submit, with a
+          tooltip about length, and no amount of correct credentials would get
+          past it. The rule belongs to registration, so it is checked in the
+          sign-up action and nowhere else.
+
+          The help text says "to create an account" for the same reason: it
+          describes what the longer of the two paths requires, without implying
+          the shorter one is now closed. */}
+      <Field
+        label="Password"
+        required
+        help={`At least ${MINIMUM_PASSWORD_LENGTH} characters to create an account.`}
+      >
         <Input
           name="password"
           type="password"
           autoComplete="current-password"
-          minLength={8}
           required
         />
       </Field>

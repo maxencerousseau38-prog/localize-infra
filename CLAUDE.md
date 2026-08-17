@@ -105,6 +105,21 @@ ReFrame (`ngbxfpsfmjagauavbuhd`, vide — 0 ligne sur ses six tables). C'est
 réversible par `restore_project` ; si ReFrame en a de nouveau besoin, il faudra
 arbitrer l'emplacement.
 
+**Écart connu — mots de passe compromis.** La protection contre les mots de
+passe fuités (corpus HaveIBeenPwned) est réservée au plan Pro de Supabase, et
+l'organisation est en plan gratuit : elle **n'est pas activable**, ce n'est pas
+un oubli. Le remplacement est plus faible et vit dans
+`packages/schemas/src/password.ts` : minimum de 12 caractères, refus au-delà de
+72 octets (bcrypt tronque en silence au-delà), refus d'un mot de passe qui
+contient l'adresse e-mail. Pas de règles de composition — NIST SP 800-63B ne les
+recommande plus, elles produisent `Password1!`. Un mot de passe de 12 caractères
+présent dans un corpus de fuite passe donc encore ; seul le plan Pro corrige ça.
+
+La règle ne s'applique qu'à la **création de compte**. L'imposer à la connexion
+enfermerait dehors les comptes antérieurs — un test e2e garde ce point, parce
+que le champ mot de passe est partagé par les deux boutons et qu'un `minLength`
+sur cet input aurait exactement cet effet.
+
 Cette phrase a déjà été fausse, et pas qu'un peu : un projet
 `localize-infra-api` a existé sur le même compte et redéployait `apps/api` à
 chaque push pendant que ce fichier affirmait « reste local ». Il répondait 500
