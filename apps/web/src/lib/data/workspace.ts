@@ -193,3 +193,46 @@ export async function findGitHubInstallation(
   if (error) return null;
   return (data as GitHubInstallation | null) ?? null;
 }
+
+export interface Entitlements {
+  plan: 'free' | 'pro';
+  private_repositories: boolean;
+}
+
+/** What this workspace may do. Read-only to clients; granted server-side. */
+export async function findEntitlements(
+  organizationId: string,
+): Promise<Entitlements> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('organization_entitlements')
+    .select('plan,private_repositories')
+    .eq('organization_id', organizationId)
+    .maybeSingle();
+
+  // Free is the floor, not an error state: every organization gets a row on
+  // creation, and a missing one means the same thing as the default.
+  return (
+    (data as Entitlements | null) ?? {
+      plan: 'free',
+      private_repositories: false,
+    }
+  );
+}
+
+/**
+ * The authorization check, asked of the database rather than computed here.
+ *
+ * may_use_private_repositories() is the single place the rule lives, so a
+ * surface cannot accidentally implement a more generous version of it.
+ */
+export async function mayUsePrivateRepositories(
+  organizationId: string,
+): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('may_use_private_repositories', {
+    org: organizationId,
+  });
+  if (error) return false;
+  return data === true;
+}
