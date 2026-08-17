@@ -97,10 +97,23 @@ M1 Phase 1 (`packages/core`, `packages/cli`) — voir
 `docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et
 `docs/superpowers/plans/2026-08-02-m1-phase1-core-cli.md`.
 
-M1 Phase 2 (`apps/api`, `services/github-app`) — **en attente de la GitHub App
-créée par un humain** (Task 6, voir
-`docs/superpowers/plans/2026-08-02-m1-phase2-api-github-app.md`) avant un
-premier run bout-en-bout réel contre un vrai repo.
+M1 Phase 2 (`apps/api`, `services/github-app`) — **la GitHub App existe et
+fonctionne.** Ce paragraphe a longtemps dit « en attente de la GitHub App créée
+par un humain (Task 6) » ; c'était faux. Les identifiants sont dans `.env`
+(gitignoré) et l'installation atteint deux dépôts, vérifié :
+`maxencerousseau38-prog/localize-infra` et
+`maxencerousseau38-prog/localize-infra-fixture-vite` — ce dernier étant
+exactement le dépôt de la PR réelle affichée sur la landing.
+
+**Une seule installation, partagée par tout le déploiement.** C'est ce qui rend
+la connexion d'un dépôt réservée aux opérateurs (`GITHUB_OPERATOR_EMAILS`) :
+le jeton d'installation atteint tous les dépôts qui lui ont été accordés, quel
+que soit le client qui demande. Sans ce garde-fou, n'importe quel compte
+pourrait pointer un projet vers les dépôts de l'opérateur et y ouvrir des pull
+requests. La barrière tombe quand chaque client installera l'App lui-même et
+que l'`installation_id` sera stocké par organisation plutôt que par
+déploiement — **ce n'est donc pas encore un produit multi-locataire côté
+GitHub.**
 
 **Écart connu à l'invariant 5 (résidence des données UE) :** cette phase
 envoie du contexte extrait du code source (chemins de fichiers, noms de
