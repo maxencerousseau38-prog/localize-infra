@@ -77,6 +77,45 @@ test.describe('authentication', () => {
     expect(new URL(page.url()).pathname).toBe('/login');
   });
 
+  test('creating an account requires the full password minimum', async ({
+    page,
+  }) => {
+    await page.goto(`${AUTH_URL}/login`, { waitUntil: 'networkidle' });
+
+    await page.getByLabel('Email').fill('short-password@example.com');
+    // Eight characters: what the old rule allowed, and what the new one must
+    // refuse. If this ever passes again, the minimum has been lowered.
+    await page.getByLabel('Password').fill('12345678');
+    await page.getByRole('button', { name: 'Create account' }).click();
+
+    await expect(page.locator('output')).toContainText(/at least 12/i);
+    expect(new URL(page.url()).pathname).toBe('/login');
+  });
+
+  test('a short password still reaches the server on sign-in', async ({
+    page,
+  }) => {
+    // The regression this guards is a lockout, not a weakness.
+    //
+    // One password field serves both buttons. A `minLength` on it would be
+    // applied by the browser to sign-in too, so an account whose password
+    // predates the new minimum could never submit the form again — no error
+    // from the server, just a browser tooltip about length and a form that
+    // refuses to go anywhere.
+    //
+    // The proof that no such client gate exists is that the request is made
+    // and the server's own answer comes back.
+    await page.goto(`${AUTH_URL}/login`, { waitUntil: 'networkidle' });
+
+    await page.getByLabel('Email').fill('legacy-account@example.com');
+    await page.getByLabel('Password').fill('short');
+    await page.getByRole('button', { name: 'Sign in' }).click();
+
+    // "not recognised" is the server talking. A client-side block would leave
+    // the output element empty.
+    await expect(page.locator('output')).toContainText(/not recognised/i);
+  });
+
   test('the form is usable from the keyboard alone', async ({ page }) => {
     await page.goto(`${AUTH_URL}/login`, { waitUntil: 'networkidle' });
 
