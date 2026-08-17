@@ -49,13 +49,23 @@ export interface NavRoute {
 export const PRIMARY_NAV: NavRoute[] = [
   {
     href: '/',
+    // Still sample, and still unbuilt — but for a narrower reason than before.
+    //
+    // Accounts and persisted projects now exist, so `/` no longer renders this
+    // dashboard for a signed-in user: it routes them to their workspace. What
+    // is unbuilt is the dashboard's *content* — the runs, ambiguities and
+    // reviews it summarises — none of which is recorded anywhere yet.
+    //
+    // The sample dashboard survives for the preview build, where there is no
+    // database at all. Marking this `built: true` on the strength of the
+    // redirect would claim a screen that still has nothing real to show.
     sample: true,
     label: 'Home',
     icon: LayoutGrid,
     built: false,
     blockedBy:
-      'It would show what needs your attention across your projects, which requires accounts and persisted projects.',
-    keywords: 'overview dashboard start',
+      'Workspaces and projects exist now, so this routes you to yours. The summary itself needs runs, ambiguities and reviews, none of which are recorded yet.',
+    keywords: 'overview dashboard start workspace',
   },
   {
     href: '/ambiguity',

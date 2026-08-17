@@ -39,3 +39,31 @@ values (
   null, '', null,
   false, null, false
 );
+
+-- A workspace and a project for the authenticated end-to-end suite to read.
+--
+-- Fixtures rather than test-created data: a suite that creates a workspace on
+-- every run accumulates rows in a shared database and starts failing on the
+-- unique slug the second time. These are created once and asserted against.
+--
+-- create_organization() is called as the seeded user by setting the JWT claim,
+-- which is also the only way to exercise the same path the application uses.
+do $$
+declare
+  uid uuid;
+  org public.organizations;
+begin
+  select id into uid from auth.users where email = 'acceptance@localize-infra.dev';
+
+  -- Claims must be set before the role switch; afterwards the GUC is no longer
+  -- settable and auth.uid() stays null.
+  perform set_config('request.jwt.claims', json_build_object('sub', uid, 'role','authenticated')::text, true);
+  perform set_config('role','authenticated',true);
+
+  org := public.create_organization('Acceptance', 'acceptance');
+
+  insert into public.projects (organization_id, name, slug, source_locale, target_locales)
+  values (org.id, 'Demo', 'demo', 'en', array['fr','de']);
+
+  perform set_config('role','postgres',true);
+end $$;

@@ -1,5 +1,6 @@
 import { Page, PageHeader, PageMeta, PageSection } from '@/components/page';
 import { SampleBanner, SampleRegion } from '@/components/sample';
+import { listOrganizations } from '@/lib/data/workspace';
 import {
   SAMPLE_AMBIGUITIES,
   SAMPLE_LOCALES,
@@ -7,6 +8,7 @@ import {
   SAMPLE_RUNS,
   type SampleRun,
 } from '@/lib/sample';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
   Badge,
   Button,
@@ -22,6 +24,7 @@ import {
 import { ArrowRight, FileText, TriangleAlert } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = { title: 'Home' };
 
@@ -94,7 +97,31 @@ const RUN_STATE: Record<SampleRun['state'], { tone: Tone; label: string }> = {
   failed: { tone: 'failed', label: 'Failed' },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  /*
+   * With a database, `/` is a signpost rather than a destination.
+   *
+   * Everything this dashboard shows — runs, ambiguity, review — is still
+   * unbuilt, so sending a signed-in user here would put invented data in front
+   * of them on the one screen that is meant to answer "is anything waiting for
+   * me?". They go to their workspace instead, or to onboarding if they have
+   * none.
+   *
+   * Without a database the sample dashboard still renders. That is the
+   * preview build and the shell test suite, both of which exist precisely to
+   * exercise this layout while the backend behind it is missing — and it stays
+   * labelled as sample throughout.
+   */
+  if (isSupabaseConfigured()) {
+    const organizations = await listOrganizations();
+    const first = organizations[0];
+    redirect(first ? `/${first.slug}/projects` : '/onboarding');
+  }
+
+  return renderSampleHome();
+}
+
+function renderSampleHome() {
   const behind = SAMPLE_LOCALES.filter((l) => l.translated < l.total).length;
 
   return (
