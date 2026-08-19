@@ -90,10 +90,58 @@ describe('TranslatedStringSchema and TranslateBatchResponseSchema', () => {
     expect(TranslateBatchResponseSchema.parse(response)).toEqual(response);
   });
 
-  it('accepts a translated string', () => {
+  it('accepts a translated string, defaulting it to confident', () => {
+    // A provider answering in the older two-field shape is treated as sure of
+    // itself rather than crashing the batch. The defaults are asserted here
+    // because they are the compatibility contract, not an implementation
+    // detail: if they ever change, every older provider silently changes
+    // behaviour with them.
     expect(TranslatedStringSchema.parse({ key: 'a', text: 'Hallo' })).toEqual({
       key: 'a',
       text: 'Hallo',
+      confidence: 'confident',
+      question: null,
+      alternatives: [],
     });
+  });
+
+  it('accepts an ambiguous translation carrying its question', () => {
+    const parsed = TranslatedStringSchema.parse({
+      key: 'nav.home',
+      text: 'Startseite',
+      confidence: 'ambiguous',
+      question:
+        '"Home" is a navigation label here, but could be a house. Which sense applies?',
+      alternatives: [
+        { text: 'Startseite', rationale: 'The landing page of a site' },
+        { text: 'Zuhause', rationale: 'A dwelling' },
+      ],
+    });
+    expect(parsed.confidence).toBe('ambiguous');
+    expect(parsed.alternatives).toHaveLength(2);
+  });
+
+  it('refuses an ambiguous translation with nothing to ask', () => {
+    // An escalation with no question is an interruption with no way to answer
+    // it. Refusing at the schema keeps that out of the queue entirely.
+    expect(() =>
+      TranslatedStringSchema.parse({
+        key: 'nav.home',
+        text: 'Startseite',
+        confidence: 'ambiguous',
+      }),
+    ).toThrow();
+  });
+
+  it('refuses an alternative with no rationale', () => {
+    expect(() =>
+      TranslatedStringSchema.parse({
+        key: 'nav.home',
+        text: 'Startseite',
+        confidence: 'ambiguous',
+        question: 'Which sense?',
+        alternatives: [{ text: 'Zuhause', rationale: '' }],
+      }),
+    ).toThrow();
   });
 });

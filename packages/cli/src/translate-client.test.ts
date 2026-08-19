@@ -34,8 +34,23 @@ describe('translateBatch', () => {
       'test-token',
     );
 
+    // The response schema now carries confidence, and fills it in when a
+    // provider answers in the older two-field shape. Asserting the defaulted
+    // form on purpose: a model that says nothing about its confidence is read
+    // as sure of itself, which is what keeps an old provider from crashing a
+    // batch — and is exactly the behaviour worth pinning, because the same
+    // default is what would silently produce zero escalations if a provider
+    // started dropping the field.
     expect(result).toEqual({
-      translations: [{ key: 'a', text: 'Willkommen' }],
+      translations: [
+        {
+          key: 'a',
+          text: 'Willkommen',
+          confidence: 'confident',
+          question: null,
+          alternatives: [],
+        },
+      ],
       missingKeys: [],
     });
     expect(fetchMock).toHaveBeenCalledWith(

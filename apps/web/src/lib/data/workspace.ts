@@ -141,9 +141,18 @@ export function toSlug(input: string): string | null {
   return slug.length >= 2 ? slug : null;
 }
 
+export type RunStatus =
+  | 'queued'
+  | 'running'
+  | 'succeeded'
+  | 'partial'
+  | 'failed'
+  /** Stopped on purpose: the agent found something it will not guess at. */
+  | 'awaiting_review';
+
 export interface RunRecord {
   id: string;
-  status: 'queued' | 'running' | 'succeeded' | 'partial' | 'failed';
+  status: RunStatus;
   stage: string;
   framework: string | null;
   keys_extracted: number;
@@ -244,4 +253,128 @@ export async function mayUsePrivateRepositories(
   });
   if (error) return false;
   return data === true;
+}
+
+export interface AmbiguityAlternative {
+  text: string;
+  rationale: string;
+}
+
+export interface AmbiguityRecord {
+  id: string;
+  run_id: string;
+  translation_key: string;
+  locale: string;
+  source_text: string;
+  proposed_text: string;
+  question: string;
+  alternatives: AmbiguityAlternative[];
+  state: 'unresolved' | 'resolved' | 'dismissed';
+  resolved_text: string | null;
+  resolved_at: string | null;
+  created_at: string;
+}
+
+const AMBIGUITY_COLUMNS =
+  'id,run_id,translation_key,locale,source_text,proposed_text,question,alternatives,state,resolved_text,resolved_at,created_at';
+
+/**
+ * Narrows whatever JSONB came back into the shape the queue renders.
+ *
+ * `alternatives` is JSONB, so the database guarantees it is an array and
+ * nothing about what is in it. A malformed entry drops out rather than
+ * reaching a component that would render `undefined` into the page.
+ */
+function toAlternatives(value: unknown): AmbiguityAlternative[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (typeof entry !== 'object' || entry === null) return [];
+    const record = entry as Record<string, unknown>;
+    if (typeof record.text !== 'string' || typeof record.rationale !== 'string')
+      return [];
+    return [{ text: record.text, rationale: record.rationale }];
+  });
+}
+
+function toAmbiguity(row: Record<string, unknown>): AmbiguityRecord {
+  return {
+    ...(row as unknown as AmbiguityRecord),
+    alternatives: toAlternatives(row.alternatives),
+  };
+}
+
+/** Every question raised by a run, newest first. */
+export async function listRunAmbiguities(
+  runId: string,
+): Promise<AmbiguityRecord[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('run_ambiguities')
+    .select(AMBIGUITY_COLUMNS)
+    .eq('run_id', runId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw new Error(`Could not load ambiguities: ${error.message}`);
+  return (data ?? []).map((row) => toAmbiguity(row as Record<string, unknown>));
+}
+
+/** Everything still waiting on a person, across a whole workspace. */
+export async function listOpenAmbiguities(
+  organizationId: string,
+): Promise<AmbiguityRecord[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('run_ambiguities')
+    .select(AMBIGUITY_COLUMNS)
+    .eq('organization_id', organizationId)
+    .eq('state', 'unresolved')
+    .order('created_at', { ascending: true });
+
+  if (error) throw new Error(`Could not load ambiguities: ${error.message}`);
+  return (data ?? []).map((row) => toAmbiguity(row as Record<string, unknown>));
+}
+
+export interface ProposedTranslation {
+  locale: string;
+  translation_key: string;
+  source_text: string;
+  proposed_text: string;
+  origin: 'model' | 'preserved' | 'resolved';
+}
+
+/**
+ * What a run proposes to write, exactly as it will be written.
+ *
+ * This is what makes the review screen a review rather than an illustration:
+ * approving commits these rows verbatim, so what a developer reads here is
+ * what lands in the pull request.
+ */
+export async function listRunTranslations(
+  runId: string,
+): Promise<ProposedTranslation[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('run_translations')
+    .select('locale,translation_key,source_text,proposed_text,origin')
+    .eq('run_id', runId)
+    .order('locale', { ascending: true })
+    .order('translation_key', { ascending: true });
+
+  if (error) throw new Error(`Could not load proposals: ${error.message}`);
+  return (data ?? []) as ProposedTranslation[];
+}
+
+/** A single run, scoped by RLS. Null when it is not this caller's to see. */
+export async function findRun(runId: string): Promise<RunRecord | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('runs')
+    .select(
+      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,project_id,target_locales,source_locale',
+    )
+    .eq('id', runId)
+    .maybeSingle();
+
+  if (error) return null;
+  return (data as RunRecord | null) ?? null;
 }

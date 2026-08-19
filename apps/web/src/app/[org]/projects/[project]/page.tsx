@@ -2,6 +2,8 @@ import { Page, PageHeader, PageMeta } from '@/components/page';
 import {
   findOrganization,
   findProject,
+  listRunAmbiguities,
+  listRunTranslations,
   listRuns,
   requireSession,
 } from '@/lib/data/workspace';
@@ -14,6 +16,7 @@ import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { RepositorySection } from './repository-section';
+import { ReviewSection } from './review-section';
 import { RunsSection } from './runs-section';
 
 export const metadata: Metadata = { title: 'Project' };
@@ -49,6 +52,22 @@ export default async function ProjectPage({
     : [];
 
   const runs = await listRuns(project.id);
+
+  /*
+   * The review gate only has a subject when a run is actually waiting on one.
+   *
+   * Scoped to the newest such run rather than every one of them: two runs
+   * waiting at once would mean two proposals for the same locale files, and
+   * answering questions on the older one would commit a diff nobody looked at.
+   * The two extra queries are skipped entirely when nothing is waiting.
+   */
+  const awaiting = runs.find((r) => r.status === 'awaiting_review') ?? null;
+  const [ambiguities, proposals] = awaiting
+    ? await Promise.all([
+        listRunAmbiguities(awaiting.id),
+        listRunTranslations(awaiting.id),
+      ])
+    : [[], []];
   const connected = Boolean(
     project.repository_owner && project.repository_name,
   );
@@ -116,6 +135,16 @@ export default async function ProjectPage({
         hasInstallation={Boolean(installationId)}
         gitHubConfigured={gitHubConfigured}
       />
+
+      {awaiting ? (
+        <ReviewSection
+          runId={awaiting.id}
+          org={org}
+          project={project.slug}
+          ambiguities={ambiguities}
+          proposals={proposals}
+        />
+      ) : null}
 
       <RunsSection
         orgSlug={org}

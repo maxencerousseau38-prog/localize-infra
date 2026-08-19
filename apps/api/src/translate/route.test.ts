@@ -32,7 +32,7 @@ describe('translateRouteHandler', () => {
     const result = await translateRouteHandler(body, providers, modelIds);
     expect(result.status).toBe(200);
     expect(result.body).toEqual({
-      translations: [{ key: 'a', text: 'Willkommen' }],
+      translations: [{ key: 'a', text: 'Willkommen', confidence: 'confident', question: null, alternatives: [] }],
       missingKeys: [],
     });
   });
