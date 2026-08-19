@@ -10,7 +10,7 @@ import {
   type GitHubAppOperations,
   openPrRouteHandler,
 } from './open-pr/route.js';
-import { getProvider } from './router/index.js';
+import { getConfiguredProviders } from './router/index.js';
 import { translateRouteHandler } from './translate/route.js';
 
 const ANTHROPIC_MODEL = process.env.API_ANTHROPIC_MODEL ?? 'claude-sonnet-5';
@@ -85,12 +85,16 @@ app.post('/v1/translate', async (c) => {
   const body = await c.req.json().catch(() => null);
   const { status, body: responseBody } = await translateRouteHandler(
     body,
-    { anthropic: getProvider('anthropic'), openai: getProvider('openai') },
+    // Built per request, and only for the providers this process holds a key
+    // for. Constructing both eagerly threw `OPENAI_API_KEY is not set` on a
+    // deployment configured with Anthropic alone, so every translate call
+    // answered 500 in a quarter of a second without reaching any model.
+    getConfiguredProviders(),
     { anthropic: ANTHROPIC_MODEL, openai: OPENAI_MODEL },
   );
   return c.json(
     responseBody as Record<string, unknown>,
-    status as 200 | 400 | 502,
+    status as 200 | 400 | 502 | 503,
   );
 });
 

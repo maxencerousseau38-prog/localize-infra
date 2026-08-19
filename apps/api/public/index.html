@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Localize Infra API</title>
+<meta name="robots" content="noindex">
+<style>
+  body { font: 15px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+         max-width: 42rem; margin: 4rem auto; padding: 0 1.5rem;
+         color: #18181b; background: #fafafa; }
+  code { background: #f4f4f5; padding: .1em .35em; border-radius: 3px; }
+  h1 { font-size: 1rem; letter-spacing: .04em; text-transform: uppercase; color: #71717a; }
+</style>
+<h1>Localize Infra API</h1>
+<p>Translation and pull-request service. Every <code>/v1/*</code> route requires a
+bearer token; there is nothing here to browse.</p>
+<ul>
+  <li><code>GET /health</code> — liveness, unauthenticated</li>
+  <li><code>POST /v1/translate</code> — bearer token required</li>
+  <li><code>POST /v1/open-pr</code> — bearer token required</li>
+</ul>
+<p>Source-derived context (file paths, component names, surrounding code) is sent
+to Anthropic, which is not hosted in the EU. This is a known, documented gap
+against the project's data-residency invariant.</p>
