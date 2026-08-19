@@ -76,3 +76,52 @@ export function writeLocaleFile(
     `${JSON.stringify(sorted, null, 2)}\n`,
   );
 }
+
+/**
+ * Which keys still need a translation.
+ *
+ * A key already present in the committed locale file is never re-translated:
+ * whatever is there is either a previous machine translation somebody accepted
+ * or a correction somebody made by hand, and both are decisions this pipeline
+ * has no business revisiting. It is also the difference between paying a model
+ * for every string on every run and paying it only for new ones.
+ */
+export function pendingKeys(
+  fresh: LocaleCatalog,
+  existing: LocaleCatalog,
+): string[] {
+  return Object.keys(fresh).filter((key) => !(key in existing));
+}
+
+/**
+ * Builds the locale file to commit.
+ *
+ * The precedence is the whole point, and it was wrong in the pipeline for as
+ * long as the pipeline existed: `{ ...existing, ...translated }` let fresh
+ * model output win, so every run overwrote the hand-corrected German that a
+ * customer had gone to the trouble of fixing. The promise this product makes
+ * about preserving manual modifications was false at the only layer that
+ * actually writes the file.
+ *
+ * Precedence, highest first:
+ *
+ *  1. `existing` — a human's or a previous run's decision, never overwritten.
+ *  2. `translated` — a new translation, for keys that had none.
+ *  3. `fresh` — the source text, when a locale failed or the model skipped a
+ *     key. An untranslated string is visibly wrong in the product; a missing
+ *     key is a crash or a blank space, which is worse.
+ *
+ * Keys are taken from `fresh` alone, so a string deleted from the source stops
+ * being shipped in every locale rather than lingering forever.
+ */
+export function mergeTranslations(
+  fresh: LocaleCatalog,
+  existing: LocaleCatalog,
+  translated: LocaleCatalog,
+): LocaleCatalog {
+  const merged: LocaleCatalog = {};
+  for (const key of Object.keys(fresh)) {
+    merged[key] = existing[key] ?? translated[key] ?? (fresh[key] as string);
+  }
+  return merged;
+}

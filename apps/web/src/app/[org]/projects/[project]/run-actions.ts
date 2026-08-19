@@ -17,6 +17,8 @@ import {
   detectFramework,
   extractFromProject,
   mergeLocaleFile,
+  mergeTranslations,
+  pendingKeys,
   readLocaleFile,
 } from '@localize-infra/core';
 import { TranslateBatchResponseSchema } from '@localize-infra/schemas';
@@ -177,42 +179,62 @@ export async function startRun(
 
     for (const locale of project.target_locales) {
       try {
-        const response = await fetch(`${apiUrl}/v1/translate`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiToken}`,
-          },
-          body: JSON.stringify({ targetLocale: locale, strings }),
-        });
+        const existing = readLocaleFile(localesDir, locale);
 
-        if (!response.ok) {
-          // Verbatim (DESIGN.md §8): a customer comparing this against their
-          // own logs must see the same string.
-          const detail = (await response.text()).slice(0, 300);
-          throw new Error(
-            `${response.status} ${response.statusText}: ${detail}`,
+        // Only keys with no translation yet are sent. Two reasons, and both
+        // matter to someone paying for this: a key that already has a value
+        // carries somebody's decision, and re-translating every string on
+        // every run bills a model for work finished months ago.
+        const pending = new Set(pendingKeys(fresh, existing));
+        const pendingStrings = strings.filter((entry) =>
+          pending.has(entry.key),
+        );
+
+        let translated: Record<string, string> = {};
+
+        if (pendingStrings.length > 0) {
+          const response = await fetch(`${apiUrl}/v1/translate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiToken}`,
+            },
+            body: JSON.stringify({
+              targetLocale: locale,
+              strings: pendingStrings,
+            }),
+          });
+
+          if (!response.ok) {
+            // Verbatim (DESIGN.md §8): a customer comparing this against their
+            // own logs must see the same string.
+            const detail = (await response.text()).slice(0, 300);
+            throw new Error(
+              `${response.status} ${response.statusText}: ${detail}`,
+            );
+          }
+
+          // Parsed through the shared schema rather than cast, so a contract
+          // drift surfaces here instead of as a confusing merge downstream.
+          const body = TranslateBatchResponseSchema.parse(
+            await response.json(),
           );
+          translated = Object.fromEntries(
+            body.translations.map((entry) => [entry.key, entry.text]),
+          );
+          keysTranslated += body.translations.length;
         }
 
-        // Parsed through the shared schema rather than cast. The contract
-        // lives in packages/schemas precisely so a drift like this surfaces
-        // here instead of as a confusing merge downstream — the first run
-        // against the real API failed because this sent `locale` where the
-        // schema names it `targetLocale`, and a cast would have hidden the
-        // shape of the reply too.
-        const body = TranslateBatchResponseSchema.parse(await response.json());
-        const existing = readLocaleFile(localesDir, locale);
-        const translated = Object.fromEntries(
-          body.translations.map((entry) => [entry.key, entry.text]),
-        );
-        const merged = { ...existing, ...translated };
+        // Precedence lives in packages/core, next to its regression tests.
+        // This was `{ ...existing, ...translated }`, which let fresh model
+        // output overwrite a translation somebody had corrected by hand — the
+        // opposite of what this product promises about manual changes.
+        const merged = mergeTranslations(fresh, existing, translated);
 
         files.push({
           path: `${detected.localesDir}/${locale}.json`,
           content: `${JSON.stringify(merged, null, 2)}\n`,
         });
-        keysTranslated += body.translations.length;
         localesSucceeded += 1;
       } catch (error) {
         // One locale failing must not abort the rest: that is the
