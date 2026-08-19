@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   buildKeyCatalog,
   mergeLocaleFile,
+  mergeTranslations,
+  pendingKeys,
   readLocaleFile,
   writeLocaleFile,
 } from './index.js';
@@ -149,5 +151,85 @@ describe('writeLocaleFile', () => {
     expect(raw).toBe(
       '{\n  "src.App.welcome": "Welcome",\n  "src.Zebra.label": "Zebra",\n  "src.about.title": "About"\n}\n',
     );
+  });
+});
+
+describe('mergeTranslations — manual modification preservation', () => {
+  const fresh = {
+    'Cart.proceed_to_checkout': 'Proceed to checkout',
+    'Cart.your_cart_is_empty': 'Your cart is empty',
+  };
+
+  it('CASE 2: an existing translation edited by hand survives a run', () => {
+    // The bug this exists to prevent. The pipeline used to spread
+    // { ...existing, ...translated }, so the model's wording replaced a
+    // correction a customer had made on purpose.
+    const existing = { 'Cart.proceed_to_checkout': 'Passer commande' };
+    const translated = { 'Cart.proceed_to_checkout': 'Procéder au paiement' };
+
+    const merged = mergeTranslations(fresh, existing, translated);
+
+    expect(merged['Cart.proceed_to_checkout']).toBe('Passer commande');
+  });
+
+  it('CASE 3: a missing translation is filled from the model', () => {
+    const merged = mergeTranslations(
+      fresh,
+      {},
+      { 'Cart.your_cart_is_empty': 'Votre panier est vide' },
+    );
+    expect(merged['Cart.your_cart_is_empty']).toBe('Votre panier est vide');
+  });
+
+  it('CASE 4: an existing translation identical to the model output is left alone', () => {
+    const existing = { 'Cart.your_cart_is_empty': 'Votre panier est vide' };
+    const merged = mergeTranslations(fresh, existing, {
+      'Cart.your_cart_is_empty': 'Votre panier est vide',
+    });
+    expect(merged['Cart.your_cart_is_empty']).toBe('Votre panier est vide');
+  });
+
+  it('CASE 5: an existing translation differing from the model output keeps the existing one', () => {
+    const existing = { 'Cart.your_cart_is_empty': 'Panier vide' };
+    const merged = mergeTranslations(fresh, existing, {
+      'Cart.your_cart_is_empty': 'Votre panier est vide',
+    });
+    expect(merged['Cart.your_cart_is_empty']).toBe('Panier vide');
+  });
+
+  it('CASE 7: a locale whose translation call failed still ships every key', () => {
+    // No translations at all. The file must still contain every key, carrying
+    // the source text — a missing key is a blank space or a crash in the
+    // product, which is worse than a visibly untranslated string.
+    const merged = mergeTranslations(fresh, {}, {});
+    expect(Object.keys(merged).sort()).toEqual(Object.keys(fresh).sort());
+    expect(merged['Cart.proceed_to_checkout']).toBe('Proceed to checkout');
+  });
+
+  it('drops a key that no longer appears in the source', () => {
+    const existing = {
+      'Cart.proceed_to_checkout': 'Passer commande',
+      'Cart.removed_string': 'Chaîne supprimée',
+    };
+    const merged = mergeTranslations(fresh, existing, {});
+    expect(merged).not.toHaveProperty('Cart.removed_string');
+  });
+
+  it('never invents a key the source does not have', () => {
+    const merged = mergeTranslations(fresh, {}, { 'Cart.hallucinated': 'Non' });
+    expect(merged).not.toHaveProperty('Cart.hallucinated');
+  });
+});
+
+describe('pendingKeys', () => {
+  it('asks for only the keys with no existing translation', () => {
+    expect(
+      pendingKeys({ a: 'A', b: 'B', c: 'C' }, { b: 'Bee' }).sort(),
+    ).toEqual(['a', 'c']);
+  });
+
+  it('asks for nothing when every key is already translated', () => {
+    // A repeat run with no source changes must not pay a model at all.
+    expect(pendingKeys({ a: 'A' }, { a: 'Ah' })).toEqual([]);
   });
 });
