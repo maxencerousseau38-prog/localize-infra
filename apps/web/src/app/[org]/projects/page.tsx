@@ -12,6 +12,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { GitHubConnection } from './github-connection';
+import { GitHubResult } from './github-result';
 import { NewProject } from './new-project';
 
 export const metadata: Metadata = { title: 'Projects' };
@@ -25,11 +26,17 @@ export const metadata: Metadata = { title: 'Projects' };
  */
 export default async function ProjectsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ org: string }>;
+  // The GitHub callback redirects back here with its outcome. Every refusal
+  // was previously silent: a rejected install and one that did nothing looked
+  // exactly alike.
+  searchParams: Promise<{ github?: string }>;
 }) {
   await requireSession();
   const { org } = await params;
+  const { github } = await searchParams;
 
   const organization = await findOrganization(org);
   // Not found rather than forbidden: a workspace that exists but is not yours
@@ -61,6 +68,8 @@ export default async function ProjectsPage({
         }
         action={<NewProject orgSlug={org} />}
       />
+
+      <GitHubResult reason={github} />
 
       <GitHubConnection
         organizationId={organization.id}

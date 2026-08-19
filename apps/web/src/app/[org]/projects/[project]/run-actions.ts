@@ -8,7 +8,6 @@ import {
   mayUsePrivateRepositories,
   requireSession,
 } from '@/lib/data/workspace';
-import { isOperator } from '@/lib/github/config';
 import { materialiseRepository } from '@/lib/github/materialise';
 import { canReachRepository } from '@/lib/github/repositories';
 import { createClient } from '@/lib/supabase/server';
@@ -54,10 +53,13 @@ export async function startRun(
   _prev: RunState,
   _formData: FormData,
 ): Promise<RunState> {
-  const session = await requireSession();
-  if (!isOperator(session.email)) {
-    return { error: 'Running the pipeline is limited to operators.' };
-  }
+  await requireSession();
+  /*
+   * Ungated for the same reason as connecting: a run acts as the workspace's
+   * own installation, so it can only reach repositories that installation was
+   * granted. The allow-list was standing in for that guarantee while the
+   * installation was shared.
+   */
 
   const organization = await findOrganization(orgSlug);
   if (!organization) return { error: 'That workspace is not available.' };

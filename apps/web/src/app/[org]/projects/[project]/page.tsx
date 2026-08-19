@@ -5,8 +5,11 @@ import {
   listRuns,
   requireSession,
 } from '@/lib/data/workspace';
-import { isGitHubConfigured, isOperator } from '@/lib/github/config';
-import { listInstallationRepositories } from '@/lib/github/repositories';
+import { isGitHubConfigured } from '@/lib/github/config';
+import {
+  installationIdFor,
+  listInstallationRepositories,
+} from '@/lib/github/repositories';
 import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -20,7 +23,7 @@ export default async function ProjectPage({
 }: {
   params: Promise<{ org: string; project: string }>;
 }) {
-  const session = await requireSession();
+  await requireSession();
   const { org, project: projectSlug } = await params;
 
   const organization = await findOrganization(org);
@@ -29,25 +32,33 @@ export default async function ProjectPage({
   const project = await findProject(organization.id, projectSlug);
   if (!project) notFound();
 
-  // The list is only fetched for an operator on a configured deployment.
-  // Calling GitHub to render a section that will say "not available" would be
-  // a network round trip to produce a sentence.
+  /*
+   * Repositories come from this workspace's own installation.
+   *
+   * The list used to be fetched only for an operator, against a shared
+   * installation. It is now fetched only when this workspace has installed the
+   * App itself — calling GitHub to render a section that will say "not
+   * connected" is a network round trip to produce a sentence.
+   */
   const gitHubConfigured = isGitHubConfigured();
-  const operator = isOperator(session.email);
-  const available =
-    gitHubConfigured && operator
-      ? await listInstallationRepositories(organization.id)
-      : [];
+  const installationId = gitHubConfigured
+    ? await installationIdFor(organization.id)
+    : null;
+  const available = installationId
+    ? await listInstallationRepositories(organization.id)
+    : [];
 
   const runs = await listRuns(project.id);
   const connected = Boolean(
     project.repository_owner && project.repository_name,
   );
-  const runReason = !operator
-    ? 'Running the pipeline is limited to this deployment’s operators while the GitHub App installation is shared.'
-    : !connected
-      ? 'Connect a repository before running.'
-      : null;
+  const runReason = !gitHubConfigured
+    ? 'This deployment has no GitHub App configured, so a run has nowhere to open a pull request.'
+    : !installationId
+      ? 'Install the Localize GitHub App on your account before running.'
+      : !connected
+        ? 'Connect a repository before running.'
+        : null;
 
   return (
     <Page>
@@ -102,14 +113,14 @@ export default async function ProjectPage({
             : null
         }
         available={available}
-        isOperator={operator}
+        hasInstallation={Boolean(installationId)}
         gitHubConfigured={gitHubConfigured}
       />
 
       <RunsSection
         orgSlug={org}
         projectSlug={project.slug}
-        canRun={operator && connected}
+        canRun={Boolean(installationId) && connected}
         reason={runReason}
         runs={runs.map((run) => ({
           id: run.id,

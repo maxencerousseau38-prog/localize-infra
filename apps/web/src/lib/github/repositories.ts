@@ -2,6 +2,7 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { App } from 'octokit';
 import { readGitHubConfig } from './config';
+import { resolveInstallation } from './resolve-installation';
 
 export interface AvailableRepository {
   owner: string;
@@ -12,38 +13,66 @@ export interface AvailableRepository {
 }
 
 /**
- * Repositories the shared installation can actually reach.
- *
- * The connection flow picks from this list rather than accepting a typed
- * owner/name. A free-text field would let a caller name any repository on
- * GitHub and get a confusing failure at push time — and, worse, would make the
- * set of reachable repositories a matter of what someone guessed rather than
- * what the installation was granted.
- */
-/**
  * The installation to act as for a given workspace.
  *
- * A workspace that has installed the App itself gets its own installation, and
- * therefore reaches its own repositories and nobody else's. Falling back to the
- * shared environment installation is what the operator path uses, and is the
- * reason that path is gated: the shared token reaches whatever it was ever
- * granted, regardless of who is asking.
+ * A workspace reaches its own repositories and nobody else's. There is no
+ * fallback: see the body, and `resolve-installation.ts` for the rule and its
+ * tests.
+ *
+ * The connection flow picks repositories from this installation's list rather
+ * than accepting a typed owner/name. A free-text field would let a caller name
+ * any repository on GitHub and get a confusing failure at push time — and,
+ * worse, would make the set of reachable repositories a matter of what someone
+ * guessed rather than what the installation was granted.
  */
 export async function installationIdFor(
   organizationId: string | null,
 ): Promise<number | null> {
-  if (organizationId) {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from('organization_github_installations')
-      .select('installation_id')
-      .eq('organization_id', organizationId)
-      .maybeSingle();
+  /*
+   * No fallback to the shared installation. This used to end with
+   *
+   *     return readGitHubConfig()?.installationId ?? null;
+   *
+   * so an organization that had never installed the App inherited the
+   * deployment's own — a token reaching the operator's repositories, with
+   * permission to open pull requests against them. It was survivable only
+   * while every GitHub surface was gated to an operator allow-list, and
+   * removing that gate is what self-serve means: the fallback and the feature
+   * could not both ship. `resolveInstallation` states the rule and is tested.
+   */
+  if (!organizationId) return null;
 
-    if (data?.installation_id) return Number(data.installation_id);
-  }
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('organization_github_installations')
+    .select('installation_id')
+    .eq('organization_id', organizationId)
+    .maybeSingle();
 
-  return readGitHubConfig()?.installationId ?? null;
+  const resolved = resolveInstallation({
+    kind: 'tenant',
+    organizationInstallationId: data?.installation_id
+      ? Number(data.installation_id)
+      : null,
+  });
+
+  return resolved.ok ? resolved.installationId : null;
+}
+
+/**
+ * The deployment's shared installation, for internal administration only.
+ *
+ * Separate function rather than a parameter, so that reaching the shared
+ * installation is something a caller has to write down. Every call site is
+ * expected to have checked `isOperator` first; this does not check it, because
+ * a security decision made in two places is made in neither.
+ */
+export function operatorInstallationId(): number | null {
+  const resolved = resolveInstallation({
+    kind: 'operator',
+    sharedInstallationId: readGitHubConfig()?.installationId ?? null,
+  });
+  return resolved.ok ? resolved.installationId : null;
 }
 
 export async function listInstallationRepositories(
