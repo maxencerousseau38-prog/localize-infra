@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["cdg1"],
+  "buildCommand": "npm run build -w @localize-infra/schemas -w @localize-infra/github-app -w @localize-infra/api",
+  "installCommand": "npm install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ],
+  "outputDirectory": "public"
+}

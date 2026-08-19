@@ -51,39 +51,40 @@ dashboard. `docs/deploying.md` has the full account.
 
 ## Environment
 
-Deliberately **not** the full set the local `.env.local` carries.
-
 | Variable | Set on Vercel | Why |
 |---|---|---|
 | `SUPABASE_URL` | yes | Auth, workspaces, projects |
 | `SUPABASE_PUBLISHABLE_KEY` | yes | Protected by RLS, not a secret |
-| `GITHUB_APP_ID` | **no** | see below |
-| `GITHUB_APP_PRIVATE_KEY` | **no** | see below |
-| `GITHUB_APP_INSTALLATION_ID` | **no** | see below |
-| `GITHUB_OPERATOR_EMAILS` | **no** | see below |
-| `LOCALIZE_API_URL` / `LOCALIZE_API_TOKEN` | **no** | see below |
+| `LOCALIZE_API_URL` | yes | `https://localize-infra-api.vercel.app` |
+| `LOCALIZE_API_TOKEN` | yes | Bearer for `/v1/*` |
+| `GITHUB_APP_ID` | yes | Reading the repository tree |
+| `GITHUB_APP_INSTALLATION_ID` | yes | Reading the repository tree |
+| `GITHUB_APP_PRIVATE_KEY` | yes | The PEM inline; the `_PATH` form is local-only |
+| `GITHUB_APP_SLUG` | yes | Builds the App installation URL |
+| `GITHUB_OPERATOR_EMAILS` | yes | Who may connect a repository |
+| `GITHUB_OAUTH_CLIENT_ID` / `_SECRET` | **no** | Not yet created — see below |
 
-GitHub and the translation API are absent on purpose, and the deployment says
-so rather than failing oddly: the repository section renders "This deployment
-has no GitHub App configured", which is true.
+This table used to say the opposite, and the reasoning it gave was sound at the
+time: the pipeline would have pointed at `127.0.0.1:8787`, the App private key
+would have travelled for nothing, and enabling it would move the invariant-5 gap
+onto a public URL. The first two stopped being true when `apps/api` was
+deployed. The third is still true and was accepted deliberately on 2026-08-19 —
+see `apps/api/DEPLOYING.md` and CLAUDE.md.
 
-Three reasons, and none of them is "not got round to it":
+**`GITHUB_OPERATOR_EMAILS` is the live authorization boundary.** One GitHub App
+installation serves the whole deployment, and its token reaches every repository
+that installation was granted regardless of who asks. So connecting a repository
+is restricted to the addresses in this variable, and `isOperator` fails closed on
+an empty value. It is set to the operator's own address; until each customer
+installs the App themselves this is **not multi-tenant on the GitHub side**.
 
-1. **The pipeline would be broken anyway.** `LOCALIZE_API_URL` defaults to
-   `http://127.0.0.1:8787`, and `apps/api` is not deployed. A run would reach
-   for a service that does not exist on that host.
-2. **It would put the App private key on Vercel.** That key can write to every
-   repository the installation was granted. It should not travel until there is
-   a reason for it to.
-3. **Invariant 5.** With the pipeline live, source-derived context leaves for
-   non-EU LLM providers from a public deployment rather than from one
-   developer's machine. The gap is documented in CLAUDE.md; widening it is a
-   decision, not a deployment step.
-
-Adding them is a deliberate act. When it happens, this file and CLAUDE.md are
-updated in the same commit — the last time a deployment and the documentation
-disagreed here, `apps/api` sat on a public URL for days while CLAUDE.md called
-it local.
+**`GITHUB_OAUTH_CLIENT_ID` / `GITHUB_OAUTH_CLIENT_SECRET` are absent because the
+secret does not exist yet.** Without them the callback cannot prove that whoever
+completes an install actually owns it, so `GitHubConnection` renders the flow as
+unavailable and explains why rather than storing an unverified installation id.
+Creating them requires ticking "Request user authorization (OAuth) during
+installation" on the App and setting the callback URL to
+`https://localize-infra-web.vercel.app/github/callback`.
 
 ## Production has its own database
 

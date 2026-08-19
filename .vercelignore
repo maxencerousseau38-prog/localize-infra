@@ -1,0 +1,21 @@
+# Vercel CLI archive uploads ignore this file's entries instead of .gitignore,
+# so everything that should not travel has to be named here explicitly.
+#
+# Without it the archive was 1.9 GB: node_modules (677 MB) plus the two .next
+# directories (489 MB) plus turbo caches, all of which Vercel rebuilds anyway
+# from `installCommand` and `buildCommand`.
+#
+# What must NOT be added here: packages/ui/src. apps/web's globals.css reaches
+# out of its root directory with `@source '../../../../packages/ui/src'`, and
+# excluding it would drop roughly 30% of the stylesheet with a green build.
+node_modules
+.next
+dist
+.turbo
+out
+coverage
+test-results
+playwright-report
+blob-report
+.vercel
+*.tsbuildinfo

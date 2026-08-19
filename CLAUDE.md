@@ -62,8 +62,12 @@ Vercel `localize-infra-site`, compte `drive-os-s-projects`, suivi de `master`).
 
 **`apps/web` est déployé** sur https://localize-infra-web.vercel.app (projet
 Vercel `localize-infra-web`, même compte, Root Directory `apps/web`, fonctions
-en `cdg1`). Ce sont les **deux** projets Vercel du dépôt. `apps/api` et
-`services/github-app` restent locaux.
+en `cdg1`).
+
+**`apps/api` est déployé** sur https://localize-infra-api.vercel.app (projet
+Vercel `localize-infra-api`, Root Directory `apps/api`, fonctions en `cdg1`).
+Ce sont les **trois** projets Vercel du dépôt. `services/github-app` reste une
+bibliothèque, consommée par `apps/api` ; elle n'a pas de déploiement propre.
 
 `apps/web` n'est **pas** relié à Git : le déploiement est une archive envoyée
 par la CLI **depuis la racine du dépôt**, avec `VERCEL_PROJECT_ID` en surcharge
@@ -128,11 +132,23 @@ sur toutes les routes — `API_AUTH_TOKEN` absent côté Vercel, et
 a transformé l'oubli en URL publique morte plutôt qu'en API ouverte. Projet
 supprimé le 2026-08-14.
 
-Redéployer `apps/api` un jour n'est donc pas un geste neutre : cela exposerait
-publiquement un service qui envoie du contexte extrait du code source à des
-fournisseurs LLM hors UE, faisant sortir l'écart connu à l'invariant 5 (décrit
-plus bas) du poste du développeur. Si ça arrive, ce paragraphe se met à jour
-dans le même commit.
+**C'est arrivé, le 2026-08-19, sur décision explicite.** Ce paragraphe disait
+que redéployer `apps/api` « n'est pas un geste neutre » et que, le cas échéant,
+il se mettrait à jour dans le même commit. Voici cette mise à jour.
+
+L'écart connu à l'invariant 5 n'est donc plus sur le poste du développeur : le
+service tourne sur une URL publique et envoie du contexte extrait du code source
+— chemins de fichiers, noms de composants, code environnant — à Anthropic, hors
+UE, à chaque traduction. Les fonctions sont en `cdg1` et la base est en
+`eu-west-3`, ce qui règle le trajet jusqu'au modèle, pas le modèle lui-même.
+`apps/api/public/index.html` le dit aussi à qui visite la racine du service.
+
+Ce qui rend le déploiement tenable plutôt qu'imprudent, c'est le fail-closed :
+`apps/api/src/index.ts` refuse de démarrer sans `API_AUTH_TOKEN`, toutes les
+routes `/v1/*` exigent le bearer (vérifié en production : 401 sans jeton, 401
+avec un mauvais jeton), et `/health` est la seule route publique. Les cinq
+variables sont cette fois configurées — l'oubli de 2026-08-14 est précisément
+ce que cette liste empêche de répéter.
 
 Aucun domaine personnalisé n'est attaché. `SITE_URL`
 (`apps/site/src/lib/routes.ts`) porte cette origine, et tout ce que le site
