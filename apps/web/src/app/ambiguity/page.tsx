@@ -1,36 +1,54 @@
-import { AmbiguityQueue } from '@/components/ambiguity-queue';
 import { Page, PageHeader, PageMeta } from '@/components/page';
-import { SampleBanner, SampleRegion } from '@/components/sample';
-import { SAMPLE_AMBIGUITIES } from '@/lib/sample';
+import {
+  listOpenAmbiguitiesForViewer,
+  requireSession,
+} from '@/lib/data/workspace';
+import { EmptyState } from '@localize-infra/ui';
 import type { Metadata } from 'next';
+import { AmbiguityInbox } from './ambiguity-inbox';
 
 export const metadata: Metadata = { title: 'Ambiguity' };
 
-export default function AmbiguityPage() {
+/**
+ * Every question waiting on this person, across their workspaces.
+ *
+ * This rendered `SAMPLE_AMBIGUITIES` — three invented escalations with a banner
+ * saying so — because until recently there was nowhere to store a real one. The
+ * table exists now, the pipeline writes to it, and RLS confines reads to
+ * workspaces the caller belongs to, so the sample is gone rather than being
+ * relabelled.
+ *
+ * Not scoped to one workspace on purpose: the route has no org in its path, and
+ * a queue that answers "what is blocked on me" is more useful spanning all of
+ * them than one arbitrarily chosen. Answering happens on the project page,
+ * where the run and its proposal are in view — this is the inbox, not the desk.
+ */
+export default async function AmbiguityPage() {
+  await requireSession();
+  const ambiguities = await listOpenAmbiguitiesForViewer();
+
   return (
     <Page>
       <PageHeader
         title="Ambiguity"
         purpose="Strings the agent would not guess at. Each one is a judgement call it escalated rather than getting wrong quietly."
-        meta={
-          <>
-            <PageMeta label="Waiting">{SAMPLE_AMBIGUITIES.length}</PageMeta>
-            <PageMeta label="Blocking">1 pull request</PageMeta>
-          </>
-        }
+        meta={<PageMeta label="Waiting">{ambiguities.length}</PageMeta>}
       />
 
-      <div className="mt-6">
-        <SampleBanner>
-          These escalations are illustrative. Real ones would come from your own
-          runs, and resolving one here changes nothing — there is no project
-          connected and no run to unblock.
-        </SampleBanner>
-      </div>
-
-      <SampleRegion label="Ambiguity queue" className="mt-6">
-        <AmbiguityQueue items={SAMPLE_AMBIGUITIES} />
-      </SampleRegion>
+      {ambiguities.length === 0 ? (
+        <div className="mt-8">
+          {/*
+           * An empty queue is the product working, not a blank screen. It says
+           * so, rather than showing sample rows that imply work is pending.
+           */}
+          <EmptyState
+            title="Nothing is waiting on you"
+            description="When a run finds a string it will not guess at, the question appears here and the pull request waits until you answer it."
+          />
+        </div>
+      ) : (
+        <AmbiguityInbox items={ambiguities} />
+      )}
     </Page>
   );
 }

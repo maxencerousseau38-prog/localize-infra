@@ -81,7 +81,7 @@ const jsBytes = (page: import('@playwright/test').Page) =>
  * number would pass unconditionally and test nothing.
  */
 test('a stub route stays within its JavaScript budget', async ({ page }) => {
-  await page.goto('/ambiguity', { waitUntil: 'networkidle' });
+  await page.goto('/runs', { waitUntil: 'networkidle' });
   const bytes = await jsBytes(page);
 
   expect(bytes).toBeGreaterThan(0);
@@ -97,7 +97,7 @@ test('a stub route stays within its JavaScript budget', async ({ page }) => {
  * numbers means this keeps working as the shell legitimately grows.
  */
 test('the design gallery is split out of the shell', async ({ page }) => {
-  await page.goto('/ambiguity', { waitUntil: 'networkidle' });
+  await page.goto('/runs', { waitUntil: 'networkidle' });
   const stub = await jsBytes(page);
 
   await page.goto('/design', { waitUntil: 'networkidle' });

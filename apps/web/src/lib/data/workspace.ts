@@ -318,6 +318,30 @@ export async function listRunAmbiguities(
   return (data ?? []).map((row) => toAmbiguity(row as Record<string, unknown>));
 }
 
+/**
+ * Everything still waiting on a person, across every workspace they belong to.
+ *
+ * RLS already confines `run_ambiguities` to organizations the caller is a
+ * member of, so this does not filter by organization at all — adding a client
+ * side `in` list would duplicate the policy and be the copy that drifts. The
+ * flat /ambiguity route is the reason this exists: it is not scoped to one
+ * workspace, and asking "which one?" of a user with a single workspace is a
+ * question the product can answer itself.
+ */
+export async function listOpenAmbiguitiesForViewer(): Promise<
+  AmbiguityRecord[]
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('run_ambiguities')
+    .select(AMBIGUITY_COLUMNS)
+    .eq('state', 'unresolved')
+    .order('created_at', { ascending: true });
+
+  if (error) throw new Error(`Could not load ambiguities: ${error.message}`);
+  return (data ?? []).map((row) => toAmbiguity(row as Record<string, unknown>));
+}
+
 /** Everything still waiting on a person, across a whole workspace. */
 export async function listOpenAmbiguities(
   organizationId: string,
