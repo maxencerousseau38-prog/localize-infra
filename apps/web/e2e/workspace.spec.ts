@@ -127,15 +127,17 @@ test.describe('workspace', () => {
   });
 
   /*
-   * The gate that matters. One GitHub App installation is shared by the whole
-   * deployment, so a non-operator being able to connect a repository would let
-   * one tenant point a project at another's code and open pull requests
-   * against it.
+   * The isolation that matters, restated for self-serve.
    *
-   * These assert the interface. The control itself is the isOperator() check
-   * at the top of connectRepository, before anything is read or written.
+   * This used to assert an operator allow-list, which existed only because one
+   * GitHub App installation was shared by the whole deployment. The allow-list
+   * is gone; the guarantee is stronger and comes from `installationIdFor`,
+   * which no longer falls back to the shared installation. A workspace that
+   * has not installed the App reaches nothing — so the picker is absent for a
+   * reason that holds for every tenant, not just for accounts nobody
+   * allow-listed.
    */
-  test('a non-operator is not offered the connection at all', async ({
+  test('a workspace with no installation is offered no repositories', async ({
     page,
   }) => {
     await page.goto(
@@ -153,8 +155,11 @@ test.describe('workspace', () => {
     await expect(
       page.getByRole('button', { name: /connect repository/i }),
     ).toHaveCount(0);
-    // Told why, rather than shown a disabled control.
-    await expect(page.getByText(/limited to its operators/i)).toBeVisible();
+    // Told why, and pointed at the way forward, rather than shown a disabled
+    // control (DESIGN.md §11).
+    await expect(
+      page.getByText(/has not installed the Localize GitHub App/i),
+    ).toBeVisible();
   });
 
   test('a project slug from another workspace is also a 404', async ({

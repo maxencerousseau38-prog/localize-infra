@@ -1,7 +1,10 @@
 'use client';
 
+import { runProgress, shouldPoll } from '@/lib/runs/progress';
+import { PIPELINE_STAGE_NAMES, type PipelineStageId } from '@localize-infra/ui';
 import { Badge, Button, type Tone } from '@localize-infra/ui';
-import { useActionState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useActionState, useEffect } from 'react';
 import { type RunState, startRun } from './run-actions';
 
 const EMPTY: RunState = {};
@@ -19,6 +22,21 @@ export interface RunRow {
   prUrl: string | null;
   prNumber: number | null;
   createdAt: string;
+  /** Last time this run reported progress. Null before it moved, or on old runs. */
+  progressAt: string | null;
+}
+
+/**
+ * The stage a reader sees, named from `PIPELINE_STAGES`.
+ *
+ * Not re-worded locally. The five stage names are fixed once (DESIGN.md §1.4)
+ * so the word somebody learns on the landing page is the word they meet here;
+ * a private mapping is how those drift apart.
+ */
+function stageLabel(stage: string): string {
+  return (
+    PIPELINE_STAGE_NAMES[stage as PipelineStageId] ?? stage.replace('_', ' ')
+  );
 }
 
 /**
@@ -72,6 +90,31 @@ export function RunsSection({
     EMPTY,
   );
 
+  const progressByRun = runs.map((run) =>
+    runProgress({
+      status: run.status,
+      stage: run.stage,
+      progressAt: run.progressAt,
+    }),
+  );
+  const watching = progressByRun.some(shouldPoll);
+
+  /*
+   * Near-real-time by re-reading the server component, not by a socket.
+   *
+   * The run writes its stage to Postgres as it goes; this asks the server for
+   * the row again while anything is still moving, and stops as soon as nothing
+   * is. Polling a finished list forever is a spinner that never resolves, and
+   * `shouldPoll` deliberately excludes `stalled` and `awaiting-review` — the
+   * first will not change on its own, the second is waiting for a person.
+   */
+  const router = useRouter();
+  useEffect(() => {
+    if (!watching) return;
+    const timer = setInterval(() => router.refresh(), 4000);
+    return () => clearInterval(timer);
+  }, [watching, router]);
+
   return (
     <section
       aria-labelledby="runs"
@@ -116,8 +159,11 @@ export function RunsSection({
         </p>
       ) : (
         <ul className="mt-4 border-t border-subtle">
-          {runs.map((run) => {
+          {runs.map((run, index) => {
             const status = STATUS[run.status];
+            const progress = progressByRun[index] as ReturnType<
+              typeof runProgress
+            >;
             const prHref = asGitHubPullRequest(run.prUrl);
             return (
               <li
@@ -132,6 +178,20 @@ export function RunsSection({
                     .slice(0, 16)
                     .replace('T', ' ')}
                 </span>
+
+                {/* Where it is, while it is still somewhere. A finished run
+                    says so with its badge and does not need a stage. */}
+                {progress.kind === 'active' ? (
+                  <span className="text-small text-secondary">
+                    {stageLabel(progress.stage)}…
+                  </span>
+                ) : progress.kind === 'stalled' ? (
+                  <span className="text-small text-degraded-text">
+                    Stopped reporting at {stageLabel(progress.stage)} —{' '}
+                    {Math.round(progress.silentForMs / 60000)} min ago. The
+                    request probably died; start another run.
+                  </span>
+                ) : null}
 
                 <span className="text-small text-secondary">
                   {run.keysExtracted} key{run.keysExtracted === 1 ? '' : 's'}

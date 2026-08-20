@@ -14,7 +14,8 @@ export interface RepositorySectionProps {
   connected: { owner: string; name: string; branch: string | null } | null;
   /** Empty when GitHub is unconfigured or the caller is not an operator. */
   available: AvailableRepository[];
-  isOperator: boolean;
+  /** Whether this workspace has its own installation of the App. */
+  hasInstallation: boolean;
   gitHubConfigured: boolean;
 }
 
@@ -31,7 +32,7 @@ export function RepositorySection({
   projectSlug,
   connected,
   available,
-  isOperator,
+  hasInstallation,
   gitHubConfigured,
 }: RepositorySectionProps) {
   const [state, action, pending] = useActionState(
@@ -84,23 +85,33 @@ export function RepositorySection({
           This deployment has no GitHub App configured, so a repository cannot
           be connected. The CLI still works against a local clone.
         </p>
-      ) : !isOperator ? (
+      ) : !hasInstallation ? (
         /*
-         * The honest boundary. Not a disabled control: a control that looks
-         * like it would work if you tried harder is worse than a sentence
-         * explaining that it would not (DESIGN.md §11).
+         * The honest boundary, and now a route forward rather than a dead end.
+         * This used to say per-customer installation was not built; it is, so
+         * the sentence points at it (DESIGN.md §11: no control that looks like
+         * it would work if you tried harder).
          */
         <p className="mt-4 max-w-[64ch] text-small leading-6 text-secondary">
-          This deployment shares a single GitHub App installation, so connecting
-          a repository is limited to its operators. Per-customer installation —
-          where you authorise the App against your own repositories — is not
-          built yet. Until then, run the CLI against a local clone.
+          This workspace has not installed the Localize GitHub App yet. Install
+          it from the workspace’s projects page, choose which repositories it
+          may see, and they will appear here.
+        </p>
+      ) : available.length === 0 ? (
+        /*
+         * Installed, but granted nothing. A distinct state: the account holds
+         * an installation whose repository selection is empty, which reads as a
+         * broken product unless it says what to do about it.
+         */
+        <p className="mt-4 max-w-[64ch] text-small leading-6 text-secondary">
+          Your installation is connected but has access to no repositories.
+          Grant it access to at least one on GitHub, then reload this page.
         </p>
       ) : (
         <form action={action} className="mt-4 flex flex-col gap-4">
           <p className="max-w-[64ch] text-small leading-6 text-secondary">
-            Operator access. These are the repositories this deployment’s shared
-            installation can reach — not a customer’s own account.
+            The repositories your installation of the Localize App can reach.
+            Change the selection on GitHub to add or remove one.
           </p>
 
           <Field label="Repository" required>

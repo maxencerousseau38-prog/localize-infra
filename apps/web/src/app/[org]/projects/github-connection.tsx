@@ -79,8 +79,7 @@ export function GitHubConnection({
           deployment: the app has no OAuth client secret, so the callback cannot
           prove that whoever completes an install actually owns it. Rather than
           store an installation id it cannot verify, the flow is switched off.
-          Operators can still connect repositories through the shared
-          installation.
+          The CLI still works against a local clone.
         </p>
       )}
     </section>

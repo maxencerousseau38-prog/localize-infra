@@ -6,8 +6,10 @@ import {
   mayUsePrivateRepositories,
   requireSession,
 } from '@/lib/data/workspace';
-import { isOperator } from '@/lib/github/config';
-import { canReachRepository } from '@/lib/github/repositories';
+import {
+  canReachRepository,
+  installationIdFor,
+} from '@/lib/github/repositories';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
@@ -34,14 +36,18 @@ export async function connectRepository(
   _prev: ConnectState,
   formData: FormData,
 ): Promise<ConnectState> {
-  const session = await requireSession();
+  await requireSession();
 
-  if (!isOperator(session.email)) {
-    return {
-      error:
-        'Connecting a repository is limited to this deployment’s operators while the GitHub App installation is shared.',
-    };
-  }
+  /*
+   * No operator allow-list here any more.
+   *
+   * That gate existed for one reason: the installation was shared, so a token
+   * issued for any workspace reached every repository the deployment had ever
+   * been granted. `installationIdFor` no longer falls back to it, so a
+   * workspace reaches its own repositories or none — the authorization is now
+   * the installation itself rather than a list of addresses, and
+   * `canReachRepository` below is where it is enforced.
+   */
 
   const selection = String(formData.get('repository') ?? '').trim();
   const [owner, name] = selection.split('/');
@@ -53,10 +59,21 @@ export async function connectRepository(
   const project = await findProject(organization.id, projectSlug);
   if (!project) return { error: 'That project is not available.' };
 
+  const installation = await installationIdFor(organization.id);
+  if (!installation) {
+    return {
+      error:
+        'This workspace has not installed the Localize GitHub App yet. Install it, choose which repositories it may see, and come back.',
+    };
+  }
+
   const repository = await canReachRepository(owner, name, organization.id);
   if (!repository) {
+    // Reachable rather than merely named: the installation exists but was not
+    // granted this repository, which is a different problem from having no
+    // installation and needs a different sentence.
     return {
-      error: `The GitHub App installation cannot reach ${owner}/${name}.`,
+      error: `Your installation cannot reach ${owner}/${name}. Grant it access to that repository on GitHub, then try again.`,
     };
   }
 
@@ -101,8 +118,9 @@ export async function disconnectRepository(
   orgSlug: string,
   projectSlug: string,
 ): Promise<void> {
-  const session = await requireSession();
-  if (!isOperator(session.email)) return;
+  // Disconnecting only clears this project's own pointer, and RLS already
+  // confines that to a workspace the caller belongs to.
+  await requireSession();
 
   const organization = await findOrganization(orgSlug);
   if (!organization) return;
