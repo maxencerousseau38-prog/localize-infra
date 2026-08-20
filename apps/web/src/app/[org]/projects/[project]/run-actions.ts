@@ -142,7 +142,38 @@ export async function startRun(
     }
     framework = detected.name;
 
-    stage = 'extract';
+    /*
+     * Progress is written down, not accumulated in memory.
+     *
+     * `stage` was a local variable persisted once, by finish_run, at the end.
+     * For the whole of a run — a checkout, an AST walk, one model call per
+     * locale — the row said 'detect', so every reader was told the same thing
+     * whether it was translating, waiting, or dead. Each call is awaited: a
+     * fire-and-forget write is exactly the one that gets cancelled when the
+     * request ends, which is when the record matters most.
+     */
+    const advance = async (
+      to: typeof stage,
+      counts: {
+        keysExtracted?: number;
+        keysTranslated?: number;
+        localesSucceeded?: number;
+        localesFailed?: number;
+      } = {},
+    ) => {
+      stage = to;
+      await supabase.rpc('advance_run', {
+        p_run_id: run.id,
+        p_stage: to,
+        p_framework: framework,
+        p_keys_extracted: counts.keysExtracted ?? null,
+        p_keys_translated: counts.keysTranslated ?? null,
+        p_locales_succeeded: counts.localesSucceeded ?? null,
+        p_locales_failed: counts.localesFailed ?? null,
+      });
+    };
+
+    await advance('extract');
     const extracted = extractFromProject(workdir, detected.sourceGlobs);
     const fresh = buildKeyCatalog(extracted);
     keysExtracted = Object.keys(fresh).length;
@@ -157,7 +188,7 @@ export async function startRun(
     const sourceLocale = project.source_locale;
     const mergedSource = mergeLocaleFile(localesDir, sourceLocale, fresh);
 
-    stage = 'translate';
+    await advance('translate', { keysExtracted });
     if (!apiToken) {
       throw new Error(
         'LOCALIZE_API_TOKEN is not set, so the translation API cannot be called.',
@@ -252,7 +283,11 @@ export async function startRun(
       );
     }
 
-    stage = 'pull_request';
+    await advance('pull_request', {
+      keysTranslated,
+      localesSucceeded,
+      localesFailed,
+    });
     const prResponse = await fetch(`${apiUrl}/v1/open-pr`, {
       method: 'POST',
       headers: {

@@ -135,6 +135,7 @@ export default async function ProjectPage({
           prUrl: run.pr_url,
           prNumber: run.pr_number,
           createdAt: run.created_at,
+          progressAt: run.progress_at,
         }))}
       />
     </Page>

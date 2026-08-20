@@ -154,6 +154,15 @@ export interface RunRecord {
   pr_url: string | null;
   pr_number: number | null;
   created_at: string;
+  /**
+   * When the run last reported progress.
+   *
+   * Null on runs that predate progress reporting, and on a run that has not
+   * moved past `queued`. A stage alone cannot tell a slow run from an abandoned
+   * one — a serverless request killed mid-flight leaves no error behind and the
+   * row sits at `translate` looking busy forever.
+   */
+  progress_at: string | null;
 }
 
 /** Runs for a project, newest first. Scoped by RLS like everything else. */
@@ -162,7 +171,7 @@ export async function listRuns(projectId: string): Promise<RunRecord[]> {
   const { data, error } = await supabase
     .from('runs')
     .select(
-      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at',
+      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,progress_at',
     )
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
