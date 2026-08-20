@@ -11,7 +11,13 @@ const EMPTY: RunState = {};
 
 export interface RunRow {
   id: string;
-  status: 'queued' | 'running' | 'succeeded' | 'partial' | 'failed';
+  status:
+    | 'queued'
+    | 'running'
+    | 'succeeded'
+    | 'partial'
+    | 'failed'
+    | 'awaiting_review';
   stage: string;
   framework: string | null;
   keysExtracted: number;
@@ -70,6 +76,11 @@ const STATUS: Record<RunRow['status'], { tone: Tone; label: string }> = {
   succeeded: { tone: 'confident', label: 'Succeeded' },
   partial: { tone: 'degraded', label: 'Partial' },
   failed: { tone: 'failed', label: 'Failed' },
+  // Iris, and only here. DESIGN.md §1.4 reserves it for "your judgement is
+  // required", which is exactly and only what this state means: the run did
+  // not fail and did not finish — it found something it will not guess at and
+  // stopped to ask. Painting it amber would read as degraded, and it is not.
+  awaiting_review: { tone: 'ambiguous', label: 'Needs your call' },
 };
 
 export function RunsSection({

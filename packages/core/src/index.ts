@@ -3,3 +3,4 @@ export * from './detect/types.js';
 export * from './extract/index.js';
 export * from './extract/types.js';
 export * from './locale-file/index.js';
+export * from './review/build-locale-files.js';

@@ -28,7 +28,11 @@ export interface RunState {
   runId?: string;
 }
 
-type Stage = 'detect' | 'extract' | 'translate' | 'pull_request';
+// 'escalate' is a real stopping point, not a step passed through: a run that
+// raised a question ends here and waits for a person. The database enum has
+// always carried it; the pipeline never used it, because until now there was
+// nothing that could be raised.
+type Stage = 'detect' | 'extract' | 'translate' | 'escalate' | 'pull_request';
 
 /**
  * One run: detect, extract, translate, open a pull request.
@@ -111,6 +115,21 @@ export async function startRun(
   let keysTranslated = 0;
   let localesSucceeded = 0;
   let localesFailed = 0;
+  const proposals: {
+    locale: string;
+    translation_key: string;
+    source_text: string;
+    proposed_text: string;
+    origin: 'model' | 'preserved' | 'resolved';
+  }[] = [];
+  const escalations: {
+    key: string;
+    locale: string;
+    sourceText: string;
+    proposedText: string;
+    question: string;
+    alternatives: { text: string; rationale: string }[];
+  }[] = [];
   let prUrl: string | null = null;
   let prNumber: number | null = null;
   const branch: string | null = null;
@@ -256,6 +275,22 @@ export async function startRun(
             body.translations.map((entry) => [entry.key, entry.text]),
           );
           keysTranslated += body.translations.length;
+
+          // Invariant 4, at the only point where it can actually be enforced.
+          // A string the model refused to guess at becomes a question in the
+          // queue, and its proposal is still used so the file is complete —
+          // the PR is what waits, not the translation.
+          for (const entry of body.translations) {
+            if (entry.confidence !== 'ambiguous' || !entry.question) continue;
+            escalations.push({
+              key: entry.key,
+              locale,
+              sourceText: fresh[entry.key] ?? entry.text,
+              proposedText: entry.text,
+              question: entry.question,
+              alternatives: entry.alternatives,
+            });
+          }
         }
 
         // Precedence lives in packages/core, next to its regression tests.
@@ -268,6 +303,20 @@ export async function startRun(
           path: `${detected.localesDir}/${locale}.json`,
           content: `${JSON.stringify(merged, null, 2)}\n`,
         });
+        // Written down so the review screen shows what will actually be
+        // committed. If approval re-ran the model, the diff a developer
+        // approved and the diff that landed would be two different samples
+        // from the same distribution.
+        for (const [key, value] of Object.entries(merged)) {
+          proposals.push({
+            locale,
+            translation_key: key,
+            source_text: fresh[key] ?? '',
+            proposed_text: value,
+            origin: existing[key] !== undefined ? 'preserved' : 'model',
+          });
+        }
+
         localesSucceeded += 1;
       } catch (error) {
         // One locale failing must not abort the rest: that is the
@@ -281,6 +330,63 @@ export async function startRun(
       throw new Error(
         `Every target locale failed. Last error: ${failure ?? 'unknown'}`,
       );
+    }
+
+    // Everything proposed is written down before anything is decided, so the
+    // review screen and the pull request are the same object seen twice.
+    if (proposals.length > 0) {
+      await supabase.rpc('record_run_translations', {
+        p_run_id: run.id,
+        p_rows: proposals,
+        // Stamped here because this is the only moment the path is known: it
+        // comes from framework detection against a checkout this request is
+        // holding open, and approval happens later with no checkout in reach.
+        p_locales_dir: detected.localesDir,
+      });
+    }
+
+    // The gate. Invariant 4 says the agent raises ambiguities rather than
+    // guessing them, and a pipeline that raised them and opened the pull
+    // request anyway would be guessing with extra steps.
+    if (escalations.length > 0) {
+      // Reported, not just assigned: a run that stops to ask a question is one
+      // a reader is most likely to be watching, so `escalate` has to reach the
+      // row rather than living in a local variable until finish_run.
+      await advance('escalate', {
+        keysTranslated,
+        localesSucceeded,
+        localesFailed,
+      });
+
+      for (const escalation of escalations) {
+        await supabase.rpc('record_ambiguity', {
+          p_run_id: run.id,
+          p_translation_key: escalation.key,
+          p_locale: escalation.locale,
+          p_source_text: escalation.sourceText,
+          p_proposed_text: escalation.proposedText,
+          p_question: escalation.question,
+          p_alternatives: escalation.alternatives,
+        });
+      }
+
+      await supabase.rpc('finish_run', {
+        p_run_id: run.id,
+        p_status: 'awaiting_review',
+        p_stage: 'escalate',
+        p_framework: framework,
+        p_keys_extracted: keysExtracted,
+        p_keys_translated: keysTranslated,
+        p_locales_succeeded: localesSucceeded,
+        p_locales_failed: localesFailed,
+        p_error: null,
+        p_pr_url: null,
+        p_pr_number: null,
+        p_branch: null,
+      });
+
+      revalidatePath(`/${organization.slug}/projects/${project.slug}`);
+      return { runId: run.id };
     }
 
     await advance('pull_request', {
