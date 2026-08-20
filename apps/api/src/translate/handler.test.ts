@@ -38,8 +38,20 @@ describe('handleTranslateBatch', () => {
       'claude-sonnet-5',
     );
     expect(result.translations).toEqual([
-      { key: 'a', text: 'Willkommen', confidence: 'confident', question: null, alternatives: [] },
-      { key: 'b', text: 'Abbrechen', confidence: 'confident', question: null, alternatives: [] },
+      {
+        key: 'a',
+        text: 'Willkommen',
+        confidence: 'confident',
+        question: null,
+        alternatives: [],
+      },
+      {
+        key: 'b',
+        text: 'Abbrechen',
+        confidence: 'confident',
+        question: null,
+        alternatives: [],
+      },
     ]);
     expect(result.missingKeys).toEqual([]);
   });
@@ -52,7 +64,13 @@ describe('handleTranslateBatch', () => {
       'claude-sonnet-5',
     );
     expect(result.translations).toEqual([
-      { key: 'a', text: 'Willkommen', confidence: 'confident', question: null, alternatives: [] },
+      {
+        key: 'a',
+        text: 'Willkommen',
+        confidence: 'confident',
+        question: null,
+        alternatives: [],
+      },
     ]);
     expect(result.missingKeys).toEqual(['b']);
   });

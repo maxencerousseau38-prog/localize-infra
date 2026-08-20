@@ -5,15 +5,33 @@ describe('parseTranslationResponse', () => {
   it('parses a clean JSON array response', () => {
     const raw = '[{"key":"a","text":"Hallo"},{"key":"b","text":"Welt"}]';
     expect(parseTranslationResponse(raw)).toEqual([
-      { key: 'a', text: 'Hallo', confidence: 'confident', question: null, alternatives: [] },
-      { key: 'b', text: 'Welt', confidence: 'confident', question: null, alternatives: [] },
+      {
+        key: 'a',
+        text: 'Hallo',
+        confidence: 'confident',
+        question: null,
+        alternatives: [],
+      },
+      {
+        key: 'b',
+        text: 'Welt',
+        confidence: 'confident',
+        question: null,
+        alternatives: [],
+      },
     ]);
   });
 
   it('extracts a JSON array wrapped in a markdown code fence', () => {
     const raw = '```json\n[{"key":"a","text":"Hallo"}]\n```';
     expect(parseTranslationResponse(raw)).toEqual([
-      { key: 'a', text: 'Hallo', confidence: 'confident', question: null, alternatives: [] },
+      {
+        key: 'a',
+        text: 'Hallo',
+        confidence: 'confident',
+        question: null,
+        alternatives: [],
+      },
     ]);
   });
 
