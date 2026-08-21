@@ -82,6 +82,30 @@ export function shouldPoll(progress: RunProgress): boolean {
 }
 
 /**
+ * The stored stage, as the shared pipeline vocabulary spells it.
+ *
+ * Postgres and `PIPELINE_STAGES` disagree on exactly one label: the enum is
+ * `pull_request` and the stage id is `pull-request`. Everything downstream
+ * matched them with `===`, so a run that reached the last stage matched nothing
+ * and `findIndex` returned -1 — which the run detail then read as "reached
+ * nothing", drawing all five stages as *Not yet*.
+ *
+ * It never showed, because the one shape that hits it is narrow: a run at
+ * `pull_request` that did *not* finish cleanly. A succeeded run takes an earlier
+ * branch that marks every stage done regardless of the index, so the bug was
+ * covered by the only case anyone had looked at. A run that failed while opening
+ * its pull request — the case where a reader most needs to see how far it
+ * got — would have reported that it never started.
+ *
+ * Translating in one place rather than renaming either side: the enum spelling
+ * is what the database has stored since #14, and the hyphen is the id the
+ * marketing site already renders from.
+ */
+export function pipelineStageId(stage: RunStage | string): string {
+  return stage === 'pull_request' ? 'pull-request' : stage;
+}
+
+/**
  * A stage as the run detail draws it.
  *
  * Replaces `SampleRunStage`, which lived in the fixtures module and required a

@@ -1,5 +1,12 @@
+import { PIPELINE_STAGES } from '@localize-infra/ui';
 import { describe, expect, it } from 'vitest';
-import { STALL_AFTER_MS, runProgress, shouldPoll } from './progress';
+import {
+  type RunStage,
+  STALL_AFTER_MS,
+  pipelineStageId,
+  runProgress,
+  shouldPoll,
+} from './progress';
 
 const NOW = Date.parse('2026-08-20T12:00:00Z');
 const agoMs = (ms: number) => new Date(NOW - ms).toISOString();
@@ -142,5 +149,42 @@ describe('shouldPoll', () => {
     ).toBe(false);
     expect(shouldPoll({ kind: 'awaiting-review' })).toBe(false);
     expect(shouldPoll({ kind: 'finished', status: 'succeeded' })).toBe(false);
+  });
+});
+
+/**
+ * The one place the database and the design vocabulary disagree.
+ *
+ * Written against `PIPELINE_STAGES` rather than against a copied list, so it
+ * fails if either side is renamed: the point is that every stored stage lands
+ * on a real stage, not that this particular pair of strings exists.
+ */
+describe('pipelineStageId', () => {
+  const STORED: RunStage[] = [
+    'detect',
+    'extract',
+    'translate',
+    'escalate',
+    'pull_request',
+  ];
+
+  it('maps every stored stage onto a stage the pipeline draws', () => {
+    for (const stage of STORED) {
+      const id = pipelineStageId(stage);
+      expect(
+        PIPELINE_STAGES.findIndex((s) => s.id === id),
+        `stored stage "${stage}" matches no pipeline stage`,
+      ).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it('translates the last stage rather than passing the enum through', () => {
+    // The regression itself: `pull_request` matched nothing, so a run that
+    // failed at the final stage reported that it had reached none of them.
+    expect(pipelineStageId('pull_request')).toBe('pull-request');
+  });
+
+  it('leaves an unrecognised stage alone instead of guessing', () => {
+    expect(pipelineStageId('something-new')).toBe('something-new');
   });
 });

@@ -34,7 +34,8 @@
       ".mcp.json",
       ".agents/**",
       ".claude/**",
-      "skills-lock.json"
+      "skills-lock.json",
+      "apps/web/e2e/.auth/**"
     ]
   }
 }
