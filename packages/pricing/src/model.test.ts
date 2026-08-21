@@ -19,25 +19,40 @@ import { SCENARIOS } from './scenarios.js';
  */
 
 describe('the output ceiling', () => {
-  it('reports the measured batch limit, not the arithmetic one', () => {
-    // 4096/65 = 63 is what dividing gives, and it is wrong: adaptive thinking
-    // spends the same budget. 40 strings was observed returning no text at all.
-    expect(maxStringsPerRequest()).toBe(20);
-    expect(maxStringsPerRequest()).toBeLessThan(
-      PIPELINE.maxOutputTokensPerRequest /
-        MEASURED.outputTextTokensPerConfidentString,
-    );
+  /*
+   * These two asserted the defect — that the usable batch was 20 strings and
+   * that no scenario could be onboarded at all. Both were true when this model
+   * was written and neither is true now: the pipeline chunks, `effort: low`
+   * collapses the thinking that was consuming the whole budget, and 250 strings
+   * through the real handler returned 250 translations with none missing.
+   *
+   * Rewritten rather than deleted. They guard the same property from the other
+   * side — work larger than one request must still be split, and a chunk must
+   * still fit under the ceiling with room to spare.
+   */
+  it('chunks at a size that fits under the output ceiling', () => {
+    const chunkOutput =
+      maxStringsPerRequest() * MEASURED.outputTokensPerString.effortLow;
+    expect(chunkOutput).toBeLessThan(PIPELINE.maxOutputTokensPerRequest);
+
+    // Headroom, not a squeeze: a chunk with an unusual number of escalations
+    // emits a question and alternatives for each, and that has to fit too.
+    expect(chunkOutput).toBeLessThan(PIPELINE.maxOutputTokensPerRequest * 0.75);
   });
 
-  it('flags every scenario as beyond what the pipeline can answer today', () => {
-    // The finding, stated as an assertion: there is no customer this product
-    // can onboard as configured, including the smallest one modelled.
+  it('splits every scenario across requests rather than sending one', () => {
+    // Still true that no customer fits in a single request, including the
+    // smallest. That is now a routine fan-out instead of a failed run.
     for (const shape of SCENARIOS) {
       const cost = customerCost(shape);
       expect(
+        cost.requestsNeededAtOnboarding,
+        `${shape.name} onboards in one request`,
+      ).toBeGreaterThan(1);
+      expect(
         cost.onboardingTruncates,
-        `${shape.name} onboards in one shot`,
-      ).toBe(true);
+        `${shape.name} is still reported unanswerable`,
+      ).toBe(false);
     }
   });
 });

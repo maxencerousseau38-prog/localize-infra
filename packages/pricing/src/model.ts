@@ -75,15 +75,15 @@ export interface RunCost {
 }
 
 /**
- * The largest batch the product can actually answer as configured.
+ * The batch size the product actually sends.
  *
- * Not `max_tokens / tokens-per-string`. That arithmetic gives 63 and is wrong,
- * because adaptive thinking spends the same budget: 40 strings was observed to
- * consume all 4096 tokens on thinking alone and return no text. This returns
- * the measured figure instead.
+ * Was derived as `max_tokens / tokens-per-string`, which gives 63 and was
+ * wrong: adaptive thinking spent the same budget, and 40 strings returned no
+ * text at all. The pipeline now chunks at a size measured to work rather than
+ * at one computed from a ceiling.
  */
 export function maxStringsPerRequest(): number {
-  return PIPELINE.observedMaxUsableStrings;
+  return PIPELINE.chunkSize;
 }
 
 export function runCost(shape: RunShape): RunCost {
@@ -159,7 +159,9 @@ export function runCost(shape: RunShape): RunCost {
     outputCost,
     totalCost: inputCost + outputCost,
     requestsNeededForOutputCeiling: needed,
-    // Not "truncates": the observed failure returns no text at all.
+    // False now that the pipeline chunks. Kept because the shape it described
+    // — work larger than one request can answer — is what chunking exists for,
+    // and a future change that removed chunking would light this up again.
     truncates: !PIPELINE.chunking && needed > 1,
   };
 }

@@ -1,8 +1,8 @@
 # Unit economics
 
-Date: 2026-08-21
-Status: the model exists. No price is published yet, and none should be until
-the two open questions at the end are closed.
+Date: 2026-08-21, revised 2026-08-22
+Status: the model exists and the P0 it uncovered is fixed. No price is published
+yet, and none should be until the two open questions at the end are closed.
 
 This closes the half of `08-critique.md` §C3 that could be closed. §C3 refused
 to let a price be published because the unit economics were "rough arithmetic"
@@ -19,28 +19,28 @@ generator, so no figure in this document can be edited into existence.
 
 | | Cost/month | What it is |
 |---|---|---|
-| **Typical customer** | **$0.77** | 800 strings, 5 locales, 60 new strings/month |
-| **Heavy customer** | **$34.40** | 4 projects × 2,500 strings, 12 locales, on every merge |
-| **Worst realistic** | **$628.01** | 10 projects × 12,000 strings, 25 locales, CI on every merge |
-| **Adversarial, uncapped** | **$17,241 per run** | §C3's 1M strings × 10 locales |
+| **Typical customer** | **$0.72** | 800 strings, 5 locales, 60 new strings/month |
+| **Heavy customer** | **$32.33** | 4 projects × 2,500 strings, 12 locales, on every merge |
+| **Worst realistic** | **$589.26** | 10 projects × 12,000 strings, 25 locales, CI on every merge |
+| **Adversarial, uncapped** | **$15,675 per run** | §C3's 1M strings × 10 locales |
 
 Month one is different, and it is the number that decides whether a plan
 survives:
 
 | | Month one | Steady state | Year one |
 |---|---|---|---|
-| Typical | $8.36 | $0.77 | $16.88 |
-| Heavy | $261.98 | $34.40 | $640.40 |
-| Worst realistic | $6,317.54 | $628.01 | $13,225.71 |
+| Typical | $7.62 | $0.72 | $15.57 |
+| Heavy | $239.24 | $32.33 | $594.92 |
+| Worst realistic | $5,762.01 | $589.26 | $12,243.83 |
 
 **§C3 was right about the shape and wrong about the magnitude.** It predicted
 month one would consume "almost the entire month's revenue"; for the typical
-customer it consumes 44% of a $19 plan, which is survivable. For a heavy
+customer it consumes 40% of a $19 plan, which is survivable. For a heavy
 customer it consumes 2.6× a $99 plan, which is not.
 
 ### The unit everything reduces to
 
-**$1.71 per 1,000 string-locale pairs.**
+**$1.55 per 1,000 string-locale pairs.**
 
 One string translated into 25 languages costs 25 times one string translated
 into one. Strings are not the driver and neither are runs — the pair is what
@@ -48,20 +48,20 @@ the bill is made of, and every figure above is this number times a shape.
 
 | Configuration | Per 1,000 pairs |
 |---|---|
-| `claude-sonnet-5`, `effort: low` (recommended) | **$1.71** |
-| `claude-sonnet-5`, as configured today | $3.25 |
-| `claude-haiku-4-5`, thinking disabled | $0.57 |
+| `claude-sonnet-5`, `effort: low` (recommended) | **$1.55** |
+| `claude-sonnet-5`, at the default effort | $3.09 |
+| `claude-haiku-4-5`, thinking disabled | $0.52 |
 
 ---
 
-## What measuring found, and it is not a cost problem
+## What measuring found, and it was not a cost problem
 
-**The pipeline returns nothing above roughly thirty strings.** Not a truncated
-answer — no answer at all.
+**The pipeline returned nothing above roughly thirty strings.** Not a truncated
+answer — no answer at all. **Fixed, and the fix is verified below.**
 
 `claude-sonnet-5` runs adaptive thinking by default, thinking tokens are billed
-as output, and `apps/api/src/router/anthropic.ts` sets `max_tokens: 4096`.
-Nothing in the send path chunks: `run-actions.ts` puts every pending string for
+as output, and `apps/api/src/router/anthropic.ts` set `max_tokens: 4096`.
+Nothing in the send path chunked: `run-actions.ts` put every pending string for
 a locale into one request. Verified with real calls against the configured
 model and this repository's own prompt and corpus:
 
@@ -73,20 +73,20 @@ model and this repository's own prompt and corpus:
 | 40 | `max_tokens` | **4,096** | 4,096 | **none — empty response** |
 | 80 | `max_tokens` | **4,096** | 4,096 | **none — empty response** |
 
-At 40 strings the entire output budget is spent thinking and the response
-carries no text block at all. `createAnthropicProvider` then throws
+At 40 strings the entire output budget went on thinking and the response
+carried no text block at all. `createAnthropicProvider` throws
 *"Anthropic response had no usable text content block"*, so it fails closed
 rather than corrupting a locale file — but the run fails.
 
 Two consequences beyond the obvious one:
 
-- **No customer in this model can be onboarded as the product is configured.**
-  The smallest scenario — a side project with 120 strings — already needs the
-  work split across requests. The pricing tiers below assume this is fixed.
-- **`missingKeys` is computed and then dropped.** `handleTranslateBatch`
-  returns it and the CLI prints it; `run-actions.ts`, the path a paying
-  customer uses, never reads it. A partial answer is silently accepted as
-  complete. This is a separate defect from the one above and it outlives it.
+- **No customer in this model could be onboarded.** The smallest scenario — a
+  side project with 120 strings — already exceeded it.
+- **`missingKeys` was computed and then dropped.** `handleTranslateBatch`
+  returned it and the CLI printed it; `run-actions.ts`, the path a paying
+  customer uses, never read it, so a locale that came back with three strings
+  out of eight hundred was counted a success. A separate defect from the one
+  above, and it would have outlived it.
 
 ### The fix, measured
 
@@ -97,9 +97,26 @@ Two consequences beyond the obvious one:
 | `thinking: { type: 'disabled' }` | 100 | yes | — |
 | `claude-haiku-4-5`, thinking disabled | 55 | yes | — |
 
-`effort: low` is both the correctness fix and a 2.8× cost reduction, and it
-scales to 100 strings in one request (5,603 output tokens — which still needs
-`max_tokens` raised above 4,096). It is what the model below prices.
+`effort: low` is both the correctness fix and a 2.8× cost reduction. All three
+parts shipped together, because each is useless without the others:
+
+1. `output_config: { effort: 'low' }` and `max_tokens` raised to 8,192, in
+   `apps/api/src/router/anthropic.ts`.
+2. Chunking at 100 strings per request, in `handleTranslateBatch` — one place
+   rather than in each of the two callers, so the CLI and the web app cannot
+   drift. Chunks run sequentially, and a chunk that fails does not discard the
+   ones that succeeded.
+3. `run-actions.ts` reads `missingKeys`, counts them, and a run that lost
+   strings finishes `partial` rather than `succeeded`. The pull request body
+   names the shortfall, because that is where the reviewer is.
+
+**Verified end to end, twice**: 250 corpus strings through the real
+`handleTranslateBatch` against the live API returned **250 translations, 0
+missing** — in 84 and 88 seconds. That is the exact workload that previously
+returned nothing at all.
+
+A batch where *every* chunk fails still throws, so a provider outage remains a
+502 rather than being reported to the customer as a partial run.
 
 Two caveats stated rather than buried: the **quality** of `effort: low` against
 the default has not been evaluated, and neither has Haiku's. The eval harness
@@ -127,7 +144,7 @@ and real `POST /v1/messages` calls, using the `INSTRUCTIONS` constant read from
 | System prompt, billed once per request | 610 tokens |
 | Input per string, with file path, component and surrounding code | 219 tokens |
 | Output per string at `effort: low`, thinking included | 56 tokens |
-| Output per string as configured today | 159 tokens |
+| Output per string at the default effort, thinking included | 159 tokens |
 | Extra output for an escalated string (question + alternatives) | +174 tokens |
 
 Nothing here is derived from a characters-per-token ratio. One figure was
@@ -151,7 +168,7 @@ Anthropic list prices, from the model table dated 2026-06-24.
 **Every figure in this document uses the standard rate.** The introductory rate
 expires in ten days, and a plan priced against it loses a third of its input
 margin the day it ends. Modelled at intro rates, the typical customer's steady
-state is $0.52 rather than $0.77.
+state is $0.48 rather than $0.72.
 
 Prompt caching is a 1.25× write and a 0.1× read; the Batch API is 50%. Batch is
 a poor fit — a run's output is a pull request somebody is waiting for.
@@ -177,15 +194,30 @@ At a $20 floor, **two typical customers at $19 cover all fixed cost.**
 
 | Assumption | Value | Settled by |
 |---|---:|---|
-| Share of strings escalated | 8% | One batch of real inference over the corpus, counting `confidence: "ambiguous"`. Never done. |
+| Share of strings escalated | **2%** — observed 0.8%–2.0%, see below | The same measurement across every locale, on real application strings |
 | Runs failed and re-run by hand | 10% | The `runs` table, once it has rows. Production has zero. |
 
-The escalation rate turns out **not** to matter much, which is worth knowing
-before anyone spends money establishing it. Swept from 2% to 20%, the typical
-customer's steady state moves from $0.72 to $0.88 — a 22% range on a figure
-that is 4% of the cheapest plan. It is still worth measuring, because it drives
-how often a human is interrupted, and that is a product question rather than a
-cost one.
+**The escalation rate was a guess of 8% and observation puts it far lower.** Two
+runs of 250 corpus strings through the real `handleTranslateBatch` into German
+returned 250 translations each, with 2 and then 5 ambiguous — 0.8% and 2.0%.
+
+The model uses the **higher** of the two. A cost model must not round in its own
+favour, and two samples differing by 2.5× are a range rather than a number.
+
+It stays in this tier rather than moving up to *measured*, because one locale
+and one corpus is not a rate. German forces a du/Sie choice that many languages
+do not, and the corpus is drawn from open-source projects whose strings have
+already been through a translation process once — both push the number around.
+It is a measurement of one case being used as the estimate for all of them.
+What has changed is that the model is no longer built on a figure known to be
+wrong.
+
+It turns out **not** to matter much either way, which is worth knowing before
+anyone spends money establishing it properly. Swept from 2% to 20%, the typical
+customer's steady state moves from $0.72 to $0.88 — a 22% range on a line that
+is 4% of the cheapest plan. It is still worth measuring, because it drives how
+often a human is interrupted, and that is a product question rather than a cost
+one.
 
 ---
 
@@ -222,19 +254,19 @@ many customers exist rather than of what one costs.
 
 | Customer | Price | Steady state | Month one | Annual (10 months prepaid) |
 |---|---:|---:|---:|---:|
-| Low | $19 | 100% | 97% | 99% |
-| **Typical** | **$19** | **96%** | **56%** | **91%** |
-| Typical | $99 | 99% | 92% | 98% |
-| **Heavy** | **$19** | **−81%** | **−1,279%** | **−237%** |
-| **Heavy** | **$99** | **65%** | **−165%** | **35%** |
-| Heavy | $399 | 91% | 34% | 84% |
-| **Worst realistic** | **$399** | **−57%** | **−1,483%** | **−232%** |
+| Low | $19 | 100% | 98% | 99% |
+| **Typical** | **$19** | **96%** | **60%** | **92%** |
+| Typical | $99 | 99% | 93% | 99% |
+| **Heavy** | **$19** | **−70%** | **−1,159%** | **−213%** |
+| **Heavy** | **$99** | **67%** | **−142%** | **40%** |
+| Heavy | $399 | 92% | 40% | 85% |
+| **Worst realistic** | **$399** | **−48%** | **−1,344%** | **−207%** |
 
 Read three things off it:
 
 - **$19 works for the typical customer** and is comfortable in steady state.
-- **A heavy customer on $99 monthly loses $163 in month one and recovers it by
-  month four.** The same customer on annual prepay is 35% positive from day
+- **A heavy customer on $99 monthly loses $140 in month one and recovers it by
+  month five.** The same customer on annual prepay is 40% positive from day
   one. This is the single strongest argument for annual billing and it is now
   a number rather than an intuition.
 - **The worst realistic customer loses money at every price offered.** It is
@@ -260,8 +292,8 @@ keeps invariant 3 intact.
 | One-time initial import | 1,000 pairs | 6,000 | 40,000 | 150,000 |
 | Pairs per month after | 300 | 3,000 | 15,000 | 60,000 |
 | Daily ceiling | 300 | 1,000 | 5,000 | 20,000 |
-| Worst-case COGS/month | $0.51 | $5.13 | $25.65 | $102.60 |
-| Gross margin at the cap | — | **73%** | **74%** | **74%** |
+| Worst-case COGS/month | $0.46 | $4.65 | $23.24 | $92.95 |
+| Gross margin at the cap | — | **75%** | **76%** | **77%** |
 
 The structure follows three decisions:
 
@@ -279,7 +311,7 @@ recommended this without numbers; the numbers are in the table above.
 
 **The daily ceiling is roughly a tenth of the monthly allowance.** It exists so
 that no single day can consume a month, which is what bounds the adversarial
-case. At Scale's 20,000 pairs/day the worst possible month is $1,026 against
+case. At Scale's 20,000 pairs/day the worst possible month is $929 against
 $399 — so Scale additionally needs the monthly cap to bind, and it does.
 
 ### On overage: there should not be any
@@ -299,10 +331,10 @@ If true overage is wanted, it requires amending invariant 3, and that is a
 positioning decision rather than a pricing one. It is not mine to make and I
 have not modelled it.
 
-### Cheap-model routing is worth $1.14 per 1,000 pairs and is not yet earned
+### Cheap-model routing is worth $1.03 per 1,000 pairs and is not yet earned
 
-Haiku 4.5 costs $0.57 per 1,000 pairs against Sonnet 5's $1.71 — a two-thirds
-reduction that would take Scale's worst-case COGS from $102.60 to $34.20.
+Haiku 4.5 costs $0.52 per 1,000 pairs against Sonnet 5's $1.55 — a two-thirds
+reduction that would take Scale's worst-case COGS from $92.95 to $30.98.
 `08-critique.md` §C3 called cheap-model routing "load-bearing architecture",
 and on these numbers it is.
 
