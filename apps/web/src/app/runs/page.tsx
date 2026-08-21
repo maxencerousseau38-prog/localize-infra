@@ -1,9 +1,9 @@
 import { NotConnected } from '@/components/not-connected';
 import { Page, PageHeader, PageMeta } from '@/components/page';
-import { RunsTable, type RunTableRow } from '@/components/runs-table';
+import { type RunTableRow, RunsTable } from '@/components/runs-table';
 import { listRunsForViewer, requireSession } from '@/lib/data/workspace';
-import { EmptyState } from '@localize-infra/ui';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { EmptyState } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Runs' };

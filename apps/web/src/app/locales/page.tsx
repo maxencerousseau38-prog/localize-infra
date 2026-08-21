@@ -4,8 +4,8 @@ import {
   listLocaleCoverageForViewer,
   requireSession,
 } from '@/lib/data/workspace';
-import { EmptyState } from '@localize-infra/ui';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { EmptyState } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { LocaleCoverageList } from './locale-coverage-list';
 

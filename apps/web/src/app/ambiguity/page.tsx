@@ -4,8 +4,8 @@ import {
   listOpenAmbiguitiesForViewer,
   requireSession,
 } from '@/lib/data/workspace';
-import { EmptyState } from '@localize-infra/ui';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { EmptyState } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { AmbiguityInbox } from './ambiguity-inbox';
 

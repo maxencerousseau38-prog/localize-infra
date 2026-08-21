@@ -1,6 +1,7 @@
 import { NotConnected } from '@/components/not-connected';
 import { Page, PageHeader, PageMeta } from '@/components/page';
 import { listReviewItemsForViewer, requireSession } from '@/lib/data/workspace';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
   EmptyState,
   StateRule,
@@ -9,7 +10,6 @@ import {
   localeFontClass,
   localeTextProps,
 } from '@localize-infra/ui';
-import { isSupabaseConfigured } from '@/lib/supabase/env';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Review' };
