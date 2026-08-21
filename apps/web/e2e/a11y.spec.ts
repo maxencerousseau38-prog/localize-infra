@@ -10,7 +10,6 @@ import { expect, test } from '@playwright/test';
  */
 const ROUTES = [
   '/',
-  '/ambiguity',
   '/review',
   '/runs',
   '/runs/run-7c1b',
@@ -230,7 +229,11 @@ test('touch targets in the navigation sheet meet the minimum size', async ({
 for (const scheme of ['light', 'dark'] as const) {
   test(`keyboard hints stay legible (${scheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme });
-    await page.goto('/ambiguity');
+    // /runs, not /ambiguity: that route reads the database now and left
+    // this suite, taking the queue's hints with it. The topbar's ⌘K badge
+    // is the remaining Kbd, and its margin is the one that was 4.54:1.
+
+    await page.goto('/runs');
 
     // Every keyboard hint on the page, not the first. The first version of
     // this measured whichever `kbd` came first in the DOM and reported it as
@@ -296,7 +299,7 @@ test('nothing animates under reduced motion', async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
   const page = await context.newPage();
 
-  for (const route of ['/', '/runs', '/ambiguity', '/design']) {
+  for (const route of ['/', '/runs', '/design']) {
     await page.goto(route);
     const animating = await page.evaluate(
       () =>

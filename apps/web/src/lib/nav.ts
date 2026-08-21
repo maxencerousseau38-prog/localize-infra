@@ -12,17 +12,16 @@ import type { LucideIcon } from 'lucide-react';
 /**
  * The application's routes.
  *
- * `built` is the load-bearing field. Every route below except the design
- * gallery renders a screen that says it is not built, because the backend those
- * screens would read from does not exist (see CLAUDE.md — no database, no
- * accounts, no organisations, no persisted projects). The shell is real; the
- * data is absent, and the UI says so rather than inventing it.
+ * `built` and `sample` were both written when there was no database, no
+ * accounts and no organisations, and every route rendered either a not-built
+ * screen or invented rows. That is no longer true of all of them, and this
+ * comment claiming otherwise is how a stale flag survives: /ambiguity now
+ * reads `run_ambiguities`, confined by RLS to the caller's workspaces.
  *
  * The information architecture (docs/product/03-information-architecture.md
- * §2) scopes these under `/{org}/{project}`. They are flat here because there
- * are no organisations or projects to scope them to yet — a URL containing a
- * fabricated org slug would be exactly the kind of invented reality the shell
- * is built to avoid.
+ * §2) scopes these under `/{org}/{project}`. They are still flat because they
+ * are inboxes — "what is waiting on me" spans workspaces, and the answering
+ * happens on the project page where the run and its proposal are in view.
  */
 export interface NavRoute {
   href: string;
@@ -69,13 +68,13 @@ export const PRIMARY_NAV: NavRoute[] = [
   },
   {
     href: '/ambiguity',
-    sample: true,
-    count: 3,
+    // No `count`. It was a hardcoded 3 rendered as a badge in the sidebar —
+    // an invented number on every account, including one with nothing
+    // waiting. A real count needs a query per render, which the sidebar does
+    // not do; no badge is honest, a fixed one is not.
     label: 'Ambiguity',
     icon: TriangleAlert,
-    built: false,
-    blockedBy:
-      'The agent already surfaces ambiguity in the terminal and in pull requests. Reviewing it here requires a place to store the questions and your answers.',
+    built: true,
     keywords: 'questions decisions blocked unclear',
   },
   {

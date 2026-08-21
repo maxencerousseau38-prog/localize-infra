@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test';
 
 const ROUTES = [
   '/',
-  '/ambiguity',
   '/review',
   '/runs',
   '/runs/run-7c1b',
@@ -176,14 +175,7 @@ test.describe('honesty about the missing backend', () => {
   // abandoning the design. They now render their real interface populated with
   // sample data, labelled at three levels at once. This suite asserts all three
   // are present, because any one of them alone could be missed.
-  const SAMPLE_ROUTES = [
-    '/',
-    '/ambiguity',
-    '/review',
-    '/runs',
-    '/runs/run-7c1b',
-    '/locales',
-  ];
+  const SAMPLE_ROUTES = ['/', '/review', '/runs', '/runs/run-7c1b', '/locales'];
 
   for (const route of SAMPLE_ROUTES) {
     test(`${route} labels its data as sample in the banner`, async ({
@@ -337,7 +329,6 @@ test.describe('responsive shell', () => {
     '/runs/run-8f2a',
     '/runs/run-6a09',
     '/locales',
-    '/ambiguity',
     '/review',
     '/settings',
     '/design',
