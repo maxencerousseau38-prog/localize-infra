@@ -16,7 +16,9 @@
 - `packages/core` + `packages/cli` — détection de framework, extraction AST,
   moteur de fusion des fichiers de locale, commande `init` (M1 Phase 1).
 - `apps/api` (propriétaire) — `POST /v1/translate`, `POST /v1/open-pr`,
-  auth bearer, en local uniquement.
+  auth bearer. **Plus « en local uniquement »** : déployé depuis le 2026-08-19,
+  vérifié aujourd'hui — `/health` répond 200, `/v1/translate` répond 401 sans
+  jeton.
 - `services/github-app` (propriétaire) — ouverture de PR via Octokit.
 - Validé de bout en bout : une vraie PR ouverte en 22 s sur un dépôt réel.
 
@@ -44,14 +46,36 @@
 - `apps/web` (propriétaire) — coquille applicative : barre latérale 240 px
   (feuille latérale sous 1024 px), barre supérieure 48 px, palette de commandes
   ⌘K, et la galerie `/design` qui rend toute la bibliothèque de composants.
-  **Six de ses sept routes déclarent qu'elles ne sont pas construites**, faute
-  de backend ; un test e2e vérifie que chacune le dit. Ne jamais remplacer ces
-  écrans par des données inventées — c'est la contrainte, pas un provisoire.
+  **Ce point disait « six de ses sept routes déclarent qu'elles ne sont pas
+  construites », et qu'un test e2e vérifiait que chacune le dit. Les deux sont
+  périmés.** Il en reste **une**, `/[org]/billing`, et le test qui gardait la
+  formule n'existe plus — il a été retiré avec les surfaces qu'il décrivait, au
+  fil des PR #19 à #22, sans que ce paragraphe suive.
+
+  `/runs`, `/runs/[id]`, `/locales`, `/ambiguity`, `/review`, `/[org]/projects`
+  et `/[org]/projects/[project]` lisent Postgres sous RLS. Ce qu'ils affichent
+  sans base configurée n'est pas un écran « non construit » mais un `NotConnected`
+  qui dit qu'il n'y a pas de base à lire — délibérément pas un repli sur des
+  données d'exemple, indiscernable d'un produit qui marche.
+
+  La contrainte, elle, ne bouge pas : ne jamais remplacer un écran vide par des
+  données inventées.
   CSP à nonce par requête (`src/proxy.ts`), à l'inverse d'`apps/site` : les deux
   configurations documentent leur arbitrage et pourquoi il ne se transpose pas.
 
-**N'existe pas encore** : base de données, comptes, organisations, équipes,
-permissions, facturation, projets persistants, tableau de bord.
+**Cette liste énumérait comme inexistants : base de données, comptes,
+organisations, équipes, permissions, facturation, projets persistants, tableau
+de bord. Sept des huit existent aujourd'hui** — Postgres, l'authentification,
+les organisations, l'appartenance et les rôles, les projets, les runs et les
+surfaces qui les lisent. Voir les seize migrations et les PR #14 à #23.
+
+**N'existe toujours pas** : la **facturation**. Aucune intégration Stripe dans
+le dépôt, et `/[org]/billing` le dit — « Paid plans are not priced yet ». Ce
+n'est pas un oubli mais une conséquence : `docs/product/08-critique.md` §C3
+interdit de publier un prix avant d'avoir modélisé le coût unitaire, et ce
+modèle n'a pas été fait. C'est donc lui, et non le code de paiement, qui est sur
+le chemin critique du « vendable ».
+
 Ne jamais simuler ces fonctionnalités dans l'interface.
 
 Voir `docs/product/`, `docs/design/`, `docs/frontend/` (PRD → jalons), et
@@ -79,22 +103,48 @@ est envoyé. Relier ce projet à Git changerait ça et rendrait le réglage
 (des classes présentes dans `packages/ui/src` et absentes d'`apps/web/src`
 doivent apparaître dans le CSS servi).
 
-Seuls `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY` sont configurés. Ni la clé
-privée de la GitHub App, ni `LOCALIZE_API_*` : le pipeline pointerait sur
-`127.0.0.1:8787`, et l'activer ferait sortir l'écart connu à l'invariant 5 du
-poste du développeur vers une URL publique. L'interface le dit au lieu
-d'échouer bizarrement.
+**Ce paragraphe disait que seuls `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY`
+étaient configurés, et que ni la clé privée de la GitHub App ni `LOCALIZE_API_*`
+ne l'étaient. C'était faux depuis le 2026-08-19.** Vérifié par
+`vercel env ls production` sur `prj_L5FZPh16GE88nLtgPbOnb2LR5e3f` : neuf
+variables y sont, dont `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_ID`,
+`LOCALIZE_API_URL` et `LOCALIZE_API_TOKEN`. Le pipeline ne pointe donc plus sur
+`127.0.0.1:8787` — c'est la conséquence du déploiement d'`apps/api` décrit plus
+bas, et elle n'avait pas été reportée ici.
+
+Deux d'entre elles ne sont plus lues par rien : `GITHUB_APP_INSTALLATION_ID` et
+`GITHUB_OPERATOR_EMAILS` (voir plus bas). Elles peuvent être retirées.
+
+**Manquent, et c'est ce qui bloque le self-serve :** `GITHUB_OAUTH_CLIENT_ID` et
+`GITHUB_OAUTH_CLIENT_SECRET`. Sans eux le callback ne peut pas prouver que celui
+qui l'achève possède réellement l'installation qu'il nomme, donc le flux est
+coupé — et l'interface le dit, plutôt que de stocker un `installation_id` non
+vérifié.
 
 **Deux projets Supabase, séparés depuis le 2026-08-17.** Développement et
 tests d'acceptation : `localize-infra` (`aguwalokxfgtqbzmdjbs`). Production :
 `localize-infra-prod` (`ijgheekdihgssktyweyy`). Les deux en `eu-west-3`, les
-onze migrations appliquées de part et d'autre.
+seize migrations appliquées de part et d'autre.
 
 Ils n'en formaient qu'un, et ce n'était pas un détail : le compte semé par
 `supabase/seeds/dev-user.sql` — mot de passe écrit dans ce dépôt, fichier qui
 précise « NOT for production » — s'authentifiait contre le déploiement public.
 Vérifié, puis re-vérifié après la bascule : le même appel renvoie désormais
-`Invalid login credentials`. La base de production ne contient aucun compte.
+`Invalid login credentials`.
+
+**Cette phrase ajoutait « La base de production ne contient aucun compte ».
+Ce n'est plus vrai, et c'est une bonne nouvelle plutôt qu'une régression :** un
+compte tiers réel s'est inscrit le 2026-08-18 (domaine `casselin.com`), a créé
+l'organisation `layersky` dont il est `owner`, est revenu le 19, puis s'est
+arrêté — zéro projet, zéro run, zéro installation. Ce n'est pas le compte semé,
+qui reste refusé.
+
+Là où il s'est arrêté est la donnée la plus utile que ce dépôt possède
+aujourd'hui : arrivé sur `/layersky/projects`, il a lu que connecter GitHub
+n'est pas disponible sur ce déploiement, avec pour seule porte de sortie « le
+CLI fonctionne toujours sur un clone local » — un CLI qui n'est pas publié sur
+npm. Le tunnel s'arrête donc sur deux manques précis, tous deux hors du code :
+le secret OAuth, et la publication du paquet.
 
 La phrase « NOT for production » n'empêchait rien, donc la règle est maintenant
 appliquée et non plus écrite. La base de production porte une marque posée hors
@@ -179,15 +229,27 @@ par un humain (Task 6) » ; c'était faux. Les identifiants sont dans `.env`
 `maxencerousseau38-prog/localize-infra-fixture-vite` — ce dernier étant
 exactement le dépôt de la PR réelle affichée sur la landing.
 
-**Une seule installation, partagée par tout le déploiement.** C'est ce qui rend
-la connexion d'un dépôt réservée aux opérateurs (`GITHUB_OPERATOR_EMAILS`) :
-le jeton d'installation atteint tous les dépôts qui lui ont été accordés, quel
-que soit le client qui demande. Sans ce garde-fou, n'importe quel compte
-pourrait pointer un projet vers les dépôts de l'opérateur et y ouvrir des pull
-requests. La barrière tombe quand chaque client installera l'App lui-même et
-que l'`installation_id` sera stocké par organisation plutôt que par
-déploiement — **ce n'est donc pas encore un produit multi-locataire côté
-GitHub.**
+**L'installation est stockée par organisation, plus par déploiement.** Ce
+paragraphe décrivait une installation unique partagée, et disait que la
+connexion d'un dépôt était « réservée aux opérateurs (`GITHUB_OPERATOR_EMAILS`) ».
+Les deux moitiés étaient fausses au moment où elles ont été écrites.
+
+`organization_github_installations` porte l'`installation_id` par organisation
+depuis la migration `…0817000600`, et `resolveInstallation` ne sait plus rien
+dire d'autre : le type ne peut plus exprimer « agir comme l'installation
+partagée ». Un workspace sans installation propre n'a donc pas d'accès GitHub —
+ce n'est pas un cas qui échoue proprement, c'est un cas qui ne compile pas.
+
+Quant au garde-fou : `isOperator` et `operatorInstallationId` **n'avaient aucun
+appelant**, ni l'un ni l'autre, alors que trois commentaires affirmaient que
+tout appelant vérifiait le premier. Ce n'était pas une faille — le chemin qu'ils
+gardaient était inatteignable — mais une liste blanche qui n'appliquait rien,
+décrite à trois endroits comme ce qui séparait les locataires. Les deux sont
+supprimés ; l'isolation était structurelle et l'est maintenant explicitement.
+
+Ce qui manque pour que ce soit un vrai produit multi-locataire côté GitHub n'est
+donc plus le stockage, c'est **le secret OAuth** : sans lui aucun client ne peut
+déclencher sa propre installation, et le bouton est absent plutôt que désactivé.
 
 **Écart connu à l'invariant 5 (résidence des données UE) :** cette phase
 envoie du contexte extrait du code source (chemins de fichiers, noms de

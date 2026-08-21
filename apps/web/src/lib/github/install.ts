@@ -1,6 +1,6 @@
 import 'server-only';
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { readGitHubConfig } from './config';
+import { readGitHubApp } from './config';
 
 /**
  * Per-customer installation of the GitHub App.
@@ -53,7 +53,7 @@ export function readOAuthConfig(): OAuthConfig | null {
  * available exactly when the rest of the flow is.
  */
 function stateSecret(): string | null {
-  const config = readGitHubConfig();
+  const config = readGitHubApp();
   return config ? config.privateKey : null;
 }
 
