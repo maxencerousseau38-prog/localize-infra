@@ -1,0 +1,8 @@
+{
+  // The benchmark is deliberately outside `src`: `tsc -p tsconfig.json` builds
+  // src alone, so nothing here reaches the Vercel deployment. It still has to
+  // be typechecked, which is what this file and the `typecheck` script are for.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": { "noEmit": true },
+  "include": [".", "../src", "../../../packages/eval/src"]
+}

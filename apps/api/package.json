@@ -9,7 +9,10 @@
     "pretest": "npm run build -w @localize-infra/schemas -w @localize-infra/github-app",
     "test": "vitest run",
     "predev": "npm run build -w @localize-infra/schemas -w @localize-infra/github-app",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p eval/tsconfig.json",
+    "eval:models": "tsx eval/run.ts",
+    "eval:robustness": "tsx eval/robustness.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",

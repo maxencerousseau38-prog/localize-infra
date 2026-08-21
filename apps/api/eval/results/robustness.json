@@ -1,0 +1,60 @@
+{
+  "ranAt": "2026-08-21T23:34:02.584Z",
+  "method": "The same 90-string de batch, sent 5 times per configuration through the production path. A configuration is complete only if every string came back.",
+  "limitation": "Five attempts per configuration cannot establish a failure rate, only whether failures recur. Read it as evidence that a failure is or is not a one-off.",
+  "results": [
+    {
+      "id": "sonnet5-effort-low",
+      "label": "Sonnet 5, effort: low",
+      "locale": "de",
+      "stringsPerAttempt": 90,
+      "attempts": 5,
+      "completeAttempts": 5,
+      "failures": []
+    },
+    {
+      "id": "sonnet5-default-reasoning",
+      "label": "Sonnet 5, default reasoning",
+      "locale": "de",
+      "stringsPerAttempt": 90,
+      "attempts": 5,
+      "completeAttempts": 0,
+      "failures": [
+        {
+          "answered": 0,
+          "error": "No JSON array found in model response"
+        },
+        {
+          "answered": 0,
+          "error": "No JSON array found in model response"
+        },
+        {
+          "answered": 0,
+          "error": "Anthropic response had no usable text content block"
+        },
+        {
+          "answered": 0,
+          "error": "No JSON array found in model response"
+        },
+        {
+          "answered": 0,
+          "error": "No JSON array found in model response"
+        }
+      ]
+    },
+    {
+      "id": "haiku45",
+      "label": "Haiku 4.5, thinking disabled",
+      "locale": "de",
+      "stringsPerAttempt": 90,
+      "attempts": 5,
+      "completeAttempts": 4,
+      "failures": [
+        {
+          "answered": 0,
+          "error": "Expected ',' or '}' after property value in JSON at position 2866 (line 99 column 28)"
+        }
+      ]
+    }
+  ]
+}

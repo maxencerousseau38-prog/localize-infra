@@ -42,6 +42,11 @@ customer it consumes 2.6× a $99 plan, which is not.
 
 **$1.55 per 1,000 string-locale pairs.**
 
+Since checked against a real run: the benchmark in
+`docs/product/10-model-benchmark.md` translated 414 strings on the recommended
+configuration and billed **$1.47 per 1,000 pairs**. The model is 5% high, which
+is the direction to be wrong in.
+
 One string translated into 25 languages costs 25 times one string translated
 into one. Strings are not the driver and neither are runs — the pair is what
 the bill is made of, and every figure above is this number times a shape.
@@ -118,11 +123,22 @@ returned nothing at all.
 A batch where *every* chunk fails still throws, so a provider outage remains a
 502 rather than being reported to the customer as a partial run.
 
-Two caveats stated rather than buried: the **quality** of `effort: low` against
-the default has not been evaluated, and neither has Haiku's. The eval harness
-in `packages/eval` exists precisely to answer that and has not been run on this
-question. A 3× saving that costs accuracy is not a saving on a product whose
-pitch is that it escalates instead of guessing.
+**This said the quality of `effort: low` was unevaluated. It has since been
+measured** — see `docs/product/10-model-benchmark.md`, which runs all three
+configurations over the 414-entry corpus through this same production path.
+
+The short version: `effort: low` was not a quality trade. It answered 414 of
+414 strings where default reasoning answered 90, and on the one locale both
+completed it scored **80.55 chrF against 75.52**. Haiku is 3.3× cheaper and
+close on quality, and is ruled out on reliability — invalid JSON in 2 of 6
+repeated attempts, with no retry in the pipeline to absorb it.
+
+One caveat survives and is the reason that document does not call the matter
+closed: **escalation behaviour is still unmeasured.** Two escalations fired in
+414 strings, which cannot distinguish one configuration from another, and the
+corpus contains no strings that are ambiguous by construction. If lower effort
+makes the model less willing to say "I don't know", that trades against
+invariant 4 and no quality score would reveal it.
 
 ---
 
@@ -194,7 +210,7 @@ At a $20 floor, **two typical customers at $19 cover all fixed cost.**
 
 | Assumption | Value | Settled by |
 |---|---:|---|
-| Share of strings escalated | **2%** — observed 0.8%–2.0%, see below | The same measurement across every locale, on real application strings |
+| Share of strings escalated | **2%** kept deliberately — later measured at 0.48% over 414 strings and 5 locales | Strings that are ambiguous by construction; this corpus has none |
 | Runs failed and re-run by hand | 10% | The `runs` table, once it has rows. Production has zero. |
 
 **The escalation rate was a guess of 8% and observation puts it far lower.** Two
@@ -203,6 +219,13 @@ returned 250 translations each, with 2 and then 5 ambiguous — 0.8% and 2.0%.
 
 The model uses the **higher** of the two. A cost model must not round in its own
 favour, and two samples differing by 2.5× are a range rather than a number.
+
+The full benchmark later put it lower still — **2 escalations in 414 strings
+across five locales, 0.48%**. The model is deliberately **not** updated to that
+figure. The corpus is drawn from open-source projects whose strings have already
+survived one translation pass, so it under-represents ambiguity by construction;
+a rate measured on it is a floor, not an estimate. Keeping 2% costs about 1% of
+the modelled bill and removes a way to be wrong in the expensive direction.
 
 It stays in this tier rather than moving up to *measured*, because one locale
 and one corpus is not a rate. German forces a du/Sie choice that many languages
