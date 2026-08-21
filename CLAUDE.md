@@ -278,8 +278,8 @@ Ouverts (MIT) : `packages/cli`, `packages/core`, `packages/eval`,
 `packages/schemas`. Chacun porte sa propre copie du texte MIT, pour que la
 licence voyage avec le code publié ou copié.
 
-Propriétaires (tous droits réservés) : `packages/ui`, `apps/api`, `apps/site`,
-`apps/web`, `services/github-app`. Chacun porte un avis explicite, pour qu'on ne
+Propriétaires (tous droits réservés) : `packages/pricing`, `packages/ui`,
+`apps/api`, `apps/site`, `apps/web`, `services/github-app`. Chacun porte un avis explicite, pour qu'on ne
 puisse pas supposer que le MIT de la racine s'applique en parcourant un dossier.
 
 **Tout ajout est propriétaire par défaut**, sauf s'il est placé dans l'un des

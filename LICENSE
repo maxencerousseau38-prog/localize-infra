@@ -33,6 +33,7 @@ any of the proprietary parts.
 All other content in this repository is proprietary and is NOT covered by the
 MIT licence. This includes, without limitation:
 
+    packages/pricing
     packages/ui
     apps/api
     apps/site
