@@ -1,0 +1,515 @@
+{
+  "generatedBy": "packages/pricing/src/report/build.ts",
+  "currency": "USD",
+  "model": "claude-sonnet-5",
+  "rates": {
+    "standard": {
+      "input": 3,
+      "output": 15
+    },
+    "introductoryUntil": "2026-08-31",
+    "introductory": {
+      "input": 2,
+      "output": 10
+    }
+  },
+  "inputs": {
+    "MEASURED": {
+      "systemPromptTokens": 610,
+      "inputTokensPerString": 219,
+      "outputTextTokensPerConfidentString": 65,
+      "outputTokensPerString": {
+        "asConfigured": 159,
+        "effortLow": 56,
+        "haikuThinkingDisabled": 55
+      },
+      "outputTokensPerAmbiguousString": 239
+    },
+    "PIPELINE": {
+      "maxOutputTokensPerRequest": 4096,
+      "observedMaxUsableStrings": 20,
+      "observedFailingStrings": 40,
+      "chunking": false,
+      "retries": 0,
+      "promptCaching": false,
+      "incremental": true
+    },
+    "PRICES": {
+      "sonnet5": {
+        "input": 3,
+        "output": 15,
+        "introInput": 2,
+        "introOutput": 10
+      },
+      "haiku45": {
+        "input": 1,
+        "output": 5
+      },
+      "cacheReadMultiplier": 0.1,
+      "cacheWriteMultiplier": 1.25,
+      "batchMultiplier": 0.5
+    },
+    "INFRA": {
+      "supabaseMonthly": 0,
+      "supabaseProMonthly": 25,
+      "vercelMonthly": 20,
+      "vercelPlanVerified": false,
+      "storageMonthly": 0
+    },
+    "ASSUMPTIONS": {
+      "ambiguityRate": 0.08,
+      "manualRetryRate": 0.1,
+      "steadyStateTranslatedShare": 0.95
+    }
+  },
+  "outputCeiling": {
+    "maxOutputTokensPerRequest": 4096,
+    "maxStringsPerRequest": 20,
+    "observedFailingStrings": 40,
+    "chunkingImplemented": false
+  },
+  "unit": {
+    "costPerThousandPairs": 1.7058,
+    "costPerThousandPairsHaiku": 0.5686,
+    "costPerThousandPairsAsConfiguredToday": 3.2508,
+    "emptyRunCostPerLocale": 0.00183,
+    "affordablePairsPerMonthAt80Margin": {
+      "19": 2227,
+      "99": 11607,
+      "399": 46781
+    }
+  },
+  "plans": [
+    {
+      "name": "Free",
+      "monthlyPrice": 0,
+      "annualPrice": 0,
+      "projects": 1,
+      "locales": 3,
+      "initialImportPairs": 1000,
+      "monthlyPairs": 300,
+      "dailyPairCeiling": 300,
+      "worstMonthlyCogs": 0.5117,
+      "grossMarginPercentAtCap": 0,
+      "initialImportCogs": 1.7058,
+      "worstMonthIfDailyCeilingHitDaily": 15.3522,
+      "monthlyCapBinds": true
+    },
+    {
+      "name": "Starter",
+      "monthlyPrice": 19,
+      "annualPrice": 190,
+      "projects": 1,
+      "locales": 6,
+      "initialImportPairs": 6000,
+      "monthlyPairs": 3000,
+      "dailyPairCeiling": 1000,
+      "worstMonthlyCogs": 5.1174,
+      "grossMarginPercentAtCap": 73.1,
+      "initialImportCogs": 10.2348,
+      "worstMonthIfDailyCeilingHitDaily": 51.174,
+      "monthlyCapBinds": true
+    },
+    {
+      "name": "Team",
+      "monthlyPrice": 99,
+      "annualPrice": 990,
+      "projects": 5,
+      "locales": 15,
+      "initialImportPairs": 40000,
+      "monthlyPairs": 15000,
+      "dailyPairCeiling": 5000,
+      "worstMonthlyCogs": 25.587,
+      "grossMarginPercentAtCap": 74.2,
+      "initialImportCogs": 68.232,
+      "worstMonthIfDailyCeilingHitDaily": 255.87,
+      "monthlyCapBinds": true
+    },
+    {
+      "name": "Scale",
+      "monthlyPrice": 399,
+      "annualPrice": 3990,
+      "projects": 20,
+      "locales": null,
+      "initialImportPairs": 150000,
+      "monthlyPairs": 60000,
+      "dailyPairCeiling": 20000,
+      "worstMonthlyCogs": 102.348,
+      "grossMarginPercentAtCap": 74.3,
+      "initialImportCogs": 255.87,
+      "worstMonthIfDailyCeilingHitDaily": 1023.48,
+      "monthlyCapBinds": true
+    }
+  ],
+  "customers": [
+    {
+      "name": "low",
+      "projectStrings": 120,
+      "locales": 2,
+      "projects": 1,
+      "newStringsPerMonth": 15,
+      "emptyRunsPerMonth": 4,
+      "onboardingCost": 0.4584,
+      "steadyStateMonthlyCost": 0.0764,
+      "firstMonthCost": 0.5348,
+      "yearOneCost": 1.3754,
+      "onboardingTruncates": true,
+      "requestsNeededAtOnboarding": 6,
+      "margins": [
+        {
+          "price": 19,
+          "steadyState": {
+            "price": 19,
+            "cogs": 0.0764,
+            "grossMarginDollars": 18.9236,
+            "grossMarginPercent": 99.6
+          },
+          "firstMonth": {
+            "price": 19,
+            "cogs": 0.5348,
+            "grossMarginDollars": 18.4652,
+            "grossMarginPercent": 97.2
+          },
+          "annualPrepaidTenMonths": {
+            "price": 190,
+            "cogs": 1.3754,
+            "grossMarginDollars": 188.6246,
+            "grossMarginPercent": 99.3
+          }
+        },
+        {
+          "price": 99,
+          "steadyState": {
+            "price": 99,
+            "cogs": 0.0764,
+            "grossMarginDollars": 98.9236,
+            "grossMarginPercent": 99.9
+          },
+          "firstMonth": {
+            "price": 99,
+            "cogs": 0.5348,
+            "grossMarginDollars": 98.4652,
+            "grossMarginPercent": 99.5
+          },
+          "annualPrepaidTenMonths": {
+            "price": 990,
+            "cogs": 1.3754,
+            "grossMarginDollars": 988.6246,
+            "grossMarginPercent": 99.9
+          }
+        },
+        {
+          "price": 399,
+          "steadyState": {
+            "price": 399,
+            "cogs": 0.0764,
+            "grossMarginDollars": 398.9236,
+            "grossMarginPercent": 100
+          },
+          "firstMonth": {
+            "price": 399,
+            "cogs": 0.5348,
+            "grossMarginDollars": 398.4652,
+            "grossMarginPercent": 99.9
+          },
+          "annualPrepaidTenMonths": {
+            "price": 3990,
+            "cogs": 1.3754,
+            "grossMarginDollars": 3988.6246,
+            "grossMarginPercent": 100
+          }
+        }
+      ]
+    },
+    {
+      "name": "normal",
+      "projectStrings": 800,
+      "locales": 5,
+      "projects": 1,
+      "newStringsPerMonth": 60,
+      "emptyRunsPerMonth": 20,
+      "onboardingCost": 7.586,
+      "steadyStateMonthlyCost": 0.7743,
+      "firstMonthCost": 8.3603,
+      "yearOneCost": 16.8774,
+      "onboardingTruncates": true,
+      "requestsNeededAtOnboarding": 40,
+      "margins": [
+        {
+          "price": 19,
+          "steadyState": {
+            "price": 19,
+            "cogs": 0.7743,
+            "grossMarginDollars": 18.2257,
+            "grossMarginPercent": 95.9
+          },
+          "firstMonth": {
+            "price": 19,
+            "cogs": 8.3603,
+            "grossMarginDollars": 10.6397,
+            "grossMarginPercent": 56
+          },
+          "annualPrepaidTenMonths": {
+            "price": 190,
+            "cogs": 16.8774,
+            "grossMarginDollars": 173.1226,
+            "grossMarginPercent": 91.1
+          }
+        },
+        {
+          "price": 99,
+          "steadyState": {
+            "price": 99,
+            "cogs": 0.7743,
+            "grossMarginDollars": 98.2257,
+            "grossMarginPercent": 99.2
+          },
+          "firstMonth": {
+            "price": 99,
+            "cogs": 8.3603,
+            "grossMarginDollars": 90.6397,
+            "grossMarginPercent": 91.6
+          },
+          "annualPrepaidTenMonths": {
+            "price": 990,
+            "cogs": 16.8774,
+            "grossMarginDollars": 973.1226,
+            "grossMarginPercent": 98.3
+          }
+        },
+        {
+          "price": 399,
+          "steadyState": {
+            "price": 399,
+            "cogs": 0.7743,
+            "grossMarginDollars": 398.2257,
+            "grossMarginPercent": 99.8
+          },
+          "firstMonth": {
+            "price": 399,
+            "cogs": 8.3603,
+            "grossMarginDollars": 390.6397,
+            "grossMarginPercent": 97.9
+          },
+          "annualPrepaidTenMonths": {
+            "price": 3990,
+            "cogs": 16.8774,
+            "grossMarginDollars": 3973.1226,
+            "grossMarginPercent": 99.6
+          }
+        }
+      ]
+    },
+    {
+      "name": "heavy",
+      "projectStrings": 2500,
+      "locales": 12,
+      "projects": 4,
+      "newStringsPerMonth": 250,
+      "emptyRunsPerMonth": 120,
+      "onboardingCost": 227.5812,
+      "steadyStateMonthlyCost": 34.4013,
+      "firstMonthCost": 261.9825,
+      "yearOneCost": 640.3969,
+      "onboardingTruncates": true,
+      "requestsNeededAtOnboarding": 125,
+      "margins": [
+        {
+          "price": 19,
+          "steadyState": {
+            "price": 19,
+            "cogs": 34.4013,
+            "grossMarginDollars": -15.4013,
+            "grossMarginPercent": -81.1
+          },
+          "firstMonth": {
+            "price": 19,
+            "cogs": 261.9825,
+            "grossMarginDollars": -242.9825,
+            "grossMarginPercent": -1278.9
+          },
+          "annualPrepaidTenMonths": {
+            "price": 190,
+            "cogs": 640.3969,
+            "grossMarginDollars": -450.3969,
+            "grossMarginPercent": -237.1
+          }
+        },
+        {
+          "price": 99,
+          "steadyState": {
+            "price": 99,
+            "cogs": 34.4013,
+            "grossMarginDollars": 64.5987,
+            "grossMarginPercent": 65.3
+          },
+          "firstMonth": {
+            "price": 99,
+            "cogs": 261.9825,
+            "grossMarginDollars": -162.9825,
+            "grossMarginPercent": -164.6
+          },
+          "annualPrepaidTenMonths": {
+            "price": 990,
+            "cogs": 640.3969,
+            "grossMarginDollars": 349.6031,
+            "grossMarginPercent": 35.3
+          }
+        },
+        {
+          "price": 399,
+          "steadyState": {
+            "price": 399,
+            "cogs": 34.4013,
+            "grossMarginDollars": 364.5987,
+            "grossMarginPercent": 91.4
+          },
+          "firstMonth": {
+            "price": 399,
+            "cogs": 261.9825,
+            "grossMarginDollars": 137.0175,
+            "grossMarginPercent": 34.3
+          },
+          "annualPrepaidTenMonths": {
+            "price": 3990,
+            "cogs": 640.3969,
+            "grossMarginDollars": 3349.6031,
+            "grossMarginPercent": 83.9
+          }
+        }
+      ]
+    },
+    {
+      "name": "worst-realistic",
+      "projectStrings": 12000,
+      "locales": 25,
+      "projects": 10,
+      "newStringsPerMonth": 900,
+      "emptyRunsPerMonth": 400,
+      "onboardingCost": 5689.53,
+      "steadyStateMonthlyCost": 628.0148,
+      "firstMonthCost": 6317.5448,
+      "yearOneCost": 13225.707,
+      "onboardingTruncates": true,
+      "requestsNeededAtOnboarding": 600,
+      "margins": [
+        {
+          "price": 19,
+          "steadyState": {
+            "price": 19,
+            "cogs": 628.0148,
+            "grossMarginDollars": -609.0148,
+            "grossMarginPercent": -3205.3
+          },
+          "firstMonth": {
+            "price": 19,
+            "cogs": 6317.5448,
+            "grossMarginDollars": -6298.5448,
+            "grossMarginPercent": -33150.2
+          },
+          "annualPrepaidTenMonths": {
+            "price": 190,
+            "cogs": 13225.707,
+            "grossMarginDollars": -13035.707,
+            "grossMarginPercent": -6860.9
+          }
+        },
+        {
+          "price": 99,
+          "steadyState": {
+            "price": 99,
+            "cogs": 628.0148,
+            "grossMarginDollars": -529.0148,
+            "grossMarginPercent": -534.4
+          },
+          "firstMonth": {
+            "price": 99,
+            "cogs": 6317.5448,
+            "grossMarginDollars": -6218.5448,
+            "grossMarginPercent": -6281.4
+          },
+          "annualPrepaidTenMonths": {
+            "price": 990,
+            "cogs": 13225.707,
+            "grossMarginDollars": -12235.707,
+            "grossMarginPercent": -1235.9
+          }
+        },
+        {
+          "price": 399,
+          "steadyState": {
+            "price": 399,
+            "cogs": 628.0148,
+            "grossMarginDollars": -229.0148,
+            "grossMarginPercent": -57.4
+          },
+          "firstMonth": {
+            "price": 399,
+            "cogs": 6317.5448,
+            "grossMarginDollars": -5918.5448,
+            "grossMarginPercent": -1483.3
+          },
+          "annualPrepaidTenMonths": {
+            "price": 3990,
+            "cogs": 13225.707,
+            "grossMarginDollars": -9235.707,
+            "grossMarginPercent": -231.5
+          }
+        }
+      ]
+    }
+  ],
+  "levers": {
+    "baseline": 0.7743,
+    "withPromptCaching": 0.6327,
+    "asConfiguredToday": 1.2841,
+    "onHaiku45": 0.2581,
+    "atIntroductoryRates": 0.5162
+  },
+  "ambiguitySweep": [
+    {
+      "ambiguityRate": 0.02,
+      "normalSteadyStateMonthly": 0.7226,
+      "normalOnboarding": 6.897
+    },
+    {
+      "ambiguityRate": 0.08,
+      "normalSteadyStateMonthly": 0.7743,
+      "normalOnboarding": 7.586
+    },
+    {
+      "ambiguityRate": 0.2,
+      "normalSteadyStateMonthly": 0.8776,
+      "normalOnboarding": 8.9641
+    }
+  ],
+  "adversarial": {
+    "stringsPerLocale": 1000000,
+    "locales": 10,
+    "totalCost": 17241
+  },
+  "dailyCaps": [
+    {
+      "stringsPerDay": 500,
+      "worstMonthlyCostAt5Locales": 129.3075,
+      "worstMonthlyCostAt25Locales": 646.5375
+    },
+    {
+      "stringsPerDay": 2000,
+      "worstMonthlyCostAt5Locales": 517.23,
+      "worstMonthlyCostAt25Locales": 2586.15
+    },
+    {
+      "stringsPerDay": 5000,
+      "worstMonthlyCostAt5Locales": 1293.075,
+      "worstMonthlyCostAt25Locales": 6465.375
+    }
+  ],
+  "fixedMonthlyInfrastructure": {
+    "supabase": 0,
+    "vercel": 20,
+    "vercelPlanVerified": false,
+    "storage": 0,
+    "total": 20
+  }
+}
