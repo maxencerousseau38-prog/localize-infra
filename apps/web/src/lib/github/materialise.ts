@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { App } from 'octokit';
-import { readGitHubConfig } from './config';
+import { readGitHubApp } from './config';
 import { installationIdFor } from './repositories';
 
 /**
@@ -73,7 +73,7 @@ export async function materialiseRepository(
   ref: string,
   organizationId: string | null = null,
 ): Promise<Materialised> {
-  const config = readGitHubConfig();
+  const config = readGitHubApp();
   if (!config) throw new Error('No GitHub App configured');
 
   // The workspace's own installation when it has one. Reading a customer's

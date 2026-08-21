@@ -53,50 +53,18 @@ describe('resolveInstallation, tenant scope', () => {
   });
 });
 
-describe('resolveInstallation, operator scope', () => {
+describe('tenants cannot be confused with one another', () => {
   /*
-   * The internal administration path still works — deliberately, and only when
-   * a caller asks for it by name. `isOperator` is checked before this is
-   * reached; the scope only records that the choice was made on purpose rather
-   * than inherited from a fallback.
+   * There is no longer an operator scope to test against.
+   *
+   * It existed so an operator could act as the deployment's shared
+   * installation, guarded by an `isOperator` allow-list. Both had zero call
+   * sites — the allow-list enforced nothing and the scope was reachable by
+   * nobody — so the pair was deleted rather than wired up. What replaced them
+   * is stronger than a passing test: `InstallationScope` can no longer express
+   * the shared installation, so "a tenant inherits it" is not a case that fails
+   * closed, it is a case that does not typecheck.
    */
-  it('acts as the shared installation when one is configured', () => {
-    expect(
-      resolveInstallation({ kind: 'operator', sharedInstallationId: 7 }),
-    ).toEqual({ ok: true, installationId: 7, source: 'shared' });
-  });
-
-  it('reports a deployment with no GitHub configured', () => {
-    expect(
-      resolveInstallation({ kind: 'operator', sharedInstallationId: null }),
-    ).toEqual({ ok: false, reason: 'not-configured' });
-  });
-});
-
-describe('the two scopes cannot be confused', () => {
-  /*
-   * Same shared installation present, two callers: the tenant still gets
-   * nothing. This is the isolation property stated as one assertion — the
-   * shared installation being configured must not change what a customer sees.
-   */
-  it('a configured shared installation is invisible to a tenant', () => {
-    const shared = resolveInstallation({
-      kind: 'operator',
-      sharedInstallationId: 99,
-    });
-    const tenant = resolveInstallation({
-      kind: 'tenant',
-      organizationInstallationId: null,
-    });
-
-    expect(shared).toEqual({
-      ok: true,
-      installationId: 99,
-      source: 'shared',
-    });
-    expect(tenant.ok).toBe(false);
-  });
-
   it('one tenant never resolves to another tenant’s installation', () => {
     const a = resolveInstallation({
       kind: 'tenant',

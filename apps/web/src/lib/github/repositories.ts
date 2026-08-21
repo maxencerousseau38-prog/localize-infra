@@ -1,7 +1,7 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { App } from 'octokit';
-import { readGitHubConfig } from './config';
+import { readGitHubApp } from './config';
 import { resolveInstallation } from './resolve-installation';
 
 export interface AvailableRepository {
@@ -59,26 +59,24 @@ export async function installationIdFor(
   return resolved.ok ? resolved.installationId : null;
 }
 
-/**
- * The deployment's shared installation, for internal administration only.
+/*
+ * `operatorInstallationId` was here, and it is gone.
  *
- * Separate function rather than a parameter, so that reaching the shared
- * installation is something a caller has to write down. Every call site is
- * expected to have checked `isOperator` first; this does not check it, because
- * a security decision made in two places is made in neither.
+ * It was the only way to reach the deployment's shared installation, kept as a
+ * named function so that using it had to be written down, and guarded — on
+ * paper — by an `isOperator` allow-list that every call site was said to check
+ * first. It had no call sites. Neither did `isOperator`.
+ *
+ * Deleting it is not a behaviour change; nothing called it. It removes a
+ * described-but-absent security control, and it lets `InstallationScope` stop
+ * being able to express "act as the shared installation" at all — so the
+ * isolation is a property of the type rather than of a rule someone remembered
+ * to follow.
  */
-export function operatorInstallationId(): number | null {
-  const resolved = resolveInstallation({
-    kind: 'operator',
-    sharedInstallationId: readGitHubConfig()?.installationId ?? null,
-  });
-  return resolved.ok ? resolved.installationId : null;
-}
-
 export async function listInstallationRepositories(
   organizationId: string | null = null,
 ): Promise<AvailableRepository[]> {
-  const config = readGitHubConfig();
+  const config = readGitHubApp();
   if (!config) return [];
 
   const installationId = await installationIdFor(organizationId);

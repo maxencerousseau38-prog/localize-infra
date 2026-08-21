@@ -13,57 +13,49 @@
  *
  * An organization with no installation of its own silently inherited the
  * deployment's shared one. That was survivable only because every surface
- * touching GitHub was gated to an operator allow-list; the moment that gate
- * comes off — which is what self-serve *is* — every customer without their own
- * installation would have been handed a token reaching the operator's
+ * touching GitHub was said to be gated to an operator allow-list; the moment
+ * that gate comes off — which is what self-serve *is* — every customer without
+ * their own installation would have been handed a token reaching the operator's
  * repositories, with permission to open pull requests against them.
  *
- * So the customer path fails closed: no installation of your own, no GitHub.
- * The shared installation remains reachable, but only when a caller asks for it
- * explicitly and has been checked as an operator, which keeps the internal
- * administration path working without leaving it as the default.
+ * The first fix kept an `operator` scope beside the tenant one, so the shared
+ * installation stayed reachable when a caller asked for it by name and had been
+ * checked against the allow-list. Neither half of that was true: the allow-list
+ * (`isOperator`) had no call sites, and neither did the function that read this
+ * scope (`operatorInstallationId`). A described-but-unenforced control is worse
+ * than none, because it is believed.
+ *
+ * So the scope is now tenant-only. The shared installation is not something
+ * this module can express, which makes the isolation a property of the type
+ * rather than of a rule a future caller has to remember. Acting as some other
+ * workspace's installation is not a case that fails closed here — it is a case
+ * that cannot be written.
  */
 
-export type InstallationScope =
-  /** A customer acting for their own workspace. Never the shared installation. */
-  | { kind: 'tenant'; organizationInstallationId: number | null }
-  /**
-   * An operator using the deployment's shared installation on purpose.
-   * `isOperator` must already have been checked by the caller; this type only
-   * records that the decision was deliberate.
-   */
-  | { kind: 'operator'; sharedInstallationId: number | null };
+export type InstallationScope = {
+  kind: 'tenant';
+  organizationInstallationId: number | null;
+};
 
 export type InstallationResolution =
-  | { ok: true; installationId: number; source: 'tenant' | 'shared' }
-  | { ok: false; reason: 'no-installation' | 'not-configured' };
+  | { ok: true; installationId: number; source: 'tenant' }
+  | { ok: false; reason: 'no-installation' };
 
 export function resolveInstallation(
   scope: InstallationScope,
 ): InstallationResolution {
-  if (scope.kind === 'tenant') {
-    if (
-      scope.organizationInstallationId &&
-      scope.organizationInstallationId > 0
-    ) {
-      return {
-        ok: true,
-        installationId: scope.organizationInstallationId,
-        source: 'tenant',
-      };
-    }
-    // Deliberately not falling through to the shared installation. A workspace
-    // that has not installed the App has no GitHub access, and saying so is the
-    // only answer that is true for every tenant.
-    return { ok: false, reason: 'no-installation' };
-  }
-
-  if (scope.sharedInstallationId && scope.sharedInstallationId > 0) {
+  if (
+    scope.organizationInstallationId &&
+    scope.organizationInstallationId > 0
+  ) {
     return {
       ok: true,
-      installationId: scope.sharedInstallationId,
-      source: 'shared',
+      installationId: scope.organizationInstallationId,
+      source: 'tenant',
     };
   }
-  return { ok: false, reason: 'not-configured' };
+
+  // A workspace that has not installed the App has no GitHub access, and
+  // saying so is the only answer that is true for every tenant.
+  return { ok: false, reason: 'no-installation' };
 }

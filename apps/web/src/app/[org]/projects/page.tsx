@@ -6,7 +6,7 @@ import {
   listProjects,
   requireSession,
 } from '@/lib/data/workspace';
-import { readGitHubConfig } from '@/lib/github/config';
+import { readGitHubApp } from '@/lib/github/config';
 import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -51,7 +51,7 @@ export default async function ProjectsPage({
 
   // The slug is public (it is in the install URL), so reading it from the App
   // rather than hardcoding it keeps the two from drifting.
-  const appSlug = readGitHubConfig()
+  const appSlug = readGitHubApp()
     ? (process.env.GITHUB_APP_SLUG ?? null)
     : null;
 
