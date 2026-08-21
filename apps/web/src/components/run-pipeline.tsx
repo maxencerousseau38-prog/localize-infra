@@ -1,6 +1,6 @@
-import type { SampleRunStage, StageState } from '@/lib/sample';
+import type { RunStageState, RunStageView } from '@/lib/runs/progress';
 import { PIPELINE_STAGE_NAMES, cn } from '@localize-infra/ui';
-import { Check, Circle, Minus, TriangleAlert, X } from 'lucide-react';
+import { Check, Circle, Loader, Minus, TriangleAlert, X } from 'lucide-react';
 
 /**
  * The run, drawn as the pipeline it traversed.
@@ -16,7 +16,7 @@ import { Check, Circle, Minus, TriangleAlert, X } from 'lucide-react';
  * justifies it.
  */
 const STAGE: Record<
-  StageState,
+  RunStageState,
   { icon: typeof Check; label: string; dot: string; text: string }
 > = {
   done: {
@@ -37,15 +37,25 @@ const STAGE: Record<
     dot: 'border-failed bg-failed text-inverse',
     text: 'text-primary',
   },
-  skipped: {
+  // Reached and still working. Not a spinner: the row re-reads itself while a
+  // run is moving, so an animated glyph here would be motion for its own sake.
+  active: {
+    icon: Loader,
+    label: 'In progress',
+    dot: 'border-strong bg-canvas text-primary',
+    text: 'text-primary',
+  },
+  // Not yet, which is a different fact from `skipped`. A pending stage may
+  // still run; a skipped one never will.
+  pending: {
     icon: Minus,
-    label: 'Did not run',
+    label: 'Not yet',
     dot: 'border-subtle bg-raised text-tertiary',
     text: 'text-tertiary',
   },
 };
 
-export function RunPipeline({ stages }: { stages: SampleRunStage[] }) {
+export function RunPipeline({ stages }: { stages: RunStageView[] }) {
   return (
     <ol
       aria-label="Pipeline stages"
@@ -86,11 +96,15 @@ export function RunPipeline({ stages }: { stages: SampleRunStage[] }) {
 
             <div className="min-w-0 sm:mt-2.5 sm:pe-6">
               <p className={cn('text-body font-medium', style.text)}>
-                {PIPELINE_STAGE_NAMES[stage.id]}
+                {PIPELINE_STAGE_NAMES[
+                  stage.id as keyof typeof PIPELINE_STAGE_NAMES
+                ] ?? stage.id}
               </p>
-              <p className="mt-0.5 text-small leading-5 text-secondary">
-                {stage.detail}
-              </p>
+              {stage.detail ? (
+                <p className="mt-0.5 text-small leading-5 text-secondary">
+                  {stage.detail}
+                </p>
+              ) : null}
               {/* State reaches assistive technology as words. The dot colour
                   and glyph are for the eye only. */}
               <span className="sr-only">{style.label}</span>
@@ -103,7 +117,7 @@ export function RunPipeline({ stages }: { stages: SampleRunStage[] }) {
 }
 
 /** Kept beside the pipeline so both read from one definition of state. */
-export function StageLegendIcon({ state }: { state: StageState }) {
+export function StageLegendIcon({ state }: { state: RunStageState }) {
   const Icon = STAGE[state]?.icon ?? Circle;
   return <Icon className="size-3.5" aria-hidden="true" />;
 }

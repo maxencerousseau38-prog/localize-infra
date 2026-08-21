@@ -1,7 +1,6 @@
 'use client';
 
 import { DataFilter, DataSearch, DataToolbar } from '@/components/data-toolbar';
-import type { SampleRun } from '@/lib/sample';
 import { useTableQuery } from '@/lib/use-table-query';
 import {
   EmptyState,
@@ -15,13 +14,49 @@ import {
   Table,
   TableEmpty,
   type Tone,
-  cn,
 } from '@localize-infra/ui';
 import { GitPullRequest } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 
-const STATE: Record<SampleRun['state'], { tone: Tone; label: string }> = {
+/**
+ * A run as this table needs it.
+ *
+ * Replaces `SampleRun`, whose shape carried two fields real runs do not have: a
+ * `trigger` command string, and a duration that always existed. Runs are
+ * started from the project page rather than typed as a command, and one still
+ * in flight has taken no time yet — so the column is gone and the duration is
+ * nullable. Keeping the sample's shape would have meant inventing both on every
+ * row.
+ */
+export interface RunTableRow {
+  id: string;
+  status:
+    | 'queued'
+    | 'running'
+    | 'awaiting_review'
+    | 'succeeded'
+    | 'partial'
+    | 'failed';
+  stage: string;
+  framework: string | null;
+  keysExtracted: number;
+  localesSucceeded: number;
+  localesFailed: number;
+  durationMs: number | null;
+  prNumber: number | null;
+  prUrl: string | null;
+  error: string | null;
+  createdAt: string;
+  progressAt: string | null;
+}
+
+const STATE: Record<RunTableRow['status'], { tone: Tone; label: string }> = {
+  queued: { tone: 'neutral', label: 'Queued' },
+  running: { tone: 'neutral', label: 'Running' },
+  // Iris, and only here. DESIGN.md §1.4 reserves it for "your judgement is
+  // required", which is exactly what this state means.
+  awaiting_review: { tone: 'ambiguous', label: 'Needs your call' },
   succeeded: { tone: 'confident', label: 'Succeeded' },
   partial: { tone: 'degraded', label: 'Partial' },
   failed: { tone: 'failed', label: 'Failed' },
@@ -29,15 +64,16 @@ const STATE: Record<SampleRun['state'], { tone: Tone; label: string }> = {
 
 const FILTERS = [
   { value: 'all', label: 'All' },
+  { value: 'awaiting_review', label: 'Needs you' },
   { value: 'succeeded', label: 'Succeeded' },
-  { value: 'partial', label: 'Partial' },
   { value: 'failed', label: 'Failed' },
 ] as const;
 
 type Filter = (typeof FILTERS)[number]['value'];
 type SortKey = 'when' | 'duration' | 'strings';
 
-function duration(ms: number): string {
+function duration(ms: number | null): string {
+  if (ms === null) return '—';
   return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
 }
 
@@ -69,7 +105,7 @@ function Fact({
  * newest-first index because the sample runs are already in that order and
  * their `when` values are human strings ("2 hours ago"), which do not sort.
  */
-export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
+export function RunsTable({ runs }: { runs: readonly RunTableRow[] }) {
   /*
    * Filter, search and sort live in the URL (DESIGN.md §9), not in component
    * state. This surface's whole audience works by sending each other links —
@@ -85,21 +121,29 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
 
   const rows = React.useMemo(() => {
     const needle = query.trim().toLowerCase();
-    const value = (run: SampleRun, index: number) =>
+    const value = (run: RunTableRow, index: number) =>
       sort === 'duration'
-        ? run.durationMs
+        ? (run.durationMs ?? 0)
         : sort === 'strings'
-          ? run.strings
+          ? run.keysExtracted
           : runs.length - index;
 
-    return runs
-      .map((run, index) => ({ run, order: value(run, index) }))
-      .filter(({ run }) => filter === 'all' || run.state === filter)
-      .filter(
-        ({ run }) => !needle || run.trigger.toLowerCase().includes(needle),
-      )
-      .sort((a, b) => (desc ? b.order - a.order : a.order - b.order))
-      .map(({ run }) => run);
+    return (
+      runs
+        .map((run, index) => ({ run, order: value(run, index) }))
+        .filter(({ run }) => filter === 'all' || run.status === filter)
+        // Searches what a real run actually carries. The sample had a `trigger`
+        // command string; runs are started from a project page, so the fields
+        // somebody would recognise are the framework and the pull request number.
+        .filter(
+          ({ run }) =>
+            !needle ||
+            (run.framework ?? '').toLowerCase().includes(needle) ||
+            String(run.prNumber ?? '').includes(needle),
+        )
+        .sort((a, b) => (desc ? b.order - a.order : a.order - b.order))
+        .map(({ run }) => run)
+    );
   }, [runs, filter, query, sort, desc]);
 
   const direction = (key: SortKey) =>
@@ -154,7 +198,7 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
           </li>
         ) : (
           rows.map((run) => {
-            const state = STATE[run.state];
+            const state = STATE[run.status];
             return (
               <li
                 key={run.id}
@@ -163,7 +207,7 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
                 <div className="flex items-baseline justify-between gap-3 pt-3">
                   <StatusDot tone={state.tone}>{state.label}</StatusDot>
                   <span className="shrink-0 text-caption text-tertiary">
-                    {run.when}
+                    {new Date(run.createdAt).toISOString().slice(0, 10)}
                   </span>
                 </div>
 
@@ -172,35 +216,34 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
                   aria-label={`Run ${run.id.replace('run-', '')}, ${state.label.toLowerCase()}`}
                   className="mt-1.5 block font-mono text-caption text-secondary after:absolute after:inset-0 group-hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
                 >
-                  {run.trigger}
+                  {run.framework ?? 'run'} · {run.id.slice(0, 8)}
                 </Link>
 
                 <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 pb-3.5">
                   <Fact label="Locales">
                     {run.localesFailed > 0 ? (
                       <span className="text-degraded-text">
-                        {run.locales - run.localesFailed}/{run.locales}
+                        {run.localesSucceeded}/
+                        {run.localesSucceeded + run.localesFailed}
                       </span>
                     ) : (
-                      run.locales
+                      run.localesSucceeded || '—'
                     )}
                   </Fact>
-                  <Fact label="Strings">{run.strings || '—'}</Fact>
+                  <Fact label="Strings">{run.keysExtracted || '—'}</Fact>
                   <Fact label="Duration">{duration(run.durationMs)}</Fact>
                   <Fact label="Output">
                     {run.prNumber ? (
                       <span className="inline-flex items-center gap-1.5">
+                        {/* No merged state: a run records the pull request it
+                            opened, not what happened to it afterwards. The
+                            sample carried `prMerged`; reading it from a run
+                            would be reporting a fact nobody stored. */}
                         <GitPullRequest
-                          className={cn(
-                            'size-3.5 shrink-0',
-                            run.prMerged ? 'text-confident' : 'text-tertiary',
-                          )}
+                          className="size-3.5 shrink-0 text-tertiary"
                           aria-hidden="true"
                         />
                         #{run.prNumber}
-                        {run.prMerged ? (
-                          <span className="text-tertiary">merged</span>
-                        ) : null}
                       </span>
                     ) : (
                       <span className="text-tertiary">—</span>
@@ -264,7 +307,7 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
             </TableEmpty>
           ) : (
             rows.map((run) => {
-              const state = STATE[run.state];
+              const state = STATE[run.status];
               return (
                 <TR key={run.id} className="group relative">
                   <TD>
@@ -289,20 +332,21 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
                       aria-label={`Run ${run.id.replace('run-', '')}, ${state.label.toLowerCase()}`}
                       className="block max-w-[9rem] truncate font-mono text-caption text-secondary after:absolute after:inset-0 group-hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus sm:max-w-[20rem] lg:max-w-none"
                     >
-                      {run.trigger}
+                      {run.framework ?? 'run'} · {run.id.slice(0, 8)}
                     </Link>
                   </TD>
                   <TD numeric className="hidden tabular-nums lg:table-cell">
                     {run.localesFailed > 0 ? (
                       <span className="text-degraded-text">
-                        {run.locales - run.localesFailed}/{run.locales}
+                        {run.localesSucceeded}/
+                        {run.localesSucceeded + run.localesFailed}
                       </span>
                     ) : (
-                      `${run.locales}`
+                      `${run.localesSucceeded || '—'}`
                     )}
                   </TD>
                   <TD numeric className="hidden tabular-nums sm:table-cell">
-                    {run.strings || '—'}
+                    {run.keysExtracted || '—'}
                   </TD>
                   <TD
                     numeric
@@ -318,27 +362,19 @@ export function RunsTable({ runs }: { runs: readonly SampleRun[] }) {
                     {run.prNumber ? (
                       <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                         <GitPullRequest
-                          className={cn(
-                            'size-3.5 shrink-0',
-                            run.prMerged ? 'text-confident' : 'text-tertiary',
-                          )}
+                          className="size-3.5 shrink-0 text-tertiary"
                           aria-hidden="true"
                         />
                         <span className="font-mono text-caption text-secondary">
                           #{run.prNumber}
                         </span>
-                        {run.prMerged ? (
-                          <span className="text-caption text-tertiary">
-                            merged
-                          </span>
-                        ) : null}
                       </span>
                     ) : (
                       <span className="text-tertiary">—</span>
                     )}
                   </TD>
                   <TD className="whitespace-nowrap text-tertiary">
-                    {run.when}
+                    {new Date(run.createdAt).toISOString().slice(0, 10)}
                   </TD>
                 </TR>
               );

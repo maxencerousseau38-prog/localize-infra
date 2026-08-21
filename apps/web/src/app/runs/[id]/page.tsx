@@ -1,16 +1,17 @@
 import { Page, PageHeader, PageMeta, PageSection } from '@/components/page';
 import { RunPipeline } from '@/components/run-pipeline';
-import { SampleBanner, SampleRegion } from '@/components/sample';
-import { SAMPLE_RUN_DETAILS, type SampleLocaleResult } from '@/lib/sample';
+import {
+  findRun,
+  listRunAmbiguities,
+  listRunTranslations,
+  requireSession,
+} from '@/lib/data/workspace';
+import { runProgress } from '@/lib/runs/progress';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
   Badge,
   Button,
-  TBody,
-  TD,
-  TH,
-  THead,
-  TR,
-  Table,
+  PIPELINE_STAGES,
   type Tone,
   localeDisplayName,
 } from '@localize-infra/ui';
@@ -23,37 +24,111 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
-  return { title: `Run ${id}` };
+  return { title: `Run ${id.slice(0, 8)}` };
 }
 
 const RUN_STATE: Record<string, { tone: Tone; label: string }> = {
+  queued: { tone: 'neutral', label: 'Queued' },
+  running: { tone: 'neutral', label: 'Running' },
+  awaiting_review: { tone: 'ambiguous', label: 'Needs your call' },
   succeeded: { tone: 'confident', label: 'Succeeded' },
   partial: { tone: 'degraded', label: 'Partial' },
   failed: { tone: 'failed', label: 'Failed' },
 };
 
-const LOCALE_STATE: Record<
-  SampleLocaleResult['state'],
-  { tone: Tone; label: string }
-> = {
-  translated: { tone: 'confident', label: 'Translated' },
-  escalated: { tone: 'ambiguous', label: 'Needs a decision' },
-  failed: { tone: 'failed', label: 'Failed' },
-};
-
-function duration(ms: number): string {
+function duration(ms: number | null): string {
+  if (ms === null) return '—';
   return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
 }
 
-export default async function RunDetailPage({ params }: Params) {
-  const { id } = await params;
-  const run = SAMPLE_RUN_DETAILS[id];
+/**
+ * Whether a stored value may become a live link.
+ *
+ * The database constrains `pr_url` to a github.com pull request, so this is the
+ * second lock rather than the only one. Parsed rather than pattern-matched:
+ * `new URL` resolves the scheme the way the browser will.
+ */
+function asGitHubPullRequest(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') return null;
+    if (url.hostname !== 'github.com') return null;
+    if (!/^\/[^/]+\/[^/]+\/pull\/\d+$/.test(url.pathname)) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
 
-  // An unknown id is a 404, not an empty page pretending the run exists.
+/**
+ * One run, as it was actually recorded.
+ *
+ * This read `SAMPLE_RUN_DETAILS[id]` — a fixture keyed by three invented ids,
+ * carrying a trigger command, per-stage results and per-locale errors that no
+ * run ever produced. Every one of those is now a real column or a real row:
+ * `runs`, `run_translations`, `run_ambiguities`. RLS confines the lookup, so a
+ * run belonging to another workspace is a 404 rather than a permission error —
+ * a workspace that exists but is not yours must be indistinguishable from one
+ * that does not.
+ *
+ * Two things the fixture had that a real run does not, and which are therefore
+ * absent rather than approximated: a `trigger` command string, because runs are
+ * started from a project page, and a per-locale error, because the pipeline
+ * records one error for the run rather than one per language.
+ */
+export default async function RunDetailPage({ params }: Params) {
+  // A run detail with no database has no run to detail. 404 rather than a
+  // sentence: the id in the URL names something that cannot exist here.
+  if (!isSupabaseConfigured()) notFound();
+
+  await requireSession();
+  const { id } = await params;
+
+  const run = await findRun(id);
   if (!run) notFound();
 
-  const state = RUN_STATE[run.state] ?? RUN_STATE.failed;
-  const failed = run.localeResults.filter((l) => l.error);
+  const [ambiguities, proposals] = await Promise.all([
+    listRunAmbiguities(run.id),
+    listRunTranslations(run.id),
+  ]);
+
+  const state = RUN_STATE[run.status] ?? RUN_STATE.failed;
+  const progress = runProgress({
+    status: run.status,
+    stage: run.stage,
+    progressAt: run.progress_at,
+  });
+  const prHref = asGitHubPullRequest(run.pr_url);
+
+  const elapsed =
+    run.started_at && run.finished_at
+      ? Date.parse(run.finished_at) - Date.parse(run.started_at)
+      : null;
+
+  // Reached, in progress, or not yet: derived from where the run actually got
+  // to rather than from a stored per-stage list, which no run writes.
+  const reachedIndex = PIPELINE_STAGES.findIndex((s) => s.id === run.stage);
+  const stages = PIPELINE_STAGES.map((stage, i) => ({
+    id: stage.id,
+    name: stage.name,
+    state:
+      progress.kind === 'finished' && run.status !== 'failed'
+        ? ('done' as const)
+        : i < reachedIndex
+          ? ('done' as const)
+          : i === reachedIndex
+            ? run.status === 'failed'
+              ? ('failed' as const)
+              : ('active' as const)
+            : ('pending' as const),
+  }));
+
+  const byLocale = new Map<string, number>();
+  for (const row of proposals) {
+    byLocale.set(row.locale, (byLocale.get(row.locale) ?? 0) + 1);
+  }
+  const openQuestions = ambiguities.filter((a) => a.state === 'unresolved');
 
   return (
     <Page>
@@ -67,28 +142,26 @@ export default async function RunDetailPage({ params }: Params) {
       </div>
 
       <PageHeader
-        title={`Run ${id.replace('run-', '')}`}
-        purpose={run.trigger}
+        title={`Run ${run.id.slice(0, 8)}`}
+        purpose={run.framework ?? undefined}
         meta={
           <>
             <PageMeta label="Status">{state?.label}</PageMeta>
-            <PageMeta label="Duration">{duration(run.durationMs)}</PageMeta>
-            <PageMeta label="Strings">{run.strings || '—'}</PageMeta>
-            <PageMeta label="Commit">
-              <span className="font-mono">{run.commit}</span>
+            <PageMeta label="Duration">{duration(elapsed)}</PageMeta>
+            <PageMeta label="Strings">{run.keys_extracted || '—'}</PageMeta>
+            <PageMeta label="When">
+              {new Date(run.created_at)
+                .toISOString()
+                .slice(0, 16)
+                .replace('T', ' ')}
             </PageMeta>
-            <PageMeta label="When">{run.when}</PageMeta>
           </>
         }
         action={
-          run.prNumber ? (
+          prHref ? (
             <Button variant="primary" size="sm" asChild>
-              <a
-                href="https://github.com/maxencerousseau38-prog/localize-infra-fixture-vite/pull/1"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                Pull request #{run.prNumber}
+              <a href={prHref} target="_blank" rel="noreferrer noopener">
+                Pull request #{run.pr_number}
                 <ExternalLink aria-hidden="true" />
               </a>
             </Button>
@@ -96,130 +169,101 @@ export default async function RunDetailPage({ params }: Params) {
         }
       />
 
-      <div className="mt-6">
-        <SampleBanner>
-          This run did not happen. Real runs come from the CLI and nothing
-          records them yet, so the stages and per-locale results below are
-          illustrative.
-        </SampleBanner>
-      </div>
+      {/* The next action, when there is one. A run waiting on a person is the
+          one state where the page should say what to do about it. */}
+      {run.status === 'awaiting_review' ? (
+        <div className="mt-6 rounded-lg border border-ambiguous-border bg-ambiguous-bg px-4 py-3">
+          <p className="text-body font-medium text-primary">
+            {openQuestions.length === 0
+              ? 'Every question is answered. This run is ready to approve.'
+              : `${openQuestions.length} question${openQuestions.length === 1 ? '' : 's'} waiting on you.`}
+          </p>
+          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
+            Answering and approving happen on the run’s project page, where the
+            proposal it will commit is shown alongside the questions.
+          </p>
+        </div>
+      ) : null}
 
-      <SampleRegion label={`Run ${id}`} className="mt-6">
-        {/* The pipeline first: it answers "what happened and where did it
-            stop?" before any table asks the reader to compare rows. */}
-        <PageSection
-          title="Pipeline"
-          description="What this run did, in the order it did it."
-          className="mt-0"
-        >
-          <div className="rounded-lg border border-subtle p-5">
-            <RunPipeline stages={run.stages} />
-          </div>
-        </PageSection>
+      {progress.kind === 'stalled' ? (
+        <div className="mt-6 rounded-lg border border-degraded-border bg-degraded-bg px-4 py-3">
+          <p className="text-body font-medium text-primary">
+            This run stopped reporting{' '}
+            {Math.round(progress.silentForMs / 60000)} minutes ago
+          </p>
+          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
+            The request that was carrying it probably ended. Nothing was
+            committed. Start another run.
+          </p>
+        </div>
+      ) : null}
 
-        <PageSection
-          title="Locales"
-          description="One row per target language, and what it produced."
-        >
-          {/* Records below md, the same move /runs and /locales made. Four
-              columns do not fit 390: `Escalated` rendered as "ESCALATE" against
-              the edge and its values were cut off entirely, while a long
-              language name wrapped to three lines. */}
-          <ul className="md:hidden">
-            {run.localeResults.map((locale) => {
-              const tone = LOCALE_STATE[locale.state];
-              return (
-                <li
-                  key={locale.code}
-                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-t border-subtle py-3"
-                >
-                  <span className="min-w-0">
-                    <span className="font-medium text-primary">
-                      {localeDisplayName(locale.code)}
-                    </span>{' '}
-                    <span className="font-mono text-caption text-tertiary">
-                      {locale.code}
-                    </span>
-                  </span>
-                  <Badge tone={tone.tone}>{tone.label}</Badge>
-                  <dl className="flex w-full gap-x-6">
-                    <div className="flex items-baseline gap-1.5">
-                      <dt className="text-caption text-tertiary">Strings</dt>
-                      <dd className="font-mono text-caption tabular-nums text-primary">
-                        {locale.strings || '—'}
-                      </dd>
-                    </div>
-                    <div className="flex items-baseline gap-1.5">
-                      <dt className="text-caption text-tertiary">Escalated</dt>
-                      <dd className="font-mono text-caption tabular-nums text-primary">
-                        {locale.escalated || '—'}
-                      </dd>
-                    </div>
-                  </dl>
-                </li>
-              );
-            })}
-          </ul>
+      <PageSection
+        title="Pipeline"
+        description="What this run did, in the order it did it."
+      >
+        <div className="rounded-lg border border-subtle p-5">
+          <RunPipeline stages={stages} />
+        </div>
+      </PageSection>
 
-          <Table className="hidden md:table">
-            <THead>
-              <TR>
-                <TH>Language</TH>
-                <TH>Result</TH>
-                <TH numeric>Strings</TH>
-                <TH numeric>Escalated</TH>
-              </TR>
-            </THead>
-            <TBody>
-              {run.localeResults.map((locale) => {
-                const tone = LOCALE_STATE[locale.state];
+      <PageSection
+        title="Locales"
+        description="What the run proposed for each target language."
+      >
+        {byLocale.size === 0 ? (
+          <p className="text-small text-tertiary">
+            This run recorded no proposals.
+          </p>
+        ) : (
+          <ul>
+            {[...byLocale.entries()]
+              .sort(([a], [b]) => (a < b ? -1 : 1))
+              .map(([locale, count]) => {
+                const waiting = openQuestions.filter(
+                  (q) => q.locale === locale,
+                ).length;
                 return (
-                  <TR key={locale.code}>
-                    <TD>
-                      <span className="font-medium text-primary">
-                        {localeDisplayName(locale.code)}
-                      </span>{' '}
+                  <li
+                    key={locale}
+                    className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-subtle py-3 first:border-t-0"
+                  >
+                    <span className="font-medium text-primary">
+                      {localeDisplayName(locale)}{' '}
                       <span className="font-mono text-caption text-tertiary">
-                        {locale.code}
+                        {locale}
                       </span>
-                    </TD>
-                    <TD>
-                      <Badge tone={tone.tone}>{tone.label}</Badge>
-                    </TD>
-                    <TD numeric>{locale.strings || '—'}</TD>
-                    <TD numeric>{locale.escalated || '—'}</TD>
-                  </TR>
+                    </span>
+                    {waiting > 0 ? (
+                      <Badge tone="ambiguous">
+                        {waiting} question{waiting === 1 ? '' : 's'}
+                      </Badge>
+                    ) : (
+                      <Badge tone="confident">Translated</Badge>
+                    )}
+                    <span className="font-mono text-caption tabular-nums text-secondary">
+                      {count} key{count === 1 ? '' : 's'}
+                    </span>
+                  </li>
                 );
               })}
-            </TBody>
-          </Table>
-        </PageSection>
+          </ul>
+        )}
+      </PageSection>
 
-        {/* Failures get their own section with the provider message verbatim.
-            Paraphrasing it would destroy its only use: being searchable. */}
-        {failed.length > 0 ? (
-          <PageSection
-            title="What failed"
-            description="Reported exactly as the provider returned it."
-          >
-            <ul className="flex flex-col gap-2">
-              {failed.map((locale) => (
-                <li
-                  key={locale.code}
-                  className="rounded-lg border border-failed-border bg-failed-bg px-4 py-3"
-                >
-                  <p className="text-body font-medium text-failed-text">
-                    {localeDisplayName(locale.code)}
-                  </p>
-                  <pre className="mt-1.5 overflow-x-auto font-mono text-caption leading-5 text-secondary">
-                    {locale.error}
-                  </pre>
-                </li>
-              ))}
-            </ul>
-          </PageSection>
-        ) : null}
-      </SampleRegion>
+      {/* Verbatim, per DESIGN.md §8: the provider's own wording is what a
+          customer will search for. One error per run, not per locale — that is
+          what the pipeline records. */}
+      {run.error ? (
+        <PageSection
+          title="What failed"
+          description="Reported exactly as the provider returned it."
+        >
+          <pre className="overflow-x-auto rounded-lg border border-failed-border bg-failed-bg px-4 py-3 font-mono text-caption leading-5 text-secondary">
+            {run.error}
+          </pre>
+        </PageSection>
+      ) : null}
     </Page>
   );
 }

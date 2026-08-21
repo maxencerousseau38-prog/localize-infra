@@ -1,9 +1,11 @@
+import { NotConnected } from '@/components/not-connected';
 import { Page, PageHeader, PageMeta } from '@/components/page';
 import {
   listOpenAmbiguitiesForViewer,
   requireSession,
 } from '@/lib/data/workspace';
 import { EmptyState } from '@localize-infra/ui';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 import type { Metadata } from 'next';
 import { AmbiguityInbox } from './ambiguity-inbox';
 
@@ -24,6 +26,23 @@ export const metadata: Metadata = { title: 'Ambiguity' };
  * where the run and its proposal are in view — this is the inbox, not the desk.
  */
 export default async function AmbiguityPage() {
+  // Before the session check: without a database there is no session to
+  // require, and `requireSession` would throw where a sentence belongs.
+  if (!isSupabaseConfigured()) {
+    return (
+      <Page>
+        {/* The header stays. A page whose only content is an empty state
+            still needs its one h1 — dropping it made this route headingless,
+            which is an accessibility failure and not a test artefact. */}
+        <PageHeader
+          title="Ambiguity"
+          purpose="Strings the agent would not guess at. Each one is a judgement call it escalated rather than getting wrong quietly."
+        />
+        <NotConnected noun="questions" />
+      </Page>
+    );
+  }
+
   await requireSession();
   const ambiguities = await listOpenAmbiguitiesForViewer();
 
