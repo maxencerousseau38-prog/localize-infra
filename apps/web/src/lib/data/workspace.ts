@@ -163,6 +163,8 @@ export interface RunRecord {
   pr_url: string | null;
   pr_number: number | null;
   created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
   /**
    * When the run last reported progress.
    *
@@ -180,7 +182,7 @@ export async function listRuns(projectId: string): Promise<RunRecord[]> {
   const { data, error } = await supabase
     .from('runs')
     .select(
-      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,progress_at',
+      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,started_at,finished_at,progress_at',
     )
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
@@ -386,6 +388,154 @@ export async function listRunTranslations(
 
   if (error) throw new Error(`Could not load proposals: ${error.message}`);
   return (data ?? []) as ProposedTranslation[];
+}
+
+/**
+ * Every run this caller can see, newest first.
+ *
+ * No organization filter, for the same reason as the ambiguity inbox: RLS
+ * already confines `runs` to workspaces the caller is a member of, and a
+ * client-side `in` list would be a second copy of that policy — the copy that
+ * drifts. The flat /runs route is a history across workspaces, not a
+ * project-scoped list; `listRuns` remains for the project page.
+ */
+export async function listRunsForViewer(limit = 50): Promise<RunRecord[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('runs')
+    .select(
+      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,started_at,finished_at,progress_at',
+    )
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(`Could not load runs: ${error.message}`);
+  return (data ?? []) as RunRecord[];
+}
+
+/**
+ * Coverage per target locale, computed from what runs actually produced.
+ *
+ * There is no stored coverage table and deliberately no new one: invariant 1
+ * says git is the source of truth and Postgres is an index. The honest answer
+ * to "how much of this language is done" is how many keys the most recent run
+ * proposed for it against how many it extracted, which is what these rows are.
+ *
+ * A locale a project targets but no run has reached yet is reported at zero
+ * rather than omitted — absent from the list reads as "not configured", and
+ * that is a different fact.
+ */
+export interface LocaleCoverage {
+  locale: string;
+  translated: number;
+  total: number;
+  needsDecision: number;
+  lastRunAt: string | null;
+}
+
+export async function listLocaleCoverageForViewer(): Promise<LocaleCoverage[]> {
+  const supabase = await createClient();
+
+  // The newest run that produced anything. Coverage from an older run would
+  // describe a repository state that has since been replaced.
+  const { data: runs, error: runsError } = await supabase
+    .from('runs')
+    .select('id,created_at,keys_extracted,target_locales')
+    .gt('keys_extracted', 0)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (runsError) {
+    throw new Error(`Could not load coverage: ${runsError.message}`);
+  }
+  const latest = runs?.[0] as
+    | {
+        id: string;
+        created_at: string;
+        keys_extracted: number;
+        target_locales: string[] | null;
+      }
+    | undefined;
+  if (!latest) return [];
+
+  const [{ data: rows }, { data: questions }] = await Promise.all([
+    supabase.from('run_translations').select('locale').eq('run_id', latest.id),
+    supabase
+      .from('run_ambiguities')
+      .select('locale,state')
+      .eq('run_id', latest.id),
+  ]);
+
+  const translated = new Map<string, number>();
+  for (const row of rows ?? []) {
+    const locale = (row as { locale: string }).locale;
+    translated.set(locale, (translated.get(locale) ?? 0) + 1);
+  }
+
+  const pending = new Map<string, number>();
+  for (const row of questions ?? []) {
+    const q = row as { locale: string; state: string };
+    if (q.state !== 'unresolved') continue;
+    pending.set(q.locale, (pending.get(q.locale) ?? 0) + 1);
+  }
+
+  const locales = new Set<string>([
+    ...(latest.target_locales ?? []),
+    ...translated.keys(),
+  ]);
+
+  return [...locales].sort().map((locale) => ({
+    locale,
+    translated: translated.get(locale) ?? 0,
+    total: latest.keys_extracted,
+    needsDecision: pending.get(locale) ?? 0,
+    lastRunAt: latest.created_at,
+  }));
+}
+
+/**
+ * Wording waiting on somebody who knows the product.
+ *
+ * The /review surface is for a reviewer who is not a developer, so it carries
+ * proposals rather than keys and diffs. Only runs that actually stopped for a
+ * person are included: a proposal from a run that already opened its pull
+ * request is history, and showing it as pending would ask for a decision that
+ * has no effect.
+ */
+export interface ReviewItem extends ProposedTranslation {
+  run_id: string;
+}
+
+export async function listReviewItemsForViewer(): Promise<ReviewItem[]> {
+  const supabase = await createClient();
+
+  const { data: waiting, error: waitingError } = await supabase
+    .from('runs')
+    .select('id')
+    .eq('status', 'awaiting_review')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (waitingError) {
+    throw new Error(`Could not load reviews: ${waitingError.message}`);
+  }
+  const ids = (waiting ?? []).map((r) => (r as { id: string }).id);
+  if (ids.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('run_translations')
+    .select('run_id,locale,translation_key,source_text,proposed_text,origin')
+    .in('run_id', ids)
+    // Newly translated wording is what a reviewer is being asked about.
+    // `preserved` rows are strings already in the repository that the run left
+    // alone, and asking somebody to approve text nobody proposed is noise.
+    .eq('origin', 'model')
+    .order('locale', { ascending: true })
+    .order('translation_key', { ascending: true })
+    .limit(200);
+
+  if (error) throw new Error(`Could not load reviews: ${error.message}`);
+  return (data ?? []) as ReviewItem[];
 }
 
 /** A single run, scoped by RLS. Null when it is not this caller's to see. */

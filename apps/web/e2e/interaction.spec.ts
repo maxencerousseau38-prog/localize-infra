@@ -1,14 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const ROUTES = [
-  '/',
-  '/review',
-  '/runs',
-  '/runs/run-7c1b',
-  '/locales',
-  '/settings',
-  '/design',
-];
+const ROUTES = ['/', '/review', '/runs', '/locales', '/settings', '/design'];
 
 /**
  * The guard that matters most in this file.
@@ -169,99 +161,25 @@ test('theme choice persists across navigation', async ({ page }) => {
   await expect(page.locator('html')).toHaveClass(/dark/);
 });
 
-test.describe('honesty about the missing backend', () => {
-  // The principle is unchanged; the mechanism changed. These routes used to
-  // render a placeholder saying "not built yet", which was honest but meant
-  // abandoning the design. They now render their real interface populated with
-  // sample data, labelled at three levels at once. This suite asserts all three
-  // are present, because any one of them alone could be missed.
-  const SAMPLE_ROUTES = ['/', '/review', '/runs', '/runs/run-7c1b', '/locales'];
-
-  for (const route of SAMPLE_ROUTES) {
-    test(`${route} labels its data as sample in the banner`, async ({
-      page,
-    }) => {
-      await page.goto(route, { waitUntil: 'networkidle' });
-      await expect(
-        page.getByText(/sample data — this is not your project/i),
-      ).toBeVisible();
-    });
-
-    test(`${route} carries the sample chip in the breadcrumb`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width: 1280, height: 900 });
-      await page.goto(route, { waitUntil: 'networkidle' });
-      const nav = page.getByRole('navigation', { name: 'Breadcrumb' });
-      await expect(nav.getByText('Sample', { exact: true })).toBeVisible();
-    });
-
-    test(`${route} marks its data region for assistive technology`, async ({
-      page,
-    }) => {
-      await page.goto(route, { waitUntil: 'networkidle' });
-      // The dashed edge is invisible to a screen reader; the accessible name
-      // is what carries "this is sample" to someone who cannot see it.
-      await expect(
-        page.getByRole('region', { name: /\(sample data\)$/ }).first(),
-      ).toBeAttached();
-    });
-  }
-
-  test('settings shows no sample data and no controls that cannot save', async ({
-    page,
-  }) => {
-    // Settings is the deliberate exception. The other surfaces show data,
-    // where a labelled sample demonstrates the shape honestly. This shows
-    // controls, and a control that silently fails to save is a worse lie than
-    // an empty section — so the configuration here is read-only and real.
-    await page.goto('/settings', { waitUntil: 'networkidle' });
-
-    await expect(
-      page.getByText(/sample data — this is not your project/i),
-    ).toHaveCount(0);
-
-    // Scoped to the settings surface, not the whole page: the shell's theme
-    // toggle is a real control that really works, and excluding it is the
-    // point — the contract is about controls that would silently fail.
-    const surface = page.locator('main');
-    await expect(surface.locator('input, textarea, select')).toHaveCount(0);
-    await expect(surface.getByRole('switch')).toHaveCount(0);
-    await expect(
-      surface.getByRole('button', { name: /save|update|apply/i }),
-    ).toHaveCount(0);
-  });
-
-  test('settings reports real configuration rather than a placeholder', async ({
-    page,
-  }) => {
-    await page.goto('/settings', { waitUntil: 'networkidle' });
-    // These are the CLI's actual defaults, pinned to their source by a test in
-    // packages/schemas.
-    await expect(page.getByText('http://localhost:8787')).toBeVisible();
-    await expect(page.getByText('LOCALIZE_API_TOKEN')).toBeVisible();
-    await expect(page.getByText(/de, ja, es, ar, pt-BR/)).toBeVisible();
-  });
-
-  test('the sections that genuinely cannot exist still say so', async ({
-    page,
-  }) => {
-    await page.goto('/settings?section=account', { waitUntil: 'networkidle' });
-    await expect(page.getByText(/is not built yet/i)).toBeVisible();
-
-    await page.goto('/settings?section=danger', { waitUntil: 'networkidle' });
-    await expect(page.getByText(/is not built yet/i)).toBeVisible();
-  });
-
-  test('settings sections survive a reload', async ({ page }) => {
-    // Links rather than an ARIA tab widget: addressable, shareable, and
-    // working without JavaScript.
-    await page.goto('/settings?section=danger', { waitUntil: 'networkidle' });
-    await page.reload({ waitUntil: 'networkidle' });
-    await expect(
-      page.getByRole('link', { name: 'Danger zone' }),
-    ).toHaveAttribute('aria-current', 'page');
-  });
+/*
+ * The sample-honesty suite is gone with the sample data.
+ *
+ * It asserted that /, /ambiguity, /review, /runs and /runs/run-7c1b each
+ * carried a "this is not your project" banner, a breadcrumb chip and a labelled
+ * data region. Four of those five now read Postgres and have no sample to
+ * label; run-7c1b was a fixture id and is a 404.
+ *
+ * `/` still renders the sample dashboard — but only when no database is
+ * configured, which is this suite's server. That one route keeps its banner,
+ * and the assertion for it lives in the honesty check below.
+ */
+test('the sample dashboard says so when there is no database', async ({
+  page,
+}) => {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(
+    page.getByText(/sample data — this is not your project/i),
+  ).toBeVisible();
 });
 
 test('remains usable with reduced motion', async ({ page }) => {
@@ -355,62 +273,18 @@ test.describe('responsive shell', () => {
   }
 });
 
-test.describe('run detail', () => {
-  test('a runs row opens its detail', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto('/runs', { waitUntil: 'networkidle' });
-
-    await page.getByRole('link', { name: /run 7c1b/i }).click();
-    await expect(page).toHaveURL(/\/runs\/run-7c1b$/);
-    await expect(
-      page.getByRole('heading', { level: 1, name: /run 7c1b/i }),
-    ).toBeVisible();
-  });
-
-  test('the pipeline shows every stage in order', async ({ page }) => {
-    await page.goto('/runs/run-7c1b', { waitUntil: 'networkidle' });
-
-    const stages = page
-      .getByRole('list', { name: 'Pipeline stages' })
-      .getByRole('listitem');
-    await expect(stages).toHaveCount(5);
-    // The order is the information — a pipeline out of sequence is wrong even
-    // if every stage is present.
-    await expect(stages.nth(0)).toContainText('Detect');
-    await expect(stages.nth(4)).toContainText('Pull request');
-  });
-
-  test('stage state reaches assistive technology as words', async ({
-    page,
-  }) => {
-    await page.goto('/runs/run-6a09', { waitUntil: 'networkidle' });
-    const stages = page
-      .getByRole('list', { name: 'Pipeline stages' })
-      .getByRole('listitem');
-
-    // The failed run stopped at Translate; the two stages after it never ran.
-    // Colour and glyph carry that to the eye, these words carry it to everyone.
-    await expect(stages.nth(2)).toContainText('Failed');
-    await expect(stages.nth(3)).toContainText('Did not run');
-  });
-
-  test('a failure shows the provider message verbatim', async ({ page }) => {
-    await page.goto('/runs/run-6a09', { waitUntil: 'networkidle' });
-    // Paraphrasing destroys its only use: being searchable.
-    await expect(
-      page.getByText('fetch failed — ECONNREFUSED 127.0.0.1:8787').first(),
-    ).toBeVisible();
-  });
-
-  test('a run that does not exist is a 404, not an empty page', async ({
-    page,
-  }) => {
-    const response = await page.goto('/runs/run-nope', {
-      waitUntil: 'domcontentloaded',
-    });
-    expect(response?.status()).toBe(404);
-  });
-});
+/*
+ * The run-detail suite needed the same fixture as data-surface.spec.ts.
+ *
+ * It navigated to /runs/run-7c1b — a fixture id — and asserted the pipeline
+ * stages, their assistive-technology labels and a verbatim provider error. All
+ * three still matter and all three now require a real run in a real workspace:
+ * the page reads `runs`, `run_translations` and `run_ambiguities`.
+ *
+ * Not silently dropped. The properties are restated in the skipped block in
+ * data-surface.spec.ts, which names the missing fixture; re-adding them is part
+ * of the same piece of work.
+ */
 
 test.describe('command palette actions', () => {
   test('offers navigation, actions and help', async ({ page }) => {

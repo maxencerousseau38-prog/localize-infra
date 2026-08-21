@@ -80,3 +80,26 @@ export function runProgress(input: RunProgressInput): RunProgress {
 export function shouldPoll(progress: RunProgress): boolean {
   return progress.kind === 'queued' || progress.kind === 'active';
 }
+
+/**
+ * A stage as the run detail draws it.
+ *
+ * Replaces `SampleRunStage`, which lived in the fixtures module and required a
+ * `detail` string per stage — a sentence the fixture author wrote and no run
+ * produces. It also had no way to say "not yet": its states were done, partial,
+ * failed and skipped, which describe a finished run only. A run in flight needs
+ * `active` and `pending`, and skipped is not the same fact as pending.
+ */
+export type RunStageState =
+  | 'done'
+  | 'active'
+  | 'pending'
+  | 'failed'
+  | 'partial';
+
+export interface RunStageView {
+  id: string;
+  state: RunStageState;
+  /** Optional: shown when the run recorded something for this stage. */
+  detail?: string;
+}

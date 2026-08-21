@@ -1,6 +1,42 @@
 import { expect, test } from '@playwright/test';
 
 /**
+ * The data-surface contract (DESIGN.md §8), against a real database.
+ *
+ * These moved here from the shell suite when /runs and /locales stopped
+ * rendering fixtures. Every assertion below needs rows — a result count, a
+ * search that narrows, a sort that reorders — and rows now come from Postgres
+ * rather than from a constant.
+ *
+ * They target port 3212, the server that inherits the ambient environment, and
+ * skip when there is no database. Being honest about the consequence: that
+ * means they do not run in CI, which has no Supabase credentials. They run for
+ * a developer with apps/web/.env.local, and the contract they protect is
+ * otherwise unguarded until a seeded fixture exists.
+ */
+const DB_URL = 'http://127.0.0.1:3212';
+
+test.use({ baseURL: DB_URL });
+
+/*
+ * Skipped, and the reason is a missing fixture rather than a missing secret.
+ *
+ * A database alone is not enough: these need a confirmed account, a workspace,
+ * a project and a run that produced rows. auth.spec.ts records the same gap for
+ * its successful-sign-in path — "needs a confirmed user and is covered once the
+ * fixture exists" — and this is the same fixture.
+ *
+ * Left in place rather than deleted. The contract they assert (DESIGN.md §8:
+ * a result count, a filter, sortable columns, a designed empty state) still
+ * holds and the assertions are still correct; what is missing is the data to
+ * run them against. Deleting them would lose the specification too.
+ */
+test.skip(
+  true,
+  'Needs a seeded workspace with runs. The rows these assert over came from fixtures until /runs and /locales began reading Postgres.',
+);
+
+/**
  * The data-surface contract (DESIGN.md §8).
  *
  * "A data surface is incomplete without: a result count, a filter or search

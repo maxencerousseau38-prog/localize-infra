@@ -1,13 +1,53 @@
-import { LocalesTable } from '@/components/locales-table';
+import { NotConnected } from '@/components/not-connected';
 import { Page, PageHeader, PageMeta } from '@/components/page';
-import { SampleBanner, SampleRegion } from '@/components/sample';
-import { SAMPLE_LOCALES, SAMPLE_SOURCE_STRINGS } from '@/lib/sample';
+import {
+  listLocaleCoverageForViewer,
+  requireSession,
+} from '@/lib/data/workspace';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { EmptyState } from '@localize-infra/ui';
 import type { Metadata } from 'next';
+import { LocaleCoverageList } from './locale-coverage-list';
 
 export const metadata: Metadata = { title: 'Locales' };
 
-export default function LocalesPage() {
-  const behind = SAMPLE_LOCALES.filter((l) => l.translated < l.total).length;
+/**
+ * Coverage, computed rather than stored.
+ *
+ * This rendered five invented languages with invented percentages. There is
+ * still no coverage table and deliberately no new one: invariant 1 says git is
+ * the source of truth and Postgres is an index. So the honest answer to "how
+ * much of this language is done" is derived from the most recent run that
+ * produced anything — how many keys it proposed for a locale against how many
+ * it extracted.
+ *
+ * That makes the number as fresh as the last run and no fresher, which is the
+ * truth. A stored percentage would go stale silently the moment somebody edited
+ * a locale file by hand, and this product's whole claim is that they can.
+ */
+export default async function LocalesPage() {
+  // Before the session check: without a database there is no session to
+  // require, and `requireSession` would throw where a sentence belongs.
+  if (!isSupabaseConfigured()) {
+    return (
+      <Page>
+        {/* The header stays. A page whose only content is an empty state
+            still needs its one h1 — dropping it made this route headingless,
+            which is an accessibility failure and not a test artefact. */}
+        <PageHeader
+          title="Locales"
+          purpose="Which languages are current, which are behind, and which are waiting on a human."
+        />
+        <NotConnected noun="coverage" />
+      </Page>
+    );
+  }
+
+  await requireSession();
+  const coverage = await listLocaleCoverageForViewer();
+
+  const behind = coverage.filter((l) => l.translated < l.total).length;
+  const sourceStrings = coverage[0]?.total ?? 0;
 
   return (
     <Page>
@@ -15,24 +55,28 @@ export default function LocalesPage() {
         title="Locales"
         purpose="Which languages are current, which are behind, and which are waiting on a human."
         meta={
-          <>
-            <PageMeta label="Languages">{SAMPLE_LOCALES.length}</PageMeta>
-            <PageMeta label="Source strings">{SAMPLE_SOURCE_STRINGS}</PageMeta>
-            <PageMeta label="Behind">{behind}</PageMeta>
-          </>
+          coverage.length > 0 ? (
+            <>
+              <PageMeta label="Languages">{coverage.length}</PageMeta>
+              <PageMeta label="Source strings">{sourceStrings}</PageMeta>
+              <PageMeta label="Behind">{behind}</PageMeta>
+            </>
+          ) : null
         }
       />
 
-      <div className="mt-6">
-        <SampleBanner>
-          Your locales live in your repository. Listing them here needs a
-          connected project, so these five show the shape instead.
-        </SampleBanner>
-      </div>
-
-      <SampleRegion label="Locale coverage" className="mt-6">
-        <LocalesTable locales={SAMPLE_LOCALES} />
-      </SampleRegion>
+      {coverage.length === 0 ? (
+        <div className="mt-8">
+          <EmptyState
+            title="No coverage to report yet"
+            description="Coverage is computed from the last run that extracted something. Run the pipeline against a connected repository and the languages it wrote appear here."
+          />
+        </div>
+      ) : (
+        <div className="mt-6">
+          <LocaleCoverageList items={coverage} />
+        </div>
+      )}
     </Page>
   );
 }
