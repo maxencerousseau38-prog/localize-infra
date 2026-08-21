@@ -50,7 +50,7 @@ If you ever create another production database, stamp it in the same breath.
 ## What is in here
 
 `migrations/` is the source of truth (invariant 1: Git, not Postgres). Applied in
-filename order, and both projects carry all eleven. Nothing here stores a
+filename order, and both projects carry all sixteen. Nothing here stores a
 translation — these tables record who owns what; the translated strings stay in
 the customer's repository.
 
@@ -67,6 +67,11 @@ the customer's repository.
 | `…000500_constrain_run_pr_url` | `pr_url` reaches an `href`; the DB decides its shape |
 | `…000600_org_github_installations` | A GitHub App installation per organization |
 | `…000700_entitlements` | `plan`, `private_repositories`, `may_use_private_repositories()` |
+| `…0819000100_run_awaiting_review` | The `awaiting_review` status — a run that stopped for a person |
+| `…0819000200_ambiguities` | `run_ambiguities`, `record_ambiguity()`, `resolve_ambiguity()` |
+| `…0819000300_run_translations` | `run_translations`, `record_run_translations()` |
+| `…0819000400_run_locales_dir` | The locales directory a run actually wrote to |
+| `…0820000100_run_progress` | `progress_at`, so a dead run is distinguishable from a slow one |
 
 ## Creating an organization
 
@@ -76,6 +81,41 @@ Call `create_organization(name, slug)`. **Do not `INSERT` directly.**
 creator does not become a member until the AFTER INSERT trigger has run — so the
 insert succeeds and the read-back is denied. supabase-js requests the inserted
 row by default, so a direct insert fails on the first call a customer makes.
+
+## The development fixture
+
+`seeds/dev-user.sql` writes everything the authenticated end-to-end suites read:
+a confirmed account (`acceptance@localize-infra.dev`), the **Acceptance**
+workspace, a **Demo** project targeting `fr` and `de`, and two runs — one that
+finished and opened a pull request, one stopped at `awaiting_review` with an
+unanswered question. Two runs rather than one because the assertions are about
+telling those states apart.
+
+Apply it by hand against **development**; nothing runs it automatically.
+
+It is re-runnable, and that took fixing. It opened with `delete from auth.users`,
+but `organizations.created_by` is ON DELETE **RESTRICT** — so the first
+application created a workspace and every one after it aborted on a foreign key
+violation, naming a constraint several statements away from the workspace it was
+actually protecting. It now deletes the organization first, which cascades to
+projects, runs, translations and ambiguities.
+
+Two things it does deliberately, both learned the hard way:
+
+* **The deletes run as the owner, not as `authenticated`.** These tables grant
+  members SELECT and no DELETE at all, so under RLS a delete is discarded
+  without raising. A fixture that silently keeps every previous run's rows looks
+  applied and reports the wrong counts.
+* **It stamps the two runs with distinct times.** `now()` in Postgres is the
+  *transaction* start time, so both runs came out with identical `created_at`,
+  `started_at` and `finished_at`. `/locales` reads "the newest run" with
+  `order by created_at desc limit 1` and got whichever row Postgres preferred,
+  and both runs displayed a duration of `0ms` — a measurement nobody took.
+
+The suites that depend on it — `apps/web/e2e/data-surface.spec.ts`,
+`auth.spec.ts` and `workspace.spec.ts` — skip themselves when `SUPABASE_URL` is
+unset, so CI stays green without a database and correspondingly does not run
+them. They are a developer gate, not a CI one.
 
 ## Verifying isolation
 

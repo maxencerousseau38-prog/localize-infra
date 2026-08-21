@@ -161,8 +161,8 @@ export function RunsTable({ runs }: { runs: readonly RunTableRow[] }) {
         <DataSearch
           value={query}
           onChange={setQuery}
-          label="Search runs by trigger"
-          placeholder="Filter by command…"
+          label="Search runs by framework or pull request"
+          placeholder="Vite, #12…"
         />
       </DataToolbar>
 
@@ -184,7 +184,7 @@ export function RunsTable({ runs }: { runs: readonly RunTableRow[] }) {
           <li className="border-t border-subtle py-10">
             <EmptyState
               title="No runs match"
-              description="No run in this sample has that status or command."
+              description="No run matches this status or search. Clear it to see the rest."
               action={
                 <button
                   type="button"
@@ -293,7 +293,7 @@ export function RunsTable({ runs }: { runs: readonly RunTableRow[] }) {
             <TableEmpty colSpan={7}>
               <EmptyState
                 title="No runs match"
-                description="No run in this sample has that status or command."
+                description="No run matches this status or search. Clear it to see the rest."
                 action={
                   <button
                     type="button"

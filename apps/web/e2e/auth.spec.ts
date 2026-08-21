@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { SEEDED_EMAIL, SEEDED_PASSWORD } from './session';
 
 /**
  * Authentication, against a real database.
@@ -126,5 +127,69 @@ test.describe('authentication', () => {
     await page.keyboard.press('Tab');
 
     await expect(page.getByRole('button', { name: 'Sign in' })).toBeFocused();
+  });
+});
+
+/**
+ * The half that needed an account.
+ *
+ * The suite above says a route is protected and that a failed sign-in reveals
+ * nothing; neither needs a user to exist. What could not be written was the
+ * successful path — and with it the only test of `safeNext`, the open-redirect
+ * guard in login/actions.ts, which until now was correct code with nothing
+ * holding it to that.
+ *
+ * The account comes from supabase/seeds/dev-user.sql. Sign-ins are deliberately
+ * few: Supabase rate-limits its token endpoint, and a suite that signs in per
+ * test starts failing partway through for a reason it is not testing.
+ */
+test.describe('signing in', () => {
+  test.skip(
+    !configured,
+    'No SUPABASE_URL: this suite needs a real database. Set it in apps/web/.env.local.',
+  );
+
+  test('lands on the page the visitor was originally refused', async ({
+    page,
+  }) => {
+    await page.goto(`${AUTH_URL}/login?next=%2Flocales`, {
+      waitUntil: 'networkidle',
+    });
+    await page.getByLabel('Email').fill(SEEDED_EMAIL);
+    await page.getByLabel('Password').fill(SEEDED_PASSWORD);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+
+    // Not merely "somewhere other than /login": being returned to where you
+    // were going is the whole point of carrying `next` through the redirect.
+    await page.waitForURL(/\/locales$/, { timeout: 30_000 });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Locales');
+
+    // And the session holds across a fresh load, rather than the redirect being
+    // the only moment the visitor is authenticated.
+    await page.goto(`${AUTH_URL}/runs`, { waitUntil: 'networkidle' });
+    await expect(page).not.toHaveURL(/\/login/);
+  });
+
+  test('cannot be used to bounce a visitor to another origin', async ({
+    page,
+  }) => {
+    // `//evil.example` is a protocol-relative URL: the browser reads it as
+    // another origin, so `redirect()` would carry a freshly authenticated
+    // visitor straight off the site. Phishing that starts on the real login
+    // page is the reason this guard exists.
+    await page.goto(`${AUTH_URL}/login?next=%2F%2Fevil.example`, {
+      waitUntil: 'networkidle',
+    });
+    await page.getByLabel('Email').fill(SEEDED_EMAIL);
+    await page.getByLabel('Password').fill(SEEDED_PASSWORD);
+    await page.getByRole('button', { name: 'Sign in' }).click();
+
+    await page.waitForURL((url) => !url.pathname.startsWith('/login'), {
+      timeout: 30_000,
+    });
+
+    // Same origin, and specifically the fallback the guard substitutes.
+    expect(new URL(page.url()).origin).toBe(AUTH_URL);
+    expect(new URL(page.url()).pathname).toBe('/');
   });
 });

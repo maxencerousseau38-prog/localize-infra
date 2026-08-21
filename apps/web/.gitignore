@@ -2,3 +2,6 @@
 
 .vercel
 .env*
+
+# A real development session token, written by e2e/auth.setup.ts.
+e2e/.auth/

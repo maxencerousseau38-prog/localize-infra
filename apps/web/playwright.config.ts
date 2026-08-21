@@ -45,7 +45,22 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [['list']],
   use: { baseURL: 'http://127.0.0.1:3211', trace: 'off' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    /*
+     * Signs in once and saves the session for the suites that need one.
+     *
+     * A dependency rather than a `globalSetup` so it appears in the reporter
+     * with a name: when the seeded account is missing, "authenticate as the
+     * seeded user" failing says what is wrong, where a global setup failure
+     * says only that the run did not start.
+     */
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+    },
+  ],
   webServer: [
     {
       command: 'npx next start -p 3211',

@@ -6,7 +6,7 @@ import {
   listRunTranslations,
   requireSession,
 } from '@/lib/data/workspace';
-import { runProgress } from '@/lib/runs/progress';
+import { pipelineStageId, runProgress } from '@/lib/runs/progress';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
   Badge,
@@ -108,7 +108,9 @@ export default async function RunDetailPage({ params }: Params) {
 
   // Reached, in progress, or not yet: derived from where the run actually got
   // to rather than from a stored per-stage list, which no run writes.
-  const reachedIndex = PIPELINE_STAGES.findIndex((s) => s.id === run.stage);
+  const reachedIndex = PIPELINE_STAGES.findIndex(
+    (s) => s.id === pipelineStageId(run.stage),
+  );
   const stages = PIPELINE_STAGES.map((stage, i) => ({
     id: stage.id,
     name: stage.name,
