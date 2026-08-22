@@ -6,7 +6,11 @@ import {
   requireSession,
 } from '@/lib/data/workspace';
 import { createClient } from '@/lib/supabase/server';
-import { buildLocaleFiles, unresolvedCount } from '@localize-infra/core';
+import {
+  buildLocaleFiles,
+  describeApprovedPullRequest,
+  unresolvedCount,
+} from '@localize-infra/core';
 import { OpenPrApiResponseSchema } from '@localize-infra/schemas';
 import { revalidatePath } from 'next/cache';
 
@@ -241,6 +245,27 @@ export async function approveRun(
         owner: project.repository_owner,
         repo: project.repository_name,
         baseBranch: project.repository_branch ?? 'main',
+        /*
+         * `title` and `body` were absent, and both are required by
+         * `OpenPrApiRequestSchema`. Approving a reviewed run answered
+         * 400 Bad Request and recorded the run failed — so the review gate,
+         * which is the product's differentiator, had never once opened a pull
+         * request.
+         *
+         * It survived because the two callers built their request bodies
+         * separately and only `run-actions.ts` was ever exercised end to end.
+         * Built by a pure function in `packages/core` now, tested against the
+         * same schema the API validates with.
+         */
+        ...describeApprovedPullRequest({
+          locales: project.target_locales,
+          keyCount: run.keys_extracted,
+          framework: run.framework,
+          decisions: decisions.map((d) => ({
+            state: d.state,
+            resolvedText: d.resolved_text,
+          })),
+        }),
         files,
       }),
     });
