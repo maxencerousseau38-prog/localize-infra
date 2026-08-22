@@ -1,0 +1,239 @@
+{
+  "ranAt": "2026-08-21T23:06:08.292Z",
+  "corpus": {
+    "entries": 414,
+    "locales": ["de", "ja", "es", "ar", "pt-BR"],
+    "perLocale": {
+      "de": 90,
+      "ja": 90,
+      "es": 90,
+      "ar": 72,
+      "pt-BR": 72
+    },
+    "glossaryTerms": 10,
+    "entriesWithIcu": 0,
+    "entriesWithPlaceholders": 19
+  },
+  "notMeasured": {
+    "icuValidity": "No corpus entry is an ICU message, so this check has no applicable input.",
+    "pluralCategories": "Depends on ICU messages, of which the corpus has none.",
+    "humanPreference": "Never run. See docs/product/08-critique.md §C2. chrF and exact match are reference-agreement proxies, not quality judgements."
+  },
+  "configs": [
+    {
+      "id": "sonnet5-effort-low",
+      "label": "Sonnet 5, effort: low",
+      "modelId": "claude-sonnet-5",
+      "settings": {
+        "maxTokens": 8192,
+        "effort": "low"
+      },
+      "note": "The proposed default. Exactly what createAnthropicProvider sends with no settings.",
+      "requested": 414,
+      "answered": 414,
+      "missingKeys": 0,
+      "completionRate": 1,
+      "errors": [],
+      "chrfMean": 75.49353139617402,
+      "exactMatchRate": 0.4106280193236715,
+      "placeholderApplicable": 19,
+      "placeholderIntactRate": 1,
+      "glossaryViolations": 0,
+      "lengthOverflowRate": 0.13043478260869565,
+      "escalationRate": 0.004830917874396135,
+      "requests": 5,
+      "latencyMsTotal": 213737,
+      "latencyMsPerRequest": 42747.4,
+      "tokens": {
+        "inputTokens": 79468,
+        "outputTokens": 24631,
+        "thinkingTokens": 65
+      },
+      "costUsd": 0.607869,
+      "costPerThousandPairs": 1.468282608695652,
+      "byLocale": {
+        "de": {
+          "requested": 90,
+          "answered": 90,
+          "chrf": 76.34313288576489,
+          "exactMatchRate": 0.36666666666666664,
+          "latencyMs": 48333
+        },
+        "ja": {
+          "requested": 90,
+          "answered": 90,
+          "chrf": 73.37117398896073,
+          "exactMatchRate": 0.4444444444444444,
+          "latencyMs": 45135
+        },
+        "es": {
+          "requested": 90,
+          "answered": 90,
+          "chrf": 80.55344929075783,
+          "exactMatchRate": 0.4,
+          "latencyMs": 43141
+        },
+        "ar": {
+          "requested": 72,
+          "answered": 72,
+          "chrf": 64.86371188480045,
+          "exactMatchRate": 0.2916666666666667,
+          "latencyMs": 47002
+        },
+        "pt-BR": {
+          "requested": 72,
+          "answered": 72,
+          "chrf": 81.38939843634574,
+          "exactMatchRate": 0.5555555555555556,
+          "latencyMs": 30126
+        }
+      }
+    },
+    {
+      "id": "sonnet5-default-reasoning",
+      "label": "Sonnet 5, default reasoning",
+      "modelId": "claude-sonnet-5",
+      "settings": {
+        "maxTokens": 8192,
+        "effort": null
+      },
+      "note": "The previous reasoning configuration. Ceiling raised to 8192 because at 4096 it returns nothing, so there would be no quality to measure.",
+      "requested": 414,
+      "answered": 90,
+      "missingKeys": 324,
+      "completionRate": 0.21739130434782608,
+      "errors": [
+        "de: No JSON array found in model response",
+        "ja: Expected ',' or '}' after property value in JSON at position 4200 (line 166 column 6)",
+        "ar: Unterminated string in JSON at position 2453 (line 94 column 134)",
+        "pt-BR: No JSON array found in model response"
+      ],
+      "chrfMean": 75.52498934041311,
+      "exactMatchRate": 0.2777777777777778,
+      "placeholderApplicable": 2,
+      "placeholderIntactRate": 1,
+      "glossaryViolations": 0,
+      "lengthOverflowRate": 0.18888888888888888,
+      "escalationRate": 0.022222222222222223,
+      "requests": 5,
+      "latencyMsTotal": 342756,
+      "latencyMsPerRequest": 68551.2,
+      "tokens": {
+        "inputTokens": 79468,
+        "outputTokens": 39140,
+        "thinkingTokens": 23580
+      },
+      "costUsd": 0.825504,
+      "costPerThousandPairs": 1.9939710144927536,
+      "byLocale": {
+        "de": {
+          "requested": 90,
+          "answered": 0,
+          "chrf": null,
+          "exactMatchRate": null,
+          "latencyMs": 74894
+        },
+        "ja": {
+          "requested": 90,
+          "answered": 0,
+          "chrf": null,
+          "exactMatchRate": null,
+          "latencyMs": 72499
+        },
+        "es": {
+          "requested": 90,
+          "answered": 90,
+          "chrf": 75.52498934041311,
+          "exactMatchRate": 0.2777777777777778,
+          "latencyMs": 51360
+        },
+        "ar": {
+          "requested": 72,
+          "answered": 0,
+          "chrf": null,
+          "exactMatchRate": null,
+          "latencyMs": 76478
+        },
+        "pt-BR": {
+          "requested": 72,
+          "answered": 0,
+          "chrf": null,
+          "exactMatchRate": null,
+          "latencyMs": 67525
+        }
+      }
+    },
+    {
+      "id": "haiku45",
+      "label": "Haiku 4.5, thinking disabled",
+      "modelId": "claude-haiku-4-5",
+      "settings": {
+        "maxTokens": 8192,
+        "effort": null,
+        "thinking": "disabled"
+      },
+      "note": "The cheap-model option 08-critique.md §C3 called load-bearing. Included to price the quality it costs, not to adopt.",
+      "requested": 414,
+      "answered": 323,
+      "missingKeys": 91,
+      "completionRate": 0.7801932367149759,
+      "errors": [
+        "de: Expected ',' or '}' after property value in JSON at position 2827 (line 99 column 28)"
+      ],
+      "chrfMean": 73.03219583832228,
+      "exactMatchRate": 0.4086687306501548,
+      "placeholderApplicable": 13,
+      "placeholderIntactRate": 1,
+      "glossaryViolations": 0,
+      "lengthOverflowRate": 0.09597523219814241,
+      "escalationRate": 0,
+      "requests": 5,
+      "latencyMsTotal": 172525,
+      "latencyMsPerRequest": 34505,
+      "tokens": {
+        "inputTokens": 61595,
+        "outputTokens": 23976,
+        "thinkingTokens": 0
+      },
+      "costUsd": 0.181475,
+      "costPerThousandPairs": 0.4383454106280193,
+      "byLocale": {
+        "de": {
+          "requested": 90,
+          "answered": 0,
+          "chrf": null,
+          "exactMatchRate": null,
+          "latencyMs": 38455
+        },
+        "ja": {
+          "requested": 90,
+          "answered": 89,
+          "chrf": 65.1441474220999,
+          "exactMatchRate": 0.3595505617977528,
+          "latencyMs": 36402
+        },
+        "es": {
+          "requested": 90,
+          "answered": 90,
+          "chrf": 79.69752706561538,
+          "exactMatchRate": 0.4,
+          "latencyMs": 35005
+        },
+        "ar": {
+          "requested": 72,
+          "answered": 72,
+          "chrf": 64.1375771901401,
+          "exactMatchRate": 0.3194444444444444,
+          "latencyMs": 36926
+        },
+        "pt-BR": {
+          "requested": 72,
+          "answered": 72,
+          "chrf": 83.34565474466284,
+          "exactMatchRate": 0.5694444444444444,
+          "latencyMs": 25737
+        }
+      }
+    }
+  ]
+}

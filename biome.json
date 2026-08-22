@@ -35,7 +35,8 @@
       ".agents/**",
       ".claude/**",
       "skills-lock.json",
-      "apps/web/e2e/.auth/**"
+      "apps/web/e2e/.auth/**",
+      "apps/api/eval/results/**"
     ]
   }
 }
