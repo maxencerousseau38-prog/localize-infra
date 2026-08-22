@@ -26,6 +26,23 @@ npm publish -w @localize-infra/core    --access public
 npm publish -w @localize-infra/cli     --access public
 ```
 
+Then, in the **same commit as the publish**, flip one constant:
+
+```ts
+// apps/site/src/lib/constants.ts
+export const CLI_PUBLISHED_TO_NPM = true;
+```
+
+The landing hero and `/docs` both read it, and e2e tests assert that whatever it
+says is what those pages say — in either direction. So the site cannot promise
+an `npx` that 404s, and it cannot keep apologising for a package that exists.
+
+This is a step, not a follow-up. The site's standing constraint is that every
+claim must be true *today*; leaving the flag behind after publishing breaks that
+constraint just as surely as flipping it early does. Both failures are caught by
+`apps/site/e2e/interaction.spec.ts`, which was run against both values of the
+flag when it was written.
+
 `--access public` is required: scoped packages default to restricted, and a
 restricted publish on a free account fails.
 

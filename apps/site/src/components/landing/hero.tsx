@@ -1,5 +1,9 @@
 import { RunArtifact } from '@/components/landing/run-artifact';
-import { EXAMPLE_PR_URL, INSTALL_COMMAND } from '@/lib/constants';
+import {
+  CLI_PUBLISHED_TO_NPM,
+  EXAMPLE_PR_URL,
+  INSTALL_COMMAND,
+} from '@/lib/constants';
 import { Button, CopyCommand } from '@localize-infra/ui';
 import { GitPullRequest } from 'lucide-react';
 import Link from 'next/link';
@@ -144,8 +148,13 @@ export function Hero() {
               <div className="w-full sm:max-w-md xl:max-w-none">
                 <CopyCommand command={INSTALL_COMMAND} />
               </div>
+              {/* Both halves of this sentence come from CLI_PUBLISHED_TO_NPM,
+                  which /docs also reads. It was prose in two places about one
+                  external fact, which is one place that gets forgotten. */}
               <p className="text-small leading-6 text-tertiary">
-                Not published to npm yet — today it runs from a clone.{' '}
+                {CLI_PUBLISHED_TO_NPM
+                  ? 'It needs an API you run yourself — there is no hosted one. '
+                  : 'Not published to npm yet — today it runs from a clone. '}
                 <Link
                   href="/docs#install"
                   className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"

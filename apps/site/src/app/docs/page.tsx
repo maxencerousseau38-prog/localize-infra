@@ -1,7 +1,11 @@
 import { Code, CodeBlock } from '@/components/docs/code-block';
 import { DocsToc, type TocEntry } from '@/components/docs/toc';
 import { PageHeader } from '@/components/page-header';
-import { GITHUB_REPO_URL } from '@/lib/constants';
+import {
+  CLI_PUBLISHED_TO_NPM,
+  GITHUB_REPO_URL,
+  INSTALL_COMMAND,
+} from '@/lib/constants';
 import { Badge, StateRule } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -217,20 +221,52 @@ export default function DocsPage() {
               badge={<Badge tone="neutral">Pre-alpha</Badge>}
             >
               <StateRule tone="neutral">
-                <p>
-                  <strong className="font-medium text-primary">
-                    The CLI is not published to npm yet.
-                  </strong>{' '}
-                  You cannot <Code>npx</Code> it. Until it is published, the
-                  only way to run it is from a clone of the repository, which is
-                  what the next section describes.
-                </p>
-                <p className="mt-3">
-                  It also needs a running API instance to translate against.
-                  There is no hosted one — you run it yourself, with your own
-                  provider key. There are no accounts, no projects and no
-                  dashboard behind any of this.
-                </p>
+                {CLI_PUBLISHED_TO_NPM ? (
+                  <>
+                    <p>
+                      <strong className="font-medium text-primary">
+                        The CLI is on npm, and installing it is not the same as
+                        being able to use it.
+                      </strong>{' '}
+                      <Code>{INSTALL_COMMAND}</Code> installs and runs. It will
+                      not translate anything until you point it at an API you
+                      run yourself.
+                    </p>
+                    <p className="mt-3">
+                      There is no hosted API. Run it without a token and the
+                      command stops on a{' '}
+                      <Link
+                        href="#errors"
+                        className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      >
+                        missing-token refusal
+                      </Link>{' '}
+                      before it looks at your code at all.
+                    </p>
+                    <p className="mt-3">
+                      So you still need this repository — not for the CLI any
+                      more, but for the API. There are no accounts, no projects
+                      and no dashboard behind any of this.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      <strong className="font-medium text-primary">
+                        The CLI is not published to npm yet.
+                      </strong>{' '}
+                      You cannot <Code>npx</Code> it. Until it is published, the
+                      only way to run it is from a clone of the repository,
+                      which is what the next section describes.
+                    </p>
+                    <p className="mt-3">
+                      It also needs a running API instance to translate against.
+                      There is no hosted one — you run it yourself, with your
+                      own provider key. There are no accounts, no projects and
+                      no dashboard behind any of this.
+                    </p>
+                  </>
+                )}
               </StateRule>
               <p>
                 What does work today, end to end, is the pipeline itself:
@@ -240,18 +276,43 @@ export default function DocsPage() {
             </Section>
 
             <Section id="install" title="Running it today">
-              <p>
-                Clone the repository and install dependencies. The CLI resolves{' '}
-                <Code>@localize-infra/core</Code> through its build output, so
-                core has to be built first — skipping this is the single most
-                common local failure.
-              </p>
-              <CodeBlock label="Clone and build">
-                {`git clone ${GITHUB_REPO_URL}.git
+              {CLI_PUBLISHED_TO_NPM ? (
+                <>
+                  <p>
+                    Installing the CLI is one command. Running it is three,
+                    because the translation step goes through an API and there
+                    is no hosted one — so the repository is still needed, for
+                    the API rather than for the CLI.
+                  </p>
+                  <CodeBlock label="Install the CLI">
+                    {'npx @localize-infra/cli --help'}
+                  </CodeBlock>
+                  <p>
+                    Then clone the repository, because the API lives in it. The
+                    CLI itself no longer needs building; the API does.
+                  </p>
+                  <CodeBlock label="Clone, for the API">
+                    {`git clone ${GITHUB_REPO_URL}.git
+cd localize-infra
+npm install`}
+                  </CodeBlock>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Clone the repository and install dependencies. The CLI
+                    resolves <Code>@localize-infra/core</Code> through its build
+                    output, so core has to be built first — skipping this is the
+                    single most common local failure.
+                  </p>
+                  <CodeBlock label="Clone and build">
+                    {`git clone ${GITHUB_REPO_URL}.git
 cd localize-infra
 npm install
 npm run build -w @localize-infra/core`}
-              </CodeBlock>
+                  </CodeBlock>
+                </>
+              )}
               <p>
                 Start the API. It needs a bearer token of your choosing and a
                 provider key; it refuses to boot without{' '}
@@ -264,7 +325,10 @@ npm run dev -w @localize-infra/api   # listens on :8787`}
               </CodeBlock>
               <p>Then run the CLI against your project.</p>
               <CodeBlock label="Run init">
-                {`export LOCALIZE_API_TOKEN="a-token-you-choose"   # same value
+                {CLI_PUBLISHED_TO_NPM
+                  ? `export LOCALIZE_API_TOKEN="a-token-you-choose"   # same value
+npx @localize-infra/cli init ../my-app --api-url http://localhost:8787`
+                  : `export LOCALIZE_API_TOKEN="a-token-you-choose"   # same value
 npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
               </CodeBlock>
               <p>
