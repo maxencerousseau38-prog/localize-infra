@@ -13,15 +13,6 @@ export const EXAMPLE_PR_URL =
   'https://github.com/maxencerousseau38-prog/localize-infra-fixture-vite/pull/1';
 
 /**
- * Shown on the landing page as the shape the tool is heading for.
- *
- * It does not work yet: `@localize-infra/cli` is not published to npm, so this
- * command 404s today. The hero says so directly and links to /docs for the
- * from-source path — the alternative was leaving a primary call to action that
- * fails for every visitor who copies it, on a site whose stated constraint is
- * that every claim must be true today.
- */
-/**
  * The evaluation harness, which is MIT-licensed.
  *
  * Linked instead of the repository root wherever the surrounding copy claims
@@ -30,4 +21,36 @@ export const EXAMPLE_PR_URL =
  */
 export const EVAL_PACKAGE_URL = `${GITHUB_REPO_URL}/tree/master/packages/eval`;
 
+/**
+ * Shown on the landing page and in /docs as the way to install the CLI.
+ *
+ * Whether it *works* is `CLI_PUBLISHED_TO_NPM` below, not something each page
+ * decides for itself. The doc comment describing this constant had drifted
+ * away from it — two comment blocks in a row, the first orphaned above the
+ * second — so the explanation for the command sat on a different export.
+ */
 export const INSTALL_COMMAND = 'npx @localize-infra/cli init';
+
+/**
+ * Whether `@localize-infra/cli` exists on the public npm registry.
+ *
+ * **One fact, one place.** Two pages make a claim that depends on it — the
+ * hero's qualification under the copyable command, and the first paragraph of
+ * /docs — and they were separately worded prose. Two hand-written sentences
+ * about one external fact is one sentence that gets forgotten, on a site whose
+ * stated constraint is that every claim must be true *today*
+ * (see docs/frontend/07-milestones.md, FE-1 risks).
+ *
+ * **Flipping this is part of publishing, not a follow-up.** `docs/releasing.md`
+ * lists it as a step in the publish sequence, and e2e tests assert that both
+ * pages say whatever this says — so the suite goes red if the flag and the copy
+ * ever disagree, in either direction.
+ *
+ * It is a constant rather than a registry lookup on purpose. Querying npm at
+ * build time would make a green build depend on a third party being reachable,
+ * and would let the site's honesty change without a commit.
+ *
+ * Verified false on 2026-08-22: `npm view @localize-infra/cli` → 404, and the
+ * `@localize-infra` scope is unclaimed.
+ */
+export const CLI_PUBLISHED_TO_NPM = false;
