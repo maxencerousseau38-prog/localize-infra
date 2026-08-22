@@ -113,6 +113,15 @@ export async function startRun(
   let framework: string | null = null;
   let keysExtracted = 0;
   let keysTranslated = 0;
+  /*
+   * Strings the model was asked for and did not return.
+   *
+   * The API has always reported these — `handleTranslateBatch` computes them
+   * and the CLI prints them — and this function read `body.translations` and
+   * nothing else. A locale that came back with three strings out of eight
+   * hundred was counted a success and the run finished `succeeded`.
+   */
+  let keysMissing = 0;
   let localesSucceeded = 0;
   let localesFailed = 0;
   const proposals: {
@@ -275,6 +284,7 @@ export async function startRun(
             body.translations.map((entry) => [entry.key, entry.text]),
           );
           keysTranslated += body.translations.length;
+          keysMissing += body.missingKeys.length;
 
           // Invariant 4, at the only point where it can actually be enforced.
           // A string the model refused to guess at becomes a question in the
@@ -405,7 +415,14 @@ export async function startRun(
         repo: project.repository_name,
         baseBranch: project.repository_branch ?? 'main',
         title: `Add translations (${project.target_locales.join(', ')})`,
-        body: `Extracted ${keysExtracted} strings from ${framework}, translated ${keysTranslated} into ${localesSucceeded} locale(s).`,
+        // The shortfall is named in the pull request itself, because that is
+        // where the reviewer is. A body reporting only what worked leaves them
+        // to notice the gap by diffing key counts by hand.
+        body: `Extracted ${keysExtracted} strings from ${framework}, translated ${keysTranslated} into ${localesSucceeded} locale(s).${
+          keysMissing > 0
+            ? `\n\nNote: ${keysMissing} string(s) were not translated and are absent from these files. Re-run to attempt them again.`
+            : ''
+        }`,
         files,
       }),
     });
@@ -443,7 +460,12 @@ export async function startRun(
    * succeeded is precisely the lie this structure exists to prevent.
    */
   const status = prUrl
-    ? localesFailed > 0
+    ? // `keysMissing` belongs in this condition and was absent from it. The
+      // file is still written with what did arrive — a partial translation
+      // merged over the existing one is better than nothing, and
+      // `mergeTranslations` protects anything edited by hand. What must not
+      // happen is calling it finished.
+      localesFailed > 0 || keysMissing > 0
       ? 'partial'
       : 'succeeded'
     : 'failed';

@@ -152,8 +152,9 @@ const report = {
   inputs: INPUTS,
   outputCeiling: {
     maxOutputTokensPerRequest: INPUTS.PIPELINE.maxOutputTokensPerRequest,
-    maxStringsPerRequest: maxStringsPerRequest(),
-    observedFailingStrings: INPUTS.PIPELINE.observedFailingStrings,
+    chunkSize: maxStringsPerRequest(),
+    observedFailingStringsBeforeFix:
+      INPUTS.PIPELINE.observedFailingStringsBeforeFix,
     chunkingImplemented: INPUTS.PIPELINE.chunking,
   },
   unit,

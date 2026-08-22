@@ -124,31 +124,52 @@ export const PIPELINE = {
   /**
    * `max_tokens` on the Anthropic call (apps/api/src/router/anthropic.ts).
    *
-   * Arithmetic said this bounded a request at 4096/65 ≈ 63 strings. Arithmetic
-   * was wrong, and the real number was found by running it: adaptive thinking
-   * spends the same budget, so the request fails between 20 and 40 strings —
-   * and it does not truncate, it returns **no text at all**
-   * (`stop_reason: max_tokens`, `thinking_tokens: 4096`, empty content).
+   * 8192 now. It was 4096, and that did not merely truncate — it returned
+   * nothing. Arithmetic said 4096 bounded a request at 4096/65 ≈ 63 strings;
+   * arithmetic was wrong, because adaptive thinking spends the same budget.
+   * Verified at 40 and at 80 strings: both spent the full 4096 tokens on
+   * thinking and produced an empty content block.
+   */
+  maxOutputTokensPerRequest: 8192,
+
+  /**
+   * `output_config.effort` on the Anthropic call.
    *
-   * Verified at 40 and at 80 strings. Both cost a full 4096 output tokens and
-   * produced nothing.
+   * `low` collapses the thinking that was consuming the whole budget: 56
+   * measured output tokens per string against 159 at the default. It is both
+   * the correctness fix and a 2.8x saving.
+   *
+   * Its effect on **quality** is unmeasured. `packages/eval` is what settles
+   * that and has not been run on this question.
    */
-  maxOutputTokensPerRequest: 4096,
+  effort: 'low',
 
   /**
-   * The largest batch observed to return a complete, parseable answer on the
-   * configured model and settings. Measured, not derived.
+   * The batch that broke it, kept as the reason the ceiling above moved.
+   * 20 strings answered; 40 returned nothing.
    */
-  observedMaxUsableStrings: 20,
-
-  /** The smallest batch observed to fail outright. */
-  observedFailingStrings: 40,
+  observedMaxUsableStringsBeforeFix: 20,
+  observedFailingStringsBeforeFix: 40,
 
   /**
-   * One request per target locale per run, carrying every pending string.
-   * Neither the CLI nor apps/web chunks — verified by reading both send paths.
+   * Strings per request, from `MAX_STRINGS_PER_REQUEST` in
+   * apps/api/src/translate/handler.ts.
+   *
+   * Measured to work: a 100-string chunk at `effort: low` emits 5,603 output
+   * tokens against the 8,192 ceiling, and 250 strings through the real handler
+   * returned 250 translations with none missing.
    */
-  chunking: false,
+  chunkSize: 100,
+
+  /**
+   * Chunked, in `handleTranslateBatch`.
+   *
+   * It was not, and that was the defect: one request per locale carrying every
+   * pending string, so the size of a request was the size of the customer's
+   * repository. Chunking lives in the API rather than in each of the two
+   * callers, so the CLI and apps/web cannot drift apart on it.
+   */
+  chunking: true,
 
   /** No retry exists on the translate call. A failure ends the run. */
   retries: 0,
@@ -261,19 +282,31 @@ export const ASSUMPTIONS = {
   /**
    * Share of strings the model escalates.
    *
-   * **No measurement exists.** The eval harness can produce one — it has a
-   * 414-string corpus and the deterministic checks already run in CI — but the
-   * escalation rate has never been computed, and §C1/§C2 record that the human
-   * evaluation never ran at all.
+   * **This was a guess of 8%, and observation puts it far lower.** Two runs of
+   * 250 corpus strings through the real `handleTranslateBatch` into German on
+   * 2026-08-22 returned 250 translations each, with 2 and then 5 ambiguous —
+   * 0.8% and 2.0%.
    *
-   * 8% is a guess. The model is run at 2%, 8% and 20% below, because this is
-   * the assumption the answer is most sensitive to on the output side.
+   * The value here is the **higher** of the two. A cost model must not round in
+   * its own favour, and two samples that differ by 2.5x are a range rather than
+   * a number.
    *
-   * Settled by: running the corpus through `/v1/translate` once and counting
-   * `confidence: "ambiguous"`. That is one batch of real inference, and it is
-   * the cheapest fact left to buy.
+   * Kept in this tier rather than promoted to measured, because one locale and
+   * one corpus is not a rate. German forces a du/Sie choice many languages do
+   * not, and the corpus is drawn from open-source projects whose strings have
+   * already been through a translation process once — both push the number
+   * around. This is a measurement of one case being used as the estimate for
+   * all of them.
+   *
+   * What has changed is that the model is no longer built on a figure known to
+   * be wrong. The sweep below still runs 2%/8%/20%, and matters less than it
+   * looked: across that whole range the typical customer moves by 22%, on a
+   * line that is 4% of the cheapest plan.
+   *
+   * Settled properly by: the same measurement across every target locale, on
+   * real application strings rather than already-translated ones.
    */
-  ambiguityRate: 0.08,
+  ambiguityRate: 0.02,
 
   /**
    * Share of runs that fail and are retried by a human.
