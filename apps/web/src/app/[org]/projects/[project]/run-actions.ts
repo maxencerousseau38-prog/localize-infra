@@ -286,6 +286,23 @@ export async function startRun(
           keysTranslated += body.translations.length;
           keysMissing += body.missingKeys.length;
 
+          /*
+           * Why keys are missing, when the API knows.
+           *
+           * `missingKeys` alone cannot tell a model that answered and left a
+           * string out from a chunk whose every attempt came back unparseable,
+           * and those deserve different reactions: the first is the model being
+           * incomplete, the second is a run that lost work to a fault and has
+           * already retried it three times.
+           *
+           * Recorded verbatim (DESIGN.md §8) and only when there is nothing
+           * worse to report — a locale that failed outright sets `failure` in
+           * the catch below, and that is the more useful message of the two.
+           */
+          for (const chunkFailure of body.failures) {
+            failure ??= `${locale}: ${chunkFailure.keys.length} string(s) lost after ${chunkFailure.attempts} attempts — ${chunkFailure.error}`;
+          }
+
           // Invariant 4, at the only point where it can actually be enforced.
           // A string the model refused to guess at becomes a question in the
           // queue, and its proposal is still used so the file is complete —

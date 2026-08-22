@@ -50,7 +50,7 @@ pointing at a CLI that is not published.
 | **Published prices** | Blocked by `08-critique.md` §C3 until the unit-cost model existed. It now does, and prices are *proposed* in `09-unit-economics.md` — not published |
 | **Self-serve GitHub connection in production** | `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are absent from the production environment, verified by `vercel env ls production` on 2026-08-22 |
 | **A published CLI** | `npm view @localize-infra/cli` returns 404, verified 2026-08-22 |
-| **Retry on a failed translation chunk** | One malformed response loses every string in that chunk. The benchmark saw this happen |
+
 | **A worker** | Runs execute inside the request. A large repository will outlive the serverless timeout, and nothing resumes it |
 
 ---
@@ -59,9 +59,9 @@ pointing at a CLI that is not published.
 
 | Question | Status |
 |---|---|
-| **Does a real customer journey work end to end?** | **Never executed.** Signup → workspace → connect a repository → run → merged pull request has not been performed once by anyone. Every part has been exercised separately |
+| **Does a real customer journey work end to end?** | **The pipeline: yes, verified 2026-08-22 — see blocker 5.** Sign in → connect → run → escalate → answer → approve → pull request, in a browser against a real repository. **Self-serve: still no** — the OAuth connection was bypassed because the secret is missing, and no non-operator account has done it on production |
 | **Do humans think the translations are good?** | **Never measured.** `08-critique.md` §C2; no evaluators were ever recruited. chrF and exact match are reference-agreement proxies, not quality |
-| **Does the agent escalate when it should?** | **Underpowered.** 2 escalations in 414 strings. The corpus contains no strings that are ambiguous by construction, so invariant 4 — the product's central promise — has no real test |
+| **Does the agent escalate when it should?** | **Partly answered.** It does escalate on genuinely context-free strings — verified end to end on *Left*, *New* and *Free*, and it correctly stayed silent on *Home* and *Close*, which their own markup disambiguates. Whether it escalates at the right *rate* is still unmeasured: 2 in 414 on a corpus containing nothing ambiguous by construction |
 | **Would anyone pay $19/$99/$399?** | **No evidence.** `08-critique.md` §C1 stands: the personas are inventions and no customer has been interviewed |
 | **Which Vercel plan is this on?** | **Not verified.** Modelled at Pro because Hobby prohibits commercial use, so the first paying customer needs Pro regardless of traffic |
 | **How do the models handle ICU plurals?** | **No data.** The corpus contains zero ICU messages |
@@ -94,16 +94,62 @@ not exist. `docs/releasing.md` covers the process.
 Hobby prohibits commercial use. This is a licence question, not a capacity one.
 **Done when:** the team is confirmed on Pro, or moved to it.
 
-### 5. Run one real end-to-end journey — *mine, once 2 and 3 are done*
-On a throwaway account, not the operator's: sign up, create a workspace,
-connect a repository, run, review, merge.
-**Done when:** a merged pull request exists that a non-operator account
-produced through the product, and the transcript is recorded.
+### 5. Run one real end-to-end journey — *partly done, 2026-08-22*
+**The pipeline works end to end. The self-serve half does not, and that is the
+whole of what remains.**
 
-### 6. Add a retry to the translate chunk — *mine*
-The benchmark's one architectural finding. A malformed response currently costs
-a whole locale.
-**Done when:** a chunk that fails to parse is retried once, with a test.
+Executed in a browser against a local build of this branch, the development
+database, the real GitHub App, and a real repository — every step through the
+product's own screens:
+
+| Step | Result |
+|---|---|
+| Sign in | ✅ |
+| Connect a repository | ✅ — dropdown populated from the real installation |
+| Run the pipeline | ✅ — 8 strings, 2 locales, 24 s |
+| Agent escalates rather than guessing | ✅ — 6 questions on *Left*, *New*, *Free* |
+| Answer each question | ✅ |
+| Approve | ✅ **after a fix** — see below |
+| Pull request opened | ✅ — real files, real translations |
+
+The pull request body read: *"A person reviewed this before it was opened: 6
+questions answered, 6 of them by choosing wording other than the suggestion."*
+The chosen readings are what landed — French `Restant` for *Left* in its
+"remaining" sense, German `Links` for the direction.
+
+**What it caught.** Approving a reviewed run had **never worked**. The approval
+path posted to `/v1/open-pr` without `title` or `body`, both required, so it
+answered 400 and recorded the run failed. The review gate — the product's
+differentiator — could not open a pull request at all. Nothing found it because
+the two callers build their request bodies separately and only the unattended
+one was ever exercised. Fixed, with the description now built by a tested pure
+function in `packages/core`.
+
+**What was bypassed, and it is the only thing.** The OAuth callback proves the
+caller owns the installation it names, and `GITHUB_OAUTH_CLIENT_SECRET` is absent
+from every environment. The installation was linked directly instead. Everything
+after that point is what a customer would do.
+
+**Still not done:** the journey has not been run by a non-operator account, on
+production, through self-serve connection. That needs blockers 2 and 3.
+
+Verification PRs #3–#6 on `localize-infra-fixture-vite` were closed afterwards
+and the fixture restored to its original three strings.
+
+### ~~6. Add a retry to the translate chunk~~ — *done*
+The benchmark's one architectural finding: a malformed response cost a whole
+locale. `handleTranslateBatch` now retries a chunk up to three times with
+exponential backoff and full jitter, re-sending only the keys still missing.
+
+**Evidence:** rerunning the same 414-entry benchmark, Haiku went from 323/414
+to **414/414** — 91 strings recovered by one extra request, for $0.002 and eight
+seconds. The recommended configuration needed no retries either time and its
+cost is unchanged. Every failure mode the benchmark observed has a regression
+test named after the error string the model actually produced.
+
+It did **not** help the broken configuration: default reasoning went from 90
+answered to zero at three times the cost. Retrying does not repair a model that
+cannot answer, and that row is in `10-model-benchmark.md` rather than omitted.
 
 ### 7. Decide the escalation question — *mine, needs a decision from the owner on scope*
 Invariant 4 is the product's differentiator and has no real test. Needs a small

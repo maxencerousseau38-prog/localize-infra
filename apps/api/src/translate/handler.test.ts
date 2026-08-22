@@ -156,13 +156,17 @@ describe('handleTranslateBatch, over more strings than one request can answer', 
     expect(calls).toHaveLength(1);
   });
 
-  it('keeps going when one chunk fails, and names what it lost', async () => {
+  it('recovers a chunk that failed once, instead of losing it', async () => {
     /*
-     * A chunk that throws must not discard the chunks that succeeded. Before
-     * chunking there was one request and one outcome; now a run can be
-     * genuinely partial, and the honest answer is the translations that exist
-     * plus the keys that do not — never a success that quietly holds less than
-     * was asked for.
+     * This asserted the opposite until the retry existed: that one thrown
+     * chunk left its strings permanently missing, and only checked that the
+     * *other* chunks survived. That was the honest description of a pipeline
+     * with no second attempt, and it is what
+     * `docs/product/10-model-benchmark.md` measured costing a whole locale.
+     *
+     * The property worth keeping from it is still asserted: a chunk failing
+     * does not discard the ones that already succeeded. What changed is that
+     * the failed chunk now comes back.
      */
     let call = 0;
     const provider: Provider = {
@@ -180,16 +184,12 @@ describe('handleTranslateBatch, over more strings than one request can answer', 
       request,
       provider,
       'claude-sonnet-5',
+      { sleep: async () => {} },
     );
 
-    expect(result.translations.length).toBeGreaterThan(0);
-    expect(result.translations.length).toBeLessThan(250);
-    // Every key that has no translation is reported, whatever the reason.
-    const translated = new Set(result.translations.map((t) => t.key));
-    const expectedMissing = request.strings
-      .map((s) => s.key)
-      .filter((k) => !translated.has(k));
-    expect(result.missingKeys).toEqual(expectedMissing);
+    expect(result.translations).toHaveLength(250);
+    expect(result.missingKeys).toEqual([]);
+    expect(result.failures).toEqual([]);
   });
 
   it('fails rather than reporting a batch where nothing worked as partial', async () => {

@@ -171,8 +171,16 @@ export const PIPELINE = {
    */
   chunking: true,
 
-  /** No retry exists on the translate call. A failure ends the run. */
-  retries: 0,
+  /**
+   * Attempts per chunk, including the first.
+   *
+   * This was 0 — "no retry exists on the translate call, a failure ends the
+   * run" — which is what `docs/product/10-model-benchmark.md` measured costing
+   * a whole locale to one unparseable response. A chunk is now tried up to
+   * three times with exponential backoff, and a retry asks only for the keys
+   * still missing rather than re-sending the chunk.
+   */
+  attemptsPerChunk: 3,
 
   /**
    * No `cache_control` is set on any request, so the 610-token system prompt is
@@ -311,8 +319,18 @@ export const ASSUMPTIONS = {
   /**
    * Share of runs that fail and are retried by a human.
    *
-   * There is no automatic retry, so this is a person clicking again. Every
-   * failed attempt is billed in full for its input.
+   * This said "there is no automatic retry, so this is a person clicking
+   * again". There is one now — `handleTranslateBatch` retries a chunk up to
+   * three times with exponential backoff — so the 10% here covers only what
+   * survives it: a run that failed for a reason retrying cannot fix.
+   *
+   * The automatic retry is **not** modelled as an extra 10%, and leaving the
+   * figure unchanged is the conservative choice rather than an oversight. On
+   * the recommended configuration the benchmark measured zero chunk failures
+   * over 414 strings and eleven requests, so the retry costs nothing in the
+   * common case; when it does fire it re-sends only the keys still missing,
+   * which is a fraction of a chunk. Both effects are inside the noise of a
+   * figure that is itself a guess.
    *
    * Settled by: the `runs` table, once there are enough runs to count. Today
    * production holds zero.

@@ -52,6 +52,10 @@ describe('translateBatch', () => {
         },
       ],
       missingKeys: [],
+      // The API response above carries no `failures` field at all. It arrives
+      // defaulted, which is the compatibility contract: a server that predates
+      // the field and a client that knows about it still agree.
+      failures: [],
     });
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:8787/v1/translate',
