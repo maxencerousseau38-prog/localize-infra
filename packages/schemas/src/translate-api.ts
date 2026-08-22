@@ -74,9 +74,37 @@ export const TranslatedStringSchema = z
   );
 export type TranslatedString = z.infer<typeof TranslatedStringSchema>;
 
+/**
+ * A chunk the API gave up on, and what it was trying when it did.
+ *
+ * `missingKeys` says a string has no translation. It does not say whether the
+ * model answered and left it out, or whether every attempt at that chunk came
+ * back unparseable — and those want different reactions from a caller. The
+ * first is a model being incomplete; the second is a run that lost work to a
+ * fault and should say so.
+ *
+ * The error is carried verbatim (DESIGN.md §8): a customer comparing this
+ * against their own logs must see the same string.
+ */
+export const ChunkFailureSchema = z.object({
+  /** The keys that had no translation when the attempts ran out. */
+  keys: z.array(z.string()),
+  /** How many times the chunk was tried, including the first. */
+  attempts: z.number().int().min(1),
+  /** The last error, as the provider or parser produced it. */
+  error: z.string(),
+});
+export type ChunkFailure = z.infer<typeof ChunkFailureSchema>;
+
+/**
+ * `failures` defaults to an empty array rather than being required, so an
+ * older client and a newer API keep working in both directions. A caller that
+ * ignores it sees exactly what it saw before.
+ */
 export const TranslateBatchResponseSchema = z.object({
   translations: z.array(TranslatedStringSchema),
   missingKeys: z.array(z.string()),
+  failures: z.array(ChunkFailureSchema).default([]),
 });
 export type TranslateBatchResponse = z.infer<
   typeof TranslateBatchResponseSchema

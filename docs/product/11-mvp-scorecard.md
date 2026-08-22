@@ -100,10 +100,20 @@ connect a repository, run, review, merge.
 **Done when:** a merged pull request exists that a non-operator account
 produced through the product, and the transcript is recorded.
 
-### 6. Add a retry to the translate chunk — *mine*
-The benchmark's one architectural finding. A malformed response currently costs
-a whole locale.
-**Done when:** a chunk that fails to parse is retried once, with a test.
+### ~~6. Add a retry to the translate chunk~~ — *done*
+The benchmark's one architectural finding: a malformed response cost a whole
+locale. `handleTranslateBatch` now retries a chunk up to three times with
+exponential backoff and full jitter, re-sending only the keys still missing.
+
+**Evidence:** rerunning the same 414-entry benchmark, Haiku went from 323/414
+to **414/414** — 91 strings recovered by one extra request, for $0.002 and eight
+seconds. The recommended configuration needed no retries either time and its
+cost is unchanged. Every failure mode the benchmark observed has a regression
+test named after the error string the model actually produced.
+
+It did **not** help the broken configuration: default reasoning went from 90
+answered to zero at three times the cost. Retrying does not repair a model that
+cannot answer, and that row is in `10-model-benchmark.md` rather than omitted.
 
 ### 7. Decide the escalation question — *mine, needs a decision from the owner on scope*
 Invariant 4 is the product's differentiator and has no real test. Needs a small

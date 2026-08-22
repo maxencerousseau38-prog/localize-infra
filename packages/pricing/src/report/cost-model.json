@@ -32,7 +32,7 @@
       "observedFailingStringsBeforeFix": 40,
       "chunkSize": 100,
       "chunking": true,
-      "retries": 0,
+      "attemptsPerChunk": 3,
       "promptCaching": false,
       "incremental": true
     },

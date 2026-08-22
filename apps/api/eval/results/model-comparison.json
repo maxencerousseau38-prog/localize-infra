@@ -1,8 +1,14 @@
 {
-  "ranAt": "2026-08-21T23:06:08.292Z",
+  "ranAt": "2026-08-22T11:18:14.517Z",
   "corpus": {
     "entries": 414,
-    "locales": ["de", "ja", "es", "ar", "pt-BR"],
+    "locales": [
+      "de",
+      "ja",
+      "es",
+      "ar",
+      "pt-BR"
+    ],
     "perLocale": {
       "de": 90,
       "ja": 90,
@@ -34,58 +40,58 @@
       "missingKeys": 0,
       "completionRate": 1,
       "errors": [],
-      "chrfMean": 75.49353139617402,
-      "exactMatchRate": 0.4106280193236715,
+      "chrfMean": 75.23406629116235,
+      "exactMatchRate": 0.4082125603864734,
       "placeholderApplicable": 19,
       "placeholderIntactRate": 1,
       "glossaryViolations": 0,
-      "lengthOverflowRate": 0.13043478260869565,
-      "escalationRate": 0.004830917874396135,
+      "lengthOverflowRate": 0.13526570048309178,
+      "escalationRate": 0.007246376811594203,
       "requests": 5,
-      "latencyMsTotal": 213737,
-      "latencyMsPerRequest": 42747.4,
+      "latencyMsTotal": 214376,
+      "latencyMsPerRequest": 42875.2,
       "tokens": {
         "inputTokens": 79468,
-        "outputTokens": 24631,
-        "thinkingTokens": 65
+        "outputTokens": 24763,
+        "thinkingTokens": 61
       },
-      "costUsd": 0.607869,
-      "costPerThousandPairs": 1.468282608695652,
+      "costUsd": 0.6098490000000001,
+      "costPerThousandPairs": 1.4730652173913046,
       "byLocale": {
         "de": {
           "requested": 90,
           "answered": 90,
-          "chrf": 76.34313288576489,
-          "exactMatchRate": 0.36666666666666664,
-          "latencyMs": 48333
+          "chrf": 77.24126473371692,
+          "exactMatchRate": 0.4,
+          "latencyMs": 48962
         },
         "ja": {
           "requested": 90,
           "answered": 90,
-          "chrf": 73.37117398896073,
-          "exactMatchRate": 0.4444444444444444,
-          "latencyMs": 45135
+          "chrf": 73.16666453053149,
+          "exactMatchRate": 0.43333333333333335,
+          "latencyMs": 45053
         },
         "es": {
           "requested": 90,
           "answered": 90,
-          "chrf": 80.55344929075783,
-          "exactMatchRate": 0.4,
-          "latencyMs": 43141
+          "chrf": 78.57748254927864,
+          "exactMatchRate": 0.36666666666666664,
+          "latencyMs": 43960
         },
         "ar": {
           "requested": 72,
           "answered": 72,
-          "chrf": 64.86371188480045,
+          "chrf": 64.779895593155,
           "exactMatchRate": 0.2916666666666667,
-          "latencyMs": 47002
+          "latencyMs": 46317
         },
         "pt-BR": {
           "requested": 72,
           "answered": 72,
-          "chrf": 81.38939843634574,
+          "chrf": 81.58422081411933,
           "exactMatchRate": 0.5555555555555556,
-          "latencyMs": 30126
+          "latencyMs": 30084
         }
       }
     },
@@ -99,67 +105,68 @@
       },
       "note": "The previous reasoning configuration. Ceiling raised to 8192 because at 4096 it returns nothing, so there would be no quality to measure.",
       "requested": 414,
-      "answered": 90,
-      "missingKeys": 324,
-      "completionRate": 0.21739130434782608,
+      "answered": 0,
+      "missingKeys": 414,
+      "completionRate": 0,
       "errors": [
         "de: No JSON array found in model response",
-        "ja: Expected ',' or '}' after property value in JSON at position 4200 (line 166 column 6)",
-        "ar: Unterminated string in JSON at position 2453 (line 94 column 134)",
+        "ja: Unterminated string in JSON at position 3989 (line 38 column 101)",
+        "es: No JSON array found in model response",
+        "ar: Expected ',' or '}' after property value in JSON at position 3702 (line 131 column 6)",
         "pt-BR: No JSON array found in model response"
       ],
-      "chrfMean": 75.52498934041311,
-      "exactMatchRate": 0.2777777777777778,
-      "placeholderApplicable": 2,
-      "placeholderIntactRate": 1,
+      "chrfMean": null,
+      "exactMatchRate": null,
+      "placeholderApplicable": 0,
+      "placeholderIntactRate": null,
       "glossaryViolations": 0,
-      "lengthOverflowRate": 0.18888888888888888,
-      "escalationRate": 0.022222222222222223,
-      "requests": 5,
-      "latencyMsTotal": 342756,
-      "latencyMsPerRequest": 68551.2,
+      "lengthOverflowRate": null,
+      "escalationRate": null,
+      "requests": 15,
+      "latencyMsTotal": 1045396,
+      "latencyMsPerRequest": 69693.06666666667,
       "tokens": {
-        "inputTokens": 79468,
-        "outputTokens": 39140,
-        "thinkingTokens": 23580
+        "inputTokens": 238404,
+        "outputTokens": 122880,
+        "thinkingTokens": 75914
       },
-      "costUsd": 0.825504,
-      "costPerThousandPairs": 1.9939710144927536,
+      "costUsd": 2.5584119999999997,
+      "costPerThousandPairs": 6.179739130434782,
       "byLocale": {
         "de": {
           "requested": 90,
           "answered": 0,
           "chrf": null,
           "exactMatchRate": null,
-          "latencyMs": 74894
+          "latencyMs": 212941
         },
         "ja": {
           "requested": 90,
           "answered": 0,
           "chrf": null,
           "exactMatchRate": null,
-          "latencyMs": 72499
+          "latencyMs": 213838
         },
         "es": {
           "requested": 90,
-          "answered": 90,
-          "chrf": 75.52498934041311,
-          "exactMatchRate": 0.2777777777777778,
-          "latencyMs": 51360
+          "answered": 0,
+          "chrf": null,
+          "exactMatchRate": null,
+          "latencyMs": 200555
         },
         "ar": {
           "requested": 72,
           "answered": 0,
           "chrf": null,
           "exactMatchRate": null,
-          "latencyMs": 76478
+          "latencyMs": 231108
         },
         "pt-BR": {
           "requested": 72,
           "answered": 0,
           "chrf": null,
           "exactMatchRate": null,
-          "latencyMs": 67525
+          "latencyMs": 186954
         }
       }
     },
@@ -174,64 +181,62 @@
       },
       "note": "The cheap-model option 08-critique.md §C3 called load-bearing. Included to price the quality it costs, not to adopt.",
       "requested": 414,
-      "answered": 323,
-      "missingKeys": 91,
-      "completionRate": 0.7801932367149759,
-      "errors": [
-        "de: Expected ',' or '}' after property value in JSON at position 2827 (line 99 column 28)"
-      ],
-      "chrfMean": 73.03219583832228,
-      "exactMatchRate": 0.4086687306501548,
-      "placeholderApplicable": 13,
+      "answered": 414,
+      "missingKeys": 0,
+      "completionRate": 1,
+      "errors": [],
+      "chrfMean": 73.8399184057276,
+      "exactMatchRate": 0.4227053140096618,
+      "placeholderApplicable": 19,
       "placeholderIntactRate": 1,
       "glossaryViolations": 0,
-      "lengthOverflowRate": 0.09597523219814241,
+      "lengthOverflowRate": 0.12560386473429952,
       "escalationRate": 0,
-      "requests": 5,
-      "latencyMsTotal": 172525,
-      "latencyMsPerRequest": 34505,
+      "requests": 6,
+      "latencyMsTotal": 180660,
+      "latencyMsPerRequest": 30110,
       "tokens": {
-        "inputTokens": 61595,
-        "outputTokens": 23976,
+        "inputTokens": 62329,
+        "outputTokens": 24097,
         "thinkingTokens": 0
       },
-      "costUsd": 0.181475,
-      "costPerThousandPairs": 0.4383454106280193,
+      "costUsd": 0.182814,
+      "costPerThousandPairs": 0.4415797101449276,
       "byLocale": {
         "de": {
           "requested": 90,
-          "answered": 0,
-          "chrf": null,
-          "exactMatchRate": null,
-          "latencyMs": 38455
+          "answered": 90,
+          "chrf": 74.75290702697029,
+          "exactMatchRate": 0.3888888888888889,
+          "latencyMs": 38294
         },
         "ja": {
           "requested": 90,
-          "answered": 89,
-          "chrf": 65.1441474220999,
-          "exactMatchRate": 0.3595505617977528,
-          "latencyMs": 36402
+          "answered": 90,
+          "chrf": 65.65506366174704,
+          "exactMatchRate": 0.37777777777777777,
+          "latencyMs": 37911
         },
         "es": {
           "requested": 90,
           "answered": 90,
-          "chrf": 79.69752706561538,
-          "exactMatchRate": 0.4,
-          "latencyMs": 35005
+          "chrf": 80.49545007234693,
+          "exactMatchRate": 0.4222222222222222,
+          "latencyMs": 41432
         },
         "ar": {
           "requested": 72,
           "answered": 72,
-          "chrf": 64.1375771901401,
-          "exactMatchRate": 0.3194444444444444,
-          "latencyMs": 36926
+          "chrf": 65.53574812828433,
+          "exactMatchRate": 0.3611111111111111,
+          "latencyMs": 36935
         },
         "pt-BR": {
           "requested": 72,
           "answered": 72,
-          "chrf": 83.34565474466284,
-          "exactMatchRate": 0.5694444444444444,
-          "latencyMs": 25737
+          "chrf": 82.91450675331896,
+          "exactMatchRate": 0.5833333333333334,
+          "latencyMs": 26088
         }
       }
     }

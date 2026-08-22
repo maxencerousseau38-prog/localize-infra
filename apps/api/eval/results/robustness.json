@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-08-21T23:34:02.584Z",
+  "ranAt": "2026-08-22T11:50:26.710Z",
   "method": "The same 90-string de batch, sent 5 times per configuration through the production path. A configuration is complete only if every string came back.",
   "limitation": "Five attempts per configuration cannot establish a failure rate, only whether failures recur. Read it as evidence that a failure is or is not a one-off.",
   "results": [
@@ -22,11 +22,7 @@
       "failures": [
         {
           "answered": 0,
-          "error": "No JSON array found in model response"
-        },
-        {
-          "answered": 0,
-          "error": "No JSON array found in model response"
+          "error": "Anthropic response had no usable text content block"
         },
         {
           "answered": 0,
@@ -35,6 +31,10 @@
         {
           "answered": 0,
           "error": "No JSON array found in model response"
+        },
+        {
+          "answered": 0,
+          "error": "Unterminated string in JSON at position 4434 (line 38 column 132)"
         },
         {
           "answered": 0,
@@ -48,11 +48,15 @@
       "locale": "de",
       "stringsPerAttempt": 90,
       "attempts": 5,
-      "completeAttempts": 4,
+      "completeAttempts": 3,
       "failures": [
         {
           "answered": 0,
-          "error": "Expected ',' or '}' after property value in JSON at position 2866 (line 99 column 28)"
+          "error": "Expected ',' or '}' after property value in JSON at position 2861 (line 99 column 28)"
+        },
+        {
+          "answered": 0,
+          "error": "Expected ',' or '}' after property value in JSON at position 2847 (line 99 column 28)"
         }
       ]
     }

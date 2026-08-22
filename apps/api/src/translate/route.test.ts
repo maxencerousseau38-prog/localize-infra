@@ -42,6 +42,10 @@ describe('translateRouteHandler', () => {
         },
       ],
       missingKeys: [],
+      // Empty rather than absent: `failures` distinguishes "the model left a
+      // key out" from "every attempt at that chunk came back unparseable", and
+      // a clean batch says so explicitly.
+      failures: [],
     });
   });
 

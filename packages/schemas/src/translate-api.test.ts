@@ -87,7 +87,44 @@ describe('TranslateBatchRequestSchema', () => {
 describe('TranslatedStringSchema and TranslateBatchResponseSchema', () => {
   it('allows an empty translations array alongside missingKeys', () => {
     const response = { translations: [], missingKeys: ['a', 'b'] };
+    // `failures` is defaulted rather than required, so a client written against
+    // the older shape still parses. It arrives as an empty array, which is the
+    // honest reading: nothing was lost to a fault, the model just left keys out.
+    expect(TranslateBatchResponseSchema.parse(response)).toEqual({
+      ...response,
+      failures: [],
+    });
+  });
+
+  it('carries why a chunk was given up on, when there was a fault', () => {
+    /*
+     * `missingKeys` cannot distinguish a model that answered and omitted a
+     * string from a chunk whose every attempt came back unparseable — and the
+     * benchmark in docs/product/10-model-benchmark.md saw both. This is the
+     * field that tells them apart.
+     */
+    const response = {
+      translations: [],
+      missingKeys: ['a'],
+      failures: [
+        {
+          keys: ['a'],
+          attempts: 3,
+          error: 'Unterminated string in JSON at position 2453',
+        },
+      ],
+    };
     expect(TranslateBatchResponseSchema.parse(response)).toEqual(response);
+  });
+
+  it('refuses a failure record that claims zero attempts', () => {
+    expect(() =>
+      TranslateBatchResponseSchema.parse({
+        translations: [],
+        missingKeys: ['a'],
+        failures: [{ keys: ['a'], attempts: 0, error: 'x' }],
+      }),
+    ).toThrow();
   });
 
   it('accepts a translated string, defaulting it to confident', () => {
