@@ -9,6 +9,7 @@ import {
   buildAmbiguityCases,
   formatPercent,
   scoreAmbiguity,
+  splitDevHoldout,
   splitIntoUnpairedGroups,
 } from '../../../packages/eval/src/index.js';
 import {
@@ -45,6 +46,24 @@ const MODEL_ID = process.env.API_ANTHROPIC_MODEL ?? 'claude-sonnet-5';
  * would have been reported as though it were stable.
  */
 const RUN_LABEL = process.env.AMBIGUITY_RUN ?? '1';
+/*
+ * Which half of the corpus to run.
+ *
+ * "dev" is the only half the prompt may be tuned against; "holdout" is scored
+ * once, at the end. Reporting a tuned prompt's score on the cases it was tuned
+ * against measures the fitting, not the agent — see `holdout.ts`.
+ */
+const SUBSET = process.env.AMBIGUITY_SUBSET ?? 'all';
+
+function selectSubset(all: AmbiguityCase[]): AmbiguityCase[] {
+  if (SUBSET === 'all') return all;
+  const { dev, holdout } = splitDevHoldout(all);
+  if (SUBSET === 'dev') return dev;
+  if (SUBSET === 'holdout') return holdout;
+  throw new Error(
+    `AMBIGUITY_SUBSET must be all, dev or holdout — got ${SUBSET}`,
+  );
+}
 
 function byLocale(cases: AmbiguityCase[]): Map<string, AmbiguityCase[]> {
   const map = new Map<string, AmbiguityCase[]>();
@@ -125,7 +144,7 @@ async function main() {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set');
 
-  const cases = buildAmbiguityCases();
+  const cases = selectSubset(buildAmbiguityCases());
   const [groupA, groupB] = splitIntoUnpairedGroups(cases);
   const usage: AnthropicUsage[] = [];
   /*
@@ -139,7 +158,7 @@ async function main() {
   });
 
   console.log(
-    `ambiguity corpus: ${cases.length} cases, ${cases.length / 2} pairs, model ${MODEL_ID}`,
+    `ambiguity corpus [${SUBSET}]: ${cases.length} cases, ${cases.length / 2} pairs, model ${MODEL_ID}`,
   );
   console.log('group A');
   const a = await runGroup(groupA, provider);
@@ -154,7 +173,7 @@ async function main() {
 
   mkdirSync(OUT_DIR, { recursive: true });
   writeFileSync(
-    join(OUT_DIR, `ambiguity-run-${RUN_LABEL}.json`),
+    join(OUT_DIR, `ambiguity-${SUBSET}-run-${RUN_LABEL}.json`),
     `${JSON.stringify(
       { modelId: MODEL_ID, inputTokens, outputTokens, observations },
       null,

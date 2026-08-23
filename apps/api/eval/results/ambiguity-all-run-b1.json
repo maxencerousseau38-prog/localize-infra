@@ -1,13 +1,13 @@
 {
   "modelId": "claude-sonnet-5",
-  "inputTokens": 35320,
-  "outputTokens": 17728,
+  "inputTokens": 34136,
+  "outputTokens": 19369,
   "observations": [
     {
       "caseId": "left-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Left' refer to remaining quantity/time or to the left direction?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -20,7 +20,7 @@
     {
       "caseId": "draw-open",
       "observed": "escalate",
-      "question": "Does 'Draw' refer to the drawing tool/action or to a tied game result?",
+      "question": "Does 'Draw' refer to a drawing tool action or a tied match result?",
       "alternativeCount": 2,
       "error": null
     },
@@ -33,9 +33,9 @@
     },
     {
       "caseId": "train-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Train' mean the verb 'to train' or the noun 'train' (vehicle/data set)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -47,9 +47,9 @@
     },
     {
       "caseId": "note-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Note' mean a text annotation or a musical note?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -61,9 +61,9 @@
     },
     {
       "caseId": "break-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Break' refer to a pause/rest period or a break action (like breaking something)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -75,16 +75,16 @@
     },
     {
       "caseId": "pitch-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Pitch' refer to audio pitch (tone) or a sports field/pitch?",
+      "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "park-settled",
-      "observed": "escalate",
-      "question": "Does 'Park' here mean the action of parking (a vehicle) or the noun 'park' (green space) as a map layer toggle?",
-      "alternativeCount": 2,
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
       "error": null
     },
     {
@@ -173,9 +173,9 @@
     },
     {
       "caseId": "order-open",
-      "observed": "escalate",
-      "question": "Does 'Order' refer to sort/display order or to a purchase order?",
-      "alternativeCount": 2,
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
       "error": null
     },
     {
@@ -230,7 +230,7 @@
     {
       "caseId": "fire-open",
       "observed": "escalate",
-      "question": "Does 'Fire' mean triggering an alarm/event or terminating an employee in this SafetyPanel context?",
+      "question": "Does 'Fire' here refer to triggering an event (e.g. firing an event/action) or to terminating an employee?",
       "alternativeCount": 2,
       "error": null
     },
@@ -243,9 +243,9 @@
     },
     {
       "caseId": "spring-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Spring' refer to the season, or to a mechanical spring component, or perhaps the Spring framework?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -285,9 +285,9 @@
     },
     {
       "caseId": "post-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Post' here refer to a content item (noun, e.g. blog post) or the action of posting (verb)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -299,9 +299,9 @@
     },
     {
       "caseId": "light-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Light' refer to a theme/color variant (light vs dark) or to lighting/illumination?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -313,9 +313,9 @@
     },
     {
       "caseId": "book-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Book' mean the action of reserving something or the noun 'book' (publication)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -327,9 +327,9 @@
     },
     {
       "caseId": "plant-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Plant' refer to a botanical plant or an industrial facility (plant/factory)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -341,9 +341,9 @@
     },
     {
       "caseId": "change-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Change' refer to a modification/edit (noun) or monetary change (coins)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -356,8 +356,8 @@
     {
       "caseId": "ring-open",
       "observed": "escalate",
-      "question": "Does 'Ring' here refer to the action of ringing/calling someone, or is it a noun (e.g., a ring/notification sound, or a jewelry ring)?",
-      "alternativeCount": 3,
+      "question": "Does 'Ring' refer to a jewelry ring, a circular UI element, or a sound/notification ring?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -474,9 +474,9 @@
     },
     {
       "caseId": "store-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Store' refer to a noun (storage/warehouse) or a verb action (to save/store data)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -488,9 +488,9 @@
     },
     {
       "caseId": "issue-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Issue' refer to a problem/ticket (noun) or the action of issuing something (verb)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -579,9 +579,9 @@
     },
     {
       "caseId": "free-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Free' refer to cost (free of charge) or availability (unoccupied/vacant)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -650,7 +650,7 @@
     {
       "caseId": "mine-open",
       "observed": "escalate",
-      "question": "Does 'Mine' refer to a masculine or feminine plural/singular noun (e.g. 'my tasks' vs 'my items'), which affects the Portuguese adjective form?",
+      "question": "Does 'Mine' refer to a filter for items owned by the user, and if so, what gender/number should the possessive adjective agree with (e.g. tasks, files, records)?",
       "alternativeCount": 2,
       "error": null
     },
@@ -712,9 +712,9 @@
     },
     {
       "caseId": "match-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Match' refer to a sports match/game or to a matching result (e.g., data matching)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -754,9 +754,9 @@
     },
     {
       "caseId": "right-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Right' refer to a spatial direction (opposite of left) or correctness (opposite of wrong)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -880,9 +880,9 @@
     },
     {
       "caseId": "fine-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Fine' refer to a monetary penalty amount, or something else like a rating/quality label?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -894,9 +894,9 @@
     },
     {
       "caseId": "watch-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Watch' mean to follow/subscribe to something (like watching a repo) or refer to viewing a video, or a wristwatch object?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -922,23 +922,23 @@
     },
     {
       "caseId": "case-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Case' refer to a switch-case branch, a legal/support case, or a physical case/container?",
+      "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "fire-settled",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Fire' refer to triggering/activating an action, or to an actual fire emergency (as suggested by nearby safety strings)?",
+      "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "rest-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Rest' mean the remaining items/group, or a period of rest/break?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -1006,9 +1006,9 @@
     },
     {
       "caseId": "state-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'State' here refer to a geographic/administrative state (like a US state field) or a status/condition value?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -1021,7 +1021,7 @@
     {
       "caseId": "file-open",
       "observed": "escalate",
-      "question": "Does 'File' here mean the noun (a document/file) or the verb action of filing/submitting something, given the other actions are New, Manage, Review?",
+      "question": "Does 'File' here mean the verb 'to file/submit a document' or does it refer to a 'File' menu/noun?",
       "alternativeCount": 2,
       "error": null
     },
@@ -1056,7 +1056,7 @@
     {
       "caseId": "ring-settled",
       "observed": "escalate",
-      "question": "Does 'Ring' refer to the ringtone/ring state of a call, or is it used as a verb meaning to call/ring someone?",
+      "question": "Does 'Ring' refer to a ringtone/sound setting, or to the act of a call ringing (as in a ring event)?",
       "alternativeCount": 2,
       "error": null
     },
@@ -1153,9 +1153,9 @@
     },
     {
       "caseId": "home-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Home' refer to a navigation destination (home screen) or to a physical home/address?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -1167,9 +1167,9 @@
     },
     {
       "caseId": "present-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Present' refer to the current state/time (as opposed to past/future) or to a gift/presentation?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -1182,7 +1182,7 @@
     {
       "caseId": "check-open",
       "observed": "escalate",
-      "question": "Does 'Check' here refer to a bank/payment check (financial instrument) or an inspection/verification action?",
+      "question": "Does 'Check' refer to a verification action/inspection method, or to a checkbox/checkmark UI element?",
       "alternativeCount": 2,
       "error": null
     },
@@ -1209,9 +1209,9 @@
     },
     {
       "caseId": "current-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Current' refer to an electrical current measurement, or to the current/present value of something?",
+      "alternativeCount": 2,
       "error": null
     },
     {
@@ -1286,9 +1286,9 @@
     },
     {
       "caseId": "charge-open",
-      "observed": "confident",
-      "question": null,
-      "alternativeCount": 0,
+      "observed": "escalate",
+      "question": "Does 'Charge' refer to an electrical/battery charge, a financial charge/fee, or an attack/action (as in a game)?",
+      "alternativeCount": 3,
       "error": null
     },
     {
@@ -1349,57 +1349,57 @@
     },
     {
       "caseId": "mine-settled",
-      "observed": "escalate",
-      "question": "Does 'Mine' refer to items that are grammatically masculine or feminine, and singular or plural, in Portuguese (e.g. 'tasks' = 'minhas' vs 'items' = 'meus')?",
-      "alternativeCount": 2,
-      "error": null
-    },
-    {
-      "caseId": "race-open",
       "observed": "confident",
       "question": null,
       "alternativeCount": 0,
       "error": null
     },
     {
+      "caseId": "race-open",
+      "observed": "escalate",
+      "question": "Does 'Race' refer to a competitive race (e.g., a running/racing event) or to ethnicity/race of a person or character?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
       "caseId": "selected-open",
       "observed": "escalate",
-      "question": "Does 'Selected' modify a masculine or feminine noun, and is it singular or plural, in this file list state label?",
+      "question": "What noun does 'Selected' modify, so the correct gender/number agreement in Portuguese can be applied?",
       "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "locked-open",
       "observed": "escalate",
-      "question": "Does 'Locked' modify a masculine or feminine noun (e.g. 'conta' account is feminine, 'acesso' access is masculine) in this account banner?",
+      "question": "What noun does 'Locked' modify, so the correct gender/number agreement in Portuguese can be applied?",
       "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "archived-open",
       "observed": "escalate",
-      "question": "Does 'Archived' modify a masculine or feminine noun (e.g. 'conversa' conversation is feminine) in this conversation row?",
+      "question": "What noun does 'Archived' modify, so the correct gender/number agreement in Portuguese can be applied?",
       "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "private-open",
       "observed": "escalate",
-      "question": "Does 'Private' modify a masculine or feminine noun (e.g. 'perfil' profile is masculine, 'conta' account is feminine) in this visibility toggle?",
+      "question": "What noun does 'Private' modify, so the correct gender/number agreement in Portuguese can be applied?",
       "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "muted-open",
       "observed": "escalate",
-      "question": "Does 'Muted' modify a masculine or feminine noun (e.g. 'canal' channel is masculine, 'conversa' conversation is feminine) in this channel setting?",
+      "question": "What noun does 'Muted' modify, so the correct gender/number agreement in Portuguese can be applied?",
       "alternativeCount": 2,
       "error": null
     },
     {
       "caseId": "expired-open",
       "observed": "escalate",
-      "question": "Does 'Expired' modify a masculine or feminine noun, and is it singular or plural (e.g. 'token' masculine singular vs 'tokens' plural) in this token list?",
+      "question": "What noun does 'Expired' modify, so the correct gender/number agreement in Portuguese can be applied?",
       "alternativeCount": 2,
       "error": null
     }
