@@ -93,15 +93,26 @@ Vercel `localize-infra-api`, Root Directory `apps/api`, fonctions en `cdg1`).
 Ce sont les **trois** projets Vercel du dépôt. `services/github-app` reste une
 bibliothèque, consommée par `apps/api` ; elle n'a pas de déploiement propre.
 
-`apps/web` n'est **pas** relié à Git : le déploiement est une archive envoyée
-par la CLI **depuis la racine du dépôt**, avec `VERCEL_PROJECT_ID` en surcharge
-parce que le lien `.vercel` de la racine appartient au site. C'est ce qui fait
-que la directive `@source` de Tailwind trouve `packages/ui/src` — tout le dépôt
-est envoyé. Relier ce projet à Git changerait ça et rendrait le réglage
-« Include source files outside of the Root Directory » indispensable. Voir
-`apps/web/DEPLOYING.md`, qui donne la commande exacte et le contrôle à rejouer
-(des classes présentes dans `packages/ui/src` et absentes d'`apps/web/src`
-doivent apparaître dans le CSS servi).
+**`apps/web` est relié à Git.** Ce paragraphe disait le contraire — « le
+déploiement est une archive envoyée par la CLI depuis la racine du dépôt » — et
+prévenait que relier le projet rendrait le réglage « Include source files
+outside of the Root Directory » indispensable. C'est fait, et c'était la bonne
+prédiction : fusionner une PR sur `master` déclenche un déploiement de
+production, et une PR ouverte déclenche une preview avec son check GitHub.
+Observé le 2026-08-23 sur la PR #31.
+
+Le contrôle que ce paragraphe prescrivait a donc été rejoué, et il passe. Root
+Directory est `apps/web`, et pourtant `bg-confident-bg` et
+`text-ambiguous-text` — deux classes présentes dans `packages/ui/src` et
+absentes d'`apps/web/src` — sont dans le CSS servi (184 611 octets sur deux
+feuilles). Elles ne pourraient pas y être si la source hors Root Directory
+n'était pas incluse : c'est une preuve par ce qui est servi, plus solide que la
+lecture du réglage.
+
+La conséquence pratique à retenir : **une modification de variable
+d'environnement ne s'applique plus « au prochain déploiement CLI » mais à la
+prochaine fusion.** Voir `apps/web/DEPLOYING.md` pour la commande CLI, qui
+reste utilisable en secours.
 
 **Ce paragraphe disait que seuls `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY`
 étaient configurés, et que ni la clé privée de la GitHub App ni `LOCALIZE_API_*`
@@ -124,8 +135,12 @@ chaque démarrage, et `/v1/open-pr` ouvre toutes ses PR à travers elle. Elles
 Retirer `GITHUB_APP_INSTALLATION_ID` du projet **API** couperait l'ouverture de
 PR — `readGitHubAppConfig` renvoie `null` sans elle et la route répond 501.
 
-La suppression ne prend effet qu'au prochain déploiement : le déploiement en
-cours porte encore les neuf valeurs, figées à sa construction.
+La suppression ne prend effet qu'au déploiement suivant — et comme le projet est
+relié à Git (voir plus haut), c'est la fusion de la PR #31 qui l'a produit.
+Vérifié sur le déploiement qui en résulte : `/login` répond 200 et le CSS servi
+est identique à l'octet près (184 611), donc retirer ces deux variables n'a rien
+changé pour l'application. C'est la seule preuve qui compte, l'absence
+d'appelant n'étant qu'un argument.
 
 **Manquent, et c'est ce qui bloque le self-serve :** `GITHUB_OAUTH_CLIENT_ID` et
 `GITHUB_OAUTH_CLIENT_SECRET`. Sans eux le callback ne peut pas prouver que celui
