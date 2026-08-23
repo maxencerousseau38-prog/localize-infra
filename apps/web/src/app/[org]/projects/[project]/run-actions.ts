@@ -48,8 +48,17 @@ type Stage = 'detect' | 'extract' | 'translate' | 'escalate' | 'pull_request';
  * written before any work starts and closed in a finally block, so a crash
  * leaves a failed run carrying its reason instead of a row stuck at "running".
  *
- * Operator-gated for the same reason connecting a repository is — one shared
- * installation reaches every repository it was ever granted.
+ * This said "operator-gated for the same reason connecting a repository is —
+ * one shared installation reaches every repository it was ever granted", which
+ * the body of the function has contradicted since the gate was removed.
+ *
+ * The half that is still true, and is worth stating precisely because the two
+ * halves differ: **reading** the repository acts as the workspace's own
+ * installation, so it reaches only what that installation was granted.
+ * **Opening the pull request does not.** It goes through `/v1/open-pr`, which
+ * takes no installation id and uses the one in the API's own environment. So a
+ * workspace whose installation the operator's does not cover will translate and
+ * then fail at the last step. See blocker 2b in `docs/product/11-mvp-scorecard.md`.
  */
 export async function startRun(
   orgSlug: string,

@@ -48,7 +48,7 @@ stands entirely undisturbed.
 | `/runs`, `/runs/[id]`, `/locales`, `/ambiguity`, `/review`, `/[org]/projects`, `/[org]/projects/[project]` read Postgres under RLS | 98 e2e tests, including 18 against a seeded workspace with real runs |
 | Three deployments live | `/health` 200 on the API, 200 on site and web, probed 2026-08-21 |
 | API is fail-closed | Refuses to start without `API_AUTH_TOKEN`; `/v1/translate` returns 401 without a bearer and with a wrong one, verified in production |
-| Cross-tenant isolation on GitHub | `resolveInstallation` cannot express the shared installation — it is a type error, not a runtime check (#24) |
+| Cross-tenant isolation on GitHub — **reads only** | `resolveInstallation` cannot express the shared installation — it is a type error, not a runtime check (#24). **Writes are not isolated:** `/v1/open-pr` takes no installation id and opens every tenant's pull request through the API's own `GITHUB_APP_INSTALLATION_ID` — see blocker 2b |
 | Open-redirect protection on sign-in | `safeNext` covered by an e2e test, verified by deleting the guard and watching it fail |
 | The translation pipeline answers a real workload | 250 corpus strings through the real handler against the live API: 250 translated, 0 missing, twice (#26) |
 | Model and settings choice | Benchmarked over 414 corpus entries in 3 configurations — `docs/product/10-model-benchmark.md` |
@@ -98,6 +98,24 @@ needs "Request user authorization during installation" enabled and its callback
 URL set to `https://localize-infra-web.vercel.app/github/callback`.
 **Done when:** a workspace other than the operator's completes an installation
 and `organization_github_installations` holds its row.
+
+### 2b. Pass the tenant's installation to `/v1/open-pr` — *mine, found 2026-08-23*
+Clearing blocker 2 is necessary but not sufficient. A customer who connects
+their own installation will translate successfully and then fail at the last
+step: `apps/api` opens every pull request through the single
+`GITHUB_APP_INSTALLATION_ID` in its own environment, which does not reach their
+repository. The read path resolves per organisation; the write path does not.
+
+This has never been observed failing because the only journey ever run used the
+operator's installation for both halves, where the two happen to coincide.
+
+**Evidence:** `apps/api/src/index.ts:58` reads the id from the environment;
+`open-pr/route.ts` contains no `installationId` and its request schema has no
+field for one.
+
+**Done when:** `/v1/open-pr` takes an installation id, the API acts as it, and a
+run on a repository the operator's installation cannot reach opens a pull
+request anyway.
 
 ### 3. Publish the CLI to npm — *owner*
 The interface offers it as the fallback when GitHub is unavailable, and it does

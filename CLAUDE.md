@@ -106,14 +106,26 @@ doivent apparaître dans le CSS servi).
 **Ce paragraphe disait que seuls `SUPABASE_URL` et `SUPABASE_PUBLISHABLE_KEY`
 étaient configurés, et que ni la clé privée de la GitHub App ni `LOCALIZE_API_*`
 ne l'étaient. C'était faux depuis le 2026-08-19.** Vérifié par
-`vercel env ls production` sur `prj_L5FZPh16GE88nLtgPbOnb2LR5e3f` : neuf
-variables y sont, dont `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_ID`,
-`LOCALIZE_API_URL` et `LOCALIZE_API_TOKEN`. Le pipeline ne pointe donc plus sur
+`vercel env ls production` sur `prj_L5FZPh16GE88nLtgPbOnb2LR5e3f` : les
+variables `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_ID`, `LOCALIZE_API_URL` et
+`LOCALIZE_API_TOKEN` y sont. Le pipeline ne pointe donc plus sur
 `127.0.0.1:8787` — c'est la conséquence du déploiement d'`apps/api` décrit plus
 bas, et elle n'avait pas été reportée ici.
 
-Deux d'entre elles ne sont plus lues par rien : `GITHUB_APP_INSTALLATION_ID` et
-`GITHUB_OPERATOR_EMAILS` (voir plus bas). Elles peuvent être retirées.
+**Elles étaient neuf ; il en reste sept**, retirées le 2026-08-23 :
+`GITHUB_OPERATOR_EMAILS` et `GITHUB_APP_INSTALLATION_ID`. Les sept qui restent
+sont toutes lues par du code non-test d'`apps/web` — vérifié variable par
+variable, c'est ce qui rend le nettoyage terminé plutôt qu'entamé.
+
+Ce paragraphe disait que les deux « ne sont plus lues par rien ». C'était vrai
+de la première et **faux de la seconde** : `apps/api/src/index.ts` la lit à
+chaque démarrage, et `/v1/open-pr` ouvre toutes ses PR à travers elle. Elles
+étaient mortes *dans le projet web*, ce qui n'est pas la même affirmation.
+Retirer `GITHUB_APP_INSTALLATION_ID` du projet **API** couperait l'ouverture de
+PR — `readGitHubAppConfig` renvoie `null` sans elle et la route répond 501.
+
+La suppression ne prend effet qu'au prochain déploiement : le déploiement en
+cours porte encore les neuf valeurs, figées à sa construction.
 
 **Manquent, et c'est ce qui bloque le self-serve :** `GITHUB_OAUTH_CLIENT_ID` et
 `GITHUB_OAUTH_CLIENT_SECRET`. Sans eux le callback ne peut pas prouver que celui
@@ -257,9 +269,34 @@ gardaient était inatteignable — mais une liste blanche qui n'appliquait rien,
 décrite à trois endroits comme ce qui séparait les locataires. Les deux sont
 supprimés ; l'isolation était structurelle et l'est maintenant explicitement.
 
+**Sur le chemin de lecture seulement.** Ce paragraphe s'arrêtait là, et
+l'affirmation est vraie d'`apps/web` — mais la PR n'est pas ouverte par
+`apps/web`. Elle est ouverte par `apps/api`, qui n'accepte **aucun**
+`installation_id` dans le corps de `/v1/open-pr` : `readGitHubAppConfig()` lit
+`GITHUB_APP_INSTALLATION_ID` dans son propre environnement, donc *toutes* les PR
+de *tous* les locataires sortent de l'installation unique de l'opérateur.
+Vérifié le 2026-08-23 : `apps/api/src/index.ts:58` pour la lecture, et zéro
+occurrence d'`installationId` dans `open-pr/route.ts` pour l'absence de
+paramètre.
+
+Deux conséquences, dans cet ordre d'importance :
+
+1. **Fonctionnelle, et c'est un blocage self-serve non listé.** Un client qui
+   connecte sa propre installation traduira, puis échouera à l'ouverture de la
+   PR — l'installation de l'opérateur n'atteint pas son dépôt. Le tunnel casse
+   au dernier pas, celui qui est le premier livrable (invariant 2).
+2. **De cloisonnement.** Rien dans l'API ne vérifie que l'appelant a le droit
+   d'écrire sur `owner/repo`. Ce qui l'empêche aujourd'hui est le contrôle
+   `canReachRepository` **côté appelant** (`run-actions.ts:86`) et le fait que
+   seul `apps/web` détient `LOCALIZE_API_TOKEN`. Une garantie portée par le
+   client, pas par le service.
+
 Ce qui manque pour que ce soit un vrai produit multi-locataire côté GitHub n'est
-donc plus le stockage, c'est **le secret OAuth** : sans lui aucun client ne peut
-déclencher sa propre installation, et le bouton est absent plutôt que désactivé.
+donc plus le stockage, mais deux choses : **le secret OAuth** — sans lui aucun
+client ne peut déclencher sa propre installation, et le bouton est absent plutôt
+que désactivé — et **le passage de l'`installation_id` du locataire à
+`/v1/open-pr`**, pour que l'écriture emprunte la même installation que la
+lecture.
 
 **Écart connu à l'invariant 5 (résidence des données UE) :** cette phase
 envoie du contexte extrait du code source (chemins de fichiers, noms de
