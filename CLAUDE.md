@@ -90,6 +90,14 @@ en `cdg1`).
 
 **`apps/api` est déployé** sur https://localize-infra-api.vercel.app (projet
 Vercel `localize-infra-api`, Root Directory `apps/api`, fonctions en `cdg1`).
+
+**Et il n'est pas relié à Git, contrairement aux deux autres.** Fusionner sur
+`master` déploie le site et le web, pas l'API : elle se déploie par
+`npx vercel deploy --prod --archive=tgz` (voir `apps/api/DEPLOYING.md`). Le
+piège est que les trois projets se ressemblent sur cette page alors que deux
+seulement suivent `master` — un correctif à `apps/api` fusionné n'est pas un
+correctif en ligne. Constaté le 2026-08-23 : la PR #33 fusionnée, la dernière
+production de l'API datait encore de la veille.
 Ce sont les **trois** projets Vercel du dépôt. `services/github-app` reste une
 bibliothèque, consommée par `apps/api` ; elle n'a pas de déploiement propre.
 

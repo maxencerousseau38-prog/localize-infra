@@ -111,11 +111,24 @@ same split `apps/web` made on the read path in #24, and for the same reason:
 fusing "what the App is" with "which installation to act as" is what left a
 request no way to choose.
 
-**Verified:** the route acts as the installation the request names and not the
-configured one, checked by reintroducing the defect and watching exactly two
-tests fail and eleven pass. Against the deployed API, a request naming an
-installation the service is not configured with is answered by *that*
-installation failing, not by the default quietly succeeding.
+**Verified, against the real server rather than only the unit tests.** This
+first said "against the deployed API", which was false when it was written:
+`localize-infra-api` is not connected to Git, so merging did not deploy it.
+
+What was actually run — `apps/api` built and started locally with the real App
+credentials and the real installation as its *default*, then two requests for a
+repository that does not exist:
+
+| Request | Where it failed | What that proves |
+|---|---|---|
+| names installation `999999999` | `POST /app/installations/999999999/access_tokens` → Not Found | it acted as the id the **request** named, and never reached the repository |
+| names none | `/repos/acme/definitely-not-a-real-repo-xyz/git/ref/heads/main` → Not Found | it got a token from the configured default and failed one step later, at the repo |
+
+Two different failures from one code path is the evidence; a status code alone
+is not, since both answer 502. Separately, the route was checked by
+reintroducing the defect and watching exactly two of thirteen tests fail.
+
+**Not yet on the deployed API.** `apps/api` deploys by CLI, not by merge.
 
 **Not verified, and it needs blocker 2:** a real second installation. Nobody but
 the operator has one, so "a repository the operator's installation cannot reach"
