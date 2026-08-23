@@ -3,43 +3,63 @@
 Date: 2026-08-23
 
 Invariant 4 — *the agent raises ambiguities, it does not guess* — is the
-product's differentiator and had never been measured. This is the measurement.
+product's differentiator and had never been measured. This is the measurement,
+the target set from it, and the tuning done against that target.
 
-**It does not hold.** On 100 strings written to be genuinely ambiguous, the
-agent asked a question about 14–24% of them and translated the rest without
-saying anything. When it does ask, it is usually right to (82–88% precision).
-The bar is not merely high, as the prompt intends; it is high enough that the
-feature rarely fires.
+**Held-out result: recall 53–61%, precision 91–97%.** The target was 60% recall
+at no less than 80% precision. Precision clears its floor with a wide margin;
+recall sits just under target, at a median of 59.2% over three runs.
+
+---
+
+## A correction, first
+
+**An earlier version of this document reported recall of 14–24% and concluded
+that invariant 4 "does not hold". That number was mostly an artefact of a
+defect in the corpus, and the conclusion drawn from it was too harsh.**
+
+Every case carried a `componentName` — `PricingTable`, `Navigation`,
+`UserStatus` — held constant across both halves of a pair so that only the
+surrounding code varied. But those names *are* context, and disambiguating
+context at that: `PricingTable` settles "Free", `Navigation` settles "Home",
+`UserStatus` tells you what "Active" agrees with. The half labelled *open* was
+therefore not open. An agent answering confidently there was right, and the
+corpus scored it wrong.
+
+It was found by asking why one category was failing so much harder than the
+others, not by review — the corpus had passed twelve tests, all of which
+checked its structure and none of which could check whether a field labelled
+"held constant" was also carrying the answer.
+
+`componentName` is now null on every case, which is also the more faithful
+shape: a locale JSON file has no component. The descriptive names are kept on
+the pair definitions in `cases.ts`, where they document intent without reaching
+the model. Every figure below was re-measured on the corrected corpus.
+
+| On the defective corpus | On the corrected corpus |
+|---|---|
+| recall 14–24%, precision 82–88% | recall 39–48%, precision 86–95% |
+
+Same prompt, same model, same 100 pairs. The difference is entirely the defect.
 
 ---
 
 ## The corpus
 
-200 cases, in `packages/eval/src/ambiguity/`, generated from
-`cases.ts` and committed as `data/ambiguity-cases.json` with a test that
-rebuilds and compares — the arrangement `benchmarks.json` and `cost-model.json`
-already use.
+200 cases in `packages/eval/src/ambiguity/`, generated from `cases.ts`,
+committed as `data/ambiguity-cases.json` with a test that rebuilds and
+compares.
 
-They are **100 pairs**, not 200 independent strings. Each pair is the same
-source text, the same target locale, the same component, differing **only** in
-the surrounding code:
+They are **100 pairs**, not 200 independent strings: the same source text, the
+same target locale, differing **only** in the surrounding code. One half's
+neighbours settle the reading; the other's do not.
 
-| Half | Surrounding keys | Expected |
-|---|---|---|
-| open | generic labels that settle nothing | escalate |
-| settled | sibling keys that fix the reading | confident |
-
-That design is the point rather than a convenience. A corpus of ambiguous
-strings alone measures recall and nothing else, and an agent that escalated on
-every string would score 100% on it — while producing exactly the failure the
-production prompt warns about, *"a queue that raises every second string is a
-queue nobody reads."* Holding everything constant but the context is what makes
-a disagreement attributable: if both halves get the same answer, the agent is
-not reading context, whatever the aggregate says.
-
-The three categories are the ones the production prompt itself declares as
-grounds for escalation. Measuring against criteria the system was never given
-would measure the wrong thing.
+That design is the point. A corpus of ambiguous strings alone measures recall
+and nothing else, and an agent that escalated on everything would score 100% on
+it — while producing exactly the failure the production prompt warns about, *"a
+queue that raises every second string is a queue nobody reads."* Holding
+everything else constant makes a disagreement attributable: if both halves get
+the same answer, the agent is not reading context, whatever the aggregate says.
 
 | Category | Cases | Locales |
 |---|---|---|
@@ -47,123 +67,141 @@ would measure the wrong thing.
 | insufficient-grammar | 50 | es, pt-BR, ar, de — languages that inflect for agreement |
 | register | 30 | de, ja, es — languages that force a formality choice |
 
-Locales are assigned round-robin, not chosen per case: choosing would let a
-preference for the locale where a case "works best" inflate the score.
+The two halves of a pair are **never sent in the same request**; a test pins
+that. Without it the model could see the pairing itself, and these would be
+confounded numbers rather than measurements.
 
-**The halves of a pair are never sent in the same request.** Each of the two
-groups takes exactly one half of every pair, alternating which, so neither
-batch is all-ambiguous and the model never sees the pairing itself. A test
-pins this; without it the numbers below would be a confound rather than a
-measurement.
+### Dev and holdout
 
----
+The corpus is split into a half the prompt was tuned against and a half scored
+only at the end, stratified by category, split by pair so a pair never straddles
+the boundary.
 
-## What was run
-
-The **production** path: the prompt in `apps/api/src/translate/prompt.ts`,
-`handleTranslateBatch`, the parser, `claude-sonnet-5` at the production effort
-setting. No overrides — the runner passes no settings, so this measurement
-follows production if production changes.
-
-Three runs of the identical corpus. `npm run eval:ambiguity -w @localize-infra/api`,
-raw observations in `apps/api/eval/results/ambiguity-run-{1,2,3}.json`.
+Tuning while watching all 200 cases and then reporting on those same 200 would
+measure how well the prompt was fitted to this corpus. With a hundred pairs and
+several iterations that is not a theoretical risk — it is the expected outcome,
+and it would produce a number that looks like progress and predicts nothing.
 
 ---
 
-## Results
+## Baseline, before tuning
 
-| Run | Precision | Recall | F1 | Pairs discriminated | Asked wrongly | Guessed instead of asking |
-|---|---|---|---|---|---|---|
-| 1 | 88.2% | 15.0% | 25.6% | 13 / 100 | 2 | 85 |
-| 2 | 82.8% | 24.0% | 37.2% | 20 / 100 | 5 | 76 |
-| 3 | 82.4% | 14.0% | 23.9% | 12 / 100 | 3 | 86 |
+Original prompt, corrected corpus, full 200 cases, three runs:
 
-600 cases scored, **zero errors** — every string came back, so nothing here is
-an artefact of failed calls.
+| Run | Precision | Recall | Pairs discriminated |
+|---|---|---|---|
+| 1 | 95.1% | 39.0% | 37 / 100 |
+| 2 | 90.6% | 48.0% | 43 / 100 |
+| 3 | 85.6% | 48.0% | 41 / 100 |
 
-### By category
+Per category on run 3: polysemy 53.3% recall, grammar 48.0%, **register 26.7%
+at 50% precision** — the weakest by a distance.
 
-| Category | Recall, run 1 / 2 / 3 | Precision, run 1 / 2 / 3 |
+---
+
+## What was changed
+
+Three edits to `INSTRUCTIONS` in `apps/api/src/translate/prompt.ts`, each
+aimed at a distinct observed failure.
+
+**1. A two-step decision.** Baseline discrimination was 37–43 of 100 pairs — the
+agent often gave the same answer whether or not the neighbours disambiguated
+the string. The prompt now asks two questions in order: does the target force a
+choice English does not make, and does the surrounding code settle it.
+
+**2. A `cue` field.** The model must write down what step 1 found and what
+step 2 settled, before it answers. An unwritten step is a step not taken. The
+field is not in `TranslatedStringSchema` and is stripped on parse — it exists to
+force the reasoning, not to be consumed.
+
+**3. Generic neighbours named as settling nothing.** `label.item`, `state.one`,
+`action.apply` read as context while carrying none. The prompt now says so, and
+adds the reason: a reading that feels obvious is usually a prior about English,
+not evidence about this codebase.
+
+Also fixed: the register criterion cited French, which is not a supported
+locale, and omitted Japanese, which is. And two defaults are now named as
+choices rather than safe fallbacks — masculine singular for a bare adjective,
+and the polite register "because it is safer".
+
+---
+
+## Result
+
+**Dev half** (51 pairs, tuned against — not a report, shown for the comparison):
+
+| Run | Precision | Recall |
 |---|---|---|
-| polysemy | 15.0% / 21.7% / 13.3% | 81.8% / 86.7% / 72.7% |
-| insufficient-grammar | 24.0% / 28.0% / 24.0% | 100% / 87.5% / 100% |
-| register | **0% / 26.7% / 0%** | no data / 66.7% / no data |
+| 1 | 87.5% | 68.6% |
+| 2 | 92.3% | 70.6% |
 
-Register is the weakest and the least stable: in two runs of three the agent
-raised **not one** of the fifteen strings where German or Japanese forces a
-formality the English does not supply. "No data" rather than 0% for precision
-in those runs is deliberate — an agent that never predicts the positive class
-has undefined precision, and printing 0% would read as a measurement that was
-taken.
+**Holdout half** (49 pairs, scored once, after the prompt was frozen):
+
+| Run | Precision | Recall | Pairs discriminated |
+|---|---|---|---|
+| 1 | 96.3% | 53.1% | 25 / 49 |
+| 2 | 90.9% | 61.2% | 28 / 49 |
+| 3 | 96.7% | 59.2% | 28 / 49 |
+
+Per category, holdout run 3: grammar 91.7% recall at 100% precision, register
+71.4% at 100%, polysemy 43.3% at 92.9%.
+
+### Against the target
+
+| | Target | Held-out result | |
+|---|---|---|---|
+| Precision | ≥ 80% | 90.9 – 96.7% | **met, with margin** |
+| Recall | ≥ 60% | 53.1 – 61.2%, median 59.2% | **just short** |
+
+One run of three reached the recall target. Calling it met would be rounding a
+median of 59.2 up to 60 and ignoring that the lowest run was 53.1.
+
+### The dev–holdout gap is the finding about method
+
+Dev returned 68.6–70.6% recall; holdout returned 53.1–61.2%. **Roughly ten
+points of the apparent gain did not survive contact with cases the prompt had
+not been tuned against.** That gap is precisely what the holdout exists to
+expose, and had the corpus not been split, this document would be reporting
+~69% recall and claiming the target beaten.
 
 ---
 
-## What the numbers mean
+## Where the remaining gap is, and what it would cost
 
-**One run of this benchmark is not a number.** Recall moved from 15.0% to 24.0%
-to 14.0% on an identical corpus with an identical configuration. Any single
-figure quoted from one run — including a flattering one — would be
-overstating what was measured. That is why three runs are reported rather than
-a best or a mean, and why the runner numbers its output files instead of
-overwriting.
+Polysemy is the weak category — 43.3% recall on the holdout against 91.7% for
+grammar — and it is 60% of the corpus, so it sets the overall number almost by
+itself. It is also the hardest of the three honestly: a word with two senses in
+a file whose neighbours say nothing is a case where a competent human would
+often also just pick the common reading.
 
-**Precision is genuinely good.** 82–88% across runs, and 100% on the grammar
-category twice. When the agent raises a question, a developer will almost
-always find it a fair question. The prompt's stated fear — crying wolf until
-ignored — is not what is happening.
+Precision has 11–17 points of headroom above its floor, so recall can be bought.
+What that trade is worth is a product judgement, not a measurement: every point
+of recall is a question a developer has to answer, and some of them will be
+questions they did not need.
 
-**Recall is the finding.** 76–86 of the 100 genuinely ambiguous strings were
-translated with a confident answer and no question. For a product whose
-differentiator is *"it asks instead of guessing"*, that is the gap between the
-claim and the behaviour.
-
-**The pair count says it is not a context problem in the way one might hope.**
-Only 12–20 of 100 pairs got different answers for their two halves. The other
-80-odd got the same answer both times — and since the agent rarely escalates,
-that overwhelmingly means *confident in both*. It is not weighing the
-surrounding code and deciding; it is mostly answering confidently regardless.
-
-**The prompt is doing this on purpose, and the dial is set too far.** The
-instruction says to mark a string ambiguous *"ONLY when a competent human
-translator would have to ask"*, forbids escalating merely because several good
-translations exist, and states that the failure mode to avoid is crying wolf.
-Given that, low recall and high precision is the intended shape. What the
-measurement adds is where the dial actually sits: at a recall low enough that
-the differentiator fires on roughly one ambiguous string in five.
+**A further round needs a fresh holdout.** This one has now been observed;
+tuning against it and reporting on it would be the same mistake the split was
+built to prevent. The corpus can be re-split, but on cases the prompt has
+already been exposed to, which is weaker.
 
 ---
 
 ## Limitations, stated because they bound the conclusion
 
-- **The ground truth is mine.** Every case carries a `rationale` field naming
-  why the expected answer is what it is, which makes each one arguable, and
-  the corpus is in the open-source package so it can be argued with. But no
-  second person has reviewed it. A reviewer who disagreed with, say, twenty
-  of the polysemy cases would move recall by several points.
-- **Three runs bound the variance loosely.** They establish that variance is
-  large; they do not establish a confidence interval.
+- **The ground truth is mine and unreviewed.** Every case carries a `rationale`
+  naming why the expected answer is what it is, and the corpus is in the MIT
+  package so it can be argued with. The `componentName` defect above is
+  evidence that this matters: one unreviewed decision moved the headline number
+  by twenty-five points.
+- **Three runs bound variance loosely.** They establish it is large — recall
+  moved eight points across identical holdout runs — not a confidence interval.
 - **One model, one configuration.** `claude-sonnet-5` at production settings.
-  Whether a different effort setting trades precision for recall is unmeasured
-  and is the obvious next experiment.
-- **The strings are written, not harvested.** They are realistic UI strings but
-  they are not drawn from a real product, so the *rate* of ambiguity here says
-  nothing about the rate in a customer's repository. This measures the agent's
-  behaviour on ambiguity, not how much ambiguity exists in the wild.
-- **Escalation quality is not scored.** Whether the question asked is a *good*
-  question, and whether the alternatives offered are the right two, is recorded
-  in the observations but not measured. That needs a human, and belongs with
-  the human evaluation in `08-critique.md` §C2 that has never happened.
-
----
-
-## What follows
-
-Nothing in this document changes production. The dial is set in one place —
-`INSTRUCTIONS` in `apps/api/src/translate/prompt.ts` — and moving it is a
-product decision with a real cost on the other side: every point of recall
-bought at the expense of precision is a question a developer did not need to
-answer.
-
-The measurement now exists to make that decision with, and to tell afterwards
-whether the change worked. Before it, the honest answer to "does the agent
-escalate when it should?" was *nobody knows*.
+- **The strings are written, not harvested.** This measures the agent's
+  behaviour on ambiguity, not how much ambiguity exists in a real repository.
+- **Escalation quality is not scored.** Whether the question asked is a good
+  one, and whether the two alternatives offered are the right two, is recorded
+  in the observations and not measured. That needs a human, and belongs with the
+  human evaluation in `08-critique.md` §C2 that has never happened.
+- **Cost rose.** The `cue` field is output tokens: roughly 13.5k against 20.4k
+  for the baseline on comparable runs, so the change is not free, though it is
+  small against the translation output itself.

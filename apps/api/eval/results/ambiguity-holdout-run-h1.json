@@ -1,0 +1,693 @@
+{
+  "modelId": "claude-sonnet-5",
+  "inputTokens": 27665,
+  "outputTokens": 12177,
+  "observations": [
+    {
+      "caseId": "close-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "fine-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "watch-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "object-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "case-open",
+      "observed": "escalate",
+      "question": "Does 'Case' here refer to a legal/support case, a physical case/container, or letter casing?",
+      "alternativeCount": 3,
+      "error": null
+    },
+    {
+      "caseId": "rest-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "sign-in-continue-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "try-again-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "confirm-your-password-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "home-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "present-open",
+      "observed": "escalate",
+      "question": "Does 'Present' refer to being present/attendance, the current time state, or a gift?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "check-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "point-open",
+      "observed": "escalate",
+      "question": "Does 'Point' refer to a numeric score, a geometric/location point, or a topic/argument point?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "current-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "type-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "match-open",
+      "observed": "escalate",
+      "question": "Does 'Match' refer to a sports match/game or to a matching/comparison result?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "second-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "cut-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "right-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "field-open",
+      "observed": "escalate",
+      "question": "Does 'Field' refer to a form/data field or a physical area/land field?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "park-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "deleted-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "verified-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "approved-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "complete-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "ready-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "default-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "want-to-delete-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "youre-all-set-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "play-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "state-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "file-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "run-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "key-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "stable-open",
+      "observed": "escalate",
+      "question": "What noun does 'Stable' modify (e.g. a masculine or feminine, singular or plural item) so the adjective can agree correctly?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "enter-your-email-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "invite-your-team-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "charge-open",
+      "observed": "escalate",
+      "question": "Does 'Charge' refer to a financial charge, an electric charge, or a criminal charge?",
+      "alternativeCount": 3,
+      "error": null
+    },
+    {
+      "caseId": "tie-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "lead-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "board-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "mark-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "race-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "selected-open",
+      "observed": "escalate",
+      "question": "What noun does 'Selected' modify (masculine/feminine, singular/plural)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "locked-open",
+      "observed": "escalate",
+      "question": "What noun does 'Locked' modify (masculine/feminine)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "archived-open",
+      "observed": "escalate",
+      "question": "What noun does 'Archived' modify (masculine/feminine)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "private-open",
+      "observed": "escalate",
+      "question": "What noun does 'Private' modify (masculine/feminine)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "muted-open",
+      "observed": "escalate",
+      "question": "What noun does 'Muted' modify (masculine/feminine)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "expired-open",
+      "observed": "escalate",
+      "question": "What noun does 'Expired' modify (masculine/feminine)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "close-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "fine-open",
+      "observed": "escalate",
+      "question": "Does 'Fine' here mean a monetary penalty or something like 'fine/OK' quality?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "watch-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "object-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "case-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "rest-open",
+      "observed": "escalate",
+      "question": "Does 'Rest' mean the remaining items or a pause/rest state?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "sign-in-continue-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "try-again-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "confirm-your-password-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "home-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "present-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "check-open",
+      "observed": "escalate",
+      "question": "Does 'Check' refer to an inspection/verification action, a checkmark, or a payment check?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "point-settled",
+      "observed": "escalate",
+      "question": "Does 'Point' refer to a geographic location or a score/unit value?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "current-open",
+      "observed": "escalate",
+      "question": "Does 'Current' refer to an electrical current measurement or the present/current value?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "type-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "match-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "second-open",
+      "observed": "escalate",
+      "question": "Does 'Second' refer to the time unit (seconds) or an ordinal position (second item)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "cut-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "right-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "field-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "park-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "deleted-open",
+      "observed": "escalate",
+      "question": "What noun does 'Deleted' modify, to determine gender/number agreement?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "verified-open",
+      "observed": "escalate",
+      "question": "What noun does 'Verified' modify, to determine gender/number agreement?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "approved-open",
+      "observed": "escalate",
+      "question": "What noun does 'Approved' modify, to determine gender/number agreement?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "complete-open",
+      "observed": "escalate",
+      "question": "Does 'Complete' describe a finished state (adjective) or is it a verb action, and what noun does it modify?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "ready-open",
+      "observed": "escalate",
+      "question": "What noun does 'Ready' modify, to determine agreement?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "default-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "want-to-delete-open",
+      "observed": "escalate",
+      "question": "Should confirmation dialogs use formal 'Sie' or informal 'du' address?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "youre-all-set-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "play-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "state-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "file-open",
+      "observed": "escalate",
+      "question": "Is 'File' here a menu noun (like a File menu) or a verb meaning to submit/file something?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "run-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "key-open",
+      "observed": "escalate",
+      "question": "Does 'Key' refer to a data/dictionary key or a physical/security key?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "stable-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "enter-your-email-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "invite-your-team-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "charge-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "tie-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "lead-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "board-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "mark-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "race-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "selected-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "locked-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "archived-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "private-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "muted-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "expired-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    }
+  ]
+}

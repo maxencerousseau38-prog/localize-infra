@@ -20,6 +20,17 @@ import type { AmbiguityCase, TargetLocale } from '@localize-infra/schemas';
  * grounds for escalation (`apps/api/src/translate/prompt.ts`). Measuring
  * against criteria the system was never given would be measuring the wrong
  * thing.
+ *
+ * `componentName` is null on every case, and that is a correction rather than
+ * an omission. It first carried a descriptive name per pair — `PricingTable`,
+ * `Navigation`, `UserStatus` — held constant across both halves so that only
+ * the context varied. But those names *are* context: `PricingTable` settles
+ * "Free", `Navigation` settles "Home", `UserStatus` tells you what "Active"
+ * agrees with. The open half was therefore not open, and an agent answering
+ * confidently there was right while the corpus scored it wrong. The names are
+ * kept on the pair definitions below, where they document the intended domain
+ * without reaching the model. A locale JSON file has no component anyway, so
+ * null is also the more faithful shape.
  */
 
 const LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'] as const;
@@ -63,7 +74,7 @@ function expand(
       pairId: pair.slug,
       sourceText: pair.text,
       filePath: pair.file,
-      componentName: pair.component,
+      componentName: null,
       surroundingCode: renderSiblings(pair.open, self),
       targetLocale: locale,
       category,
@@ -75,7 +86,7 @@ function expand(
       pairId: pair.slug,
       sourceText: pair.text,
       filePath: pair.file,
-      componentName: pair.component,
+      componentName: null,
       surroundingCode: renderSiblings(pair.settled, self),
       targetLocale: locale,
       category,

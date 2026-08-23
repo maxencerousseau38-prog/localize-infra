@@ -34,3 +34,4 @@ export * from './ambiguity/build.js';
 export * from './ambiguity/cases.js';
 export * from './ambiguity/score.js';
 export * from './ambiguity/split.js';
+export * from './ambiguity/holdout.js';
