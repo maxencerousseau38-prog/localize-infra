@@ -91,9 +91,39 @@ PR #26. Until it lands, the deployed pipeline returns nothing above roughly
 thirty strings. Everything below assumes it is merged.
 **Done when:** merged to `master` and `apps/web` redeployed.
 
-### 2. `GITHUB_OAUTH_CLIENT_SECRET`, and two App settings — *owner*
+### 2. `GITHUB_OAUTH_CLIENT_SECRET`, and two App settings — *blocked on Vercel*
 Without the secret no customer can connect a repository, and the interface
 correctly says so rather than storing an unverified installation id.
+
+**Escalated to Vercel support on 2026-08-23**, because the variable cannot be
+stored. The dashboard shows `GITHUB_OAUTH_CLIENT_SECRET` on
+`localize-infra-web` Production, and the row survives a full page reload — so
+it is not an unsaved form row, which is what the first several attempts turned
+out to be. The API does not have it.
+
+Recorded so nobody re-runs this. Four independent reads, all as the account
+owner on `prj_L5FZPh16GE88nLtgPbOnb2LR5e3f`:
+
+| Read | Result |
+|---|---|
+| `vercel env ls` | 12 rows, absent |
+| `vercel env ls production` | 8 rows, absent |
+| `vercel env pull --environment production` | absent |
+| `GET /v9/projects/{id}/env` (raw REST, different code path) | 12 entries, absent |
+
+Two explanations were raised and both are ruled out by the raw response:
+`"hiddenProductionEnvCount": 0`, so nothing is being withheld; and sensitive
+variables *are* returned, key visible and value `""` — `GITHUB_OAUTH_CLIENT_ID`
+appears that way in every call.
+
+That variable is the control. It was added by CLI the same day, same project,
+same environment, and is visible in both the dashboard and the API. Project,
+account and permissions work; the discrepancy is specific to this one key.
+
+**Nothing in the repository is waiting on this.** The OAuth code has been
+complete since it was written, and `readOAuthConfig()` returns null unless it
+holds both values, so a lone client id cannot half-enable the flow — pinned by
+a test in `install.test.ts`.
 
 **`GITHUB_OAUTH_CLIENT_ID` is set** on the web production environment as of
 2026-08-23. It did not need the owner: `GET /app`, authenticated as the App with
