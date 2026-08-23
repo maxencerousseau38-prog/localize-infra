@@ -128,7 +128,23 @@ Two different failures from one code path is the evidence; a status code alone
 is not, since both answer 502. Separately, the route was checked by
 reintroducing the defect and watching exactly two of thirteen tests fail.
 
-**Not yet on the deployed API.** `apps/api` deploys by CLI, not by merge.
+**And now on the deployed API**, redeployed 2026-08-23 because `apps/api` ships
+by CLI rather than by merge:
+
+| Probe against production | Result |
+|---|---|
+| `installationId: -1`, otherwise valid | **400** — the field is validated. The old schema had no such key and Zod strips unknown keys silently, so the previous build answered 502 here |
+| `installationId: 1.5` | **400** |
+| `installationId: 999999999` | 502, and the runtime log names `POST /app/installations/999999999/access_tokens` → Not Found — it acted as the id the request gave |
+| no `installationId` | 502 one step later, at the repository — the configured default was used |
+
+The `-1` probe is what distinguishes deployed-new from deployed-old without
+opening anything: a field the old build ignored is a field the new build
+rejects. Every probe named a repository that does not exist, so nothing was
+written.
+
+`/health` 200, and `/v1/translate` and `/v1/open-pr` both 401 without a bearer
+and with a wrong one — the fail-closed behaviour is unchanged by the split.
 
 **Not verified, and it needs blocker 2:** a real second installation. Nobody but
 the operator has one, so "a repository the operator's installation cannot reach"
