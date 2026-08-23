@@ -284,7 +284,25 @@ async function main(): Promise<void> {
   const summaries = [];
   const raw: Record<string, Scored[]> = {};
 
-  for (const config of CONFIGS) {
+  /*
+   * `EVAL_CONFIGS` narrows the run to named configurations.
+   *
+   * The full sweep exists to choose a model; a prompt change needs only the
+   * production configuration, re-run to show quality did not regress. Paying
+   * for three when one answers the question is how a required check turns into
+   * one that gets skipped.
+   */
+  const requested = process.env.EVAL_CONFIGS?.split(',').map((s) => s.trim());
+  const selected = requested
+    ? CONFIGS.filter((c) => requested.includes(c.id))
+    : CONFIGS;
+  if (selected.length === 0) {
+    throw new Error(
+      `EVAL_CONFIGS matched nothing. Known ids: ${CONFIGS.map((c) => c.id).join(', ')}`,
+    );
+  }
+
+  for (const config of selected) {
     process.stdout.write(`running ${config.id}…\n`);
     const run = await runConfig(config, byLocale, glossary, apiKey);
     raw[config.id] = run.scored;

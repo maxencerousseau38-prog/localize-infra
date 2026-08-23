@@ -186,6 +186,58 @@ already been exposed to, which is weaker.
 
 ---
 
+## Did tuning escalation cost translation quality?
+
+CLAUDE.md requires the eval harness to be re-run on any prompt change, and this
+was a prompt change. The 414-entry corpus, production configuration, before and
+after:
+
+| | Baseline | Tuned prompt |
+|---|---:|---:|
+| Answered | 414 / 414 | 414 / 414 |
+| Missing keys | 0 | 0 |
+| chrF | 75.234 | 75.202 |
+| Exact match | 40.82% | 40.82% |
+| Placeholder integrity | 100% | 100% |
+| Glossary violations | 0 | 0 |
+| Length overflow | 13.53% | 13.04% |
+| **Escalation rate** | **0.72%** | **0.72%** |
+| Cost per 1,000 pairs | $1.47 | $1.71 |
+
+**Quality did not move.** chrF differs by 0.03, exact match is identical to four
+decimals, placeholder integrity holds at 100% against the ≥99.5% CI gate.
+
+**The escalation rate on real material is identical** — 3 strings in 414, both
+times. That is the "cried wolf" fear answered by independent evidence: the
+recall gain shows up on strings written to be ambiguous and *not* on ordinary
+strings harvested from real projects. A prompt that had simply become
+trigger-happy would have moved this number.
+
+**Cost rose 16%.** Output per string went from 60 to 73 — the `cue` field is
+output tokens, and output is five times the price of input on this model. The
+measured input in `packages/pricing` was updated from 56 to 73 and the cost
+model regenerated, so every figure in `09-unit-economics.md` moves with it.
+
+### A ceiling moved, and a test caught it rather than a failure
+
+Updating that one input broke `packages/pricing/src/model.test.ts`, which
+asserts a full chunk fits under 75% of `max_tokens`. At 73 tokens per string a
+100-string chunk emits ~7,300 against a 6,144 headroom — still under the 8,192
+ceiling, but without the room a chunk needs when some of its strings escalate at
+239 tokens each.
+
+`max_tokens` is now 16,384. Raised rather than chunking smaller because the
+ceiling is billed on what is emitted, not on what is allowed: halving the chunk
+would have re-sent the 610-token system prompt twice as often and paid for it in
+input tokens.
+
+Worth recording plainly: this is the same class of bug as the P0 that returned
+empty responses in August — output budget exhausted before the text is emitted —
+and it was caught by an arithmetic test on a measured input, before any run
+failed.
+
+---
+
 ## Limitations, stated because they bound the conclusion
 
 - **The ground truth is mine and unreviewed.** Every case carries a `rationale`

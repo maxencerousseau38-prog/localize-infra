@@ -42,9 +42,13 @@ describe('createAnthropicProvider defaults', () => {
     const calls = captureBody();
     await createAnthropicProvider('k').translate(request, 'claude-sonnet-5');
 
+    // 16384 since 2026-08-24. The `cue` field added by the escalation tuning
+    // took output per string from 60 to 73, so a full 100-string chunk emits
+    // ~7,300 and no longer cleared the headroom 8192 left it — see the
+    // rationale on `maxTokens` in anthropic.ts.
     expect(calls[0]).toEqual({
       model: 'claude-sonnet-5',
-      max_tokens: 8192,
+      max_tokens: 16384,
       output_config: { effort: 'low' },
       system: 'sys',
       messages: [{ role: 'user', content: 'user' }],
