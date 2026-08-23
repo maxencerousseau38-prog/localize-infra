@@ -60,13 +60,42 @@ excluding tests):
 | `GITHUB_APP_ID`                | Yes, for `/v1/open-pr` to work      | GitHub App ID used to authenticate as the App. |
 | `GITHUB_APP_PRIVATE_KEY_PATH`  | Recommended way to supply the key   | Path to the App's private key `.pem` file, exactly as downloaded from GitHub's App-creation flow (`<app-slug>.<date>.private-key.pem`). Read at request time. See "Standard GitHub App configuration" below. |
 | `GITHUB_APP_PRIVATE_KEY`       | Alternative to `GITHUB_APP_PRIVATE_KEY_PATH` | The App's private key as raw PEM content, inline. Takes precedence if both this and `_PATH` are set. See the gotcha below if you use this form. |
-| `GITHUB_APP_INSTALLATION_ID`   | Yes, for `/v1/open-pr` to work      | The App installation ID for the target GitHub account/org. Must parse as a number — a non-numeric value is treated the same as if it were unset. |
+| `GITHUB_APP_INSTALLATION_ID`   | Only if callers do not send their own | **Default** installation ID, used when a `/v1/open-pr` request carries no `installationId`. Must parse as a number — a non-numeric value is treated the same as if it were unset. |
 
-If `GITHUB_APP_ID` / `GITHUB_APP_INSTALLATION_ID` is missing, or neither
-`GITHUB_APP_PRIVATE_KEY_PATH` nor `GITHUB_APP_PRIVATE_KEY` resolves to a
-readable key (or `GITHUB_APP_INSTALLATION_ID` isn't numeric), `/v1/open-pr`
-responds `501 Not Implemented` rather than crashing — `/v1/translate` is
-unaffected either way.
+If `GITHUB_APP_ID` is missing, or neither `GITHUB_APP_PRIVATE_KEY_PATH` nor
+`GITHUB_APP_PRIVATE_KEY` resolves to a readable key, `/v1/open-pr` responds
+`501 Not Implemented` rather than crashing — `/v1/translate` is unaffected
+either way. The same `501` answers a well-formed request that names no
+`installationId` when no default is configured: there is nothing to act as.
+
+### Which installation opens the pull request
+
+`/v1/open-pr` accepts an optional `installationId`. When present it is used;
+when absent the service falls back to `GITHUB_APP_INSTALLATION_ID`.
+
+The field did not exist, and its absence was a self-serve blocker rather than a
+missing convenience. A multi-tenant caller resolves an installation per
+workspace in order to *read* the repository and then had no way to say so when
+*writing*, so every tenant's pull request was opened through the one
+installation this service was configured with. A customer who installed the App
+on their own repository would translate successfully and fail at the pull
+request, because the operator's installation does not reach it.
+
+The two shapes this serves:
+
+- **Multi-tenant** (`apps/web`) sends `installationId` on every request, so the
+  write uses the same installation as the read.
+- **Single-tenant self-hosted** (`packages/cli` against an `apps/api` you run
+  yourself) sends nothing and gets the configured default. There is one
+  installation and nothing to choose between.
+
+**The limit, stated rather than implied:** this service does not know which
+tenant is calling — it authenticates a bearer token, not a workspace — so it
+cannot verify that the installation a request names belongs to the caller. That
+guarantee is held by the caller. What *is* enforced here is GitHub's own
+boundary: an installation token only reaches repositories that installation was
+granted, so naming one that cannot reach `owner/repo` fails rather than
+succeeding somewhere unintended.
 
 ### Standard GitHub App configuration
 

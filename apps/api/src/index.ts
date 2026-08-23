@@ -48,24 +48,40 @@ function readPrivateKey(): string | null {
 
 // Exported for direct unit testing (see index.test.ts), in addition to being
 // reachable indirectly through the /v1/open-pr route.
-export function readGitHubAppConfig(): {
+//
+// This was one function, `readGitHubAppConfig`, returning the credentials and
+// the installation id together and returning null unless all three were set.
+// Fusing them is what forced every caller of /v1/open-pr through the same
+// installation: a request had no way to name its own, so a multi-tenant caller
+// could resolve an installation per workspace for reads and had nowhere to put
+// it for writes.
+//
+// Split, `GITHUB_APP_INSTALLATION_ID` becomes what it should always have been
+// on a service that serves more than one tenant: a default for deployments that
+// have exactly one installation, not the only installation there is.
+export function readGitHubAppCredentials(): {
   appId: string;
   privateKey: string;
-  installationId: number;
 } | null {
   const appId = process.env.GITHUB_APP_ID;
   const privateKey = readPrivateKey();
+  if (!appId || !privateKey) return null;
+  return { appId, privateKey };
+}
+
+export function readDefaultInstallationId(): number | null {
   const installationId = process.env.GITHUB_APP_INSTALLATION_ID;
-  if (!appId || !privateKey || !installationId) return null;
-  const parsedInstallationId = Number(installationId);
+  if (!installationId) return null;
+  const parsed = Number(installationId);
   // A non-numeric GITHUB_APP_INSTALLATION_ID (e.g. a typo, or an accidentally
   // pasted URL fragment) makes `installationId` truthy as a STRING, so the
   // check above alone wouldn't catch it. Number(...) on such a value produces
   // NaN, which would otherwise flow all the way to getInstallationOctokit(NaN)
   // and fail there with a confusing, indirect error. Treat it the same as a
-  // missing env var: fail closed with the same 501 "not configured" response.
-  if (Number.isNaN(parsedInstallationId)) return null;
-  return { appId, privateKey, installationId: parsedInstallationId };
+  // missing env var: no default, so a request that names no installation is
+  // refused rather than served with NaN.
+  if (Number.isNaN(parsed)) return null;
+  return parsed;
 }
 
 // The only place in apps/api that touches the real @localize-infra/github-app
@@ -102,7 +118,10 @@ app.post('/v1/open-pr', async (c) => {
   const body = await c.req.json().catch(() => null);
   const { status, body: responseBody } = await openPrRouteHandler(
     body,
-    readGitHubAppConfig(),
+    {
+      app: readGitHubAppCredentials(),
+      defaultInstallationId: readDefaultInstallationId(),
+    },
     githubAppOperations,
   );
   return c.json(

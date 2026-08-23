@@ -284,34 +284,33 @@ gardaient était inatteignable — mais une liste blanche qui n'appliquait rien,
 décrite à trois endroits comme ce qui séparait les locataires. Les deux sont
 supprimés ; l'isolation était structurelle et l'est maintenant explicitement.
 
-**Sur le chemin de lecture seulement.** Ce paragraphe s'arrêtait là, et
-l'affirmation est vraie d'`apps/web` — mais la PR n'est pas ouverte par
-`apps/web`. Elle est ouverte par `apps/api`, qui n'accepte **aucun**
-`installation_id` dans le corps de `/v1/open-pr` : `readGitHubAppConfig()` lit
-`GITHUB_APP_INSTALLATION_ID` dans son propre environnement, donc *toutes* les PR
-de *tous* les locataires sortent de l'installation unique de l'opérateur.
-Vérifié le 2026-08-23 : `apps/api/src/index.ts:58` pour la lecture, et zéro
-occurrence d'`installationId` dans `open-pr/route.ts` pour l'absence de
-paramètre.
+**L'écriture emprunte désormais la même installation que la lecture.** Ce
+paragraphe disait « sur le chemin de lecture seulement », et c'était exact :
+la PR n'est pas ouverte par `apps/web` mais par `apps/api`, qui n'acceptait
+**aucun** `installation_id` et sortait donc *toutes* les PR de *tous* les
+locataires par l'installation unique de l'opérateur. Un client ayant connecté la
+sienne aurait traduit puis échoué au dernier pas — celui qui est le premier
+livrable (invariant 2).
 
-Deux conséquences, dans cet ordre d'importance :
+Corrigé : `/v1/open-pr` accepte un `installationId` optionnel et agit comme lui ;
+les deux appelants d'`apps/web` résolvent l'installation du workspace et
+l'envoient. `GITHUB_APP_INSTALLATION_ID` cesse d'être *l'*installation pour
+devenir un **défaut**, ce qui garde `packages/cli` fonctionnel contre un
+`apps/api` auto-hébergé. `GitHubAppConfig` a été scindé en identifiants et
+installation — le même découpage qu'`apps/web` a fait en #24, pour la même
+raison : fusionner « ce qu'est l'App » et « quelle installation » est ce qui ne
+laissait aucune place au choix.
 
-1. **Fonctionnelle, et c'est un blocage self-serve non listé.** Un client qui
-   connecte sa propre installation traduira, puis échouera à l'ouverture de la
-   PR — l'installation de l'opérateur n'atteint pas son dépôt. Le tunnel casse
-   au dernier pas, celui qui est le premier livrable (invariant 2).
-2. **De cloisonnement.** Rien dans l'API ne vérifie que l'appelant a le droit
-   d'écrire sur `owner/repo`. Ce qui l'empêche aujourd'hui est le contrôle
-   `canReachRepository` **côté appelant** (`run-actions.ts:86`) et le fait que
-   seul `apps/web` détient `LOCALIZE_API_TOKEN`. Une garantie portée par le
-   client, pas par le service.
+Ce qui reste, et qui est une garantie portée par le client et non par le
+service : `apps/api` authentifie un jeton, pas un workspace, donc il ne peut pas
+vérifier que l'installation nommée appartient à l'appelant. `apps/web` la dérive
+de l'organisation et détient seul `LOCALIZE_API_TOKEN`. Le garde-fou de dernier
+recours est celui de GitHub — un jeton d'installation n'atteint que ce que cette
+installation s'est vu accorder.
 
-Ce qui manque pour que ce soit un vrai produit multi-locataire côté GitHub n'est
-donc plus le stockage, mais deux choses : **le secret OAuth** — sans lui aucun
-client ne peut déclencher sa propre installation, et le bouton est absent plutôt
-que désactivé — et **le passage de l'`installation_id` du locataire à
-`/v1/open-pr`**, pour que l'écriture emprunte la même installation que la
-lecture.
+Il ne manque donc plus qu'une chose côté GitHub pour le multi-locataire :
+**le secret OAuth**, sans lequel aucun client ne peut déclencher sa propre
+installation — et le bouton est absent plutôt que désactivé.
 
 **Écart connu à l'invariant 5 (résidence des données UE) :** cette phase
 envoie du contexte extrait du code source (chemins de fichiers, noms de

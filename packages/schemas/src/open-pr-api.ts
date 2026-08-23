@@ -59,6 +59,37 @@ export const OpenPrApiRequestSchema = z.object({
   title: z.string().min(1),
   body: z.string(),
   files: z.array(OpenPrFileSchema).min(1),
+  /*
+   * Which App installation should open the pull request.
+   *
+   * There was no such field, and that was a self-serve blocker rather than a
+   * missing convenience. A multi-tenant caller resolves an installation per
+   * workspace to *read* the repository, then had no way to say so when
+   * *writing*: the service opened every tenant's pull request through the one
+   * installation named by its own `GITHUB_APP_INSTALLATION_ID`. A customer who
+   * connected their own installation would translate successfully and fail at
+   * the pull request, because the operator's installation does not reach their
+   * repository.
+   *
+   * Optional, and the optionality is the point rather than leniency. Two
+   * callers with different shapes share this route:
+   *
+   *   - a multi-tenant deployment (`apps/web`) knows the workspace and MUST
+   *     send its installation, so the write uses the same one as the read;
+   *   - a self-hosted single-tenant deployment (`packages/cli` against an
+   *     `apps/api` the same person runs) has exactly one installation and no
+   *     concept of choosing between them. Requiring the field would break it
+   *     for no gain — there is nothing there to isolate from.
+   *
+   * Omitted, the service falls back to its configured default. That fallback is
+   * a real limit and is written down rather than implied: the service trusts
+   * whoever holds its bearer token to name the correct installation. It does
+   * not know which tenant is calling, so it cannot check. What it does enforce
+   * is GitHub's own boundary — an installation token only reaches repositories
+   * that installation was granted, so naming one that cannot reach `owner/repo`
+   * fails rather than succeeding somewhere unintended.
+   */
+  installationId: z.number().int().positive().optional(),
 });
 export type OpenPrApiRequest = z.infer<typeof OpenPrApiRequestSchema>;
 

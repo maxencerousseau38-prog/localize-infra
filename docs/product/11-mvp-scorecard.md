@@ -48,7 +48,7 @@ stands entirely undisturbed.
 | `/runs`, `/runs/[id]`, `/locales`, `/ambiguity`, `/review`, `/[org]/projects`, `/[org]/projects/[project]` read Postgres under RLS | 98 e2e tests, including 18 against a seeded workspace with real runs |
 | Three deployments live | `/health` 200 on the API, 200 on site and web, probed 2026-08-21 |
 | API is fail-closed | Refuses to start without `API_AUTH_TOKEN`; `/v1/translate` returns 401 without a bearer and with a wrong one, verified in production |
-| Cross-tenant isolation on GitHub — **reads only** | `resolveInstallation` cannot express the shared installation — it is a type error, not a runtime check (#24). **Writes are not isolated:** `/v1/open-pr` takes no installation id and opens every tenant's pull request through the API's own `GITHUB_APP_INSTALLATION_ID` — see blocker 2b |
+| Cross-tenant isolation on GitHub — reads **and** writes | `resolveInstallation` cannot express the shared installation — it is a type error, not a runtime check (#24). Writes now use the same installation: `/v1/open-pr` takes an `installationId` and both callers send the workspace's own (blocker 2b, fixed). The service still trusts its authenticated caller to name the right one — that half is a caller-side guarantee, and is stated as one |
 | Open-redirect protection on sign-in | `safeNext` covered by an e2e test, verified by deleting the guard and watching it fail |
 | The translation pipeline answers a real workload | 250 corpus strings through the real handler against the live API: 250 translated, 0 missing, twice (#26) |
 | Model and settings choice | Benchmarked over 414 corpus entries in 3 configurations — `docs/product/10-model-benchmark.md` |
@@ -99,23 +99,34 @@ URL set to `https://localize-infra-web.vercel.app/github/callback`.
 **Done when:** a workspace other than the operator's completes an installation
 and `organization_github_installations` holds its row.
 
-### 2b. Pass the tenant's installation to `/v1/open-pr` — *mine, found 2026-08-23*
-Clearing blocker 2 is necessary but not sufficient. A customer who connects
-their own installation will translate successfully and then fail at the last
-step: `apps/api` opens every pull request through the single
-`GITHUB_APP_INSTALLATION_ID` in its own environment, which does not reach their
-repository. The read path resolves per organisation; the write path does not.
+### ~~2b. Pass the tenant's installation to `/v1/open-pr`~~ — *fixed 2026-08-23*
+`/v1/open-pr` now takes an optional `installationId` and acts as it; both
+`apps/web` callers resolve the workspace's own installation and send it, so the
+write uses the same one as the read. `GITHUB_APP_INSTALLATION_ID` is demoted
+from *the* installation to a default for single-tenant deployments, which is
+what keeps `packages/cli` working against a self-hosted `apps/api`.
 
-This has never been observed failing because the only journey ever run used the
-operator's installation for both halves, where the two happen to coincide.
+The API's `GitHubAppConfig` was split into credentials and installation — the
+same split `apps/web` made on the read path in #24, and for the same reason:
+fusing "what the App is" with "which installation to act as" is what left a
+request no way to choose.
 
-**Evidence:** `apps/api/src/index.ts:58` reads the id from the environment;
-`open-pr/route.ts` contains no `installationId` and its request schema has no
-field for one.
+**Verified:** the route acts as the installation the request names and not the
+configured one, checked by reintroducing the defect and watching exactly two
+tests fail and eleven pass. Against the deployed API, a request naming an
+installation the service is not configured with is answered by *that*
+installation failing, not by the default quietly succeeding.
 
-**Done when:** `/v1/open-pr` takes an installation id, the API acts as it, and a
-run on a repository the operator's installation cannot reach opens a pull
-request anyway.
+**Not verified, and it needs blocker 2:** a real second installation. Nobody but
+the operator has one, so "a repository the operator's installation cannot reach"
+has no subject yet. What is closed is the mechanism; the end-to-end proof waits
+on a second tenant existing.
+
+**Still held by the caller, not the service:** `apps/api` authenticates a bearer
+token, not a workspace, so it cannot check that the installation a request names
+belongs to the caller. `apps/web` derives it from the organisation and is the
+only holder of the token. GitHub's own boundary is the backstop — an
+installation token reaches only what that installation was granted.
 
 ### 3. Publish the CLI to npm — *owner*
 The interface offers it as the fallback when GitHub is unavailable, and it does
