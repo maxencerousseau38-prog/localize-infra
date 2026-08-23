@@ -49,9 +49,27 @@ export function createAnthropicProvider(
      * repository's own prompt and corpus: at 40 strings the model spent all
      * 4096 tokens reasoning and emitted an empty content block, so `translate`
      * below threw and the run failed. Reproduced at 80. A 100-string batch at
-     * the effort below needs 5,603.
+     * the effort below needed 5,603.
+     *
+     * **16384 since 2026-08-24**, because that last figure changed. Tuning
+     * escalation to the owner's target added a `cue` field the model fills
+     * before answering, and output per string went from 60 to 73 measured on
+     * the same 414-entry corpus. A full 100-string chunk now emits about
+     * 7,300 — still under 8192, but past the headroom a chunk needs, since a
+     * string the model escalates costs roughly 239 tokens rather than 73 and
+     * a chunk with a dozen of them would have truncated.
+     *
+     * `packages/pricing/src/model.test.ts` caught this, not a production
+     * failure: it asserts a chunk fits under 75% of the ceiling, and 7,300
+     * against 6,144 failed the moment the measured input was updated.
+     *
+     * Raised rather than chunking smaller because this ceiling is billed on
+     * what is emitted, not on what is allowed. Halving the chunk size would
+     * have re-sent the system prompt twice as often and paid for it in input
+     * tokens; raising the ceiling costs nothing until the tokens are actually
+     * used.
      */
-    maxTokens = 8192,
+    maxTokens = 16384,
     /*
      * Batch translation is not a reasoning task, and paying for reasoning here
      * bought a failure rather than accuracy.

@@ -97,10 +97,25 @@ export const MEASURED = {
      */
     asConfigured: 159,
     /**
-     * With `output_config: { effort: 'low' }`. 5603/100.
-     * Nearly 3x cheaper than the default, and it scales.
+     * With `output_config: { effort: 'low' }`, as production sends.
+     *
+     * **73, re-measured 2026-08-24** over the full 414-entry corpus:
+     * 30,269 output tokens / 414 strings. It was 56, from 5603/100 on a
+     * hundred-string sample, and the difference is not sampling noise — the
+     * same corpus measured 59.8 immediately before the change and 73.1
+     * immediately after.
+     *
+     * The change is the `cue` field. Tuning escalation to the owner's target
+     * (60% recall at ≥80% precision) required the model to write down what
+     * forced a choice and what settled it before answering; an unwritten step
+     * was a step not taken. That reasoning is output tokens, and output tokens
+     * are five times the price of input on this model.
+     *
+     * So invariant 4 now has two lines on the bill rather than one: this,
+     * paid on **every** string, and `outputTokensPerAmbiguousString` below,
+     * paid only on the ones it raises. See `docs/product/12-ambiguity-benchmark.md`.
      */
-    effortLow: 56,
+    effortLow: 73,
     /** `claude-haiku-4-5` with thinking disabled. 2185/40. Quality unmeasured. */
     haikuThinkingDisabled: 55,
   },
@@ -124,23 +139,34 @@ export const PIPELINE = {
   /**
    * `max_tokens` on the Anthropic call (apps/api/src/router/anthropic.ts).
    *
-   * 8192 now. It was 4096, and that did not merely truncate — it returned
-   * nothing. Arithmetic said 4096 bounded a request at 4096/65 ≈ 63 strings;
-   * arithmetic was wrong, because adaptive thinking spends the same budget.
-   * Verified at 40 and at 80 strings: both spent the full 4096 tokens on
-   * thinking and produced an empty content block.
+   * 16384 now, and it has moved twice for two different reasons.
+   *
+   * It was 4096, and that did not merely truncate — it returned nothing.
+   * Arithmetic said 4096 bounded a request at 4096/65 ≈ 63 strings; arithmetic
+   * was wrong, because adaptive thinking spends the same budget. Verified at
+   * 40 and at 80 strings: both spent the full 4096 tokens on thinking and
+   * produced an empty content block. That took it to 8192.
+   *
+   * 8192 then stopped being enough when the escalation tuning added the `cue`
+   * field: output per string went 60 → 73, so a full 100-string chunk emits
+   * ~7,300 and no longer clears the 75% headroom a chunk needs — a chunk with
+   * a dozen escalations at 239 tokens each would have truncated. `model.test.ts`
+   * caught it the moment `effortLow` was updated, before any run failed.
    */
-  maxOutputTokensPerRequest: 8192,
+  maxOutputTokensPerRequest: 16384,
 
   /**
    * `output_config.effort` on the Anthropic call.
    *
-   * `low` collapses the thinking that was consuming the whole budget: 56
+   * `low` collapses the thinking that was consuming the whole budget: 73
    * measured output tokens per string against 159 at the default. It is both
-   * the correctness fix and a 2.8x saving.
+   * the correctness fix and a 2.2x saving — it was 2.8x before the `cue` field
+   * raised the numerator.
    *
-   * Its effect on **quality** is unmeasured. `packages/eval` is what settles
-   * that and has not been run on this question.
+   * Its effect on **quality** is now measured, and it is nil: re-running the
+   * 414-entry harness across the prompt change gave chrF 75.20 against 75.23,
+   * identical exact-match, 100% placeholder integrity and zero glossary
+   * violations. See `docs/product/12-ambiguity-benchmark.md`.
    */
   effort: 'low',
 

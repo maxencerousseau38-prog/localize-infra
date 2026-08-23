@@ -98,12 +98,21 @@ Two consequences beyond the obvious one:
 | Configuration | Output tokens/string | Works at 40 | Works at 100 |
 |---|---:|---|---|
 | As configured (`max_tokens: 4096`) | 159 | no | no |
-| `output_config: { effort: 'low' }` | **56** | yes | yes |
+| `output_config: { effort: 'low' }` | **73** | yes | yes |
 | `thinking: { type: 'disabled' }` | 100 | yes | — |
 | `claude-haiku-4-5`, thinking disabled | 55 | yes | — |
 
-`effort: low` is both the correctness fix and a 2.8× cost reduction. All three
+`effort: low` is both the correctness fix and a 2.2× cost reduction. All three
 parts shipped together, because each is useless without the others:
+
+**That figure was 56 and a 2.8× reduction until 2026-08-24.** Tuning escalation
+to the owner's target added a `cue` field the model fills before answering, and
+output per string rose to 73 — re-measured over the whole 414-entry corpus
+rather than a hundred-string sample, which is also why it is more trustworthy
+than the number it replaces. Every cost figure below moves with it; they are
+generated from `packages/pricing`, not written here. The knock-on: a full
+100-string chunk now emits ~7,300 output tokens, which pushed `max_tokens` from
+8,192 to 16,384 — caught by a test, not by a failure.
 
 1. `output_config: { effort: 'low' }` and `max_tokens` raised to 8,192, in
    `apps/api/src/router/anthropic.ts`.
@@ -159,7 +168,7 @@ and real `POST /v1/messages` calls, using the `INSTRUCTIONS` constant read from
 |---|---:|
 | System prompt, billed once per request | 610 tokens |
 | Input per string, with file path, component and surrounding code | 219 tokens |
-| Output per string at `effort: low`, thinking included | 56 tokens |
+| Output per string at `effort: low`, thinking included | 73 tokens |
 | Output per string at the default effort, thinking included | 159 tokens |
 | Extra output for an escalated string (question + alternatives) | +174 tokens |
 
