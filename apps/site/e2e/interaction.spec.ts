@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { CLI_PUBLISHED_TO_NPM } from '../src/lib/constants';
 import { SITE_URL } from '../src/lib/routes';
 
 const ROUTES = [
@@ -218,14 +219,34 @@ test.describe('published numbers trace to the artifact', () => {
   });
 });
 
-test.describe('the install claim is qualified', () => {
-  // @localize-infra/cli is not on npm. The hero still shows the command it is
-  // heading for, so the qualification is what keeps the page truthful.
-  test('the landing page says the command is not published yet', async ({
+/*
+ * Whether the CLI is on npm is one fact, `CLI_PUBLISHED_TO_NPM`, and two pages
+ * make a claim that depends on it. These tests read the same constant, so the
+ * suite fails whenever the flag and the copy disagree — in either direction.
+ *
+ * That matters more than it looks. The failure this guards against is not a
+ * page saying "not published" after publishing; it is the opposite, a page
+ * promising an `npx` that 404s for every visitor who copies it. Asserting one
+ * fixed wording would have gone stale silently the day the flag moved.
+ */
+test.describe('the install claim matches whether the package exists', () => {
+  test('the landing page qualifies the command truthfully', async ({
     page,
   }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await expect(page.getByText(/not published to npm yet/i)).toBeVisible();
+
+    if (CLI_PUBLISHED_TO_NPM) {
+      // Published, and still not self-sufficient: the translation step needs an
+      // API the reader runs themselves. Saying only "it's on npm" would be true
+      // and misleading.
+      await expect(
+        page.getByText(/needs an API you run yourself/i),
+      ).toBeVisible();
+      await expect(page.getByText(/not published to npm/i)).toHaveCount(0);
+    } else {
+      await expect(page.getByText(/not published to npm yet/i)).toBeVisible();
+    }
+
     // The disclaimer must hand the reader somewhere that works. The link's
     // label moved from "see the docs" to "Install guide" when the hero was
     // recomposed; what matters is that the route is reachable from the
@@ -235,8 +256,37 @@ test.describe('the install claim is qualified', () => {
 
   test('/docs leads with the same limitation', async ({ page }) => {
     await page.goto('/docs', { waitUntil: 'networkidle' });
+
+    if (CLI_PUBLISHED_TO_NPM) {
+      await expect(
+        page.getByText(
+          /installing it is not the same as being able to use it/i,
+        ),
+      ).toBeVisible();
+      // The status block must send the reader to the refusal rather than
+      // re-quoting it: "When it refuses" already documents that exact message,
+      // and a second verbatim copy is the kind of duplication that drifts.
+      const status = page.getByRole('region', { name: /before you start/i });
+      await expect(
+        status.getByRole('link', { name: /missing-token refusal/i }),
+      ).toHaveAttribute('href', '#errors');
+      await expect(
+        page.getByText(/The CLI is not published to npm yet/i),
+      ).toHaveCount(0);
+    } else {
+      await expect(
+        page.getByText(/The CLI is not published to npm yet/i),
+      ).toBeVisible();
+    }
+  });
+
+  test('the copyable command is the npm one either way', async ({ page }) => {
+    // The hero shows the command the product is heading for whether or not it
+    // resolves yet — DESIGN.md §4.5.3 demotes an unavailable primary action
+    // rather than hiding it. What changes is the sentence beneath it.
+    await page.goto('/', { waitUntil: 'networkidle' });
     await expect(
-      page.getByText(/The CLI is not published to npm yet/i),
+      page.getByText('npx @localize-infra/cli init').first(),
     ).toBeVisible();
   });
 });

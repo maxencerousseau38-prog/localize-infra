@@ -133,18 +133,28 @@ Vérifié, puis re-vérifié après la bascule : le même appel renvoie désorma
 `Invalid login credentials`.
 
 **Cette phrase ajoutait « La base de production ne contient aucun compte ».
-Ce n'est plus vrai, et c'est une bonne nouvelle plutôt qu'une régression :** un
-compte tiers réel s'est inscrit le 2026-08-18 (domaine `casselin.com`), a créé
-l'organisation `layersky` dont il est `owner`, est revenu le 19, puis s'est
-arrêté — zéro projet, zéro run, zéro installation. Ce n'est pas le compte semé,
-qui reste refusé.
+Ce n'est plus vrai :** la base contient un compte, créé le 2026-08-18, qui a
+créé l'organisation `layersky`. Ce n'est pas le compte semé, qui reste refusé.
 
-Là où il s'est arrêté est la donnée la plus utile que ce dépôt possède
-aujourd'hui : arrivé sur `/layersky/projects`, il a lu que connecter GitHub
-n'est pas disponible sur ce déploiement, avec pour seule porte de sortie « le
-CLI fonctionne toujours sur un clone local » — un CLI qui n'est pas publié sur
-npm. Le tunnel s'arrête donc sur deux manques précis, tous deux hors du code :
-le secret OAuth, et la publication du paquet.
+**Ce paragraphe a affirmé qu'il s'agissait d'un « compte tiers réel » et que
+c'était « la donnée la plus utile que ce dépôt possède ». C'était faux.** Le
+compte appartient au propriétaire — confirmé par lui le 2026-08-23, et
+recoupé par le fait que `npm whoami` renvoie `layersky`. Il avait été lu comme
+une inscription indépendante parce que l'adresse est sur un autre domaine que
+celui habituel du propriétaire : une déduction à partir d'un domaine e-mail,
+écrite comme un fait sur un inconnu, sans rien vérifier.
+
+Ce qui subsiste, parce que cela ne dépend pas de l'identité du compte : le
+tunnel se termine en cul-de-sac. Un workspace sans installation GitHub arrive
+sur `/layersky/projects` et lit que connecter GitHub n'est pas disponible sur ce
+déploiement, avec pour seule porte de sortie « le CLI fonctionne toujours sur un
+clone local » — un CLI qui n'est pas publié sur npm. C'est vérifiable dans le
+code et sur le déploiement, et c'est pourquoi le secret OAuth et la publication
+du paquet sont des bloquants.
+
+**Il n'existe toujours aucune preuve que quiconque hors de ce projet le
+veuille.** `docs/product/08-critique.md` §C1 — zéro recherche primaire, personas
+inventés — reste entièrement valable.
 
 La phrase « NOT for production » n'empêchait rien, donc la règle est maintenant
 appliquée et non plus écrite. La base de production porte une marque posée hors

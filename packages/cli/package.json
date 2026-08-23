@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "localize-infra": "./dist/index.js"
+    "localize-infra": "dist/index.js"
   },
   "scripts": {
     "prepublishOnly": "npm run build -w @localize-infra/schemas -w @localize-infra/core && npm run build",
@@ -41,5 +41,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

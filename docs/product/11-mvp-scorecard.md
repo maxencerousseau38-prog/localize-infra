@@ -16,13 +16,27 @@ part.
 **No.** Two of the blockers are outside the code and are the owner's to clear;
 the rest are listed below in dependency order.
 
-The most useful evidence this repository has on that question is not an
-opinion. A real third party signed up on production on 2026-08-18 from a
-`casselin.com` address, created the `layersky` workspace, came back on the 19th,
-and stopped. Zero projects, zero runs, zero installations. They reached
-`/layersky/projects` and read that connecting GitHub is unavailable on this
+**This section previously claimed a real third party had signed up and stopped,
+and called it the most useful evidence in the repository. That was wrong.**
+
+The production database holds one account, which created the `layersky`
+workspace on 2026-08-18. It belongs to the owner. It was read as an independent
+signup because the address is on a different domain from the owner's usual one —
+an inference from an email domain, presented as a fact about a stranger. Nothing
+was verified before it was written down, and it was load-bearing: a scorecard
+whose stated rule is that a row is green only if something was run had a claim
+about market interest resting on a guess.
+
+What survives, because it does not depend on who the account belongs to: the
+funnel dead-ends. A workspace with no GitHub installation reaches
+`/layersky/projects` and reads that connecting GitHub is unavailable on this
 deployment, with one way out — *"The CLI still works against a local clone"* —
-pointing at a CLI that is not published.
+pointing at a CLI that is not published. That is verifiable from the code and
+the deployment, and it is why blockers 2 and 3 below are blockers.
+
+**There is still no evidence that anybody outside this project wants it.**
+`08-critique.md` §C1 — zero primary research, personas that are inventions —
+stands entirely undisturbed.
 
 ---
 
