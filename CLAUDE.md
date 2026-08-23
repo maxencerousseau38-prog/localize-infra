@@ -150,11 +150,27 @@ est identique à l'octet près (184 611), donc retirer ces deux variables n'a ri
 changé pour l'application. C'est la seule preuve qui compte, l'absence
 d'appelant n'étant qu'un argument.
 
-**Manquent, et c'est ce qui bloque le self-serve :** `GITHUB_OAUTH_CLIENT_ID` et
-`GITHUB_OAUTH_CLIENT_SECRET`. Sans eux le callback ne peut pas prouver que celui
-qui l'achève possède réellement l'installation qu'il nomme, donc le flux est
-coupé — et l'interface le dit, plutôt que de stocker un `installation_id` non
-vérifié.
+**Ce paragraphe disait que `GITHUB_OAUTH_CLIENT_ID` et
+`GITHUB_OAUTH_CLIENT_SECRET` manquaient tous les deux. Le premier est configuré
+depuis le 2026-08-23**, obtenu par `GET /app` authentifié comme l'App avec la
+clé privée déjà présente dans `.env` : le `client_id` est public par
+construction, il figure dans toute URL d'autorisation.
+
+**Le secret, lui, n'est récupérable par aucune API** — GitHub ne l'affiche
+qu'une fois, à la génération, dans les réglages de l'App. C'est cette asymétrie,
+et non un oubli, qui fait que la moitié de ce blocage était automatisable et
+l'autre non.
+
+Ajouter le `client_id` seul ne peut rien activer à moitié : `readOAuthConfig()`
+renvoie `null` sans la paire, et `canInstall` en dépend. Le flux reste donc coupé
+et continue de le dire, plutôt que de stocker un `installation_id` non vérifié.
+
+Restent aussi deux réglages sur l'App, ni modifiables ni **lisibles** par API :
+« Request user authorization (OAuth) during installation », et l'URL de callback
+`https://localize-infra-web.vercel.app/github/callback`. Sonder
+`login/oauth/authorize` ne les révèle pas — GitHub redirige vers sa page de
+connexion avant de valider `redirect_uri`, donc une URL enregistrée et une URL
+inconnue répondent à l'identique. Vérifié : ce raccourci n'existe pas.
 
 **Deux projets Supabase, séparés depuis le 2026-08-17.** Développement et
 tests d'acceptation : `localize-infra` (`aguwalokxfgtqbzmdjbs`). Production :
