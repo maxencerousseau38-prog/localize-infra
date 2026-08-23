@@ -75,7 +75,7 @@ stands entirely undisturbed.
 |---|---|
 | **Does a real customer journey work end to end?** | **The pipeline: yes, verified 2026-08-22 — see blocker 5.** Sign in → connect → run → escalate → answer → approve → pull request, in a browser against a real repository. **Self-serve: still no** — the OAuth connection was bypassed because the secret is missing, and no non-operator account has done it on production |
 | **Do humans think the translations are good?** | **Never measured.** `08-critique.md` §C2; no evaluators were ever recruited. chrF and exact match are reference-agreement proxies, not quality |
-| **Does the agent escalate when it should?** | **Partly answered.** It does escalate on genuinely context-free strings — verified end to end on *Left*, *New* and *Free*, and it correctly stayed silent on *Home* and *Close*, which their own markup disambiguates. Whether it escalates at the right *rate* is still unmeasured: 2 in 414 on a corpus containing nothing ambiguous by construction |
+| **Does the agent escalate when it should?** | **Answered, and the answer is mostly no.** Measured 2026-08-23 on 200 purpose-written cases through the production path: recall 14–24% across three runs, precision 82–88%, and only 12–20 of 100 pairs answered differently when the context changed. It asks good questions and asks too few of them — `12-ambiguity-benchmark.md`. This row previously said the rate was unmeasured; it no longer is |
 | **Would anyone pay $19/$99/$399?** | **No evidence.** `08-critique.md` §C1 stands: the personas are inventions and no customer has been interviewed |
 | **Which Vercel plan is this on?** | **Not verified.** Modelled at Pro because Hobby prohibits commercial use, so the first paying customer needs Pro regardless of traffic |
 | **How do the models handle ICU plurals?** | **No data.** The corpus contains zero ICU messages |
@@ -276,11 +276,37 @@ It did **not** help the broken configuration: default reasoning went from 90
 answered to zero at three times the cost. Retrying does not repair a model that
 cannot answer, and that row is in `10-model-benchmark.md` rather than omitted.
 
-### 7. Decide the escalation question — *mine, needs a decision from the owner on scope*
-Invariant 4 is the product's differentiator and has no real test. Needs a small
-corpus of deliberately ambiguous strings with the expected behaviour recorded.
-**Done when:** escalation precision and recall are measured on strings written
-to be ambiguous.
+### 7. Decide the escalation question — *measured 2026-08-23; the decision is now the owner's*
+**Measured, and invariant 4 does not hold.** A 200-case corpus — 100 pairs, the
+same string in a context that settles it and one that does not — through the
+production prompt and model, three runs:
+
+| | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|
+| Precision | 88.2% | 82.8% | 82.4% |
+| Recall | 15.0% | 24.0% | 14.0% |
+| Pairs discriminated | 13/100 | 20/100 | 12/100 |
+
+The agent translated 76–86 of the 100 genuinely ambiguous strings confidently,
+without asking. On the register category — where German or Japanese forces a
+formality English does not supply — it raised **nothing at all** in two runs of
+three. When it does ask, it is usually right to: precision holds at 82–88%.
+
+One run of this benchmark is not a number; recall moved by ten points across
+identical runs, which is why three are reported rather than one.
+
+Full method, per-category figures and limitations: `12-ambiguity-benchmark.md`.
+
+**What this changes.** The row below in *what is unknown* said escalation rate
+was unmeasured. It is measured now, and the answer is that the differentiator
+fires on roughly one ambiguous string in five. The prompt sets that bar
+deliberately — it forbids escalating merely because several translations exist
+— so this is a dial, not a defect, and where to set it is a product decision
+with a real cost on the other side.
+
+**Done when:** the owner decides the target — recall at what precision — and
+`INSTRUCTIONS` in `apps/api/src/translate/prompt.ts` is tuned to it, with this
+benchmark rerun to show the move.
 
 ### 8. Model unit economics into a published price — *mine, owner decides the numbers*
 The model exists; the prices in `09-unit-economics.md` are proposals with no

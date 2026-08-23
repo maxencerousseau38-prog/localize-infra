@@ -12,7 +12,8 @@
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p eval/tsconfig.json",
     "eval:models": "tsx eval/run.ts",
-    "eval:robustness": "tsx eval/robustness.ts"
+    "eval:robustness": "tsx eval/robustness.ts",
+    "eval:ambiguity": "tsx eval/ambiguity.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",
