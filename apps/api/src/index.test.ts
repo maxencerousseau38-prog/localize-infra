@@ -99,36 +99,51 @@ describe('app (real index.ts route wiring)', () => {
   });
 });
 
-describe('readGitHubAppConfig', () => {
+describe('readGitHubAppCredentials and readDefaultInstallationId', () => {
   async function loadModule() {
     process.env.API_AUTH_TOKEN = 'test-auth-token';
     vi.resetModules();
     return import('./index.js');
   }
 
-  it('returns null when required env vars are missing', async () => {
-    const { readGitHubAppConfig } = await loadModule();
-    expect(readGitHubAppConfig()).toBeNull();
+  it('returns null credentials when required env vars are missing', async () => {
+    const { readGitHubAppCredentials } = await loadModule();
+    expect(readGitHubAppCredentials()).toBeNull();
   });
 
-  it('returns null when GITHUB_APP_INSTALLATION_ID is not numeric (NaN guard)', async () => {
+  /*
+   * The App is configured even with no installation, and that is the whole
+   * point of the split.
+   *
+   * These were one function returning null unless all three were present, so a
+   * deployment holding valid App credentials and no default installation
+   * reported the App as unconfigured — and a request naming its own tenant
+   * installation, which needs nothing from the environment beyond the key,
+   * could never be served. `apps/web` hit the identical bug on the read path in
+   * #24, from the identical cause.
+   */
+  it('reports the App as configured when only the installation id is absent', async () => {
     process.env.GITHUB_APP_ID = 'app-123';
     process.env.GITHUB_APP_PRIVATE_KEY = 'fake-pem-content';
-    process.env.GITHUB_APP_INSTALLATION_ID = 'not-a-number';
-    const { readGitHubAppConfig } = await loadModule();
-    expect(readGitHubAppConfig()).toBeNull();
-  });
-
-  it('returns a config object with a numeric installationId when all env vars are valid', async () => {
-    process.env.GITHUB_APP_ID = 'app-123';
-    process.env.GITHUB_APP_PRIVATE_KEY = 'fake-pem-content';
-    process.env.GITHUB_APP_INSTALLATION_ID = '456';
-    const { readGitHubAppConfig } = await loadModule();
-    expect(readGitHubAppConfig()).toEqual({
+    const { readGitHubAppCredentials, readDefaultInstallationId } =
+      await loadModule();
+    expect(readGitHubAppCredentials()).toEqual({
       appId: 'app-123',
       privateKey: 'fake-pem-content',
-      installationId: 456,
     });
+    expect(readDefaultInstallationId()).toBeNull();
+  });
+
+  it('returns no default installation when GITHUB_APP_INSTALLATION_ID is not numeric (NaN guard)', async () => {
+    process.env.GITHUB_APP_INSTALLATION_ID = 'not-a-number';
+    const { readDefaultInstallationId } = await loadModule();
+    expect(readDefaultInstallationId()).toBeNull();
+  });
+
+  it('returns a numeric default installation when GITHUB_APP_INSTALLATION_ID is valid', async () => {
+    process.env.GITHUB_APP_INSTALLATION_ID = '456';
+    const { readDefaultInstallationId } = await loadModule();
+    expect(readDefaultInstallationId()).toBe(456);
   });
 
   it('reads the private key from GITHUB_APP_PRIVATE_KEY_PATH when GITHUB_APP_PRIVATE_KEY is not set', async () => {
@@ -138,12 +153,10 @@ describe('readGitHubAppConfig', () => {
     try {
       process.env.GITHUB_APP_ID = 'app-123';
       process.env.GITHUB_APP_PRIVATE_KEY_PATH = keyPath;
-      process.env.GITHUB_APP_INSTALLATION_ID = '456';
-      const { readGitHubAppConfig } = await loadModule();
-      expect(readGitHubAppConfig()).toEqual({
+      const { readGitHubAppCredentials } = await loadModule();
+      expect(readGitHubAppCredentials()).toEqual({
         appId: 'app-123',
         privateKey: 'fake-pem-content-from-file',
-        installationId: 456,
       });
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -158,9 +171,8 @@ describe('readGitHubAppConfig', () => {
       process.env.GITHUB_APP_ID = 'app-123';
       process.env.GITHUB_APP_PRIVATE_KEY = 'from-inline';
       process.env.GITHUB_APP_PRIVATE_KEY_PATH = keyPath;
-      process.env.GITHUB_APP_INSTALLATION_ID = '456';
-      const { readGitHubAppConfig } = await loadModule();
-      expect(readGitHubAppConfig()?.privateKey).toBe('from-inline');
+      const { readGitHubAppCredentials } = await loadModule();
+      expect(readGitHubAppCredentials()?.privateKey).toBe('from-inline');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -172,9 +184,8 @@ describe('readGitHubAppConfig', () => {
       tmpdir(),
       'this-file-does-not-exist.pem',
     );
-    process.env.GITHUB_APP_INSTALLATION_ID = '456';
-    const { readGitHubAppConfig } = await loadModule();
-    expect(readGitHubAppConfig()).toBeNull();
+    const { readGitHubAppCredentials } = await loadModule();
+    expect(readGitHubAppCredentials()).toBeNull();
   });
 
   it('causes /v1/open-pr to respond 501 (not configured) rather than crash, when installationId is non-numeric', async () => {

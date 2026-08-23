@@ -9,10 +9,14 @@ import {
   requireSession,
 } from '@/lib/data/workspace';
 import { materialiseRepository } from '@/lib/github/materialise';
-import { canReachRepository } from '@/lib/github/repositories';
+import {
+  canReachRepository,
+  installationIdFor,
+} from '@/lib/github/repositories';
 import { createClient } from '@/lib/supabase/server';
 import {
   buildKeyCatalog,
+  buildOpenPrRequest,
   detectFramework,
   extractFromProject,
   mergeLocaleFile,
@@ -52,13 +56,12 @@ type Stage = 'detect' | 'extract' | 'translate' | 'escalate' | 'pull_request';
  * one shared installation reaches every repository it was ever granted", which
  * the body of the function has contradicted since the gate was removed.
  *
- * The half that is still true, and is worth stating precisely because the two
- * halves differ: **reading** the repository acts as the workspace's own
- * installation, so it reaches only what that installation was granted.
- * **Opening the pull request does not.** It goes through `/v1/open-pr`, which
- * takes no installation id and uses the one in the API's own environment. So a
- * workspace whose installation the operator's does not cover will translate and
- * then fail at the last step. See blocker 2b in `docs/product/11-mvp-scorecard.md`.
+ * Reading the repository and writing the pull request now act as the same
+ * installation — the workspace's own. They did not: `/v1/open-pr` took no
+ * installation id, so every tenant's pull request came out of whichever one the
+ * API had in its environment, and a workspace the operator's installation did
+ * not cover would translate and then fail at the last step. The id is resolved
+ * once here, by `installationIdFor`, and used for both halves.
  */
 export async function startRun(
   orgSlug: string,
@@ -430,27 +433,54 @@ export async function startRun(
       localesSucceeded,
       localesFailed,
     });
+
+    /*
+     * The same installation the tree was read through.
+     *
+     * `materialiseRepository` has already resolved and used it above, so this
+     * cannot be null here in practice — it is re-resolved rather than threaded
+     * through because the alternative is a parameter that exists only to be
+     * carried, and re-reading is the cheaper of the two to keep correct. The
+     * refusal below is what makes the type non-optional at the call site rather
+     * than an assumption about the code above.
+     */
+    const installationId = await installationIdFor(organization.id);
+    if (!installationId) {
+      throw new Error(
+        'This workspace has no GitHub installation, so no pull request can be opened.',
+      );
+    }
+
     const prResponse = await fetch(`${apiUrl}/v1/open-pr`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiToken}`,
       },
-      body: JSON.stringify({
-        owner: project.repository_owner,
-        repo: project.repository_name,
-        baseBranch: project.repository_branch ?? 'main',
-        title: `Add translations (${project.target_locales.join(', ')})`,
-        // The shortfall is named in the pull request itself, because that is
-        // where the reviewer is. A body reporting only what worked leaves them
-        // to notice the gap by diffing key counts by hand.
-        body: `Extracted ${keysExtracted} strings from ${framework}, translated ${keysTranslated} into ${localesSucceeded} locale(s).${
-          keysMissing > 0
-            ? `\n\nNote: ${keysMissing} string(s) were not translated and are absent from these files. Re-run to attempt them again.`
-            : ''
-        }`,
-        files,
-      }),
+      // Same builder as the approval path in ambiguity-actions.ts, so the two
+      // cannot drift on what the envelope must contain. They have twice.
+      body: JSON.stringify(
+        buildOpenPrRequest(
+          {
+            owner: project.repository_owner,
+            repo: project.repository_name,
+            baseBranch: project.repository_branch ?? 'main',
+            installationId,
+          },
+          {
+            title: `Add translations (${project.target_locales.join(', ')})`,
+            // The shortfall is named in the pull request itself, because that
+            // is where the reviewer is. A body reporting only what worked
+            // leaves them to notice the gap by diffing key counts by hand.
+            body: `Extracted ${keysExtracted} strings from ${framework}, translated ${keysTranslated} into ${localesSucceeded} locale(s).${
+              keysMissing > 0
+                ? `\n\nNote: ${keysMissing} string(s) were not translated and are absent from these files. Re-run to attempt them again.`
+                : ''
+            }`,
+          },
+          files,
+        ),
+      ),
     });
 
     if (!prResponse.ok) {

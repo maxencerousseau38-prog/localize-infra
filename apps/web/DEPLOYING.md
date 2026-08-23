@@ -103,14 +103,16 @@ value. `isOperator` had no callers at all — the whitelist enforced nothing, an
 three places described it as what separated tenants (#24). It and the variable
 are both gone.
 
-What separates tenants on the **read** path is structural:
-`organization_github_installations` holds an installation per organisation and
-`resolveInstallation` cannot express a shared one. The **write** path is a
-different matter, and still open: `/v1/open-pr` takes no installation id and
-opens every tenant's pull request through the API's own
-`GITHUB_APP_INSTALLATION_ID`. So this is **still not multi-tenant on the GitHub
-side**, for a reason other than the one written here before — see blocker 2b in
-`docs/product/11-mvp-scorecard.md`.
+What separates tenants is structural on both paths now.
+`organization_github_installations` holds an installation per organisation,
+`resolveInstallation` cannot express a shared one, and `/v1/open-pr` takes an
+`installationId` so the pull request is opened by the same installation that
+read the repository. The write path did not do this and was blocker 2b.
+
+What is **not** yet multi-tenant is the step before all of it: no customer can
+trigger their own installation while `GITHUB_OAUTH_CLIENT_ID` /
+`GITHUB_OAUTH_CLIENT_SECRET` are missing, so in practice there is still one
+installation on this deployment — the operator's.
 
 **`GITHUB_OAUTH_CLIENT_ID` / `GITHUB_OAUTH_CLIENT_SECRET` are absent because the
 secret does not exist yet.** Without them the callback cannot prove that whoever

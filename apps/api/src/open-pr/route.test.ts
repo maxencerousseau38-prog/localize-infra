@@ -11,7 +11,13 @@ const validBody = {
   files: [{ path: 'locales/de.json', content: '{}' }],
 };
 
-const config = { appId: '123', privateKey: 'fake-key', installationId: 456 };
+const DEFAULT_INSTALLATION = 456;
+const TENANT_INSTALLATION = 789;
+
+const config = {
+  app: { appId: '123', privateKey: 'fake-key' },
+  defaultInstallationId: DEFAULT_INSTALLATION,
+};
 
 function fakeOps(
   overrides: Partial<GitHubAppOperations> = {},
@@ -28,7 +34,11 @@ function fakeOps(
 
 describe('openPrRouteHandler', () => {
   it('returns 501 when no GitHub App config is available', async () => {
-    const result = await openPrRouteHandler(validBody, null, fakeOps());
+    const result = await openPrRouteHandler(
+      validBody,
+      { app: null, defaultInstallationId: DEFAULT_INSTALLATION },
+      fakeOps(),
+    );
     expect(result.status).toBe(501);
   });
 
@@ -45,6 +55,105 @@ describe('openPrRouteHandler', () => {
       prNumber: 1,
     });
   });
+
+  /*
+   * The regression test for blocker 2b.
+   *
+   * Nothing here asserted *which* installation the pull request came out of,
+   * and the route had no way to be told: it passed its own configuration
+   * straight to `createClient`. So every tenant's pull request was opened by
+   * the operator's installation, and a customer with their own would have
+   * translated and then failed at the last step. The suite passed throughout,
+   * because "a pull request was opened" was the whole of what it checked.
+   *
+   * Asserting the negative alongside the positive is deliberate: with the
+   * fallback still in place, an implementation that ignored the request field
+   * would satisfy "called with an installation" and only this line catches it.
+   */
+  it('acts as the installation the request names, not the one it is configured with', async () => {
+    const createClient = vi.fn(async () => ({}) as never);
+    const result = await openPrRouteHandler(
+      { ...validBody, installationId: TENANT_INSTALLATION },
+      config,
+      fakeOps({ createClient }),
+    );
+
+    expect(result.status).toBe(200);
+    expect(createClient).toHaveBeenCalledWith(
+      expect.objectContaining({ installationId: TENANT_INSTALLATION }),
+    );
+    expect(createClient).not.toHaveBeenCalledWith(
+      expect.objectContaining({ installationId: DEFAULT_INSTALLATION }),
+    );
+  });
+
+  it('carries the App credentials through unchanged when the request names an installation', async () => {
+    const createClient = vi.fn(async () => ({}) as never);
+    await openPrRouteHandler(
+      { ...validBody, installationId: TENANT_INSTALLATION },
+      config,
+      fakeOps({ createClient }),
+    );
+
+    expect(createClient).toHaveBeenCalledWith({
+      appId: '123',
+      privateKey: 'fake-key',
+      installationId: TENANT_INSTALLATION,
+    });
+  });
+
+  /*
+   * The single-tenant path: `packages/cli` runs against an `apps/api` the same
+   * person operates, has exactly one installation, and sends no id. Requiring
+   * the field would have broken it for no isolation gain.
+   */
+  it('falls back to the configured installation when the request names none', async () => {
+    const createClient = vi.fn(async () => ({}) as never);
+    const result = await openPrRouteHandler(
+      validBody,
+      config,
+      fakeOps({ createClient }),
+    );
+
+    expect(result.status).toBe(200);
+    expect(createClient).toHaveBeenCalledWith(
+      expect.objectContaining({ installationId: DEFAULT_INSTALLATION }),
+    );
+  });
+
+  it('returns 501 when the request names no installation and none is configured', async () => {
+    const openPr = vi.fn(async () => ({
+      prUrl: 'https://example.com/pull/1',
+      prNumber: 1,
+    }));
+    const result = await openPrRouteHandler(
+      validBody,
+      {
+        app: { appId: '123', privateKey: 'fake-key' },
+        defaultInstallationId: null,
+      },
+      fakeOps({ openPr }),
+    );
+
+    expect(result.status).toBe(501);
+    // Refused before acting, not after failing somewhere inside GitHub.
+    expect(openPr).not.toHaveBeenCalled();
+  });
+
+  it.each([0, -1, 1.5])(
+    'rejects installationId %s rather than passing it to Octokit',
+    async (installationId) => {
+      const createClient = vi.fn(async () => ({}) as never);
+      const result = await openPrRouteHandler(
+        { ...validBody, installationId },
+        config,
+        fakeOps({ createClient }),
+      );
+
+      expect(result.status).toBe(400);
+      expect(createClient).not.toHaveBeenCalled();
+    },
+  );
 
   it('returns 502 when github-app throws', async () => {
     const ops = fakeOps({

@@ -5,9 +5,11 @@ import {
   findProject,
   requireSession,
 } from '@/lib/data/workspace';
+import { installationIdFor } from '@/lib/github/repositories';
 import { createClient } from '@/lib/supabase/server';
 import {
   buildLocaleFiles,
+  buildOpenPrRequest,
   describeApprovedPullRequest,
   unresolvedCount,
 } from '@localize-infra/core';
@@ -231,6 +233,24 @@ export async function approveRun(
     };
   }
 
+  /*
+   * The workspace's own installation, not the API's.
+   *
+   * Both callers of `/v1/open-pr` had to change for the same reason and this
+   * one is the easier to forget, because the approval path is reached by hand
+   * rather than by the unattended run. The route falls back to the API's
+   * configured installation when the field is absent, so omitting it here would
+   * not fail loudly — it would open the pull request from the wrong account, or
+   * fail only for the customers who are not the operator.
+   */
+  const installationId = await installationIdFor(organization.id);
+  if (!installationId) {
+    return {
+      error:
+        'This workspace has no GitHub installation, so no pull request can be opened.',
+    };
+  }
+
   let prUrl: string;
   let prNumber: number;
 
@@ -241,33 +261,36 @@ export async function approveRun(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiToken}`,
       },
-      body: JSON.stringify({
-        owner: project.repository_owner,
-        repo: project.repository_name,
-        baseBranch: project.repository_branch ?? 'main',
-        /*
-         * `title` and `body` were absent, and both are required by
-         * `OpenPrApiRequestSchema`. Approving a reviewed run answered
-         * 400 Bad Request and recorded the run failed — so the review gate,
-         * which is the product's differentiator, had never once opened a pull
-         * request.
-         *
-         * It survived because the two callers built their request bodies
-         * separately and only `run-actions.ts` was ever exercised end to end.
-         * Built by a pure function in `packages/core` now, tested against the
-         * same schema the API validates with.
-         */
-        ...describeApprovedPullRequest({
-          locales: project.target_locales,
-          keyCount: run.keys_extracted,
-          framework: run.framework,
-          decisions: decisions.map((d) => ({
-            state: d.state,
-            resolvedText: d.resolved_text,
-          })),
-        }),
-        files,
-      }),
+      /*
+       * The whole body comes from `packages/core`, not from a literal here.
+       *
+       * `title` and `body` were once absent from this call and both are
+       * required, so approving a reviewed run answered 400 and the review gate
+       * — the product's differentiator — had never once opened a pull request.
+       * `installationId` went missing from both callers the same way. Two
+       * separately-assembled literals for one contract is the shape that
+       * produced both, so the envelope is built in one tested place now.
+       */
+      body: JSON.stringify(
+        buildOpenPrRequest(
+          {
+            owner: project.repository_owner,
+            repo: project.repository_name,
+            baseBranch: project.repository_branch ?? 'main',
+            installationId,
+          },
+          describeApprovedPullRequest({
+            locales: project.target_locales,
+            keyCount: run.keys_extracted,
+            framework: run.framework,
+            decisions: decisions.map((d) => ({
+              state: d.state,
+              resolvedText: d.resolved_text,
+            })),
+          }),
+          files,
+        ),
+      ),
     });
 
     if (!response.ok) {
