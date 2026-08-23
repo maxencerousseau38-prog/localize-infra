@@ -62,7 +62,7 @@ stands entirely undisturbed.
 |---|---|
 | **Billing** | No Stripe integration anywhere in the repository. `/[org]/billing` says "Paid plans are not priced yet" |
 | **Published prices** | Blocked by `08-critique.md` §C3 until the unit-cost model existed. It now does, and prices are *proposed* in `09-unit-economics.md` — not published |
-| **Self-serve GitHub connection in production** | `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are absent from the production environment, verified by `vercel env ls production` on 2026-08-22 |
+| **Self-serve GitHub connection in production** | `GITHUB_OAUTH_CLIENT_ID` is set as of 2026-08-23; `GITHUB_OAUTH_CLIENT_SECRET` is still absent, verified by `vercel env ls production`. The flow needs both, so it remains unavailable — see blocker 2 |
 | **A published CLI** | `npm view @localize-infra/cli` returns 404, verified 2026-08-22 |
 
 | **A worker** | Runs execute inside the request. A large repository will outlive the serverless timeout, and nothing resumes it |
@@ -91,11 +91,34 @@ PR #26. Until it lands, the deployed pipeline returns nothing above roughly
 thirty strings. Everything below assumes it is merged.
 **Done when:** merged to `master` and `apps/web` redeployed.
 
-### 2. `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` — *owner*
-Without them no customer can connect a repository, and the interface correctly
-says so rather than storing an unverified installation id. The GitHub App also
-needs "Request user authorization during installation" enabled and its callback
-URL set to `https://localize-infra-web.vercel.app/github/callback`.
+### 2. `GITHUB_OAUTH_CLIENT_SECRET`, and two App settings — *owner*
+Without the secret no customer can connect a repository, and the interface
+correctly says so rather than storing an unverified installation id.
+
+**`GITHUB_OAUTH_CLIENT_ID` is set** on the web production environment as of
+2026-08-23. It did not need the owner: `GET /app`, authenticated as the App with
+the private key already in `.env`, returns `client_id`. It does **not** return
+`client_secret` — GitHub shows that once, at generation, in the App settings —
+which is the whole of why this blocker is still open and why the remaining half
+cannot be automated.
+
+Setting the id alone cannot half-enable anything: `readOAuthConfig()` returns
+null unless both are present, and `canInstall` in `github-connection.tsx` is
+gated on that. So the flow stays unavailable and keeps saying so.
+
+Two settings on the App itself remain, and neither is writable through the API —
+GitHub App settings are UI-only:
+
+- "Request user authorization (OAuth) during installation" enabled. Without it
+  GitHub omits `code` from the callback, and the route refuses with
+  `missing-code` rather than trusting the installation id;
+- the callback URL set to `https://localize-infra-web.vercel.app/github/callback`.
+
+**Neither was verifiable from here.** `GET /app` exposes no field for either,
+and probing `login/oauth/authorize` is inconclusive: GitHub redirects to its
+login page before validating `redirect_uri`, so a registered and an unregistered
+URL answer identically. Confirming them needs the App's settings page.
+
 **Done when:** a workspace other than the operator's completes an installation
 and `organization_github_installations` holds its row.
 

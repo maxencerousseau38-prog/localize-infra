@@ -76,7 +76,8 @@ from reading the toggle.
 | `GITHUB_APP_ID` | yes | Reading the repository tree |
 | `GITHUB_APP_PRIVATE_KEY` | yes | The PEM inline; the `_PATH` form is local-only |
 | `GITHUB_APP_SLUG` | yes | Builds the App installation URL |
-| `GITHUB_OAUTH_CLIENT_ID` / `_SECRET` | **no** | Not yet created — see below |
+| `GITHUB_OAUTH_CLIENT_ID` | yes | Proves the caller owns the installation they name. Read from `GET /app` — see below |
+| `GITHUB_OAUTH_CLIENT_SECRET` | **no** | The one thing still blocking self-serve. Not retrievable by API — see below |
 
 **Two rows left this table on 2026-08-23**, removed from the project rather
 than merely undocumented: `GITHUB_APP_INSTALLATION_ID` and
@@ -114,13 +115,36 @@ trigger their own installation while `GITHUB_OAUTH_CLIENT_ID` /
 `GITHUB_OAUTH_CLIENT_SECRET` are missing, so in practice there is still one
 installation on this deployment — the operator's.
 
-**`GITHUB_OAUTH_CLIENT_ID` / `GITHUB_OAUTH_CLIENT_SECRET` are absent because the
-secret does not exist yet.** Without them the callback cannot prove that whoever
-completes an install actually owns it, so `GitHubConnection` renders the flow as
-unavailable and explains why rather than storing an unverified installation id.
-Creating them requires ticking "Request user authorization (OAuth) during
-installation" on the App and setting the callback URL to
-`https://localize-infra-web.vercel.app/github/callback`.
+**`GITHUB_OAUTH_CLIENT_ID` is set; `GITHUB_OAUTH_CLIENT_SECRET` is not.** The id
+came from `GET /app` authenticated as the App — it is public by construction, it
+appears in every authorize URL a user sees. The secret is not retrievable by any
+API: GitHub shows it once, at generation, in the App's settings page. That
+asymmetry is the reason one half of this was automatable and the other was not.
+
+The flow stays unavailable until both are present — `readOAuthConfig()` returns
+null unless it has the pair — so the callback still cannot prove that whoever
+completes an install actually owns it, and `GitHubConnection` still says so
+rather than storing an unverified installation id. Adding the id alone changes
+nothing a customer can see, by design.
+
+Two settings on the App remain, and neither is writable through the API:
+ticking "Request user authorization (OAuth) during installation", and setting
+the callback URL to `https://localize-infra-web.vercel.app/github/callback`.
+Neither is *readable* through the API either — `GET /app` has no field for them,
+and probing `login/oauth/authorize` cannot tell a registered callback URL from
+an unregistered one, because GitHub redirects to its login page before it
+validates `redirect_uri`. Checked, and it is not a shortcut that exists.
+
+The secret is added by whoever generates it, in their own terminal:
+
+```sh
+VERCEL_ORG_ID=team_jkFQHiZ8OitJujErZvg9oJFb \
+VERCEL_PROJECT_ID=prj_L5FZPh16GE88nLtgPbOnb2LR5e3f \
+npx vercel env add GITHUB_OAUTH_CLIENT_SECRET production
+```
+
+It prompts for the value, so the secret never travels through a shell history
+line, a file, or a conversation.
 
 ## Production has its own database
 
