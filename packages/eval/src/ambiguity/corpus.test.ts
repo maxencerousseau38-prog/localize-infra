@@ -24,10 +24,29 @@ describe('the ambiguity corpus', () => {
     }
   });
 
-  it('holds 200 cases, balanced', () => {
-    expect(cases).toHaveLength(200);
-    expect(cases.filter((c) => c.expected === 'escalate')).toHaveLength(100);
-    expect(cases.filter((c) => c.expected === 'confident')).toHaveLength(100);
+  it('holds 280 cases, balanced', () => {
+    expect(cases).toHaveLength(280);
+    expect(cases.filter((c) => c.expected === 'escalate')).toHaveLength(140);
+    expect(cases.filter((c) => c.expected === 'confident')).toHaveLength(140);
+  });
+
+  it('records which cohort each case belongs to', () => {
+    expect(cases.filter((c) => c.cohort === 'core')).toHaveLength(200);
+    expect(cases.filter((c) => c.cohort === 'polysemy-2')).toHaveLength(80);
+  });
+
+  /*
+   * The second cohort exists to be unseen, which is only true if its words are
+   * genuinely new. A rephrasing of a case the prompt was fitted to would look
+   * like fresh material and measure the fitting.
+   */
+  it('shares no source text between the two cohorts', () => {
+    const core = new Set(
+      cases.filter((c) => c.cohort === 'core').map((c) => c.sourceText),
+    );
+    for (const c of cases.filter((x) => x.cohort === 'polysemy-2')) {
+      expect(core.has(c.sourceText)).toBe(false);
+    }
   });
 
   it('gives every case a unique id', () => {
@@ -46,7 +65,7 @@ describe('the ambiguity corpus', () => {
     const pairIds = [...new Set(cases.map((c) => c.pairId))];
 
     it('has exactly one escalate and one confident half per pair', () => {
-      expect(pairIds).toHaveLength(100);
+      expect(pairIds).toHaveLength(140);
       for (const pairId of pairIds) {
         const halves = cases.filter((c) => c.pairId === pairId);
         expect(halves).toHaveLength(2);
@@ -112,9 +131,50 @@ describe('the ambiguity corpus', () => {
     for (const c of cases) {
       counts.set(c.category, (counts.get(c.category) ?? 0) + 1);
     }
-    expect(counts.get('polysemy')).toBe(120);
+    expect(counts.get('polysemy')).toBe(200);
     expect(counts.get('insufficient-grammar')).toBe(50);
     expect(counts.get('register')).toBe(30);
+  });
+
+  /*
+   * The open half must leak nothing.
+   *
+   * A first draft of the second cohort gave "Fork" the neighbours Copy, Split
+   * and Duplicate — words that point straight at the repository sense. That is
+   * the componentName mistake in another costume: a field meant to withhold
+   * context quietly supplying it, and an agent marked wrong for reading what
+   * was there. Every open context now draws from a fixed pool of contentless
+   * labels, which is checkable rather than a matter of judgement.
+   */
+  it('gives the second cohort open contexts that carry no domain content', () => {
+    const allowed = new Set([
+      'label.item',
+      'label.value',
+      'label.name',
+      'label.entry',
+      'label.detail',
+      'label.field',
+      'label.one',
+      'label.two',
+      'label.three',
+    ]);
+    const open = cases.filter(
+      (c) => c.cohort === 'polysemy-2' && c.expected === 'escalate',
+    );
+    expect(open).toHaveLength(40);
+    for (const c of open) {
+      const siblings = [...c.surroundingCode.matchAll(/"([^"]+)":/g)]
+        .map((m) => m[1] as string)
+        .filter((k) => k !== c.id.replace('-open', ''));
+      const foreign = siblings.filter(
+        (k) =>
+          !allowed.has(k) &&
+          !c.surroundingCode.includes(
+            `"${k}": ${JSON.stringify(c.sourceText)}`,
+          ),
+      );
+      expect(foreign).toEqual([]);
+    }
   });
 
   it('puts the string under test inside its own surrounding code', () => {

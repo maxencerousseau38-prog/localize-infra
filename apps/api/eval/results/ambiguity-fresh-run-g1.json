@@ -1,0 +1,567 @@
+{
+  "modelId": "claude-sonnet-5",
+  "inputTokens": 26461,
+  "outputTokens": 10654,
+  "observations": [
+    {
+      "caseId": "branch-open",
+      "observed": "escalate",
+      "question": "Does 'Branch' refer to a version-control/code branch, an organizational branch, or a tree branch?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "bug-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "host-open",
+      "observed": "escalate",
+      "question": "Does 'Host' refer to a server/network host or a person hosting an event/meeting?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "key-2-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "drive-open",
+      "observed": "escalate",
+      "question": "Does 'Drive' refer to a storage/disk drive or to motivation/ambition?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "stage-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "flag-open",
+      "observed": "escalate",
+      "question": "Does 'Flag' refer to a country/banner flag or a boolean/marker flag?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "palette-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "head-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "patch-open",
+      "observed": "escalate",
+      "question": "Does 'Patch' refer to a software update/diff or a physical patch (e.g., cloth patch)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "cell-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "pool-open",
+      "observed": "escalate",
+      "question": "Does 'Pool' refer to a resource/connection pool, a swimming pool, or something else?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "mount-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "release-open",
+      "observed": "escalate",
+      "question": "Does 'Release' refer to a software/product release or the act of releasing something?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "block-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "space-open",
+      "observed": "escalate",
+      "question": "Does 'Space' refer to a whitespace character, a physical/virtual area, or a workspace concept?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "master-open",
+      "observed": "escalate",
+      "question": "Does 'Master' refer to a primary/main item (e.g., master record) or something else like a master key/version?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "shell-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "sheet-open",
+      "observed": "escalate",
+      "question": "Does 'Sheet' refer to a spreadsheet, a sheet of paper, or another type of sheet?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "queue-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "image-open",
+      "observed": "escalate",
+      "question": "Does 'Image' refer to a picture/photo or a disk/system image?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "trace-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "crop-open",
+      "observed": "escalate",
+      "question": "Does 'Crop' refer to the image-editing action (crop) or agricultural crop?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "plan-2-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "commit-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "root-open",
+      "observed": "escalate",
+      "question": "Does 'Root' refer to a file system/directory root, a mathematical root, or a root cause?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "column-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "stream-open",
+      "observed": "escalate",
+      "question": "Does 'Stream' refer to a data stream, media stream, or something else?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "tag-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "log-open",
+      "observed": "escalate",
+      "question": "Does 'Log' refer to a record/history noun or the action of logging?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "frame-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "mail-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "fork-open",
+      "observed": "escalate",
+      "question": "Is 'Fork' a verb action (to fork a repo) or a noun label (a fork)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "port-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "index-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "memory-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "build-open",
+      "observed": "escalate",
+      "question": "Is 'Build' a noun (a software build artifact) or a verb action (to build)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "scale-2-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "clip-open",
+      "observed": "escalate",
+      "question": "Is 'Clip' a noun (a media clip) or a verb action (to clip/trim)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "draft-2-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "branch-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "bug-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "host-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "key-2-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "drive-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "stage-open",
+      "observed": "escalate",
+      "question": "Does 'Stage' refer to a step/phase in a process or a physical/theatrical stage?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "flag-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "palette-open",
+      "observed": "escalate",
+      "question": "Does 'Palette' refer to a color palette or a command palette (UI menu)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "head-open",
+      "observed": "escalate",
+      "question": "Does 'Head' refer to a git/version-control head, a leader/head of something, or a literal head (top part)?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "patch-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "cell-open",
+      "observed": "escalate",
+      "question": "Does 'Cell' refer to a spreadsheet/table cell, a battery cell, or something else?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "pool-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "mount-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "release-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "block-open",
+      "observed": "escalate",
+      "question": "Does 'Block' refer to a UI/content block (noun) or the act of blocking something?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "space-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "master-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "shell-open",
+      "observed": "escalate",
+      "question": "Does 'Shell' refer to a command-line interpreter or a physical/UI shell/casing?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "sheet-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "queue-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "image-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "trace-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "crop-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "plan-2-open",
+      "observed": "escalate",
+      "question": "Does 'Plan' refer to a subscription/pricing plan or a design/project plan?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "commit-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "root-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "column-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "stream-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "tag-open",
+      "observed": "escalate",
+      "question": "Does 'Tag' refer to a metadata/label tag, an HTML markup tag, or something else like a price tag?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "log-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "frame-open",
+      "observed": "escalate",
+      "question": "Does 'Frame' refer to a video/animation frame, a picture frame, or a structural frame?",
+      "alternativeCount": 2,
+      "error": null
+    },
+    {
+      "caseId": "mail-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "fork-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "port-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "index-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "memory-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "build-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "scale-2-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "clip-settled",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    },
+    {
+      "caseId": "draft-2-open",
+      "observed": "confident",
+      "question": null,
+      "alternativeCount": 0,
+      "error": null
+    }
+  ]
+}

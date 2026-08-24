@@ -99,11 +99,12 @@ export const MEASURED = {
     /**
      * With `output_config: { effort: 'low' }`, as production sends.
      *
-     * **73, re-measured 2026-08-24** over the full 414-entry corpus:
-     * 30,269 output tokens / 414 strings. It was 56, from 5603/100 on a
-     * hundred-string sample, and the difference is not sampling noise — the
-     * same corpus measured 59.8 immediately before the change and 73.1
-     * immediately after.
+     * **75, re-measured 2026-08-24** over the full 414-entry corpus, after two
+     * rounds of escalation tuning: 30,880 output tokens / 414 strings. It was
+     * 56, from 5603/100 on a hundred-string sample. The same corpus measured
+     * 59.8 before the first round, 73.1 after it, and 74.6 after the second —
+     * so the first change accounts for almost all of it and the difference is
+     * not sampling noise.
      *
      * The change is the `cue` field. Tuning escalation to the owner's target
      * (60% recall at ≥80% precision) required the model to write down what
@@ -115,7 +116,7 @@ export const MEASURED = {
      * paid on **every** string, and `outputTokensPerAmbiguousString` below,
      * paid only on the ones it raises. See `docs/product/12-ambiguity-benchmark.md`.
      */
-    effortLow: 73,
+    effortLow: 75,
     /** `claude-haiku-4-5` with thinking disabled. 2185/40. Quality unmeasured. */
     haikuThinkingDisabled: 55,
   },
@@ -148,8 +149,8 @@ export const PIPELINE = {
    * produced an empty content block. That took it to 8192.
    *
    * 8192 then stopped being enough when the escalation tuning added the `cue`
-   * field: output per string went 60 → 73, so a full 100-string chunk emits
-   * ~7,300 and no longer clears the 75% headroom a chunk needs — a chunk with
+   * field: output per string went 60 → 75, so a full 100-string chunk emits
+   * ~7,500 and no longer clears the 75% headroom a chunk needs — a chunk with
    * a dozen escalations at 239 tokens each would have truncated. `model.test.ts`
    * caught it the moment `effortLow` was updated, before any run failed.
    */
@@ -158,9 +159,9 @@ export const PIPELINE = {
   /**
    * `output_config.effort` on the Anthropic call.
    *
-   * `low` collapses the thinking that was consuming the whole budget: 73
+   * `low` collapses the thinking that was consuming the whole budget: 75
    * measured output tokens per string against 159 at the default. It is both
-   * the correctness fix and a 2.2x saving — it was 2.8x before the `cue` field
+   * the correctness fix and a 2.1x saving — it was 2.8x before the `cue` field
    * raised the numerator.
    *
    * Its effect on **quality** is now measured, and it is nil: re-running the

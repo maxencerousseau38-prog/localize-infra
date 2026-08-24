@@ -98,7 +98,7 @@ Two consequences beyond the obvious one:
 | Configuration | Output tokens/string | Works at 40 | Works at 100 |
 |---|---:|---|---|
 | As configured (`max_tokens: 4096`) | 159 | no | no |
-| `output_config: { effort: 'low' }` | **73** | yes | yes |
+| `output_config: { effort: 'low' }` | **75** | yes | yes |
 | `thinking: { type: 'disabled' }` | 100 | yes | — |
 | `claude-haiku-4-5`, thinking disabled | 55 | yes | — |
 
@@ -168,7 +168,7 @@ and real `POST /v1/messages` calls, using the `INSTRUCTIONS` constant read from
 |---|---:|
 | System prompt, billed once per request | 610 tokens |
 | Input per string, with file path, component and surrounding code | 219 tokens |
-| Output per string at `effort: low`, thinking included | 73 tokens |
+| Output per string at `effort: low`, thinking included | 75 tokens |
 | Output per string at the default effort, thinking included | 159 tokens |
 | Extra output for an escalated string (question + alternatives) | +174 tokens |
 

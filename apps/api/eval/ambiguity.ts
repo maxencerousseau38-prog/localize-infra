@@ -8,6 +8,7 @@ import type {
 import {
   buildAmbiguityCases,
   formatPercent,
+  freshCohort,
   scoreAmbiguity,
   splitDevHoldout,
   splitIntoUnpairedGroups,
@@ -57,11 +58,17 @@ const SUBSET = process.env.AMBIGUITY_SUBSET ?? 'all';
 
 function selectSubset(all: AmbiguityCase[]): AmbiguityCase[] {
   if (SUBSET === 'all') return all;
+  /*
+   * "fresh" is the cohort written after the last round of tuning. It is the
+   * only subset that can answer whether a gain generalised, and it can answer
+   * that once — after which it is material the author has seen.
+   */
+  if (SUBSET === 'fresh') return freshCohort(all);
   const { dev, holdout } = splitDevHoldout(all);
   if (SUBSET === 'dev') return dev;
   if (SUBSET === 'holdout') return holdout;
   throw new Error(
-    `AMBIGUITY_SUBSET must be all, dev or holdout — got ${SUBSET}`,
+    `AMBIGUITY_SUBSET must be all, dev, holdout or fresh — got ${SUBSET}`,
   );
 }
 

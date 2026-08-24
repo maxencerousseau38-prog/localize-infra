@@ -17,10 +17,24 @@ function categoryCounts(subset: typeof cases) {
 }
 
 describe('splitDevHoldout', () => {
-  it('uses every case exactly once', () => {
-    expect(dev.length + holdout.length).toBe(cases.length);
+  const core = cases.filter((c) => c.cohort === 'core');
+
+  it('uses every core case exactly once', () => {
+    expect(dev.length + holdout.length).toBe(core.length);
     const ids = [...dev, ...holdout].map((c) => c.id);
-    expect(new Set(ids).size).toBe(cases.length);
+    expect(new Set(ids).size).toBe(core.length);
+  });
+
+  /*
+   * A cohort written after a round of tuning is unseen, and that is a property
+   * that can only be spent once. Splitting half of it into a dev set would
+   * spend it on the first caller that asked.
+   */
+  it('never divides a cohort written after tuning', () => {
+    expect(cases.some((c) => c.cohort === 'polysemy-2')).toBe(true);
+    for (const subset of [dev, holdout]) {
+      expect(subset.every((c) => c.cohort === 'core')).toBe(true);
+    }
   });
 
   /*
@@ -38,7 +52,9 @@ describe('splitDevHoldout', () => {
     for (const pairId of devPairs) {
       expect(holdoutPairs.has(pairId)).toBe(false);
     }
-    expect(devPairs.size + holdoutPairs.size).toBe(100);
+    expect(devPairs.size + holdoutPairs.size).toBe(
+      new Set(core.map((c) => c.pairId)).size,
+    );
   });
 
   it('keeps both halves complete pairs, so discrimination is computable', () => {
@@ -56,6 +72,7 @@ describe('splitDevHoldout', () => {
     const holdoutCounts = categoryCounts(holdout);
     expect(devCounts.get('polysemy')).toBe(60);
     expect(holdoutCounts.get('polysemy')).toBe(60);
+    // Core only — the 40 pairs of `polysemy-2` are held out entire.
     expect(devCounts.get('insufficient-grammar')).toBe(26);
     expect(holdoutCounts.get('insufficient-grammar')).toBe(24);
     expect(devCounts.get('register')).toBe(16);

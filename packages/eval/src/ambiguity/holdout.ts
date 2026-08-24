@@ -27,11 +27,26 @@ export interface CorpusSplit {
   holdout: AmbiguityCase[];
 }
 
+/** Cases from a cohort written after tuning, held out entire. */
+export function freshCohort(cases: AmbiguityCase[]): AmbiguityCase[] {
+  return cases.filter((c) => c.cohort !== 'core');
+}
+
 export function splitDevHoldout(cases: AmbiguityCase[]): CorpusSplit {
+  /*
+   * Only the `core` cohort is ever split.
+   *
+   * A cohort written after a round of tuning exists precisely because it was
+   * never seen; handing half of it to a dev set would spend that property on
+   * the first thing that asked for it. Later cohorts are held out entire, and
+   * this function silently declines to divide them rather than trusting every
+   * caller to remember.
+   */
+  const splittable = cases.filter((c) => c.cohort === 'core');
   const seen = new Map<string, string>();
   const perCategory = new Map<string, number>();
 
-  for (const testCase of cases) {
+  for (const testCase of splittable) {
     if (seen.has(testCase.pairId)) continue;
     const index = perCategory.get(testCase.category) ?? 0;
     perCategory.set(testCase.category, index + 1);
@@ -39,7 +54,7 @@ export function splitDevHoldout(cases: AmbiguityCase[]): CorpusSplit {
   }
 
   return {
-    dev: cases.filter((c) => seen.get(c.pairId) === 'dev'),
-    holdout: cases.filter((c) => seen.get(c.pairId) === 'holdout'),
+    dev: splittable.filter((c) => seen.get(c.pairId) === 'dev'),
+    holdout: splittable.filter((c) => seen.get(c.pairId) === 'holdout'),
   };
 }

@@ -1,6 +1,7 @@
 [
   {
     "id": "left-open",
+    "cohort": "core",
     "pairId": "left",
     "sourceText": "Left",
     "filePath": "src/locales/en.json",
@@ -13,6 +14,7 @@
   },
   {
     "id": "left-settled",
+    "cohort": "core",
     "pairId": "left",
     "sourceText": "Left",
     "filePath": "src/locales/en.json",
@@ -25,6 +27,7 @@
   },
   {
     "id": "close-open",
+    "cohort": "core",
     "pairId": "close",
     "sourceText": "Close",
     "filePath": "src/locales/en.json",
@@ -37,6 +40,7 @@
   },
   {
     "id": "close-settled",
+    "cohort": "core",
     "pairId": "close",
     "sourceText": "Close",
     "filePath": "src/locales/en.json",
@@ -49,6 +53,7 @@
   },
   {
     "id": "post-open",
+    "cohort": "core",
     "pairId": "post",
     "sourceText": "Post",
     "filePath": "src/locales/en.json",
@@ -61,6 +66,7 @@
   },
   {
     "id": "post-settled",
+    "cohort": "core",
     "pairId": "post",
     "sourceText": "Post",
     "filePath": "src/locales/en.json",
@@ -73,6 +79,7 @@
   },
   {
     "id": "home-open",
+    "cohort": "core",
     "pairId": "home",
     "sourceText": "Home",
     "filePath": "src/locales/en.json",
@@ -85,6 +92,7 @@
   },
   {
     "id": "home-settled",
+    "cohort": "core",
     "pairId": "home",
     "sourceText": "Home",
     "filePath": "src/locales/en.json",
@@ -97,6 +105,7 @@
   },
   {
     "id": "free-open",
+    "cohort": "core",
     "pairId": "free",
     "sourceText": "Free",
     "filePath": "src/locales/en.json",
@@ -109,6 +118,7 @@
   },
   {
     "id": "free-settled",
+    "cohort": "core",
     "pairId": "free",
     "sourceText": "Free",
     "filePath": "src/locales/en.json",
@@ -121,6 +131,7 @@
   },
   {
     "id": "match-open",
+    "cohort": "core",
     "pairId": "match",
     "sourceText": "Match",
     "filePath": "src/locales/en.json",
@@ -133,6 +144,7 @@
   },
   {
     "id": "match-settled",
+    "cohort": "core",
     "pairId": "match",
     "sourceText": "Match",
     "filePath": "src/locales/en.json",
@@ -145,6 +157,7 @@
   },
   {
     "id": "order-open",
+    "cohort": "core",
     "pairId": "order",
     "sourceText": "Order",
     "filePath": "src/locales/en.json",
@@ -157,6 +170,7 @@
   },
   {
     "id": "order-settled",
+    "cohort": "core",
     "pairId": "order",
     "sourceText": "Order",
     "filePath": "src/locales/en.json",
@@ -169,6 +183,7 @@
   },
   {
     "id": "play-open",
+    "cohort": "core",
     "pairId": "play",
     "sourceText": "Play",
     "filePath": "src/locales/en.json",
@@ -181,6 +196,7 @@
   },
   {
     "id": "play-settled",
+    "cohort": "core",
     "pairId": "play",
     "sourceText": "Play",
     "filePath": "src/locales/en.json",
@@ -193,6 +209,7 @@
   },
   {
     "id": "record-open",
+    "cohort": "core",
     "pairId": "record",
     "sourceText": "Record",
     "filePath": "src/locales/en.json",
@@ -205,6 +222,7 @@
   },
   {
     "id": "record-settled",
+    "cohort": "core",
     "pairId": "record",
     "sourceText": "Record",
     "filePath": "src/locales/en.json",
@@ -217,6 +235,7 @@
   },
   {
     "id": "charge-open",
+    "cohort": "core",
     "pairId": "charge",
     "sourceText": "Charge",
     "filePath": "src/locales/en.json",
@@ -229,6 +248,7 @@
   },
   {
     "id": "charge-settled",
+    "cohort": "core",
     "pairId": "charge",
     "sourceText": "Charge",
     "filePath": "src/locales/en.json",
@@ -241,6 +261,7 @@
   },
   {
     "id": "draw-open",
+    "cohort": "core",
     "pairId": "draw",
     "sourceText": "Draw",
     "filePath": "src/locales/en.json",
@@ -253,6 +274,7 @@
   },
   {
     "id": "draw-settled",
+    "cohort": "core",
     "pairId": "draw",
     "sourceText": "Draw",
     "filePath": "src/locales/en.json",
@@ -265,6 +287,7 @@
   },
   {
     "id": "fine-open",
+    "cohort": "core",
     "pairId": "fine",
     "sourceText": "Fine",
     "filePath": "src/locales/en.json",
@@ -277,6 +300,7 @@
   },
   {
     "id": "fine-settled",
+    "cohort": "core",
     "pairId": "fine",
     "sourceText": "Fine",
     "filePath": "src/locales/en.json",
@@ -289,6 +313,7 @@
   },
   {
     "id": "light-open",
+    "cohort": "core",
     "pairId": "light",
     "sourceText": "Light",
     "filePath": "src/locales/en.json",
@@ -301,6 +326,7 @@
   },
   {
     "id": "light-settled",
+    "cohort": "core",
     "pairId": "light",
     "sourceText": "Light",
     "filePath": "src/locales/en.json",
@@ -313,6 +339,7 @@
   },
   {
     "id": "present-open",
+    "cohort": "core",
     "pairId": "present",
     "sourceText": "Present",
     "filePath": "src/locales/en.json",
@@ -325,6 +352,7 @@
   },
   {
     "id": "present-settled",
+    "cohort": "core",
     "pairId": "present",
     "sourceText": "Present",
     "filePath": "src/locales/en.json",
@@ -337,6 +365,7 @@
   },
   {
     "id": "scale-open",
+    "cohort": "core",
     "pairId": "scale",
     "sourceText": "Scale",
     "filePath": "src/locales/en.json",
@@ -349,6 +378,7 @@
   },
   {
     "id": "scale-settled",
+    "cohort": "core",
     "pairId": "scale",
     "sourceText": "Scale",
     "filePath": "src/locales/en.json",
@@ -361,6 +391,7 @@
   },
   {
     "id": "second-open",
+    "cohort": "core",
     "pairId": "second",
     "sourceText": "Second",
     "filePath": "src/locales/en.json",
@@ -373,6 +404,7 @@
   },
   {
     "id": "second-settled",
+    "cohort": "core",
     "pairId": "second",
     "sourceText": "Second",
     "filePath": "src/locales/en.json",
@@ -385,6 +417,7 @@
   },
   {
     "id": "sign-open",
+    "cohort": "core",
     "pairId": "sign",
     "sourceText": "Sign",
     "filePath": "src/locales/en.json",
@@ -397,6 +430,7 @@
   },
   {
     "id": "sign-settled",
+    "cohort": "core",
     "pairId": "sign",
     "sourceText": "Sign",
     "filePath": "src/locales/en.json",
@@ -409,6 +443,7 @@
   },
   {
     "id": "state-open",
+    "cohort": "core",
     "pairId": "state",
     "sourceText": "State",
     "filePath": "src/locales/en.json",
@@ -421,6 +456,7 @@
   },
   {
     "id": "state-settled",
+    "cohort": "core",
     "pairId": "state",
     "sourceText": "State",
     "filePath": "src/locales/en.json",
@@ -433,6 +469,7 @@
   },
   {
     "id": "store-open",
+    "cohort": "core",
     "pairId": "store",
     "sourceText": "Store",
     "filePath": "src/locales/en.json",
@@ -445,6 +482,7 @@
   },
   {
     "id": "store-settled",
+    "cohort": "core",
     "pairId": "store",
     "sourceText": "Store",
     "filePath": "src/locales/en.json",
@@ -457,6 +495,7 @@
   },
   {
     "id": "tie-open",
+    "cohort": "core",
     "pairId": "tie",
     "sourceText": "Tie",
     "filePath": "src/locales/en.json",
@@ -469,6 +508,7 @@
   },
   {
     "id": "tie-settled",
+    "cohort": "core",
     "pairId": "tie",
     "sourceText": "Tie",
     "filePath": "src/locales/en.json",
@@ -481,6 +521,7 @@
   },
   {
     "id": "train-open",
+    "cohort": "core",
     "pairId": "train",
     "sourceText": "Train",
     "filePath": "src/locales/en.json",
@@ -493,6 +534,7 @@
   },
   {
     "id": "train-settled",
+    "cohort": "core",
     "pairId": "train",
     "sourceText": "Train",
     "filePath": "src/locales/en.json",
@@ -505,6 +547,7 @@
   },
   {
     "id": "watch-open",
+    "cohort": "core",
     "pairId": "watch",
     "sourceText": "Watch",
     "filePath": "src/locales/en.json",
@@ -517,6 +560,7 @@
   },
   {
     "id": "watch-settled",
+    "cohort": "core",
     "pairId": "watch",
     "sourceText": "Watch",
     "filePath": "src/locales/en.json",
@@ -529,6 +573,7 @@
   },
   {
     "id": "book-open",
+    "cohort": "core",
     "pairId": "book",
     "sourceText": "Book",
     "filePath": "src/locales/en.json",
@@ -541,6 +586,7 @@
   },
   {
     "id": "book-settled",
+    "cohort": "core",
     "pairId": "book",
     "sourceText": "Book",
     "filePath": "src/locales/en.json",
@@ -553,6 +599,7 @@
   },
   {
     "id": "check-open",
+    "cohort": "core",
     "pairId": "check",
     "sourceText": "Check",
     "filePath": "src/locales/en.json",
@@ -565,6 +612,7 @@
   },
   {
     "id": "check-settled",
+    "cohort": "core",
     "pairId": "check",
     "sourceText": "Check",
     "filePath": "src/locales/en.json",
@@ -577,6 +625,7 @@
   },
   {
     "id": "contact-open",
+    "cohort": "core",
     "pairId": "contact",
     "sourceText": "Contact",
     "filePath": "src/locales/en.json",
@@ -589,6 +638,7 @@
   },
   {
     "id": "contact-settled",
+    "cohort": "core",
     "pairId": "contact",
     "sourceText": "Contact",
     "filePath": "src/locales/en.json",
@@ -601,6 +651,7 @@
   },
   {
     "id": "cut-open",
+    "cohort": "core",
     "pairId": "cut",
     "sourceText": "Cut",
     "filePath": "src/locales/en.json",
@@ -613,6 +664,7 @@
   },
   {
     "id": "cut-settled",
+    "cohort": "core",
     "pairId": "cut",
     "sourceText": "Cut",
     "filePath": "src/locales/en.json",
@@ -625,6 +677,7 @@
   },
   {
     "id": "date-open",
+    "cohort": "core",
     "pairId": "date",
     "sourceText": "Date",
     "filePath": "src/locales/en.json",
@@ -637,6 +690,7 @@
   },
   {
     "id": "date-settled",
+    "cohort": "core",
     "pairId": "date",
     "sourceText": "Date",
     "filePath": "src/locales/en.json",
@@ -649,6 +703,7 @@
   },
   {
     "id": "file-open",
+    "cohort": "core",
     "pairId": "file",
     "sourceText": "File",
     "filePath": "src/locales/en.json",
@@ -661,6 +716,7 @@
   },
   {
     "id": "file-settled",
+    "cohort": "core",
     "pairId": "file",
     "sourceText": "File",
     "filePath": "src/locales/en.json",
@@ -673,6 +729,7 @@
   },
   {
     "id": "issue-open",
+    "cohort": "core",
     "pairId": "issue",
     "sourceText": "Issue",
     "filePath": "src/locales/en.json",
@@ -685,6 +742,7 @@
   },
   {
     "id": "issue-settled",
+    "cohort": "core",
     "pairId": "issue",
     "sourceText": "Issue",
     "filePath": "src/locales/en.json",
@@ -697,6 +755,7 @@
   },
   {
     "id": "lead-open",
+    "cohort": "core",
     "pairId": "lead",
     "sourceText": "Lead",
     "filePath": "src/locales/en.json",
@@ -709,6 +768,7 @@
   },
   {
     "id": "lead-settled",
+    "cohort": "core",
     "pairId": "lead",
     "sourceText": "Lead",
     "filePath": "src/locales/en.json",
@@ -721,6 +781,7 @@
   },
   {
     "id": "note-open",
+    "cohort": "core",
     "pairId": "note",
     "sourceText": "Note",
     "filePath": "src/locales/en.json",
@@ -733,6 +794,7 @@
   },
   {
     "id": "note-settled",
+    "cohort": "core",
     "pairId": "note",
     "sourceText": "Note",
     "filePath": "src/locales/en.json",
@@ -745,6 +807,7 @@
   },
   {
     "id": "object-open",
+    "cohort": "core",
     "pairId": "object",
     "sourceText": "Object",
     "filePath": "src/locales/en.json",
@@ -757,6 +820,7 @@
   },
   {
     "id": "object-settled",
+    "cohort": "core",
     "pairId": "object",
     "sourceText": "Object",
     "filePath": "src/locales/en.json",
@@ -769,6 +833,7 @@
   },
   {
     "id": "plant-open",
+    "cohort": "core",
     "pairId": "plant",
     "sourceText": "Plant",
     "filePath": "src/locales/en.json",
@@ -781,6 +846,7 @@
   },
   {
     "id": "plant-settled",
+    "cohort": "core",
     "pairId": "plant",
     "sourceText": "Plant",
     "filePath": "src/locales/en.json",
@@ -793,6 +859,7 @@
   },
   {
     "id": "point-open",
+    "cohort": "core",
     "pairId": "point",
     "sourceText": "Point",
     "filePath": "src/locales/en.json",
@@ -805,6 +872,7 @@
   },
   {
     "id": "point-settled",
+    "cohort": "core",
     "pairId": "point",
     "sourceText": "Point",
     "filePath": "src/locales/en.json",
@@ -817,6 +885,7 @@
   },
   {
     "id": "range-open",
+    "cohort": "core",
     "pairId": "range",
     "sourceText": "Range",
     "filePath": "src/locales/en.json",
@@ -829,6 +898,7 @@
   },
   {
     "id": "range-settled",
+    "cohort": "core",
     "pairId": "range",
     "sourceText": "Range",
     "filePath": "src/locales/en.json",
@@ -841,6 +911,7 @@
   },
   {
     "id": "right-open",
+    "cohort": "core",
     "pairId": "right",
     "sourceText": "Right",
     "filePath": "src/locales/en.json",
@@ -853,6 +924,7 @@
   },
   {
     "id": "right-settled",
+    "cohort": "core",
     "pairId": "right",
     "sourceText": "Right",
     "filePath": "src/locales/en.json",
@@ -865,6 +937,7 @@
   },
   {
     "id": "row-open",
+    "cohort": "core",
     "pairId": "row",
     "sourceText": "Row",
     "filePath": "src/locales/en.json",
@@ -877,6 +950,7 @@
   },
   {
     "id": "row-settled",
+    "cohort": "core",
     "pairId": "row",
     "sourceText": "Row",
     "filePath": "src/locales/en.json",
@@ -889,6 +963,7 @@
   },
   {
     "id": "run-open",
+    "cohort": "core",
     "pairId": "run",
     "sourceText": "Run",
     "filePath": "src/locales/en.json",
@@ -901,6 +976,7 @@
   },
   {
     "id": "run-settled",
+    "cohort": "core",
     "pairId": "run",
     "sourceText": "Run",
     "filePath": "src/locales/en.json",
@@ -913,6 +989,7 @@
   },
   {
     "id": "bank-open",
+    "cohort": "core",
     "pairId": "bank",
     "sourceText": "Bank",
     "filePath": "src/locales/en.json",
@@ -925,6 +1002,7 @@
   },
   {
     "id": "bank-settled",
+    "cohort": "core",
     "pairId": "bank",
     "sourceText": "Bank",
     "filePath": "src/locales/en.json",
@@ -937,6 +1015,7 @@
   },
   {
     "id": "board-open",
+    "cohort": "core",
     "pairId": "board",
     "sourceText": "Board",
     "filePath": "src/locales/en.json",
@@ -949,6 +1028,7 @@
   },
   {
     "id": "board-settled",
+    "cohort": "core",
     "pairId": "board",
     "sourceText": "Board",
     "filePath": "src/locales/en.json",
@@ -961,6 +1041,7 @@
   },
   {
     "id": "break-open",
+    "cohort": "core",
     "pairId": "break",
     "sourceText": "Break",
     "filePath": "src/locales/en.json",
@@ -973,6 +1054,7 @@
   },
   {
     "id": "break-settled",
+    "cohort": "core",
     "pairId": "break",
     "sourceText": "Break",
     "filePath": "src/locales/en.json",
@@ -985,6 +1067,7 @@
   },
   {
     "id": "case-open",
+    "cohort": "core",
     "pairId": "case",
     "sourceText": "Case",
     "filePath": "src/locales/en.json",
@@ -997,6 +1080,7 @@
   },
   {
     "id": "case-settled",
+    "cohort": "core",
     "pairId": "case",
     "sourceText": "Case",
     "filePath": "src/locales/en.json",
@@ -1009,6 +1093,7 @@
   },
   {
     "id": "change-open",
+    "cohort": "core",
     "pairId": "change",
     "sourceText": "Change",
     "filePath": "src/locales/en.json",
@@ -1021,6 +1106,7 @@
   },
   {
     "id": "change-settled",
+    "cohort": "core",
     "pairId": "change",
     "sourceText": "Change",
     "filePath": "src/locales/en.json",
@@ -1033,6 +1119,7 @@
   },
   {
     "id": "current-open",
+    "cohort": "core",
     "pairId": "current",
     "sourceText": "Current",
     "filePath": "src/locales/en.json",
@@ -1045,6 +1132,7 @@
   },
   {
     "id": "current-settled",
+    "cohort": "core",
     "pairId": "current",
     "sourceText": "Current",
     "filePath": "src/locales/en.json",
@@ -1057,6 +1145,7 @@
   },
   {
     "id": "drop-open",
+    "cohort": "core",
     "pairId": "drop",
     "sourceText": "Drop",
     "filePath": "src/locales/en.json",
@@ -1069,6 +1158,7 @@
   },
   {
     "id": "drop-settled",
+    "cohort": "core",
     "pairId": "drop",
     "sourceText": "Drop",
     "filePath": "src/locales/en.json",
@@ -1081,6 +1171,7 @@
   },
   {
     "id": "field-open",
+    "cohort": "core",
     "pairId": "field",
     "sourceText": "Field",
     "filePath": "src/locales/en.json",
@@ -1093,6 +1184,7 @@
   },
   {
     "id": "field-settled",
+    "cohort": "core",
     "pairId": "field",
     "sourceText": "Field",
     "filePath": "src/locales/en.json",
@@ -1105,6 +1197,7 @@
   },
   {
     "id": "fire-open",
+    "cohort": "core",
     "pairId": "fire",
     "sourceText": "Fire",
     "filePath": "src/locales/en.json",
@@ -1117,6 +1210,7 @@
   },
   {
     "id": "fire-settled",
+    "cohort": "core",
     "pairId": "fire",
     "sourceText": "Fire",
     "filePath": "src/locales/en.json",
@@ -1129,6 +1223,7 @@
   },
   {
     "id": "key-open",
+    "cohort": "core",
     "pairId": "key",
     "sourceText": "Key",
     "filePath": "src/locales/en.json",
@@ -1141,6 +1236,7 @@
   },
   {
     "id": "key-settled",
+    "cohort": "core",
     "pairId": "key",
     "sourceText": "Key",
     "filePath": "src/locales/en.json",
@@ -1153,6 +1249,7 @@
   },
   {
     "id": "last-open",
+    "cohort": "core",
     "pairId": "last",
     "sourceText": "Last",
     "filePath": "src/locales/en.json",
@@ -1165,6 +1262,7 @@
   },
   {
     "id": "last-settled",
+    "cohort": "core",
     "pairId": "last",
     "sourceText": "Last",
     "filePath": "src/locales/en.json",
@@ -1177,6 +1275,7 @@
   },
   {
     "id": "mark-open",
+    "cohort": "core",
     "pairId": "mark",
     "sourceText": "Mark",
     "filePath": "src/locales/en.json",
@@ -1189,6 +1288,7 @@
   },
   {
     "id": "mark-settled",
+    "cohort": "core",
     "pairId": "mark",
     "sourceText": "Mark",
     "filePath": "src/locales/en.json",
@@ -1201,6 +1301,7 @@
   },
   {
     "id": "pitch-open",
+    "cohort": "core",
     "pairId": "pitch",
     "sourceText": "Pitch",
     "filePath": "src/locales/en.json",
@@ -1213,6 +1314,7 @@
   },
   {
     "id": "pitch-settled",
+    "cohort": "core",
     "pairId": "pitch",
     "sourceText": "Pitch",
     "filePath": "src/locales/en.json",
@@ -1225,6 +1327,7 @@
   },
   {
     "id": "rest-open",
+    "cohort": "core",
     "pairId": "rest",
     "sourceText": "Rest",
     "filePath": "src/locales/en.json",
@@ -1237,6 +1340,7 @@
   },
   {
     "id": "rest-settled",
+    "cohort": "core",
     "pairId": "rest",
     "sourceText": "Rest",
     "filePath": "src/locales/en.json",
@@ -1249,6 +1353,7 @@
   },
   {
     "id": "ring-open",
+    "cohort": "core",
     "pairId": "ring",
     "sourceText": "Ring",
     "filePath": "src/locales/en.json",
@@ -1261,6 +1366,7 @@
   },
   {
     "id": "ring-settled",
+    "cohort": "core",
     "pairId": "ring",
     "sourceText": "Ring",
     "filePath": "src/locales/en.json",
@@ -1273,6 +1379,7 @@
   },
   {
     "id": "type-open",
+    "cohort": "core",
     "pairId": "type",
     "sourceText": "Type",
     "filePath": "src/locales/en.json",
@@ -1285,6 +1392,7 @@
   },
   {
     "id": "type-settled",
+    "cohort": "core",
     "pairId": "type",
     "sourceText": "Type",
     "filePath": "src/locales/en.json",
@@ -1297,6 +1405,7 @@
   },
   {
     "id": "mine-open",
+    "cohort": "core",
     "pairId": "mine",
     "sourceText": "Mine",
     "filePath": "src/locales/en.json",
@@ -1309,6 +1418,7 @@
   },
   {
     "id": "mine-settled",
+    "cohort": "core",
     "pairId": "mine",
     "sourceText": "Mine",
     "filePath": "src/locales/en.json",
@@ -1321,6 +1431,7 @@
   },
   {
     "id": "park-open",
+    "cohort": "core",
     "pairId": "park",
     "sourceText": "Park",
     "filePath": "src/locales/en.json",
@@ -1333,6 +1444,7 @@
   },
   {
     "id": "park-settled",
+    "cohort": "core",
     "pairId": "park",
     "sourceText": "Park",
     "filePath": "src/locales/en.json",
@@ -1345,6 +1457,7 @@
   },
   {
     "id": "spring-open",
+    "cohort": "core",
     "pairId": "spring",
     "sourceText": "Spring",
     "filePath": "src/locales/en.json",
@@ -1357,6 +1470,7 @@
   },
   {
     "id": "spring-settled",
+    "cohort": "core",
     "pairId": "spring",
     "sourceText": "Spring",
     "filePath": "src/locales/en.json",
@@ -1369,6 +1483,7 @@
   },
   {
     "id": "stable-open",
+    "cohort": "core",
     "pairId": "stable",
     "sourceText": "Stable",
     "filePath": "src/locales/en.json",
@@ -1381,6 +1496,7 @@
   },
   {
     "id": "stable-settled",
+    "cohort": "core",
     "pairId": "stable",
     "sourceText": "Stable",
     "filePath": "src/locales/en.json",
@@ -1393,6 +1509,7 @@
   },
   {
     "id": "mean-open",
+    "cohort": "core",
     "pairId": "mean",
     "sourceText": "Mean",
     "filePath": "src/locales/en.json",
@@ -1405,6 +1522,7 @@
   },
   {
     "id": "mean-settled",
+    "cohort": "core",
     "pairId": "mean",
     "sourceText": "Mean",
     "filePath": "src/locales/en.json",
@@ -1417,6 +1535,7 @@
   },
   {
     "id": "race-open",
+    "cohort": "core",
     "pairId": "race",
     "sourceText": "Race",
     "filePath": "src/locales/en.json",
@@ -1429,6 +1548,7 @@
   },
   {
     "id": "race-settled",
+    "cohort": "core",
     "pairId": "race",
     "sourceText": "Race",
     "filePath": "src/locales/en.json",
@@ -1441,6 +1561,7 @@
   },
   {
     "id": "active-open",
+    "cohort": "core",
     "pairId": "active",
     "sourceText": "Active",
     "filePath": "src/locales/en.json",
@@ -1453,6 +1574,7 @@
   },
   {
     "id": "active-settled",
+    "cohort": "core",
     "pairId": "active",
     "sourceText": "Active",
     "filePath": "src/locales/en.json",
@@ -1465,6 +1587,7 @@
   },
   {
     "id": "selected-open",
+    "cohort": "core",
     "pairId": "selected",
     "sourceText": "Selected",
     "filePath": "src/locales/en.json",
@@ -1477,6 +1600,7 @@
   },
   {
     "id": "selected-settled",
+    "cohort": "core",
     "pairId": "selected",
     "sourceText": "Selected",
     "filePath": "src/locales/en.json",
@@ -1489,6 +1613,7 @@
   },
   {
     "id": "required-open",
+    "cohort": "core",
     "pairId": "required",
     "sourceText": "Required",
     "filePath": "src/locales/en.json",
@@ -1501,6 +1626,7 @@
   },
   {
     "id": "required-settled",
+    "cohort": "core",
     "pairId": "required",
     "sourceText": "Required",
     "filePath": "src/locales/en.json",
@@ -1513,6 +1639,7 @@
   },
   {
     "id": "deleted-open",
+    "cohort": "core",
     "pairId": "deleted",
     "sourceText": "Deleted",
     "filePath": "src/locales/en.json",
@@ -1525,6 +1652,7 @@
   },
   {
     "id": "deleted-settled",
+    "cohort": "core",
     "pairId": "deleted",
     "sourceText": "Deleted",
     "filePath": "src/locales/en.json",
@@ -1537,6 +1665,7 @@
   },
   {
     "id": "saved-open",
+    "cohort": "core",
     "pairId": "saved",
     "sourceText": "Saved",
     "filePath": "src/locales/en.json",
@@ -1549,6 +1678,7 @@
   },
   {
     "id": "saved-settled",
+    "cohort": "core",
     "pairId": "saved",
     "sourceText": "Saved",
     "filePath": "src/locales/en.json",
@@ -1561,6 +1691,7 @@
   },
   {
     "id": "locked-open",
+    "cohort": "core",
     "pairId": "locked",
     "sourceText": "Locked",
     "filePath": "src/locales/en.json",
@@ -1573,6 +1704,7 @@
   },
   {
     "id": "locked-settled",
+    "cohort": "core",
     "pairId": "locked",
     "sourceText": "Locked",
     "filePath": "src/locales/en.json",
@@ -1585,6 +1717,7 @@
   },
   {
     "id": "shared-open",
+    "cohort": "core",
     "pairId": "shared",
     "sourceText": "Shared",
     "filePath": "src/locales/en.json",
@@ -1597,6 +1730,7 @@
   },
   {
     "id": "shared-settled",
+    "cohort": "core",
     "pairId": "shared",
     "sourceText": "Shared",
     "filePath": "src/locales/en.json",
@@ -1609,6 +1743,7 @@
   },
   {
     "id": "verified-open",
+    "cohort": "core",
     "pairId": "verified",
     "sourceText": "Verified",
     "filePath": "src/locales/en.json",
@@ -1621,6 +1756,7 @@
   },
   {
     "id": "verified-settled",
+    "cohort": "core",
     "pairId": "verified",
     "sourceText": "Verified",
     "filePath": "src/locales/en.json",
@@ -1633,6 +1769,7 @@
   },
   {
     "id": "empty-open",
+    "cohort": "core",
     "pairId": "empty",
     "sourceText": "Empty",
     "filePath": "src/locales/en.json",
@@ -1645,6 +1782,7 @@
   },
   {
     "id": "empty-settled",
+    "cohort": "core",
     "pairId": "empty",
     "sourceText": "Empty",
     "filePath": "src/locales/en.json",
@@ -1657,6 +1795,7 @@
   },
   {
     "id": "archived-open",
+    "cohort": "core",
     "pairId": "archived",
     "sourceText": "Archived",
     "filePath": "src/locales/en.json",
@@ -1669,6 +1808,7 @@
   },
   {
     "id": "archived-settled",
+    "cohort": "core",
     "pairId": "archived",
     "sourceText": "Archived",
     "filePath": "src/locales/en.json",
@@ -1681,6 +1821,7 @@
   },
   {
     "id": "pending-open",
+    "cohort": "core",
     "pairId": "pending",
     "sourceText": "Pending",
     "filePath": "src/locales/en.json",
@@ -1693,6 +1834,7 @@
   },
   {
     "id": "pending-settled",
+    "cohort": "core",
     "pairId": "pending",
     "sourceText": "Pending",
     "filePath": "src/locales/en.json",
@@ -1705,6 +1847,7 @@
   },
   {
     "id": "approved-open",
+    "cohort": "core",
     "pairId": "approved",
     "sourceText": "Approved",
     "filePath": "src/locales/en.json",
@@ -1717,6 +1860,7 @@
   },
   {
     "id": "approved-settled",
+    "cohort": "core",
     "pairId": "approved",
     "sourceText": "Approved",
     "filePath": "src/locales/en.json",
@@ -1729,6 +1873,7 @@
   },
   {
     "id": "blocked-open",
+    "cohort": "core",
     "pairId": "blocked",
     "sourceText": "Blocked",
     "filePath": "src/locales/en.json",
@@ -1741,6 +1886,7 @@
   },
   {
     "id": "blocked-settled",
+    "cohort": "core",
     "pairId": "blocked",
     "sourceText": "Blocked",
     "filePath": "src/locales/en.json",
@@ -1753,6 +1899,7 @@
   },
   {
     "id": "private-open",
+    "cohort": "core",
     "pairId": "private",
     "sourceText": "Private",
     "filePath": "src/locales/en.json",
@@ -1765,6 +1912,7 @@
   },
   {
     "id": "private-settled",
+    "cohort": "core",
     "pairId": "private",
     "sourceText": "Private",
     "filePath": "src/locales/en.json",
@@ -1777,6 +1925,7 @@
   },
   {
     "id": "unread-open",
+    "cohort": "core",
     "pairId": "unread",
     "sourceText": "Unread",
     "filePath": "src/locales/en.json",
@@ -1789,6 +1938,7 @@
   },
   {
     "id": "unread-settled",
+    "cohort": "core",
     "pairId": "unread",
     "sourceText": "Unread",
     "filePath": "src/locales/en.json",
@@ -1801,6 +1951,7 @@
   },
   {
     "id": "complete-open",
+    "cohort": "core",
     "pairId": "complete",
     "sourceText": "Complete",
     "filePath": "src/locales/en.json",
@@ -1813,6 +1964,7 @@
   },
   {
     "id": "complete-settled",
+    "cohort": "core",
     "pairId": "complete",
     "sourceText": "Complete",
     "filePath": "src/locales/en.json",
@@ -1825,6 +1977,7 @@
   },
   {
     "id": "hidden-open",
+    "cohort": "core",
     "pairId": "hidden",
     "sourceText": "Hidden",
     "filePath": "src/locales/en.json",
@@ -1837,6 +1990,7 @@
   },
   {
     "id": "hidden-settled",
+    "cohort": "core",
     "pairId": "hidden",
     "sourceText": "Hidden",
     "filePath": "src/locales/en.json",
@@ -1849,6 +2003,7 @@
   },
   {
     "id": "muted-open",
+    "cohort": "core",
     "pairId": "muted",
     "sourceText": "Muted",
     "filePath": "src/locales/en.json",
@@ -1861,6 +2016,7 @@
   },
   {
     "id": "muted-settled",
+    "cohort": "core",
     "pairId": "muted",
     "sourceText": "Muted",
     "filePath": "src/locales/en.json",
@@ -1873,6 +2029,7 @@
   },
   {
     "id": "failed-open",
+    "cohort": "core",
     "pairId": "failed",
     "sourceText": "Failed",
     "filePath": "src/locales/en.json",
@@ -1885,6 +2042,7 @@
   },
   {
     "id": "failed-settled",
+    "cohort": "core",
     "pairId": "failed",
     "sourceText": "Failed",
     "filePath": "src/locales/en.json",
@@ -1897,6 +2055,7 @@
   },
   {
     "id": "ready-open",
+    "cohort": "core",
     "pairId": "ready",
     "sourceText": "Ready",
     "filePath": "src/locales/en.json",
@@ -1909,6 +2068,7 @@
   },
   {
     "id": "ready-settled",
+    "cohort": "core",
     "pairId": "ready",
     "sourceText": "Ready",
     "filePath": "src/locales/en.json",
@@ -1921,6 +2081,7 @@
   },
   {
     "id": "public-open",
+    "cohort": "core",
     "pairId": "public",
     "sourceText": "Public",
     "filePath": "src/locales/en.json",
@@ -1933,6 +2094,7 @@
   },
   {
     "id": "public-settled",
+    "cohort": "core",
     "pairId": "public",
     "sourceText": "Public",
     "filePath": "src/locales/en.json",
@@ -1945,6 +2107,7 @@
   },
   {
     "id": "expired-open",
+    "cohort": "core",
     "pairId": "expired",
     "sourceText": "Expired",
     "filePath": "src/locales/en.json",
@@ -1957,6 +2120,7 @@
   },
   {
     "id": "expired-settled",
+    "cohort": "core",
     "pairId": "expired",
     "sourceText": "Expired",
     "filePath": "src/locales/en.json",
@@ -1969,6 +2133,7 @@
   },
   {
     "id": "draft-open",
+    "cohort": "core",
     "pairId": "draft",
     "sourceText": "Draft",
     "filePath": "src/locales/en.json",
@@ -1981,6 +2146,7 @@
   },
   {
     "id": "draft-settled",
+    "cohort": "core",
     "pairId": "draft",
     "sourceText": "Draft",
     "filePath": "src/locales/en.json",
@@ -1993,6 +2159,7 @@
   },
   {
     "id": "default-open",
+    "cohort": "core",
     "pairId": "default",
     "sourceText": "Default",
     "filePath": "src/locales/en.json",
@@ -2005,6 +2172,7 @@
   },
   {
     "id": "default-settled",
+    "cohort": "core",
     "pairId": "default",
     "sourceText": "Default",
     "filePath": "src/locales/en.json",
@@ -2017,6 +2185,7 @@
   },
   {
     "id": "custom-open",
+    "cohort": "core",
     "pairId": "custom",
     "sourceText": "Custom",
     "filePath": "src/locales/en.json",
@@ -2029,6 +2198,7 @@
   },
   {
     "id": "custom-settled",
+    "cohort": "core",
     "pairId": "custom",
     "sourceText": "Custom",
     "filePath": "src/locales/en.json",
@@ -2040,7 +2210,1048 @@
     "rationale": "The sibling keys name the noun — domain — so the agreement is determined."
   },
   {
+    "id": "branch-open",
+    "cohort": "polysemy-2",
+    "pairId": "branch",
+    "sourceText": "Branch",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.branch\": \"Branch\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Branch\" can mean a line of version-control history or an office of a company, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "branch-settled",
+    "cohort": "polysemy-2",
+    "pairId": "branch",
+    "sourceText": "Branch",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"git.commit\": \"Commit\",\n  \"git.merge\": \"Merge\",\n  \"label.branch\": \"Branch\",\n  \"git.pullRequest\": \"Pull request\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are git.commit, git.merge, git.pullRequest, which settle it on a line of version-control history."
+  },
+  {
+    "id": "head-open",
+    "cohort": "polysemy-2",
+    "pairId": "head",
+    "sourceText": "Head",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.head\": \"Head\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Head\" can mean the current commit pointer or the person in charge, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "head-settled",
+    "cohort": "polysemy-2",
+    "pairId": "head",
+    "sourceText": "Head",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"git.detached\": \"Detached\",\n  \"git.checkout\": \"Check out\",\n  \"label.head\": \"Head\",\n  \"git.ref\": \"Reference\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are git.detached, git.checkout, git.ref, which settle it on the current commit pointer."
+  },
+  {
+    "id": "master-open",
+    "cohort": "polysemy-2",
+    "pairId": "master",
+    "sourceText": "Master",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.master\": \"Master\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Master\" can mean the primary branch or replica or an expert, or a degree, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "master-settled",
+    "cohort": "polysemy-2",
+    "pairId": "master",
+    "sourceText": "Master",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"db.replica\": \"Replica\",\n  \"db.failover\": \"Failover\",\n  \"label.master\": \"Master\",\n  \"db.connection\": \"Connection\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are db.replica, db.failover, db.connection, which settle it on the primary replica."
+  },
+  {
+    "id": "commit-open",
+    "cohort": "polysemy-2",
+    "pairId": "commit",
+    "sourceText": "Commit",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"action.commit\": \"Commit\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Commit\" can mean record a change in version control or to pledge oneself, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "commit-settled",
+    "cohort": "polysemy-2",
+    "pairId": "commit",
+    "sourceText": "Commit",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"git.stage\": \"Stage\",\n  \"git.amend\": \"Amend\",\n  \"action.commit\": \"Commit\",\n  \"git.message\": \"Message\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are git.stage, git.amend, git.message, which settle it on record a change in version control."
+  },
+  {
+    "id": "fork-open",
+    "cohort": "polysemy-2",
+    "pairId": "fork",
+    "sourceText": "Fork",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"action.fork\": \"Fork\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Fork\" can mean copy a repository or a split in a road, or cutlery, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "fork-settled",
+    "cohort": "polysemy-2",
+    "pairId": "fork",
+    "sourceText": "Fork",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"repo.star\": \"Star\",\n  \"repo.clone\": \"Clone\",\n  \"action.fork\": \"Fork\",\n  \"repo.upstream\": \"Upstream\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are repo.star, repo.clone, repo.upstream, which settle it on copy a repository."
+  },
+  {
+    "id": "bug-open",
+    "cohort": "polysemy-2",
+    "pairId": "bug",
+    "sourceText": "Bug",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.bug\": \"Bug\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Bug\" can mean a defect in software or an insect, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "bug-settled",
+    "cohort": "polysemy-2",
+    "pairId": "bug",
+    "sourceText": "Bug",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"tracker.severity\": \"Severity\",\n  \"tracker.reproduce\": \"Steps to reproduce\",\n  \"label.bug\": \"Bug\",\n  \"tracker.regression\": \"Regression\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are tracker.severity, tracker.reproduce, tracker.regression, which settle it on a defect in software."
+  },
+  {
+    "id": "patch-open",
+    "cohort": "polysemy-2",
+    "pairId": "patch",
+    "sourceText": "Patch",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.patch\": \"Patch\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Patch\" can mean a code change or fix or a piece of cloth or ground, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "patch-settled",
+    "cohort": "polysemy-2",
+    "pairId": "patch",
+    "sourceText": "Patch",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"release.major\": \"Major\",\n  \"release.minor\": \"Minor\",\n  \"label.patch\": \"Patch\",\n  \"release.version\": \"Version\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are release.major, release.minor, release.version, which settle it on the patch component of a version number."
+  },
+  {
+    "id": "shell-open",
+    "cohort": "polysemy-2",
+    "pairId": "shell",
+    "sourceText": "Shell",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.shell\": \"Shell\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Shell\" can mean a command interpreter or a hard outer covering, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "shell-settled",
+    "cohort": "polysemy-2",
+    "pairId": "shell",
+    "sourceText": "Shell",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"terminal.prompt\": \"Prompt\",\n  \"terminal.command\": \"Command\",\n  \"label.shell\": \"Shell\",\n  \"terminal.exitCode\": \"Exit code\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are terminal.prompt, terminal.command, terminal.exitCode, which settle it on a command interpreter."
+  },
+  {
+    "id": "root-open",
+    "cohort": "polysemy-2",
+    "pairId": "root",
+    "sourceText": "Root",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.root\": \"Root\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Root\" can mean the top directory or superuser or the part of a plant, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "root-settled",
+    "cohort": "polysemy-2",
+    "pairId": "root",
+    "sourceText": "Root",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"fs.directory\": \"Directory\",\n  \"fs.permissions\": \"Permissions\",\n  \"label.root\": \"Root\",\n  \"fs.symlink\": \"Symbolic link\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are fs.directory, fs.permissions, fs.symlink, which settle it on the top directory."
+  },
+  {
+    "id": "port-open",
+    "cohort": "polysemy-2",
+    "pairId": "port",
+    "sourceText": "Port",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.port\": \"Port\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Port\" can mean a network port or a harbour, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "port-settled",
+    "cohort": "polysemy-2",
+    "pairId": "port",
+    "sourceText": "Port",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"net.host\": \"Host\",\n  \"net.protocol\": \"Protocol\",\n  \"label.port\": \"Port\",\n  \"net.timeout\": \"Timeout\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are net.host, net.protocol, net.timeout, which settle it on a network port."
+  },
+  {
+    "id": "host-open",
+    "cohort": "polysemy-2",
+    "pairId": "host",
+    "sourceText": "Host",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.host\": \"Host\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Host\" can mean a server address or a person receiving guests, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "host-settled",
+    "cohort": "polysemy-2",
+    "pairId": "host",
+    "sourceText": "Host",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"net.dns\": \"DNS\",\n  \"net.ipAddress\": \"IP address\",\n  \"label.host\": \"Host\",\n  \"net.certificate\": \"Certificate\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are net.dns, net.ipAddress, net.certificate, which settle it on a server address."
+  },
+  {
+    "id": "cell-open",
+    "cohort": "polysemy-2",
+    "pairId": "cell",
+    "sourceText": "Cell",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.cell\": \"Cell\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Cell\" can mean a spreadsheet cell or a biological cell or a prison cell, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "cell-settled",
+    "cohort": "polysemy-2",
+    "pairId": "cell",
+    "sourceText": "Cell",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"sheet.formula\": \"Formula\",\n  \"sheet.range\": \"Range\",\n  \"label.cell\": \"Cell\",\n  \"sheet.merge\": \"Merge cells\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are sheet.formula, sheet.range, sheet.merge, which settle it on a spreadsheet cell."
+  },
+  {
+    "id": "sheet-open",
+    "cohort": "polysemy-2",
+    "pairId": "sheet",
+    "sourceText": "Sheet",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.sheet\": \"Sheet\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Sheet\" can mean a tab in a workbook or a piece of bedding or paper, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "sheet-settled",
+    "cohort": "polysemy-2",
+    "pairId": "sheet",
+    "sourceText": "Sheet",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"workbook.addSheet\": \"Add sheet\",\n  \"workbook.renameSheet\": \"Rename sheet\",\n  \"label.sheet\": \"Sheet\",\n  \"workbook.formula\": \"Formula\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are workbook.addSheet, workbook.renameSheet, workbook.formula, which settle it on a tab in a workbook."
+  },
+  {
+    "id": "column-open",
+    "cohort": "polysemy-2",
+    "pairId": "column",
+    "sourceText": "Column",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.column\": \"Column\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Column\" can mean a vertical field in a table or a newspaper column or a pillar, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "column-settled",
+    "cohort": "polysemy-2",
+    "pairId": "column",
+    "sourceText": "Column",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"table.primaryKey\": \"Primary key\",\n  \"table.nullable\": \"Nullable\",\n  \"label.column\": \"Column\",\n  \"table.dataType\": \"Data type\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are table.primaryKey, table.nullable, table.dataType, which settle it on a vertical field in a table."
+  },
+  {
+    "id": "index-open",
+    "cohort": "polysemy-2",
+    "pairId": "index",
+    "sourceText": "Index",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.index\": \"Index\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Index\" can mean a database index or a position in a list, or a book index, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "index-settled",
+    "cohort": "polysemy-2",
+    "pairId": "index",
+    "sourceText": "Index",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"db.query\": \"Query\",\n  \"db.explain\": \"Explain plan\",\n  \"label.index\": \"Index\",\n  \"db.tableScan\": \"Table scan\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are db.query, db.explain, db.tableScan, which settle it on a database index."
+  },
+  {
+    "id": "key-2-open",
+    "cohort": "polysemy-2",
+    "pairId": "key-2",
+    "sourceText": "Primary",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.primaryKey\": \"Primary\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Primary\" can mean the main one of several or a primary election or colour, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "key-2-settled",
+    "cohort": "polysemy-2",
+    "pairId": "key-2",
+    "sourceText": "Primary",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"contact.secondaryEmail\": \"Secondary email\",\n  \"contact.addEmail\": \"Add email\",\n  \"label.primaryKey\": \"Primary\",\n  \"contact.verifyEmail\": \"Verify email\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are contact.secondaryEmail, contact.addEmail, contact.verifyEmail, which settle it on the main one of several."
+  },
+  {
+    "id": "pool-open",
+    "cohort": "polysemy-2",
+    "pairId": "pool",
+    "sourceText": "Pool",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.pool\": \"Pool\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Pool\" can mean a set of reusable resources or a place to swim, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "pool-settled",
+    "cohort": "polysemy-2",
+    "pairId": "pool",
+    "sourceText": "Pool",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"db.idleConnections\": \"Idle connections\",\n  \"db.maxConnections\": \"Maximum connections\",\n  \"label.pool\": \"Pool\",\n  \"db.acquireTimeout\": \"Acquire timeout\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are db.idleConnections, db.maxConnections, db.acquireTimeout, which settle it on a set of reusable resources."
+  },
+  {
+    "id": "queue-open",
+    "cohort": "polysemy-2",
+    "pairId": "queue",
+    "sourceText": "Queue",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.queue\": \"Queue\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Queue\" can mean a job queue or a line of people waiting, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "queue-settled",
+    "cohort": "polysemy-2",
+    "pairId": "queue",
+    "sourceText": "Queue",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"jobs.retry\": \"Retry\",\n  \"jobs.deadLetter\": \"Dead letter\",\n  \"label.queue\": \"Queue\",\n  \"jobs.worker\": \"Worker\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are jobs.retry, jobs.deadLetter, jobs.worker, which settle it on a job queue."
+  },
+  {
+    "id": "stream-open",
+    "cohort": "polysemy-2",
+    "pairId": "stream",
+    "sourceText": "Stream",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.stream\": \"Stream\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Stream\" can mean a flow of data or a small river, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "stream-settled",
+    "cohort": "polysemy-2",
+    "pairId": "stream",
+    "sourceText": "Stream",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"data.buffer\": \"Buffer\",\n  \"data.backpressure\": \"Backpressure\",\n  \"label.stream\": \"Stream\",\n  \"data.chunk\": \"Chunk\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are data.buffer, data.backpressure, data.chunk, which settle it on a flow of data."
+  },
+  {
+    "id": "memory-open",
+    "cohort": "polysemy-2",
+    "pairId": "memory",
+    "sourceText": "Memory",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.memory\": \"Memory\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Memory\" can mean machine memory or the human faculty of recall, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "memory-settled",
+    "cohort": "polysemy-2",
+    "pairId": "memory",
+    "sourceText": "Memory",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"system.cpu\": \"CPU\",\n  \"system.disk\": \"Disk\",\n  \"label.memory\": \"Memory\",\n  \"system.swap\": \"Swap\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are system.cpu, system.disk, system.swap, which settle it on machine memory."
+  },
+  {
+    "id": "drive-open",
+    "cohort": "polysemy-2",
+    "pairId": "drive",
+    "sourceText": "Drive",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.drive\": \"Drive\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Drive\" can mean a storage device or to operate a vehicle, or motivation, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "drive-settled",
+    "cohort": "polysemy-2",
+    "pairId": "drive",
+    "sourceText": "Drive",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"storage.partition\": \"Partition\",\n  \"storage.mountPoint\": \"Mount point\",\n  \"label.drive\": \"Drive\",\n  \"storage.filesystem\": \"File system\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are storage.partition, storage.mountPoint, storage.filesystem, which settle it on a storage device."
+  },
+  {
+    "id": "mount-open",
+    "cohort": "polysemy-2",
+    "pairId": "mount",
+    "sourceText": "Mount",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"action.mount\": \"Mount\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Mount\" can mean attach a filesystem or a mountain, or to climb onto, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "mount-settled",
+    "cohort": "polysemy-2",
+    "pairId": "mount",
+    "sourceText": "Mount",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"storage.unmount\": \"Unmount\",\n  \"storage.volume\": \"Volume\",\n  \"action.mount\": \"Mount\",\n  \"storage.readOnly\": \"Read-only\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are storage.unmount, storage.volume, storage.readOnly, which settle it on attach a filesystem."
+  },
+  {
+    "id": "image-open",
+    "cohort": "polysemy-2",
+    "pairId": "image",
+    "sourceText": "Image",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.image\": \"Image\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Image\" can mean a container or disk image or a picture, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "image-settled",
+    "cohort": "polysemy-2",
+    "pairId": "image",
+    "sourceText": "Image",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"container.registry\": \"Registry\",\n  \"container.tag\": \"Tag\",\n  \"label.image\": \"Image\",\n  \"container.pull\": \"Pull\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are container.registry, container.tag, container.pull, which settle it on a container image."
+  },
+  {
+    "id": "tag-open",
+    "cohort": "polysemy-2",
+    "pairId": "tag",
+    "sourceText": "Tag",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.tag\": \"Tag\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Tag\" can mean a version marker or a label attached to content, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "tag-settled",
+    "cohort": "polysemy-2",
+    "pairId": "tag",
+    "sourceText": "Tag",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"release.changelog\": \"Changelog\",\n  \"release.publish\": \"Publish release\",\n  \"label.tag\": \"Tag\",\n  \"release.semver\": \"Semantic version\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are release.changelog, release.publish, release.semver, which settle it on a version marker."
+  },
+  {
+    "id": "build-open",
+    "cohort": "polysemy-2",
+    "pairId": "build",
+    "sourceText": "Build",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.build\": \"Build\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Build\" can mean a compiled artefact or CI run or to construct, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "build-settled",
+    "cohort": "polysemy-2",
+    "pairId": "build",
+    "sourceText": "Build",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"ci.artifact\": \"Artifact\",\n  \"ci.pipeline\": \"Pipeline\",\n  \"label.build\": \"Build\",\n  \"ci.duration\": \"Duration\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are ci.artifact, ci.pipeline, ci.duration, which settle it on a CI run."
+  },
+  {
+    "id": "stage-open",
+    "cohort": "polysemy-2",
+    "pairId": "stage",
+    "sourceText": "Stage",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.stage\": \"Stage\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Stage\" can mean a step in a pipeline or a platform, or to stage files, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "stage-settled",
+    "cohort": "polysemy-2",
+    "pairId": "stage",
+    "sourceText": "Stage",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"pipeline.deploy\": \"Deploy\",\n  \"pipeline.testStage\": \"Test\",\n  \"label.stage\": \"Stage\",\n  \"pipeline.approval\": \"Approval\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are pipeline.deploy, pipeline.testStage, pipeline.approval, which settle it on a step in a pipeline."
+  },
+  {
+    "id": "release-open",
+    "cohort": "polysemy-2",
+    "pairId": "release",
+    "sourceText": "Release",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.release\": \"Release\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Release\" can mean a published version or to let go of something, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "release-settled",
+    "cohort": "polysemy-2",
+    "pairId": "release",
+    "sourceText": "Release",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"version.changelog\": \"Changelog\",\n  \"version.downloads\": \"Downloads\",\n  \"label.release\": \"Release\",\n  \"version.prerelease\": \"Pre-release\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are version.changelog, version.downloads, version.prerelease, which settle it on a published version."
+  },
+  {
+    "id": "trace-open",
+    "cohort": "polysemy-2",
+    "pairId": "trace",
+    "sourceText": "Trace",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.trace\": \"Trace\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Trace\" can mean a distributed trace or stack trace or a faint remnant, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "trace-settled",
+    "cohort": "polysemy-2",
+    "pairId": "trace",
+    "sourceText": "Trace",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"observability.span\": \"Span\",\n  \"observability.latency\": \"Latency\",\n  \"label.trace\": \"Trace\",\n  \"observability.sampling\": \"Sampling rate\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are observability.span, observability.latency, observability.sampling, which settle it on a distributed trace."
+  },
+  {
+    "id": "log-open",
+    "cohort": "polysemy-2",
+    "pairId": "log",
+    "sourceText": "Log",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.log\": \"Log\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Log\" can mean a record of events or a felled tree, or a logarithm, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "log-settled",
+    "cohort": "polysemy-2",
+    "pairId": "log",
+    "sourceText": "Log",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"logs.level\": \"Level\",\n  \"logs.timestamp\": \"Timestamp\",\n  \"label.log\": \"Log\",\n  \"logs.tail\": \"Tail\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are logs.level, logs.timestamp, logs.tail, which settle it on a record of events."
+  },
+  {
+    "id": "scale-2-open",
+    "cohort": "polysemy-2",
+    "pairId": "scale-2",
+    "sourceText": "Instance",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"action.scaleOut\": \"Instance\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Instance\" can mean a running server or an example or occurrence, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "scale-2-settled",
+    "cohort": "polysemy-2",
+    "pairId": "scale-2",
+    "sourceText": "Instance",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"infra.region\": \"Region\",\n  \"infra.restart\": \"Restart\",\n  \"action.scaleOut\": \"Instance\",\n  \"infra.autoscaling\": \"Autoscaling\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are infra.region, infra.restart, infra.autoscaling, which settle it on a running server."
+  },
+  {
+    "id": "flag-open",
+    "cohort": "polysemy-2",
+    "pairId": "flag",
+    "sourceText": "Flag",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.flag\": \"Flag\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Flag\" can mean a feature toggle or boolean option or a national flag, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "flag-settled",
+    "cohort": "polysemy-2",
+    "pairId": "flag",
+    "sourceText": "Flag",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"toggle.rollout\": \"Rollout percentage\",\n  \"toggle.enabled\": \"Enabled\",\n  \"label.flag\": \"Flag\",\n  \"toggle.targeting\": \"Targeting rules\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are toggle.rollout, toggle.enabled, toggle.targeting, which settle it on a feature toggle."
+  },
+  {
+    "id": "block-open",
+    "cohort": "polysemy-2",
+    "pairId": "block",
+    "sourceText": "Block",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.block\": \"Block\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Block\" can mean a unit of content or storage or to prevent access, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "block-settled",
+    "cohort": "polysemy-2",
+    "pairId": "block",
+    "sourceText": "Block",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"editor.paragraph\": \"Paragraph\",\n  \"editor.heading\": \"Heading\",\n  \"label.block\": \"Block\",\n  \"editor.insertBlock\": \"Insert block\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are editor.paragraph, editor.heading, editor.insertBlock, which settle it on a unit of content."
+  },
+  {
+    "id": "crop-open",
+    "cohort": "polysemy-2",
+    "pairId": "crop",
+    "sourceText": "Crop",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"action.crop\": \"Crop\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Crop\" can mean trim an image or a harvested plant, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "crop-settled",
+    "cohort": "polysemy-2",
+    "pairId": "crop",
+    "sourceText": "Crop",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"photo.rotate\": \"Rotate\",\n  \"photo.exposure\": \"Exposure\",\n  \"action.crop\": \"Crop\",\n  \"photo.aspectRatio\": \"Aspect ratio\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are photo.rotate, photo.exposure, photo.aspectRatio, which settle it on trim an image."
+  },
+  {
+    "id": "frame-open",
+    "cohort": "polysemy-2",
+    "pairId": "frame",
+    "sourceText": "Frame",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.frame\": \"Frame\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Frame\" can mean a single image in a sequence or a border around a picture, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "frame-settled",
+    "cohort": "polysemy-2",
+    "pairId": "frame",
+    "sourceText": "Frame",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"video.keyframe\": \"Keyframe\",\n  \"video.frameRate\": \"Frame rate\",\n  \"label.frame\": \"Frame\",\n  \"video.timeline\": \"Timeline\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are video.keyframe, video.frameRate, video.timeline, which settle it on a single image in a sequence."
+  },
+  {
+    "id": "clip-open",
+    "cohort": "polysemy-2",
+    "pairId": "clip",
+    "sourceText": "Clip",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.clip\": \"Clip\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Clip\" can mean a short segment of video or a fastener, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "clip-settled",
+    "cohort": "polysemy-2",
+    "pairId": "clip",
+    "sourceText": "Clip",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"video.trim\": \"Trim\",\n  \"video.playhead\": \"Playhead\",\n  \"label.clip\": \"Clip\",\n  \"video.export\": \"Export\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are video.trim, video.playhead, video.export, which settle it on a short segment of video."
+  },
+  {
+    "id": "palette-open",
+    "cohort": "polysemy-2",
+    "pairId": "palette",
+    "sourceText": "Palette",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.palette\": \"Palette\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Palette\" can mean a set of colours or a command palette, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "palette-settled",
+    "cohort": "polysemy-2",
+    "pairId": "palette",
+    "sourceText": "Palette",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"theme.swatch\": \"Swatch\",\n  \"theme.contrast\": \"Contrast\",\n  \"label.palette\": \"Palette\",\n  \"theme.hexValue\": \"Hex value\",",
+    "targetLocale": "de",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are theme.swatch, theme.contrast, theme.hexValue, which settle it on a set of colours."
+  },
+  {
+    "id": "space-open",
+    "cohort": "polysemy-2",
+    "pairId": "space",
+    "sourceText": "Space",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.space\": \"Space\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Space\" can mean a workspace or namespace or blank characters, or physical room, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "space-settled",
+    "cohort": "polysemy-2",
+    "pairId": "space",
+    "sourceText": "Space",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"workspace.members\": \"Members\",\n  \"workspace.invite\": \"Invite to workspace\",\n  \"label.space\": \"Space\",\n  \"workspace.leave\": \"Leave workspace\",",
+    "targetLocale": "ja",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are workspace.members, workspace.invite, workspace.leave, which settle it on a workspace."
+  },
+  {
+    "id": "plan-2-open",
+    "cohort": "polysemy-2",
+    "pairId": "plan-2",
+    "sourceText": "Plan",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.entry\": \"Entry\",\n  \"label.detail\": \"Detail\",\n  \"label.planItem\": \"Plan\",\n  \"label.field\": \"Field\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Plan\" can mean a subscription tier or a course of action or a diagram, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "plan-2-settled",
+    "cohort": "polysemy-2",
+    "pairId": "plan-2",
+    "sourceText": "Plan",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"billing.invoice\": \"Invoice\",\n  \"billing.seats\": \"Seats\",\n  \"label.planItem\": \"Plan\",\n  \"billing.renewal\": \"Renewal date\",",
+    "targetLocale": "es",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are billing.invoice, billing.seats, billing.renewal, which settle it on a subscription tier."
+  },
+  {
+    "id": "mail-open",
+    "cohort": "polysemy-2",
+    "pairId": "mail",
+    "sourceText": "Mail",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.one\": \"One\",\n  \"label.two\": \"Two\",\n  \"label.mail\": \"Mail\",\n  \"label.three\": \"Three\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Mail\" can mean electronic messages or physical post, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "mail-settled",
+    "cohort": "polysemy-2",
+    "pairId": "mail",
+    "sourceText": "Mail",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"inbox.compose\": \"Compose\",\n  \"inbox.attachment\": \"Attachment\",\n  \"label.mail\": \"Mail\",\n  \"inbox.spamFolder\": \"Spam\",",
+    "targetLocale": "ar",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are inbox.compose, inbox.attachment, inbox.spamFolder, which settle it on electronic messages."
+  },
+  {
+    "id": "draft-2-open",
+    "cohort": "polysemy-2",
+    "pairId": "draft-2",
+    "sourceText": "Revision",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"label.item\": \"Item\",\n  \"label.value\": \"Value\",\n  \"label.draftDoc\": \"Revision\",\n  \"label.name\": \"Name\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "escalate",
+    "rationale": "\"Revision\" can mean a stored version of a document or the act of revising, and the sibling keys are generic labels that pick neither."
+  },
+  {
+    "id": "draft-2-settled",
+    "cohort": "polysemy-2",
+    "pairId": "draft-2",
+    "sourceText": "Revision",
+    "filePath": "src/locales/en.json",
+    "componentName": null,
+    "surroundingCode": "  \"history.restore\": \"Restore this revision\",\n  \"history.compare\": \"Compare revisions\",\n  \"label.draftDoc\": \"Revision\",\n  \"history.author\": \"Author\",",
+    "targetLocale": "pt-BR",
+    "category": "polysemy",
+    "expected": "confident",
+    "rationale": "The sibling keys are history.restore, history.compare, history.author, which settle it on a stored version of a document."
+  },
+  {
     "id": "are-you-sure-open",
+    "cohort": "core",
     "pairId": "are-you-sure",
     "sourceText": "Are you sure?",
     "filePath": "src/locales/en.json",
@@ -2053,6 +3264,7 @@
   },
   {
     "id": "are-you-sure-settled",
+    "cohort": "core",
     "pairId": "are-you-sure",
     "sourceText": "Are you sure?",
     "filePath": "src/locales/en.json",
@@ -2065,6 +3277,7 @@
   },
   {
     "id": "sign-in-continue-open",
+    "cohort": "core",
     "pairId": "sign-in-continue",
     "sourceText": "Sign in to continue",
     "filePath": "src/locales/en.json",
@@ -2077,6 +3290,7 @@
   },
   {
     "id": "sign-in-continue-settled",
+    "cohort": "core",
     "pairId": "sign-in-continue",
     "sourceText": "Sign in to continue",
     "filePath": "src/locales/en.json",
@@ -2089,6 +3303,7 @@
   },
   {
     "id": "unsaved-changes-open",
+    "cohort": "core",
     "pairId": "unsaved-changes",
     "sourceText": "You have unsaved changes",
     "filePath": "src/locales/en.json",
@@ -2101,6 +3316,7 @@
   },
   {
     "id": "unsaved-changes-settled",
+    "cohort": "core",
     "pairId": "unsaved-changes",
     "sourceText": "You have unsaved changes",
     "filePath": "src/locales/en.json",
@@ -2113,6 +3329,7 @@
   },
   {
     "id": "want-to-delete-open",
+    "cohort": "core",
     "pairId": "want-to-delete",
     "sourceText": "Do you want to delete this?",
     "filePath": "src/locales/en.json",
@@ -2125,6 +3342,7 @@
   },
   {
     "id": "want-to-delete-settled",
+    "cohort": "core",
     "pairId": "want-to-delete",
     "sourceText": "Do you want to delete this?",
     "filePath": "src/locales/en.json",
@@ -2137,6 +3355,7 @@
   },
   {
     "id": "welcome-back-open",
+    "cohort": "core",
     "pairId": "welcome-back",
     "sourceText": "Welcome back!",
     "filePath": "src/locales/en.json",
@@ -2149,6 +3368,7 @@
   },
   {
     "id": "welcome-back-settled",
+    "cohort": "core",
     "pairId": "welcome-back",
     "sourceText": "Welcome back!",
     "filePath": "src/locales/en.json",
@@ -2161,6 +3381,7 @@
   },
   {
     "id": "enter-your-email-open",
+    "cohort": "core",
     "pairId": "enter-your-email",
     "sourceText": "Enter your email",
     "filePath": "src/locales/en.json",
@@ -2173,6 +3394,7 @@
   },
   {
     "id": "enter-your-email-settled",
+    "cohort": "core",
     "pairId": "enter-your-email",
     "sourceText": "Enter your email",
     "filePath": "src/locales/en.json",
@@ -2185,6 +3407,7 @@
   },
   {
     "id": "check-your-inbox-open",
+    "cohort": "core",
     "pairId": "check-your-inbox",
     "sourceText": "Check your inbox",
     "filePath": "src/locales/en.json",
@@ -2197,6 +3420,7 @@
   },
   {
     "id": "check-your-inbox-settled",
+    "cohort": "core",
     "pairId": "check-your-inbox",
     "sourceText": "Check your inbox",
     "filePath": "src/locales/en.json",
@@ -2209,6 +3433,7 @@
   },
   {
     "id": "try-again-open",
+    "cohort": "core",
     "pairId": "try-again",
     "sourceText": "Try again",
     "filePath": "src/locales/en.json",
@@ -2221,6 +3446,7 @@
   },
   {
     "id": "try-again-settled",
+    "cohort": "core",
     "pairId": "try-again",
     "sourceText": "Try again",
     "filePath": "src/locales/en.json",
@@ -2233,6 +3459,7 @@
   },
   {
     "id": "tell-us-open",
+    "cohort": "core",
     "pairId": "tell-us",
     "sourceText": "Tell us what you think",
     "filePath": "src/locales/en.json",
@@ -2245,6 +3472,7 @@
   },
   {
     "id": "tell-us-settled",
+    "cohort": "core",
     "pairId": "tell-us",
     "sourceText": "Tell us what you think",
     "filePath": "src/locales/en.json",
@@ -2257,6 +3485,7 @@
   },
   {
     "id": "youre-all-set-open",
+    "cohort": "core",
     "pairId": "youre-all-set",
     "sourceText": "You're all set",
     "filePath": "src/locales/en.json",
@@ -2269,6 +3498,7 @@
   },
   {
     "id": "youre-all-set-settled",
+    "cohort": "core",
     "pairId": "youre-all-set",
     "sourceText": "You're all set",
     "filePath": "src/locales/en.json",
@@ -2281,6 +3511,7 @@
   },
   {
     "id": "choose-a-plan-open",
+    "cohort": "core",
     "pairId": "choose-a-plan",
     "sourceText": "Choose a plan",
     "filePath": "src/locales/en.json",
@@ -2293,6 +3524,7 @@
   },
   {
     "id": "choose-a-plan-settled",
+    "cohort": "core",
     "pairId": "choose-a-plan",
     "sourceText": "Choose a plan",
     "filePath": "src/locales/en.json",
@@ -2305,6 +3537,7 @@
   },
   {
     "id": "invite-your-team-open",
+    "cohort": "core",
     "pairId": "invite-your-team",
     "sourceText": "Invite your team",
     "filePath": "src/locales/en.json",
@@ -2317,6 +3550,7 @@
   },
   {
     "id": "invite-your-team-settled",
+    "cohort": "core",
     "pairId": "invite-your-team",
     "sourceText": "Invite your team",
     "filePath": "src/locales/en.json",
@@ -2329,6 +3563,7 @@
   },
   {
     "id": "couldnt-find-account-open",
+    "cohort": "core",
     "pairId": "couldnt-find-account",
     "sourceText": "We couldn't find your account",
     "filePath": "src/locales/en.json",
@@ -2341,6 +3576,7 @@
   },
   {
     "id": "couldnt-find-account-settled",
+    "cohort": "core",
     "pairId": "couldnt-find-account",
     "sourceText": "We couldn't find your account",
     "filePath": "src/locales/en.json",
@@ -2353,6 +3589,7 @@
   },
   {
     "id": "confirm-your-password-open",
+    "cohort": "core",
     "pairId": "confirm-your-password",
     "sourceText": "Confirm your password",
     "filePath": "src/locales/en.json",
@@ -2365,6 +3602,7 @@
   },
   {
     "id": "confirm-your-password-settled",
+    "cohort": "core",
     "pairId": "confirm-your-password",
     "sourceText": "Confirm your password",
     "filePath": "src/locales/en.json",
@@ -2377,6 +3615,7 @@
   },
   {
     "id": "lets-get-started-open",
+    "cohort": "core",
     "pairId": "lets-get-started",
     "sourceText": "Let's get started",
     "filePath": "src/locales/en.json",
@@ -2389,6 +3628,7 @@
   },
   {
     "id": "lets-get-started-settled",
+    "cohort": "core",
     "pairId": "lets-get-started",
     "sourceText": "Let's get started",
     "filePath": "src/locales/en.json",
