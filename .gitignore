@@ -20,3 +20,6 @@ test-results/
 
 # Scratch directory for design-audit screenshots (Playwright).
 apps/*/.audit/
+
+# Supabase CLI scratch (version cache). Created by any `supabase` invocation.
+supabase/.temp/
