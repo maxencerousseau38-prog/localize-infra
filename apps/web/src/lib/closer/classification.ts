@@ -1,4 +1,5 @@
 import 'server-only';
+import { modelConfigured, requireModelKey } from '@/lib/closer/model';
 import { createClient } from '@/lib/supabase/server';
 import {
   type Classification,
@@ -23,20 +24,14 @@ import {
 
 const MODEL = 'claude-opus-5';
 
-export function classificationModelConfigured(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
-}
+/** Re-exported so callers of this module do not need to know where it lives. */
+export const classificationModelConfigured = modelConfigured;
 
 export async function classifyReply(
   organizationId: string,
   replyId: string,
 ): Promise<Classification> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      'Classification is not available: no model key on this deployment',
-    );
-  }
+  const apiKey = requireModelKey('Classification');
 
   const supabase = await createClient();
 

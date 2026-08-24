@@ -1,4 +1,5 @@
 import 'server-only';
+import { modelConfigured, requireModelKey } from '@/lib/closer/model';
 import { createClient } from '@/lib/supabase/server';
 import {
   type DraftEvidence,
@@ -47,20 +48,8 @@ export interface DraftOutcome {
   citations: string[];
 }
 
-/**
- * The key, or null.
- *
- * Read at call time rather than at module load so that a deployment which
- * gains the variable does not need a rebuild to notice — and so the absence is
- * a value the caller can render, not an exception thrown during a render.
- *
- * This deployment does not have it: `ANTHROPIC_API_KEY` is set for `apps/api`,
- * not for the web project. So drafting reports itself unavailable rather than
- * failing at the moment somebody presses a button.
- */
-export function draftingModelConfigured(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
-}
+/** Re-exported so callers of this module do not need to know where it lives. */
+export const draftingModelConfigured = modelConfigured;
 
 interface AnthropicReply {
   text: string;
@@ -124,12 +113,7 @@ export async function draftMessageForLead(
   leadId: string,
   channel: 'email' | 'linkedin',
 ): Promise<DraftOutcome> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      'Drafting is not available: no model key on this deployment',
-    );
-  }
+  const apiKey = requireModelKey('Drafting');
 
   const supabase = await createClient();
 

@@ -325,9 +325,45 @@ untouched, and it has moved. It is still low, and the corpus precision of
 thousand strings now sees roughly seventeen questions where they saw seven.
 
 chrF and exact match slipped slightly, and one glossary violation appeared
-where there were none. Individually small; recorded because the trade is real
-and the decision about whether it is worth making is the owner's, not the
-measurement's.
+where there were none. Individually small; recorded because the trade is real.
+
+### The glossary violation, run down rather than left as a number
+
+The single violation was `zulip-WW91IGhhdmUgZGVhY3RpdmF0-ja`. The source is
+"You have deactivated your Zulip demo organization, %(realm_name)s, on
+%(localized_date)s."; the glossary keeps **Zulip** verbatim in Japanese, and the
+produced translation dropped it. A real violation of a real rule.
+
+It does not reproduce. Run eight times through the round-two prompt at
+production settings, with the same key, file path and empty surrounding code
+the harness sends, the term was kept **8/8** and both placeholders survived
+every time. So this is a sample, not a property of the prompt.
+
+Two things bound that. The benchmark sends 414 strings in six batched requests
+and the probe sends one string alone, so what is shown is that the prompt does
+not systematically drop the term — not that a long batch never will. And a
+second defect surfaced while looking: **the human reference for this entry is
+wrong.** "Zulip組織 %(realm_name)s に参加しました。" says the reader *joined* an
+organization; the source says they *deactivated* one. The chrF of 56.8 on this
+entry is measured against a mistranslation, which is a corpus defect and not a
+model result. It is one entry in 414 and is left recorded rather than quietly
+repaired, because editing a reference to improve a score is how a benchmark
+stops measuring anything.
+
+### Decision: round two is adopted
+
+Recall is what invariant 4 is about, and it moved from 39–48% to 53–61% on
+held-out material while precision moved *up*, 86–95% to 91–97% — far above the
+80% floor the target set. The costs are a doubled escalation rate that is still
+1.69%, a chrF and exact-match slip inside the run-to-run variance this document
+already reports as large (recall itself moved eight points across identical
+runs), and a glossary violation that does not reproduce. None of them argues
+against a change that makes the agent better at the one thing it exists to do.
+
+**Adopted in the repository is not the same as live.** `apps/api` does not
+follow Git — see CLAUDE.md — so this prompt reaches production only through
+`npx vercel deploy --prod --archive=tgz`, and until that runs, translations in
+production still use round one.
 
 ---
 
