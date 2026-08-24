@@ -555,3 +555,152 @@ test.describe('the inboxes', () => {
     await expect(page.getByText('app.cancel')).toHaveCount(0);
   });
 });
+
+/**
+ * Closer — the operator's own sales tooling, inside the customer application.
+ *
+ * Two things worth asserting at this stage and only two: that the screen reads
+ * real tables rather than a fixture, and that it says plainly what is not
+ * connected. The gate itself is asserted from the other side, on the server
+ * with no database, where the group must be absent.
+ */
+test.describe('Closer', () => {
+  /*
+   * One navigation, three assertions.
+   *
+   * This began as three tests, each opening /closer for one claim. The page
+   * makes six counting queries against a real database, so three loads was
+   * three times the cost for no extra coverage — and it was enough extra load
+   * on a parallel suite to push an unrelated 100 ms perceptual budget over.
+   * A test that reloads a page to assert a second thing about it is paying
+   * twice to learn once.
+   */
+  test('is its own area, reads real tables, and names what is not connected', async ({
+    page,
+  }) => {
+    await open(page, '/closer');
+
+    // Its own navigation, inside its own area.
+    const nav = page.getByRole('navigation', { name: 'Closer' });
+    await expect(nav).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible();
+
+    /*
+     * And nothing in the global sidebar. Closer is reached by URL on purpose:
+     * a link there would either show a sales pipeline to customers or put the
+     * entitlement query back on every page render, which is what moving this
+     * navigation out of the sidebar was for.
+     */
+    await expect(
+      page.getByRole('navigation', { name: 'Main' }).getByText('Closer'),
+    ).toHaveCount(0);
+
+    await expect(
+      page.getByRole('heading', { name: 'Closer', level: 1 }),
+    ).toBeVisible();
+
+    /*
+     * Every stage of the forward chain is listed, including the ones nothing
+     * has reached. A pipeline that hid its empty stages would look continuous
+     * while having a hole, which is the failure `summarisePipeline` exists to
+     * prevent — asserted here on the rendered page, not only in a unit.
+     */
+    await expect(page.getByRole('heading', { name: 'Pipeline' })).toBeVisible();
+    for (const label of ['Discovered', 'Contacted', 'Replied', 'Negotiation']) {
+      await expect(page.getByText(label, { exact: true })).toBeVisible();
+    }
+
+    /*
+     * Section 45 of the brief: an integration that does not exist says so,
+     * rather than offering a control that pretends.
+     */
+    await expect(page.getByText('Outbound email')).toBeVisible();
+    await expect(page.getByText('Inbound replies')).toBeVisible();
+    await expect(page.getByText('Not connected').first()).toBeVisible();
+  });
+
+  /*
+   * Companies, before anything has been discovered.
+   *
+   * The empty state is the assertion that matters at this stage: the screen
+   * must say "nothing discovered yet" rather than show a demonstration. Whether
+   * discovery works is settled against GitHub, not here — an e2e test that
+   * searched the real API would be slow, rate-limited and different every run.
+   */
+  test('lists companies, and says plainly when there are none', async ({
+    page,
+  }) => {
+    await open(page, '/closer/companies');
+
+    await expect(
+      page.getByRole('heading', { name: 'Companies', level: 1 }),
+    ).toBeVisible();
+
+    // The control that spends a GitHub rate limit, and what it costs, together.
+    await expect(page.getByRole('button', { name: /discover/i })).toBeVisible();
+    await expect(
+      page.getByText(/ten public repositories per run/i),
+    ).toBeVisible();
+
+    await expect(page.getByText(/nothing discovered yet/i)).toBeVisible();
+
+    // Both tabs, now that Companies is built rather than named and inert.
+    const nav = page.getByRole('navigation', { name: 'Closer' });
+    await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Companies' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Approvals' })).toBeVisible();
+  });
+
+  /*
+   * The approval queue, and the sentence that keeps it honest.
+   *
+   * The claim under test is not that a list renders — it is that this screen
+   * never offers to send. Nothing in this repository can send an email, so a
+   * Send button here would be the button-that-pretends-to-work the whole
+   * feature is built to avoid, and the empty state has to say what actually
+   * happens instead.
+   */
+  test('holds outreach behind a person, and does not pretend to send it', async ({
+    page,
+  }) => {
+    await open(page, '/closer/approvals');
+
+    await expect(
+      page.getByRole('heading', { name: 'Approvals', level: 1 }),
+    ).toBeVisible();
+
+    await expect(page.getByText(/nothing waiting/i)).toBeVisible();
+    await expect(
+      page.getByText(/sent without passing through this screen/i),
+    ).toBeVisible();
+
+    // No send affordance anywhere on the page, in any state.
+    await expect(page.getByRole('button', { name: /^send$/i })).toHaveCount(0);
+  });
+
+  /*
+   * The reply loop, and the two things it must not claim.
+   *
+   * It must not claim to watch a mailbox — nothing here can receive an email,
+   * so the intake is a person pasting text and the screen says so. And it must
+   * not show an agreement rate computed from a handful of replies: a
+   * percentage reads as a trend however it is annotated, so below the
+   * threshold the figure is withheld and replaced by how short it is.
+   */
+  test('takes replies by hand and withholds a rate it cannot support', async ({
+    page,
+  }) => {
+    await open(page, '/closer/replies');
+
+    await expect(
+      page.getByRole('heading', { name: 'Replies', level: 1 }),
+    ).toBeVisible();
+
+    await expect(page.getByText(/no mailbox connector/i)).toBeVisible();
+    await expect(page.getByText(/nothing has come back/i)).toBeVisible();
+
+    // No rate from no data — the sentence, not a zero percent.
+    await expect(page.getByText(/a rate needs 20/i)).toBeVisible();
+    await expect(page.getByText(/^\d+%$/)).toHaveCount(0);
+  });
+});

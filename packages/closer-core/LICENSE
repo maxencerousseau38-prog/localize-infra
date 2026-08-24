@@ -1,0 +1,12 @@
+PROPRIETARY — ALL RIGHTS RESERVED
+
+Copyright (c) 2026 Rousseau Software SAS. All rights reserved.
+
+This directory is NOT part of the open-source core of this repository and is
+not covered by the MIT licence that applies to packages/cli, packages/core,
+packages/eval and packages/schemas. See the LICENSE file at the repository root
+for the full scope statement.
+
+It is proprietary deliberately and not by omission: this package contains the
+unit-cost model behind the product's pricing. Publishing it under the root MIT
+licence would publish the margin on every plan.

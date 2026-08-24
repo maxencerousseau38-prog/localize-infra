@@ -367,3 +367,27 @@ test.describe('command palette actions', () => {
     }
   });
 });
+
+/*
+ * The gate, asserted from the side where it must hold.
+ *
+ * This server runs with no database, so `hasCloser()` cannot find a row and the
+ * group must be absent from the markup entirely — not present and hidden, which
+ * is a different and much weaker thing. A customer signing in to the real
+ * application is in the same position as this page: not a member of a workspace
+ * with Closer.
+ */
+test('Closer is not reachable without an entitled workspace', async ({
+  page,
+}) => {
+  // This server runs with no database, so `hasCloser()` can find no row. A 404
+  // is the only answer that does not confirm the route exists.
+  const response = await page.goto('/closer');
+  expect(response?.status()).toBe(404);
+
+  // And nothing anywhere in the shell points at it.
+  await page.goto('/');
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  await expect(nav).toBeVisible();
+  await expect(nav.getByText('Closer')).toHaveCount(0);
+});
