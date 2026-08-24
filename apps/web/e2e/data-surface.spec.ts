@@ -423,6 +423,86 @@ test.describe('a run detail', () => {
     ).toBeLessThanOrEqual(390);
   });
 
+  /*
+   * The proposals table, on the run that recorded four of them.
+   *
+   * The seed writes app.save and app.cancel in fr and de, all origin `model`.
+   * That shape is what the assertions rest on: two locales means the language
+   * filter is offered, one origin means the origin filter is not — a control
+   * whose every option returns everything is not a control.
+   */
+  test.describe('the proposals it recorded', () => {
+    async function openFinishedRun(page: Page) {
+      await open(page, '/runs');
+      await page.getByRole('link', { name: /run .*succeeded/i }).click();
+      await expect(page).toHaveURL(/\/runs\/[0-9a-f-]{36}$/);
+    }
+
+    test('lists every string the run would write', async ({ page }) => {
+      await openFinishedRun(page);
+
+      const proposals = page.getByRole('table').last();
+      await expect(proposals.getByText('app.save').first()).toBeVisible();
+      await expect(proposals.getByText('Enregistrer')).toBeVisible();
+      await expect(proposals.getByText('Speichern')).toBeVisible();
+    });
+
+    test('narrows to one language, and says so in the count', async ({
+      page,
+    }) => {
+      await openFinishedRun(page);
+
+      /*
+       * The label is clicked, not the input. `DataFilter` hides the real radio
+       * with `sr-only` so the segmented control can be styled, which leaves the
+       * input unactionable to Playwright and is exactly what a mouse user does
+       * anyway — the label is the target on screen.
+       */
+      await page
+        .getByRole('group', { name: 'Language' })
+        .getByText('de', { exact: true })
+        .click();
+      await expect(page.getByText(/2 of 4 proposals/)).toBeVisible();
+      await expect(page.getByText('Enregistrer')).toBeHidden();
+      await expect(page.getByText('Speichern')).toBeVisible();
+
+      // Filters live in the URL so a reader can send the filtered view on.
+      await expect(page).toHaveURL(/locale=de/);
+    });
+
+    test('searches the key, the source and the translation together', async ({
+      page,
+    }) => {
+      await openFinishedRun(page);
+
+      const search = page.getByRole('searchbox', { name: /search proposals/i });
+      await search.fill('Annuler');
+      await expect(page.getByText(/1 of 4 proposals/)).toBeVisible();
+      await expect(page.getByText('app.cancel')).toBeVisible();
+      await expect(page.getByText('app.save')).toBeHidden();
+    });
+
+    /*
+     * The constraint this table was built under.
+     *
+     * `run_translations.proposed_text` has no update path, and approving a run
+     * is one decision about the whole run — `/review` had per-string Approve
+     * and Suggest-a-change buttons that did nothing, and they were deleted
+     * rather than wired. A row action here would re-create exactly that.
+     */
+    test('offers no action on a row, because none exists', async ({ page }) => {
+      await openFinishedRun(page);
+
+      const proposals = page.getByRole('table').last();
+      await expect(
+        proposals.getByRole('button', {
+          name: /approve|edit|suggest|accept|reject|save/i,
+        }),
+      ).toHaveCount(0);
+      await expect(proposals.getByRole('textbox')).toHaveCount(0);
+    });
+  });
+
   test('the finished run links the pull request it opened', async ({
     page,
   }) => {

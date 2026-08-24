@@ -36,22 +36,19 @@ export interface TableQuery<F extends string, S extends string> {
   reset: () => void;
 }
 
-export function useTableQuery<F extends string, S extends string>(defaults: {
-  filter: F;
-  sort: S;
-  desc: boolean;
-}): TableQuery<F, S> {
+/**
+ * Writing a set of parameters, shared by everything in this module.
+ *
+ * Extracted so a second filter can reuse the exact semantics rather than
+ * approximate them — `scroll: false`, deletion on empty, and `replace` rather
+ * than `push` so a filter does not fill the back button with keystrokes.
+ */
+function useCommitParams() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const filter = (params.get('status') as F) ?? defaults.filter;
-  const query = params.get('q') ?? '';
-  const sort = (params.get('sort') as S) ?? defaults.sort;
-  const desc = params.get('dir') ? params.get('dir') === 'desc' : defaults.desc;
-  const page = Math.max(1, Number(params.get('page') ?? 1) || 1);
-
-  const commit = React.useCallback(
+  return React.useCallback(
     (next: Record<string, string | null>) => {
       const search = new URLSearchParams(params.toString());
       for (const [key, value] of Object.entries(next)) {
@@ -65,6 +62,48 @@ export function useTableQuery<F extends string, S extends string>(defaults: {
     },
     [params, pathname, router],
   );
+}
+
+/**
+ * One more filter, on a parameter of the caller's choosing.
+ *
+ * `useTableQuery` names its filter parameter `status`, which is right for the
+ * surfaces it was written for and wrong for a table that filters by two things
+ * at once. Rather than widen that hook and change three call sites, this adds a
+ * second filter alongside it, sharing the same commit so both behave
+ * identically — including resetting the page, since narrowing a result while
+ * standing on page nine is how a table appears to go blank.
+ *
+ * The default is never written to the URL, matching the rule above it: a
+ * pristine surface has a clean address bar.
+ */
+export function useUrlFilter<T extends string>(
+  param: string,
+  fallback: T,
+): [T, (value: T) => void] {
+  const params = useSearchParams();
+  const commit = useCommitParams();
+  const value = (params.get(param) as T | null) ?? fallback;
+  return [
+    value,
+    (next: T) =>
+      commit({ [param]: next === fallback ? null : next, page: null }),
+  ];
+}
+
+export function useTableQuery<F extends string, S extends string>(defaults: {
+  filter: F;
+  sort: S;
+  desc: boolean;
+}): TableQuery<F, S> {
+  const params = useSearchParams();
+  const commit = useCommitParams();
+
+  const filter = (params.get('status') as F) ?? defaults.filter;
+  const query = params.get('q') ?? '';
+  const sort = (params.get('sort') as S) ?? defaults.sort;
+  const desc = params.get('dir') ? params.get('dir') === 'desc' : defaults.desc;
+  const page = Math.max(1, Number(params.get('page') ?? 1) || 1);
 
   return {
     filter,
