@@ -1,4 +1,5 @@
 import { Page, PageHeader, PageMeta, PageSection } from '@/components/page';
+import { ProposalsTable } from '@/components/proposals-table';
 import { RunPipeline } from '@/components/run-pipeline';
 import {
   findRun,
@@ -333,6 +334,19 @@ export default async function RunDetailPage({ params }: Params) {
           </ul>
         )}
       </PageSection>
+
+      {/* Every proposal the run recorded.
+          Placed after Locales, which summarises, and before the failure, which
+          is the reason to stop reading. The rows were already being fetched to
+          produce the counts above. */}
+      {proposals.length > 0 ? (
+        <PageSection
+          title="Proposals"
+          description="Every string this run would write, exactly as it would write it."
+        >
+          <ProposalsTable proposals={proposals} />
+        </PageSection>
+      ) : null}
 
       {/* Verbatim, per DESIGN.md §8: the provider's own wording is what a
           customer will search for. One error per run, not per locale — that is
