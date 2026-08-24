@@ -6,9 +6,14 @@ import {
   inspectRepository,
   searchCandidates,
 } from '@/lib/closer/discovery';
+import { researchRepository } from '@/lib/closer/research';
 import { requireSession } from '@/lib/data/workspace';
 import { createClient } from '@/lib/supabase/server';
-import { companyDomain } from '@localize-infra/closer-core';
+import {
+  DEFAULT_ICP_WEIGHTS,
+  companyDomain,
+  scoreIcp,
+} from '@localize-infra/closer-core';
 import { revalidatePath } from 'next/cache';
 
 export interface DiscoveryState {
@@ -136,6 +141,137 @@ export async function discoverCompanies(
       qualified: inspected.length,
       recorded,
       skipped,
+    },
+  };
+}
+
+export interface ResearchState {
+  error?: string;
+  done?: { company: string; pain: number; icp: number; assessable: number };
+}
+
+/**
+ * Research one company: read its history, record what it found, score it.
+ *
+ * Separate from discovery, and run per company rather than in bulk, because it
+ * is the expensive half — three or four GitHub requests each — and because the
+ * operator choosing which company to look at more closely is the whole point of
+ * a list with evidence on it.
+ *
+ * The pain evidence is written as `closer_evidence` rows of kind `pain`, beside
+ * the `localization_signal` rows discovery wrote. Two kinds in one table on
+ * purpose: they are both observations with a source and a date, and the reader
+ * needs to see them together.
+ */
+export async function researchCompany(
+  _prev: ResearchState,
+  formData: FormData,
+): Promise<ResearchState> {
+  await requireSession();
+
+  const organizationId = await closerOrganizationId();
+  if (!organizationId) return { error: 'This workspace does not have Closer.' };
+
+  const companyId = String(formData.get('companyId') ?? '');
+  if (!companyId) return { error: 'No company named.' };
+
+  const supabase = await createClient();
+  const { data: company, error: readError } = await supabase
+    .from('closer_companies')
+    .select('id,name,repository,locales')
+    .eq('id', companyId)
+    .maybeSingle();
+
+  if (readError || !company) return { error: 'That company is not available.' };
+  if (!company.repository)
+    return { error: `${company.name} has no repository to read.` };
+
+  let result: Awaited<ReturnType<typeof researchRepository>>;
+  try {
+    result = await researchRepository(organizationId, company.repository);
+  } catch (error) {
+    return {
+      error: `Could not read the repository: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
+  const repoUrl = `https://github.com/${company.repository}`;
+
+  for (const item of result.pain) {
+    await supabase.rpc('closer_record_evidence', {
+      p_company_id: company.id,
+      p_kind: 'pain',
+      p_label: item.label,
+      p_summary: item.summary,
+      p_source: 'github_commit',
+      p_source_url: `${repoUrl}/commits`,
+      p_observed_at: result.localeCommits[0]?.date ?? new Date().toISOString(),
+      p_confidence: item.confidence,
+    });
+  }
+
+  /*
+   * The pain score is recorded even when it is zero.
+   *
+   * "We looked at ninety days of history and found no translation friction" is
+   * a finding, and a company with no pain row is indistinguishable from one
+   * nobody has researched. The stage history says when it was looked at; the
+   * score says what was seen.
+   */
+  await supabase.rpc('closer_record_score', {
+    p_company_id: company.id,
+    p_kind: 'pain',
+    p_value: result.painValue,
+    p_confidence: result.painConfidence,
+    p_breakdown:
+      result.painBreakdown.length > 0
+        ? result.painBreakdown
+        : [
+            {
+              component: 'no_pain_found',
+              points: 0,
+              max: 100,
+              why: `No translation friction in ${result.windowDays} days across ${result.searchedPaths.join(', ') || 'no localisation directory'}`,
+            },
+          ],
+    p_weights: { severity_points: { low: 8, medium: 16, high: 25 } },
+  });
+
+  // Signals were recorded at discovery; the labels are re-derived here only to
+  // feed the complexity component, not written again.
+  const { data: signalRows } = await supabase
+    .from('closer_evidence')
+    .select('label')
+    .eq('company_id', company.id)
+    .eq('kind', 'localization_signal');
+
+  const icp = scoreIcp({
+    localeCount: company.locales?.length ?? 0,
+    signalLabels: (signalRows ?? []).map((row) => row.label as string),
+    commitsInWindow: result.commitsInWindow,
+    windowDays: result.windowDays,
+    painValue: result.painValue,
+    painConfidence: result.painConfidence,
+  });
+
+  await supabase.rpc('closer_record_score', {
+    p_company_id: company.id,
+    p_kind: 'icp',
+    p_value: icp.value,
+    p_confidence: icp.confidence,
+    p_breakdown: icp.breakdown,
+    p_weights: DEFAULT_ICP_WEIGHTS,
+  });
+
+  revalidatePath('/closer/companies');
+  revalidatePath('/closer');
+
+  return {
+    done: {
+      company: company.name,
+      pain: result.painValue,
+      icp: icp.value,
+      assessable: icp.assessable,
     },
   };
 }

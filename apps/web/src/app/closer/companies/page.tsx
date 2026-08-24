@@ -7,6 +7,7 @@ import { Building2, ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { DiscoverForm } from './discover-form';
+import { ResearchButton } from './research-button';
 
 export const metadata: Metadata = { title: 'Companies · Closer' };
 
@@ -19,7 +20,8 @@ interface CompanyRow {
   locales: string[];
   created_at: string;
   closer_leads: { stage: CloserStage }[];
-  closer_evidence: { label: string; summary: string }[];
+  closer_evidence: { label: string; summary: string; kind: string }[];
+  closer_scores: { kind: string; value: number; confidence: number }[];
 }
 
 /**
@@ -41,7 +43,7 @@ export default async function CloserCompaniesPage() {
   const { data, error } = await supabase
     .from('closer_companies')
     .select(
-      'id,name,domain,repository,discovered_url,locales,created_at,closer_leads(stage),closer_evidence(label,summary)',
+      'id,name,domain,repository,discovered_url,locales,created_at,closer_leads(stage),closer_evidence(label,summary,kind),closer_scores(kind,value,confidence)',
     )
     .order('created_at', { ascending: false })
     .limit(100);
@@ -95,9 +97,34 @@ export default async function CloserCompaniesPage() {
                         </span>
                       ) : null}
                     </span>
-                    {stage ? (
-                      <Badge tone="neutral">{STAGE_LABELS[stage].label}</Badge>
-                    ) : null}
+                    <span className="flex flex-wrap items-center gap-2">
+                      {/* Scores beside the stage, newest of each kind. A score
+                          without its evidence below it would be the thing this
+                          system is specified not to produce; both are here. */}
+                      {['icp', 'pain'].map((kind) => {
+                        const score = company.closer_scores.find(
+                          (s) => s.kind === kind,
+                        );
+                        if (!score) return null;
+                        return (
+                          <span
+                            key={kind}
+                            className="font-mono text-caption text-secondary"
+                          >
+                            {kind === 'icp' ? 'fit' : 'pain'} {score.value}
+                            <span className="text-tertiary">
+                              {' '}
+                              ({Math.round(score.confidence * 100)}%)
+                            </span>
+                          </span>
+                        );
+                      })}
+                      {stage ? (
+                        <Badge tone="neutral">
+                          {STAGE_LABELS[stage].label}
+                        </Badge>
+                      ) : null}
+                    </span>
                   </div>
 
                   {company.discovered_url ? (
@@ -137,6 +164,10 @@ export default async function CloserCompaniesPage() {
                         </li>
                       ))}
                     </ul>
+                  ) : null}
+
+                  {company.repository ? (
+                    <ResearchButton companyId={company.id} />
                   ) : null}
                 </li>
               );
