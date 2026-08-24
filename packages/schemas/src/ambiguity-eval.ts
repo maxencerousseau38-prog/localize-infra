@@ -29,8 +29,27 @@ export const AMBIGUITY_CATEGORIES = [
 ] as const;
 export type AmbiguityCategory = (typeof AMBIGUITY_CATEGORIES)[number];
 
+/**
+ * Which batch of material a case belongs to.
+ *
+ * Provenance, not decoration. Once a prompt has been tuned while its author
+ * could see a set of cases, that set can never again be a held-out measure of
+ * that prompt — re-splitting it differently does not undo the exposure. A
+ * genuinely fresh measurement needs material written afterwards, and the only
+ * way to keep that claim checkable later is to record when each case entered
+ * the corpus.
+ */
+export const AMBIGUITY_COHORTS = [
+  /** The original 100 pairs. The escalation prompt was tuned against half of these. */
+  'core',
+  /** 40 polysemy pairs added 2026-08-24, after that tuning, as an unseen set. */
+  'polysemy-2',
+] as const;
+export type AmbiguityCohort = (typeof AMBIGUITY_COHORTS)[number];
+
 export const AmbiguityCaseSchema = z.object({
   id: z.string().min(1),
+  cohort: z.enum(AMBIGUITY_COHORTS),
   /**
    * The pair this case belongs to.
    *

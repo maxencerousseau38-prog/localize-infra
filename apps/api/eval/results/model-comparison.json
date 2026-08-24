@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-08-23T23:24:27.240Z",
+  "ranAt": "2026-08-24T00:25:20.466Z",
   "corpus": {
     "entries": 414,
     "locales": [
@@ -40,58 +40,58 @@
       "missingKeys": 0,
       "completionRate": 1,
       "errors": [],
-      "chrfMean": 75.20232011253012,
-      "exactMatchRate": 0.4082125603864734,
+      "chrfMean": 74.89235903337243,
+      "exactMatchRate": 0.3961352657004831,
       "placeholderApplicable": 19,
       "placeholderIntactRate": 1,
-      "glossaryViolations": 0,
-      "lengthOverflowRate": 0.13043478260869565,
-      "escalationRate": 0.007246376811594203,
+      "glossaryViolations": 1,
+      "lengthOverflowRate": 0.11835748792270531,
+      "escalationRate": 0.016908212560386472,
       "requests": 6,
-      "latencyMsTotal": 258122,
-      "latencyMsPerRequest": 43020.333333333336,
+      "latencyMsTotal": 265904,
+      "latencyMsPerRequest": 44317.333333333336,
       "tokens": {
-        "inputTokens": 84983,
-        "outputTokens": 30269,
-        "thinkingTokens": 70
+        "inputTokens": 85943,
+        "outputTokens": 30881,
+        "thinkingTokens": 79
       },
-      "costUsd": 0.7089840000000001,
-      "costPerThousandPairs": 1.7125217391304348,
+      "costUsd": 0.721044,
+      "costPerThousandPairs": 1.7416521739130435,
       "byLocale": {
         "de": {
           "requested": 90,
           "answered": 90,
-          "chrf": 78.01274274891252,
-          "exactMatchRate": 0.4,
-          "latencyMs": 58428
+          "chrf": 77.73059221149072,
+          "exactMatchRate": 0.3888888888888889,
+          "latencyMs": 57175
         },
         "ja": {
           "requested": 90,
           "answered": 90,
-          "chrf": 70.43290499729302,
-          "exactMatchRate": 0.4,
-          "latencyMs": 55417
+          "chrf": 71.85999333351819,
+          "exactMatchRate": 0.4111111111111111,
+          "latencyMs": 57250
         },
         "es": {
           "requested": 90,
           "answered": 90,
-          "chrf": 79.56137264852951,
-          "exactMatchRate": 0.36666666666666664,
-          "latencyMs": 52596
+          "chrf": 77.4955448826432,
+          "exactMatchRate": 0.3111111111111111,
+          "latencyMs": 56511
         },
         "ar": {
           "requested": 72,
           "answered": 72,
-          "chrf": 67.20839194993454,
+          "chrf": 67.23046208866997,
           "exactMatchRate": 0.3472222222222222,
-          "latencyMs": 52804
+          "latencyMs": 56146
         },
         "pt-BR": {
           "requested": 72,
           "answered": 72,
-          "chrf": 80.1961732036945,
+          "chrf": 79.54293931865635,
           "exactMatchRate": 0.5416666666666666,
-          "latencyMs": 38877
+          "latencyMs": 38822
         }
       }
     }

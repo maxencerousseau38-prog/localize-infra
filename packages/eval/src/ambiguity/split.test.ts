@@ -35,8 +35,9 @@ describe('splitIntoUnpairedGroups', () => {
   it('leaves both groups mixed rather than all-ambiguous', () => {
     for (const group of [groupA, groupB]) {
       const escalate = group.filter((c) => c.expected === 'escalate').length;
-      expect(escalate).toBe(50);
-      expect(group.length - escalate).toBe(50);
+      const half = group.length / 2;
+      expect(escalate).toBe(half);
+      expect(group.length - escalate).toBe(half);
     }
   });
 

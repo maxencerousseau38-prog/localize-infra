@@ -4,6 +4,8 @@ import { buildAmbiguityCases } from './cases.js';
 import { formatPercent, scoreAmbiguity } from './score.js';
 
 const cases = buildAmbiguityCases();
+const PAIRS = new Set(cases.map((c) => c.pairId)).size;
+const TOTAL = cases.length;
 
 function observe(
   decide: (expected: 'escalate' | 'confident') => 'escalate' | 'confident',
@@ -26,7 +28,7 @@ describe('scoreAmbiguity', () => {
     expect(score.overall.precision).toBe(1);
     expect(score.overall.recall).toBe(1);
     expect(score.overall.f1).toBe(1);
-    expect(score.pairs.discriminated).toBe(100);
+    expect(score.pairs.discriminated).toBe(PAIRS);
     expect(score.pairs.insensitive).toBe(0);
   });
 
@@ -47,7 +49,7 @@ describe('scoreAmbiguity', () => {
     expect(score.overall.recall).toBe(1);
     expect(score.overall.precision).toBe(0.5);
     expect(score.pairs.discriminated).toBe(0);
-    expect(score.pairs.insensitive).toBe(100);
+    expect(score.pairs.insensitive).toBe(PAIRS);
   });
 
   it('reports undefined precision for an agent that never escalates, not zero', () => {
@@ -60,7 +62,7 @@ describe('scoreAmbiguity', () => {
     // 0% would read as a measurement rather than the absence of one.
     expect(score.overall.precision).toBeNull();
     expect(score.overall.f1).toBeNull();
-    expect(score.pairs.insensitive).toBe(100);
+    expect(score.pairs.insensitive).toBe(PAIRS);
   });
 
   it('counts an inverted pair separately from an insensitive one', () => {
@@ -74,7 +76,7 @@ describe('scoreAmbiguity', () => {
       error: null,
     }));
     const score = scoreAmbiguity(cases, inverted);
-    expect(score.pairs.inverted).toBe(100);
+    expect(score.pairs.inverted).toBe(PAIRS);
     expect(score.pairs.discriminated).toBe(0);
     expect(score.pairs.insensitive).toBe(0);
   });
@@ -85,14 +87,14 @@ describe('scoreAmbiguity', () => {
     );
     const score = scoreAmbiguity(cases, observations);
     expect(score.errors).toBe(10);
-    expect(score.overall.scored).toBe(190);
+    expect(score.overall.scored).toBe(TOTAL - 10);
   });
 
   it('treats a case with no observation at all as an error, not a pass', () => {
     const score = scoreAmbiguity(cases, []);
-    expect(score.errors).toBe(200);
+    expect(score.errors).toBe(TOTAL);
     expect(score.overall.scored).toBe(0);
-    expect(score.pairs.incomplete).toBe(100);
+    expect(score.pairs.incomplete).toBe(PAIRS);
   });
 
   it('scores each category separately', () => {
@@ -100,7 +102,7 @@ describe('scoreAmbiguity', () => {
       cases,
       observe((expected) => expected),
     );
-    expect(score.byCategory.polysemy.scored).toBe(120);
+    expect(score.byCategory.polysemy.scored).toBe(200);
     expect(score.byCategory['insufficient-grammar'].scored).toBe(50);
     expect(score.byCategory.register.scored).toBe(30);
   });

@@ -75,7 +75,7 @@ stands entirely undisturbed.
 |---|---|
 | **Does a real customer journey work end to end?** | **The pipeline: yes, verified 2026-08-22 — see blocker 5.** Sign in → connect → run → escalate → answer → approve → pull request, in a browser against a real repository. **Self-serve: still no** — the OAuth connection was bypassed because the secret is missing, and no non-operator account has done it on production |
 | **Do humans think the translations are good?** | **Never measured.** `08-critique.md` §C2; no evaluators were ever recruited. chrF and exact match are reference-agreement proxies, not quality |
-| **Does the agent escalate when it should?** | **Measured, tuned, and reported on held-out cases.** Recall 53–61% at 91–97% precision after tuning; 39–48% at 86–95% before. An earlier figure of 14–24% in this file was a corpus defect of mine and is retracted — `12-ambiguity-benchmark.md` |
+| **Does the agent escalate when it should?** | **Measured and tuned to target.** Recall 67.5–70.0% at 96.4–100% precision on forty pairs written after the tuning and never seen during it. Two corpus defects of mine were found and retracted en route, including the one behind an earlier 14–24% figure — `12-ambiguity-benchmark.md` |
 | **Would anyone pay $19/$99/$399?** | **No evidence.** `08-critique.md` §C1 stands: the personas are inventions and no customer has been interviewed |
 | **Which Vercel plan is this on?** | **Not verified.** Modelled at Pro because Hobby prohibits commercial use, so the first paying customer needs Pro regardless of traffic |
 | **How do the models handle ICU plurals?** | **No data.** The corpus contains zero ICU messages |
@@ -276,37 +276,41 @@ It did **not** help the broken configuration: default reasoning went from 90
 answered to zero at three times the cost. Retrying does not repair a model that
 cannot answer, and that row is in `10-model-benchmark.md` rather than omitted.
 
-### ~~7. Decide the escalation question~~ — *target set and tuned to, 2026-08-23*
-The owner set the target: **60% recall, precision not below 80%.** Held-out
-result after tuning the prompt: **recall 53–61% (median 59.2%), precision
-91–97%.** Precision clears its floor with margin; recall lands just under.
+### ~~7. Decide the escalation question~~ — *target met 2026-08-24, in two rounds*
+The owner set the target: **60% recall, precision not below 80%.**
 
-| | Baseline | After tuning (held out) |
-|---|---|---|
-| Recall | 39–48% | 53.1–61.2% |
-| Precision | 86–95% | 90.9–96.7% |
+**Met.** On forty polysemy pairs written *after* the tuning and never consulted
+during it: **recall 67.5–70.0%, precision 96.4–100%**, three runs, both
+thresholds cleared every time.
 
-**A published figure in this file was wrong and is retracted.** The first
-measurement reported 14–24% recall and concluded invariant 4 "does not hold".
-Most of that was a corpus defect of mine — `componentName` carried the
-disambiguating information the "open" half was supposed to lack, so the agent
-was scored wrong for being right. Corrected, re-measured, and the correction is
-larger than the tuning gain.
+| | Baseline | Round one | Round two |
+|---|---|---|---|
+| Recall | 39–48% | 53–61% | **67.5–70.0%** |
+| Precision | 86–95% | 91–97% | **96.4–100%** |
 
-The prompt was tuned against half the corpus and scored on the other half,
-which is what makes the number above reportable. Dev returned 68.6–70.6%
-recall; the holdout returned 53.1–61.2%. Ten points did not survive, and
-without the split this row would be claiming the target beaten.
+Round one tuned against half the original corpus and reported on the other
+half. Round two needed a genuinely unseen set, because "fresh holdout" cannot
+mean re-splitting cases already seen — so forty new pairs were written for it.
 
-Full method, per-category figures, what was changed and what it cost:
-`12-ambiguity-benchmark.md`.
+**Two corpus defects were found and retracted along the way, both mine, both
+inflating the agent's apparent failure.** First `componentName` carried the
+disambiguating information the "open" half was supposed to lack — that alone
+accounted for most of the original 14–24% figure this file once reported.
+Then the new cohort's first draft gave "Fork" the neighbours *Copy*, *Split*,
+*Duplicate*. Structural tests caught neither: they check a corpus is
+well-formed, and a well-formed corpus can still be wrong.
 
-**Still open, and it is a product judgement rather than a measurement:**
-polysemy carries the remaining gap (43.3% recall on the holdout against 91.7%
-for grammar) and precision has 11–17 points of headroom, so recall can be
-bought from it. Whether that trade is worth making — every point is a question
-a developer must answer — is the owner's call. A further round needs a fresh
-holdout; this one has been observed.
+**What it cost, and this is a live decision rather than a footnote.** The
+escalation rate on 414 real strings went from 0.72% to 1.69% — a customer with
+a thousand strings sees roughly seventeen questions where they saw seven. chrF
+slipped 75.20 → 74.89, exact match 40.8% → 39.6%, and one glossary violation
+appeared where there were none. Placeholder integrity holds at 100%.
+
+Whether that trade is worth keeping is the owner's call; the measurement only
+says what it is. Reverting round two returns 42.5–60% recall at 100% precision
+on the same unseen cohort.
+
+Full method, per-category figures and limitations: `12-ambiguity-benchmark.md`.
 
 ### 8. Model unit economics into a published price — *mine, owner decides the numbers*
 The model exists; the prices in `09-unit-economics.md` are proposals with no

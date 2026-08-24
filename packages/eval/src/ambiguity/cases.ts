@@ -1,4 +1,5 @@
 import type { AmbiguityCase, TargetLocale } from '@localize-infra/schemas';
+import { POLYSEMY_2 } from './cases-polysemy-2.js';
 
 /**
  * The ambiguity corpus, as data rather than as 200 hand-written blobs.
@@ -39,7 +40,7 @@ const AGREEMENT_LOCALES = ['es', 'pt-BR', 'ar', 'de'] as const;
 /** Locales that force a formality choice which changes the wording. */
 const REGISTER_LOCALES = ['de', 'ja', 'es'] as const;
 
-interface Pair {
+export interface Pair {
   /** Stable slug; becomes `<slug>-open` and `<slug>-settled`. */
   slug: string;
   key: string;
@@ -66,11 +67,13 @@ function expand(
   locale: TargetLocale,
   openRationale: string,
   settledRationale: string,
+  cohort: AmbiguityCase['cohort'] = 'core',
 ): AmbiguityCase[] {
   const self: [string, string] = [pair.key, pair.text];
   return [
     {
       id: `${pair.slug}-open`,
+      cohort,
       pairId: pair.slug,
       sourceText: pair.text,
       filePath: pair.file,
@@ -83,6 +86,7 @@ function expand(
     },
     {
       id: `${pair.slug}-settled`,
+      cohort,
       pairId: pair.slug,
       sourceText: pair.text,
       filePath: pair.file,
@@ -2030,6 +2034,28 @@ export function buildAmbiguityCases(): AmbiguityCase[] {
         locale,
         `"${pair.text}" stands alone and ${locale} needs ${pair.missing}; the sibling keys are placeholders that supply no noun.`,
         `The sibling keys name the noun — ${pair.noun} — so the agreement is determined.`,
+      ),
+    );
+  });
+
+  /*
+   * The second polysemy cohort, appended after the first hundred so ids and
+   * ordering of the existing cases do not shift. Written after the escalation
+   * prompt was tuned and never consulted during it — the only thing that makes
+   * it a genuinely held-out set rather than a re-drawn boundary.
+   */
+  POLYSEMY_2.forEach((pair, index) => {
+    const locale = LOCALES[index % LOCALES.length] as TargetLocale;
+    cases.push(
+      ...expand(
+        pair,
+        'polysemy',
+        locale,
+        `"${pair.text}" can mean ${pair.senses[0]} or ${pair.senses[1]}, and the sibling keys are generic labels that pick neither.`,
+        `The sibling keys are ${pair.settled
+          .map(([k]) => k)
+          .join(', ')}, which settle it on ${pair.settledSense}.`,
+        'polysemy-2',
       ),
     );
   });

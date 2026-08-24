@@ -50,6 +50,7 @@ const INSTRUCTIONS = [
   '',
   'STEP 1 — does translating this string force a choice the English does not make? Exactly three things force one:',
   '- SENSE: the English word has two genuinely different senses that translate differently ("Left" as a direction vs as what remains, "Post" as a verb vs a noun, "Order" as a purchase vs a sequence, "Free" as costing nothing vs unoccupied).',
+  '  Two traps here, and they are where SENSE is missed rather than over-applied. First: that a word has a common technical meaning does not settle it. Everything you are translating is a software product, so "Branch", "Key", "Mount", "Host" and their kind will always have a plausible technical reading — that is a fact about software, not evidence about this string. Second: it is enough that a competent translator could reasonably produce two different words. You do not need to believe the second reading is likely, only that a repository exists where it is right.',
   '- FORM: the string is too short to carry grammar the target requires — typically a bare adjective or participle whose gender or number depends on a noun that is not in the string. Spanish, Portuguese, Arabic and German all force this; "Active", "Selected", "Deleted" alone are the usual shape.',
   '- REGISTER: the string addresses the user and the target forces a formality that changes the wording — German du vs Sie, Spanish tú vs usted, Japanese plain vs polite (です/ます). Questions, imperatives and anything containing "you" or "your" are where this bites.',
   '',

@@ -6,9 +6,14 @@ Invariant 4 — *the agent raises ambiguities, it does not guess* — is the
 product's differentiator and had never been measured. This is the measurement,
 the target set from it, and the tuning done against that target.
 
-**Held-out result: recall 53–61%, precision 91–97%.** The target was 60% recall
-at no less than 80% precision. Precision clears its floor with a wide margin;
-recall sits just under target, at a median of 59.2% over three runs.
+**Target met after two rounds: recall 67.5–70.0% at 96.4–100% precision**, on a
+cohort of forty pairs written after the tuning and never consulted during it.
+The target was 60% recall at no less than 80% precision.
+
+Round one reached 53–61% recall at 91–97% precision on a held-out half of the
+original corpus — precision clear, recall just short. Round two closed the gap
+on polysemy, which was carrying it. Both rounds are below, including what the
+second one cost.
 
 ---
 
@@ -235,6 +240,94 @@ Worth recording plainly: this is the same class of bug as the P0 that returned
 empty responses in August — output budget exhausted before the text is emitted —
 and it was caught by an arithmetic test on a measured input, before any run
 failed.
+
+---
+
+## Round two: polysemy, on a cohort written afterwards
+
+Polysemy carried the remaining gap — 43.3% held-out recall against 91.7% for
+grammar, and 60% of the corpus. The owner asked for another round.
+
+**"A fresh holdout" cannot mean re-splitting cases already seen.** Re-drawing a
+boundary does not undo exposure; it hides it. So forty new polysemy pairs were
+written after the first round of tuning and never consulted during it, tagged
+`polysemy-2`, with words disjoint from the original sixty. `splitDevHoldout`
+refuses to divide a post-tuning cohort at all, and a test asserts it.
+
+### A second corpus defect, found the same way
+
+The first draft of the new cohort gave "Fork" the neighbours *Copy*, *Split*
+and *Duplicate* — words pointing straight at the repository sense. That is the
+`componentName` mistake in another costume: a field meant to withhold context
+quietly supplying it.
+
+Every open context now draws from a fixed pool of contentless labels
+(`label.item`, `label.value`, `label.one`…), which is checkable rather than a
+matter of taste, and a test enforces it. The effect was large:
+
+| Fresh cohort, same prompt | Recall |
+|---|---|
+| With leaking neighbours | 25.0 – 37.5% |
+| With the pool | 42.5 – 60.0% |
+
+Two corpus defects in two rounds, both inflating the agent's apparent failure,
+both found by asking why a category looked worse than it should rather than by
+review. The structural tests never caught either: they check that a corpus is
+well-formed, and a well-formed corpus can still be wrong.
+
+### The change
+
+One addition to the SENSE criterion, naming the two ways polysemy was being
+missed: that a word has a common technical meaning is a fact about software and
+not evidence about the string, and it is enough that a competent translator
+*could* reasonably produce two words — the second reading need not be likely.
+
+### Result, on cases the prompt never saw
+
+| Run | Precision | Recall | Pairs discriminated |
+|---|---|---|---|
+| 1 | 100.0% | 67.5% | 27 / 40 |
+| 2 | 96.6% | 70.0% | 28 / 40 |
+| 3 | 96.4% | 67.5% | 26 / 40 |
+
+Before the change, on the same cohort: 42.5 – 60.0% recall at 100% precision.
+
+| | Target | Fresh-cohort result | |
+|---|---|---|---|
+| Precision | ≥ 80% | 96.4 – 100% | **met** |
+| Recall | ≥ 60% | 67.5 – 70.0% | **met, all three runs** |
+
+The dev–fresh gap narrowed to about five points (72.5–74.5% against
+67.5–70.0%), against ten points in round one.
+
+On the core holdout the change is an improvement or a wash: overall recall
+53.1/61.2/59.2 → 61.2/61.2, polysemy 46.7/56.7/43.3 → 56.7/56.7, grammar
+stable. Register reads as a drop — 71.4% → 28.6–42.9% — and **is not one**:
+recomputed from the stored observations, register under the previous prompt was
+already 1/7, 3/7 and 5/7 across its three runs. Seven pairs cannot support a
+conclusion either way, which is a corpus limitation rather than a result.
+
+### What it cost, stated because it is not nothing
+
+| | Round one | Round two |
+|---|---:|---:|
+| chrF | 75.202 | 74.892 |
+| Exact match | 40.82% | 39.61% |
+| Placeholder integrity | 100% | 100% |
+| Glossary violations | 0 | **1** |
+| Escalation rate on real material | 0.72% | **1.69%** |
+| Output tokens per string | 73.1 | 74.6 |
+
+The escalation rate on the 414-entry corpus of real strings **more than
+doubled** — three strings to seven. That is the guarantee round one reported as
+untouched, and it has moved. It is still low, and the corpus precision of
+96–100% says the extra questions are mostly fair ones, but a customer with a
+thousand strings now sees roughly seventeen questions where they saw seven.
+
+chrF and exact match slipped slightly, and one glossary violation appeared
+where there were none. Individually small; recorded because the trade is real
+and the decision about whether it is worth making is the owner's, not the
+measurement's.
 
 ---
 
