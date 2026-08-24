@@ -132,6 +132,37 @@ export default async function RunDetailPage({ params }: Params) {
   }
   const openQuestions = ambiguities.filter((a) => a.state === 'unresolved');
 
+  /*
+   * The languages the run was asked for and never delivered.
+   *
+   * `locales_failed` counts them and cannot name them. This can: a target with
+   * no proposals produced nothing, whatever the counter says. Naming them is
+   * the difference between "Partial" — a word that tells a reader to go
+   * looking — and knowing which language to re-run.
+   */
+  const unattempted = run.target_locales.filter((l) => !byLocale.has(l));
+
+  /*
+   * Translations the run owed and did not deliver.
+   *
+   * `keys_extracted` and `keys_translated` are **not the same unit**, and
+   * subtracting one from the other — the obvious move — is meaningless.
+   * `run-actions.ts` sets the first to `Object.keys(fresh).length`, distinct
+   * source strings, and accumulates the second across locales
+   * (`keysTranslated += body.translations.length`). The seeded run makes the
+   * trap visible: 1 extracted, 2 translated, nothing missing.
+   *
+   * So the comparison is against what the succeeded locales owed. Locales that
+   * delivered nothing are excluded on purpose — they are counted by
+   * `locales_failed` and named by `unattempted` below, and folding them in here
+   * would report the same gap twice.
+   *
+   * The pipeline does compute the exact figure, as `keysMissing`, and no column
+   * stores it. This derivation is the closest honest thing until one does.
+   */
+  const owed = run.keys_extracted * run.locales_succeeded;
+  const shortfall = Math.max(0, owed - run.keys_translated);
+
   return (
     <Page>
       <div className="pt-6">
@@ -150,7 +181,16 @@ export default async function RunDetailPage({ params }: Params) {
           <>
             <PageMeta label="Status">{state?.label}</PageMeta>
             <PageMeta label="Duration">{duration(elapsed)}</PageMeta>
+            {/* Distinct source strings. Deliberately not "translated of
+                extracted": those two columns count different things, and a
+                ratio between them would read as a completeness figure while
+                being arithmetic on mismatched units. */}
             <PageMeta label="Strings">{run.keys_extracted || '—'}</PageMeta>
+            {run.source_locale ? (
+              <PageMeta label="From">
+                {localeDisplayName(run.source_locale)}
+              </PageMeta>
+            ) : null}
             <PageMeta label="When">
               {new Date(run.created_at)
                 .toISOString()
@@ -200,6 +240,25 @@ export default async function RunDetailPage({ params }: Params) {
         </div>
       ) : null}
 
+      {/* A shortfall is not a failure and is not a success, and the status word
+          says neither. Stated here because the pull request this run opened is
+          missing these strings, and the reviewer is about to approve it. */}
+      {shortfall > 0 ? (
+        <div className="mt-6 rounded-lg border border-degraded-border bg-degraded-bg px-4 py-3">
+          <p className="text-body font-medium text-primary">
+            {shortfall} translation{shortfall === 1 ? '' : 's'} missing across
+            the {run.locales_succeeded} language
+            {run.locales_succeeded === 1 ? '' : 's'} that answered
+          </p>
+          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
+            {owed} were expected — {run.keys_extracted} string
+            {run.keys_extracted === 1 ? '' : 's'} in each. The missing ones are
+            absent from the files this run proposed, not translated badly.
+            Running again attempts only what is still missing.
+          </p>
+        </div>
+      ) : null}
+
       <PageSection
         title="Pipeline"
         description="What this run did, in the order it did it."
@@ -213,7 +272,7 @@ export default async function RunDetailPage({ params }: Params) {
         title="Locales"
         description="What the run proposed for each target language."
       >
-        {byLocale.size === 0 ? (
+        {byLocale.size === 0 && unattempted.length === 0 ? (
           <p className="text-small text-tertiary">
             This run recorded no proposals.
           </p>
@@ -249,6 +308,28 @@ export default async function RunDetailPage({ params }: Params) {
                   </li>
                 );
               })}
+
+            {/* Asked for, never delivered. Listed alongside the rest rather
+                than in a section of their own: a reader scanning target
+                languages should find all of them in one place, with the ones
+                that produced nothing marked instead of missing. */}
+            {unattempted.sort().map((locale) => (
+              <li
+                key={locale}
+                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-subtle py-3 first:border-t-0"
+              >
+                <span className="font-medium text-primary">
+                  {localeDisplayName(locale)}{' '}
+                  <span className="font-mono text-caption text-tertiary">
+                    {locale}
+                  </span>
+                </span>
+                <Badge tone="failed">No proposals</Badge>
+                <span className="font-mono text-caption tabular-nums text-secondary">
+                  0 keys
+                </span>
+              </li>
+            ))}
           </ul>
         )}
       </PageSection>

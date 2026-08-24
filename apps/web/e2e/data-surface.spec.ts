@@ -374,6 +374,35 @@ test.describe('a run detail', () => {
     await expect(page.getByText(/project page/i)).toBeVisible();
   });
 
+  /*
+   * The regression that prompted this test.
+   *
+   * `findRun` selected fifteen columns while `RunRecord` declared seventeen,
+   * and `started_at`, `finished_at` and `progress_at` were among the missing.
+   * The `as RunRecord` cast made it typecheck, so the page read `undefined`
+   * from all three: every run showed "—" for duration, and `runProgress` reads
+   * a missing heartbeat as "nothing to judge against" and reports the run
+   * active — so the stalled banner could never appear here at all.
+   *
+   * It stayed invisible because the list pages selected the columns and behaved
+   * correctly. The same run looked right in the list and blank in the detail.
+   *
+   * Asserted on the seeded run rather than on any run, because the seed sets
+   * these timestamps deliberately — it carries a comment about two runs once
+   * sharing a `now()` and both rendering a zero duration. The fixture was
+   * built to make this number mean something, and the page was dropping it.
+   */
+  test('shows how long the run took, which needs a column it once dropped', async ({
+    page,
+  }) => {
+    await openEscalatedRun(page);
+
+    const duration = page
+      .getByRole('definition')
+      .filter({ hasText: /^\d+(\.\d+)?(ms|s)$/ });
+    await expect(duration.first()).toBeVisible();
+  });
+
   test('keeps its facts reachable at 390', async ({ page }) => {
     await openEscalatedRun(page);
     await page.setViewportSize({ width: 390, height: 900 });

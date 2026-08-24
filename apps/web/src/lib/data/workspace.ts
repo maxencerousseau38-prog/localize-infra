@@ -1,3 +1,4 @@
+import { RUN_SELECT } from '@/lib/data/run-columns';
 import type {
   Organization,
   OrganizationRole,
@@ -174,6 +175,16 @@ export interface RunRecord {
    * row sits at `translate` looking busy forever.
    */
   progress_at: string | null;
+  /** The language the strings were written in, when the run recorded one. */
+  source_locale: string | null;
+  /**
+   * Every language the run was asked for.
+   *
+   * Distinct from the locales that produced proposals, and the difference is
+   * the interesting part: a target with no rows is one the run never delivered.
+   * `locales_failed` counts them; only this says which.
+   */
+  target_locales: string[];
 }
 
 /** Runs for a project, newest first. Scoped by RLS like everything else. */
@@ -181,9 +192,7 @@ export async function listRuns(projectId: string): Promise<RunRecord[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('runs')
-    .select(
-      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,started_at,finished_at,progress_at',
-    )
+    .select(RUN_SELECT)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
     .limit(20);
@@ -403,9 +412,7 @@ export async function listRunsForViewer(limit = 50): Promise<RunRecord[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('runs')
-    .select(
-      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,started_at,finished_at,progress_at',
-    )
+    .select(RUN_SELECT)
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -543,9 +550,7 @@ export async function findRun(runId: string): Promise<RunRecord | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('runs')
-    .select(
-      'id,status,stage,framework,keys_extracted,keys_translated,locales_succeeded,locales_failed,error,pr_url,pr_number,created_at,project_id,target_locales,source_locale',
-    )
+    .select(RUN_SELECT)
     .eq('id', runId)
     .maybeSingle();
 
