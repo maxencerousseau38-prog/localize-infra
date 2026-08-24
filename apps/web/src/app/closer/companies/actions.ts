@@ -6,6 +6,7 @@ import {
   inspectRepository,
   searchCandidates,
 } from '@/lib/closer/discovery';
+import { draftMessageForLead } from '@/lib/closer/drafting';
 import { researchRepository } from '@/lib/closer/research';
 import { requireSession } from '@/lib/data/workspace';
 import { createClient } from '@/lib/supabase/server';
@@ -274,4 +275,51 @@ export async function researchCompany(
       assessable: icp.assessable,
     },
   };
+}
+
+export interface DraftState {
+  error?: string;
+  done?: { citations: number; preview: string };
+}
+
+/**
+ * Write a first message for this company's lead.
+ *
+ * Everything that decides whether a draft is allowed at all lives in the
+ * database — a suppressed address, a lead marked `do_not_contact`, a citation
+ * that belongs to somebody else. This action carries the failure back as a
+ * sentence and otherwise stays out of the way.
+ *
+ * The result is a row in `pending_approval`, and there is no path from here to
+ * anything a recipient sees. `closer_approve_message` reads `auth.uid()`, so
+ * approval cannot happen inside a call chain that nobody is signed in to.
+ */
+export async function draftOutreach(
+  _previous: DraftState,
+  form: FormData,
+): Promise<DraftState> {
+  await requireSession();
+
+  const organizationId = await closerOrganizationId();
+  if (!organizationId)
+    return { error: 'Closer is not enabled for this workspace' };
+
+  const leadId = String(form.get('leadId') ?? '');
+  if (!leadId) return { error: 'No lead was named' };
+
+  const channel = form.get('channel') === 'linkedin' ? 'linkedin' : 'email';
+
+  try {
+    const draft = await draftMessageForLead(organizationId, leadId, channel);
+    revalidatePath('/closer/approvals');
+    revalidatePath('/closer/companies');
+    return {
+      done: {
+        citations: draft.citations.length,
+        preview: draft.subject ?? draft.body.slice(0, 60),
+      },
+    };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) };
+  }
 }

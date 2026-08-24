@@ -1,4 +1,5 @@
 import { Page, PageHeader, PageMeta, PageSection } from '@/components/page';
+import { draftingModelConfigured } from '@/lib/closer/drafting';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
 import { type CloserStage, STAGE_LABELS } from '@localize-infra/closer-core';
@@ -7,6 +8,7 @@ import { Building2, ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { DiscoverForm } from './discover-form';
+import { DraftButton } from './draft-button';
 import { ResearchButton } from './research-button';
 
 export const metadata: Metadata = { title: 'Companies · Closer' };
@@ -19,7 +21,7 @@ interface CompanyRow {
   discovered_url: string | null;
   locales: string[];
   created_at: string;
-  closer_leads: { stage: CloserStage }[];
+  closer_leads: { id: string; stage: CloserStage }[];
   closer_evidence: { label: string; summary: string; kind: string }[];
   closer_scores: { kind: string; value: number; confidence: number }[];
 }
@@ -43,12 +45,13 @@ export default async function CloserCompaniesPage() {
   const { data, error } = await supabase
     .from('closer_companies')
     .select(
-      'id,name,domain,repository,discovered_url,locales,created_at,closer_leads(stage),closer_evidence(label,summary,kind),closer_scores(kind,value,confidence)',
+      'id,name,domain,repository,discovered_url,locales,created_at,closer_leads(id,stage),closer_evidence(label,summary,kind),closer_scores(kind,value,confidence)',
     )
     .order('created_at', { ascending: false })
     .limit(100);
 
   const companies = (data ?? []) as unknown as CompanyRow[];
+  const draftingAvailable = draftingModelConfigured();
 
   return (
     <Page>
@@ -82,7 +85,8 @@ export default async function CloserCompaniesPage() {
         ) : (
           <ul className="space-y-3">
             {companies.map((company) => {
-              const stage = company.closer_leads[0]?.stage;
+              const lead = company.closer_leads[0];
+              const stage = lead?.stage;
               return (
                 <li
                   key={company.id}
@@ -166,9 +170,21 @@ export default async function CloserCompaniesPage() {
                     </ul>
                   ) : null}
 
-                  {company.repository ? (
-                    <ResearchButton companyId={company.id} />
-                  ) : null}
+                  <div className="mt-2 flex flex-wrap items-start gap-2">
+                    {company.repository ? (
+                      <ResearchButton companyId={company.id} />
+                    ) : null}
+                    {/* Drafting needs a lead to hang the message on and
+                        evidence to write from. Absent either, the button is
+                        absent rather than disabled-with-a-tooltip: there is
+                        nothing the reader could do to enable it here. */}
+                    {lead && company.closer_evidence.length > 0 ? (
+                      <DraftButton
+                        leadId={lead.id}
+                        enabled={draftingAvailable}
+                      />
+                    ) : null}
+                  </div>
                 </li>
               );
             })}

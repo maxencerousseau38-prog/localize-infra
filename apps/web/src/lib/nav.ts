@@ -3,6 +3,7 @@ import {
   Building2,
   FileText,
   History,
+  Inbox,
   Languages,
   LayoutGrid,
   Radar,
@@ -159,6 +160,13 @@ export const CLOSER_NAV: NavRoute[] = [
     icon: Building2,
     built: true,
     keywords: 'closer prospects accounts discovery',
+  },
+  {
+    href: '/closer/approvals',
+    label: 'Approvals',
+    icon: Inbox,
+    built: true,
+    keywords: 'closer outreach drafts approve review send',
   },
 ];
 

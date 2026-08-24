@@ -648,5 +648,33 @@ test.describe('Closer', () => {
     const nav = page.getByRole('navigation', { name: 'Closer' });
     await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Companies' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Approvals' })).toBeVisible();
+  });
+
+  /*
+   * The approval queue, and the sentence that keeps it honest.
+   *
+   * The claim under test is not that a list renders — it is that this screen
+   * never offers to send. Nothing in this repository can send an email, so a
+   * Send button here would be the button-that-pretends-to-work the whole
+   * feature is built to avoid, and the empty state has to say what actually
+   * happens instead.
+   */
+  test('holds outreach behind a person, and does not pretend to send it', async ({
+    page,
+  }) => {
+    await open(page, '/closer/approvals');
+
+    await expect(
+      page.getByRole('heading', { name: 'Approvals', level: 1 }),
+    ).toBeVisible();
+
+    await expect(page.getByText(/nothing waiting/i)).toBeVisible();
+    await expect(
+      page.getByText(/sent without passing through this screen/i),
+    ).toBeVisible();
+
+    // No send affordance anywhere on the page, in any state.
+    await expect(page.getByRole('button', { name: /^send$/i })).toHaveCount(0);
   });
 });
