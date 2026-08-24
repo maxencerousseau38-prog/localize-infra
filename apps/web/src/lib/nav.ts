@@ -157,9 +157,8 @@ export const CLOSER_NAV: NavRoute[] = [
     href: '/closer/companies',
     label: 'Companies',
     icon: Building2,
-    built: false,
-    blockedBy: 'Discovery — phase 3',
-    keywords: 'closer prospects accounts',
+    built: true,
+    keywords: 'closer prospects accounts discovery',
   },
 ];
 

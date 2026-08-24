@@ -41,3 +41,30 @@ export async function hasCloser(): Promise<boolean> {
   if (error) return false;
   return data !== null;
 }
+
+/**
+ * The workspace Closer runs in, or null.
+ *
+ * The same row as `hasCloser`, returning the id rather than a boolean. Kept as
+ * a second function rather than one that returns `string | null` because the
+ * gate reads better as a question — `if (!(await hasCloser())) notFound()` —
+ * and because every caller of one wants exactly one of the two.
+ *
+ * Singular on purpose: Closer is the operator's own tooling, and a reader who
+ * somehow belonged to two enabled workspaces would need a switcher, a scoping
+ * decision on every write, and a way to say which one a lead belongs to. None
+ * of that exists, so the first row is the answer and the shape says so.
+ */
+export async function closerOrganizationId(): Promise<string | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('closer_workspaces')
+    .select('organization_id')
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data.organization_id;
+}

@@ -618,4 +618,35 @@ test.describe('Closer', () => {
     await expect(page.getByText('Inbound replies')).toBeVisible();
     await expect(page.getByText('Not connected').first()).toBeVisible();
   });
+
+  /*
+   * Companies, before anything has been discovered.
+   *
+   * The empty state is the assertion that matters at this stage: the screen
+   * must say "nothing discovered yet" rather than show a demonstration. Whether
+   * discovery works is settled against GitHub, not here — an e2e test that
+   * searched the real API would be slow, rate-limited and different every run.
+   */
+  test('lists companies, and says plainly when there are none', async ({
+    page,
+  }) => {
+    await open(page, '/closer/companies');
+
+    await expect(
+      page.getByRole('heading', { name: 'Companies', level: 1 }),
+    ).toBeVisible();
+
+    // The control that spends a GitHub rate limit, and what it costs, together.
+    await expect(page.getByRole('button', { name: /discover/i })).toBeVisible();
+    await expect(
+      page.getByText(/ten public repositories per run/i),
+    ).toBeVisible();
+
+    await expect(page.getByText(/nothing discovered yet/i)).toBeVisible();
+
+    // Both tabs, now that Companies is built rather than named and inert.
+    const nav = page.getByRole('navigation', { name: 'Closer' });
+    await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Companies' })).toBeVisible();
+  });
 });
