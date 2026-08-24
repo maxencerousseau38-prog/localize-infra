@@ -1,9 +1,11 @@
 import {
   Boxes,
+  Building2,
   FileText,
   History,
   Languages,
   LayoutGrid,
+  Radar,
   Settings,
   TriangleAlert,
 } from 'lucide-react';
@@ -126,6 +128,38 @@ export const SECONDARY_NAV: NavRoute[] = [
     blockedBy:
       'There is no account, organisation, or project to configure yet.',
     keywords: 'preferences configuration account',
+  },
+];
+
+/**
+ * Closer — the operator's own sales tooling.
+ *
+ * A group of its own rather than entries mixed into `PRIMARY_NAV`, and it is
+ * rendered only for a workspace that has Closer. Two reasons, and the second is
+ * the one that matters: mixing "Leads" in beside "Runs" would tell a customer
+ * that their localisation product has a sales pipeline, and the entries would
+ * be present in the markup of every signed-in page whether or not the reader
+ * may use them.
+ *
+ * Not in `ALL_ROUTES`. That list feeds the command palette and the breadcrumb,
+ * both of which render for everybody — a Closer route surfacing in a customer's
+ * ⌘K is the same leak by a quieter route.
+ */
+export const CLOSER_NAV: NavRoute[] = [
+  {
+    href: '/closer',
+    label: 'Overview',
+    icon: Radar,
+    built: true,
+    keywords: 'closer sales pipeline prospects',
+  },
+  {
+    href: '/closer/companies',
+    label: 'Companies',
+    icon: Building2,
+    built: false,
+    blockedBy: 'Discovery — phase 3',
+    keywords: 'closer prospects accounts',
   },
 ];
 

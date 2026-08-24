@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@localize-infra/closer-core": "*",
     "@localize-infra/core": "*",
     "@localize-infra/schemas": "*",
     "@localize-infra/ui": "*",

@@ -555,3 +555,67 @@ test.describe('the inboxes', () => {
     await expect(page.getByText('app.cancel')).toHaveCount(0);
   });
 });
+
+/**
+ * Closer — the operator's own sales tooling, inside the customer application.
+ *
+ * Two things worth asserting at this stage and only two: that the screen reads
+ * real tables rather than a fixture, and that it says plainly what is not
+ * connected. The gate itself is asserted from the other side, on the server
+ * with no database, where the group must be absent.
+ */
+test.describe('Closer', () => {
+  /*
+   * One navigation, three assertions.
+   *
+   * This began as three tests, each opening /closer for one claim. The page
+   * makes six counting queries against a real database, so three loads was
+   * three times the cost for no extra coverage — and it was enough extra load
+   * on a parallel suite to push an unrelated 100 ms perceptual budget over.
+   * A test that reloads a page to assert a second thing about it is paying
+   * twice to learn once.
+   */
+  test('is its own area, reads real tables, and names what is not connected', async ({
+    page,
+  }) => {
+    await open(page, '/closer');
+
+    // Its own navigation, inside its own area.
+    const nav = page.getByRole('navigation', { name: 'Closer' });
+    await expect(nav).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible();
+
+    /*
+     * And nothing in the global sidebar. Closer is reached by URL on purpose:
+     * a link there would either show a sales pipeline to customers or put the
+     * entitlement query back on every page render, which is what moving this
+     * navigation out of the sidebar was for.
+     */
+    await expect(
+      page.getByRole('navigation', { name: 'Main' }).getByText('Closer'),
+    ).toHaveCount(0);
+
+    await expect(
+      page.getByRole('heading', { name: 'Closer', level: 1 }),
+    ).toBeVisible();
+
+    /*
+     * Every stage of the forward chain is listed, including the ones nothing
+     * has reached. A pipeline that hid its empty stages would look continuous
+     * while having a hole, which is the failure `summarisePipeline` exists to
+     * prevent — asserted here on the rendered page, not only in a unit.
+     */
+    await expect(page.getByRole('heading', { name: 'Pipeline' })).toBeVisible();
+    for (const label of ['Discovered', 'Contacted', 'Replied', 'Negotiation']) {
+      await expect(page.getByText(label, { exact: true })).toBeVisible();
+    }
+
+    /*
+     * Section 45 of the brief: an integration that does not exist says so,
+     * rather than offering a control that pretends.
+     */
+    await expect(page.getByText('Outbound email')).toBeVisible();
+    await expect(page.getByText('Inbound replies')).toBeVisible();
+    await expect(page.getByText('Not connected').first()).toBeVisible();
+  });
+});

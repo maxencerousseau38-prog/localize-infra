@@ -241,4 +241,16 @@ begin
          started_at  = now() - interval '30 minutes',
          finished_at = now() - interval '30 minutes' + interval '9.7 seconds'
    where project_id = proj.id and status = 'awaiting_review';
+
+  /*
+   * Closer, on for the seeded workspace.
+   *
+   * Without this the sidebar has no Closer group and /closer answers 404, which
+   * is the correct behaviour and would make the acceptance suite unable to see
+   * the screen at all. Seeded rather than enabled by hand in one database, so a
+   * fresh seed produces a workspace the tests can actually exercise.
+   */
+  insert into public.closer_workspaces (organization_id, note)
+  values (org.id, 'Seeded development workspace')
+  on conflict (organization_id) do nothing;
 end $$;
