@@ -677,4 +677,30 @@ test.describe('Closer', () => {
     // No send affordance anywhere on the page, in any state.
     await expect(page.getByRole('button', { name: /^send$/i })).toHaveCount(0);
   });
+
+  /*
+   * The reply loop, and the two things it must not claim.
+   *
+   * It must not claim to watch a mailbox — nothing here can receive an email,
+   * so the intake is a person pasting text and the screen says so. And it must
+   * not show an agreement rate computed from a handful of replies: a
+   * percentage reads as a trend however it is annotated, so below the
+   * threshold the figure is withheld and replaced by how short it is.
+   */
+  test('takes replies by hand and withholds a rate it cannot support', async ({
+    page,
+  }) => {
+    await open(page, '/closer/replies');
+
+    await expect(
+      page.getByRole('heading', { name: 'Replies', level: 1 }),
+    ).toBeVisible();
+
+    await expect(page.getByText(/no mailbox connector/i)).toBeVisible();
+    await expect(page.getByText(/nothing has come back/i)).toBeVisible();
+
+    // No rate from no data — the sentence, not a zero percent.
+    await expect(page.getByText(/a rate needs 20/i)).toBeVisible();
+    await expect(page.getByText(/^\d+%$/)).toHaveCount(0);
+  });
 });

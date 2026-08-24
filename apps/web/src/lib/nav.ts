@@ -6,6 +6,7 @@ import {
   Inbox,
   Languages,
   LayoutGrid,
+  MessageSquare,
   Radar,
   Settings,
   TriangleAlert,
@@ -167,6 +168,13 @@ export const CLOSER_NAV: NavRoute[] = [
     icon: Inbox,
     built: true,
     keywords: 'closer outreach drafts approve review send',
+  },
+  {
+    href: '/closer/replies',
+    label: 'Replies',
+    icon: MessageSquare,
+    built: true,
+    keywords: 'closer replies answers classify intent opt out',
   },
 ];
 

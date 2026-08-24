@@ -1,5 +1,6 @@
 'use server';
 
+import { advanceLead } from '@/lib/closer/funnel';
 import { requireSession } from '@/lib/data/workspace';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
@@ -28,6 +29,24 @@ async function withSupabase() {
 }
 
 /**
+ * The lead behind a message, so the funnel can follow what just happened.
+ *
+ * Read after the action rather than before, because the action is the event
+ * and its success is what justifies the move.
+ */
+async function leadOf(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  messageId: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('closer_messages')
+    .select('lead_id')
+    .eq('id', messageId)
+    .maybeSingle();
+  return data?.lead_id ?? null;
+}
+
+/**
  * Errors from Postgres, in words a reviewer can act on.
  *
  * The RPCs raise with a message written for this screen, so most pass through
@@ -47,11 +66,26 @@ export async function approveMessage(
   const id = String(form.get('messageId') ?? '');
   if (!id) return { error: 'No message was named' };
 
-  const supabase = await withSupabase();
+  const session = await requireSession();
+  const supabase = await createClient();
   const { error } = await supabase.rpc('closer_approve_message', {
     p_message_id: id,
   });
   if (error) return { error: explain(error) };
+
+  // "A human approved the draft" — the transition table's own note for this
+  // edge, and the only event that satisfies it just happened.
+  const leadId = await leadOf(supabase, id);
+  if (leadId) {
+    await advanceLead(
+      supabase,
+      leadId,
+      'ready_for_outreach',
+      'outreach_approved',
+      'A human approved the draft',
+      session.userId,
+    );
+  }
 
   revalidatePath('/closer/approvals');
   return {
@@ -127,12 +161,26 @@ export async function markMessageSent(
   const id = String(form.get('messageId') ?? '');
   if (!id) return { error: 'No message was named' };
 
-  const supabase = await withSupabase();
+  const session = await requireSession();
+  const supabase = await createClient();
   const { error } = await supabase.rpc('closer_mark_message_sent', {
     p_message_id: id,
   });
   if (error) return { error: explain(error) };
 
+  const leadId = await leadOf(supabase, id);
+  if (leadId) {
+    await advanceLead(
+      supabase,
+      leadId,
+      'outreach_approved',
+      'contacted',
+      'The message left',
+      session.userId,
+    );
+  }
+
   revalidatePath('/closer/approvals');
+  revalidatePath('/closer/replies');
   return { done: 'Recorded as sent.' };
 }

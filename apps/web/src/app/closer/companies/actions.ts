@@ -7,6 +7,7 @@ import {
   searchCandidates,
 } from '@/lib/closer/discovery';
 import { draftMessageForLead } from '@/lib/closer/drafting';
+import { advanceLead, leadForCompany } from '@/lib/closer/funnel';
 import { researchRepository } from '@/lib/closer/research';
 import { requireSession } from '@/lib/data/workspace';
 import { createClient } from '@/lib/supabase/server';
@@ -168,7 +169,7 @@ export async function researchCompany(
   _prev: ResearchState,
   formData: FormData,
 ): Promise<ResearchState> {
-  await requireSession();
+  const session = await requireSession();
 
   const organizationId = await closerOrganizationId();
   if (!organizationId) return { error: 'This workspace does not have Closer.' };
@@ -264,6 +265,34 @@ export async function researchCompany(
     p_weights: DEFAULT_ICP_WEIGHTS,
   });
 
+  /*
+   * The funnel, moved by the thing that moved it.
+   *
+   * `discovered → researching → qualified` is exactly what just happened, in
+   * the transition table's own words. Guarded on the current stage, so a
+   * re-run on an already-qualified company does not take the legal-but-wrong
+   * `qualified → researching` edge and undo itself.
+   */
+  const lead = await leadForCompany(supabase, company.id);
+  if (lead) {
+    await advanceLead(
+      supabase,
+      lead.id,
+      'discovered',
+      'researching',
+      'Research begins',
+      session.userId,
+    );
+    await advanceLead(
+      supabase,
+      lead.id,
+      'researching',
+      'qualified',
+      'Evidence supports a fit',
+      session.userId,
+    );
+  }
+
   revalidatePath('/closer/companies');
   revalidatePath('/closer');
 
@@ -298,7 +327,7 @@ export async function draftOutreach(
   _previous: DraftState,
   form: FormData,
 ): Promise<DraftState> {
-  await requireSession();
+  const session = await requireSession();
 
   const organizationId = await closerOrganizationId();
   if (!organizationId)
@@ -311,6 +340,22 @@ export async function draftOutreach(
 
   try {
     const draft = await draftMessageForLead(organizationId, leadId, channel);
+
+    /*
+     * "A contact and an angle exist" is the transition table's note for this
+     * edge, and writing a grounded message to a named person is precisely the
+     * evidence that both do.
+     */
+    const supabase = await createClient();
+    await advanceLead(
+      supabase,
+      leadId,
+      'qualified',
+      'ready_for_outreach',
+      'A contact and an angle exist',
+      session.userId,
+    );
+
     revalidatePath('/closer/approvals');
     revalidatePath('/closer/companies');
     return {
