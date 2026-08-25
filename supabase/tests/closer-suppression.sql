@@ -120,5 +120,37 @@ begin
   exception when others then ok := true; end;
   r := r || format('new-lead-blocked-by-suppressed-contact=%s(want t); ', ok);
 
+  /* ---- a suppressed company must not come back through discovery ----- */
+  -- The D2 regression. `closer_upsert_company` checked membership and nothing
+  -- else, so the next discovery run re-upserted a company that had opted out
+  -- and it reappeared in the list looking like a fresh prospect. Contact was
+  -- never possible — five other guards saw to that — but a name somebody
+  -- promised never to look at again was back on the screen.
+  perform public.closer_suppress(org, 'with-domain.test.invalid', null, 'opted_out', 'audit');
+
+  ok := false;
+  begin perform public.closer_upsert_company(
+    org,'WithDomain','with-domain.test.invalid','github_repository',
+    'https://github.com/t/a','t/a');
+  exception when others then ok := true; end;
+  r := r || format('rediscovery-of-suppressed-company-refused=%s(want t); ', ok);
+
+  -- A different company is untouched: the check is scoped to the identifier,
+  -- not a blanket stop on discovery.
+  ok := true;
+  begin perform public.closer_upsert_company(
+    org,'Unrelated','unrelated.test.invalid','github_repository',
+    'https://github.com/t/c','t/c');
+  exception when others then ok := false; end;
+  r := r || format('unsuppressed-company-still-discoverable=%s(want t); ', ok);
+
+  -- A company with no domain has no identifier to check, and must still be
+  -- recordable — that is the early-stage team discovery exists to find.
+  ok := true;
+  begin perform public.closer_upsert_company(
+    org,'NoDomainTwo',null,'github_repository','https://github.com/t/d','t/d');
+  exception when others then ok := false; end;
+  r := r || format('nodomain-company-still-recordable=%s(want t); ', ok);
+
   raise exception 'CLOSER-SUPPRESSION >> %', r;
 end $$;

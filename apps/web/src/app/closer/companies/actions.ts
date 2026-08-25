@@ -128,9 +128,25 @@ export async function discoverCompanies(
       });
     }
 
-    // Idempotent: rediscovering a company returns the lead it already has, at
-    // whatever stage it reached, rather than resetting it to `discovered`.
-    await supabase.rpc('closer_open_lead', { p_company_id: company.id });
+    /*
+     * Idempotent: rediscovering a company returns the lead it already has, at
+     * whatever stage it reached, rather than resetting it to `discovered`.
+     *
+     * The result is checked, and `recorded` only counts a company that actually
+     * has a lead. It used to increment unconditionally, so a company whose lead
+     * could not be opened — a contact at it had opted out — was reported as
+     * recorded by a run that had recorded nothing usable. A count that includes
+     * the failures is a count that says the opposite of what it means.
+     */
+    const { error: leadError } = await supabase.rpc('closer_open_lead', {
+      p_company_id: company.id,
+    });
+
+    if (leadError) {
+      skipped.push(`${repo.fullName} (${leadError.message})`);
+      continue;
+    }
+
     recorded += 1;
   }
 
