@@ -66,7 +66,7 @@ export async function approveMessage(
   const id = String(form.get('messageId') ?? '');
   if (!id) return { error: 'No message was named' };
 
-  const session = await requireSession();
+  await requireSession();
   const supabase = await createClient();
   const { error } = await supabase.rpc('closer_approve_message', {
     p_message_id: id,
@@ -83,7 +83,6 @@ export async function approveMessage(
       'ready_for_outreach',
       'outreach_approved',
       'A human approved the draft',
-      session.userId,
     );
   }
 
@@ -161,7 +160,7 @@ export async function markMessageSent(
   const id = String(form.get('messageId') ?? '');
   if (!id) return { error: 'No message was named' };
 
-  const session = await requireSession();
+  await requireSession();
   const supabase = await createClient();
   const { error } = await supabase.rpc('closer_mark_message_sent', {
     p_message_id: id,
@@ -176,7 +175,6 @@ export async function markMessageSent(
       'outreach_approved',
       'contacted',
       'The message left',
-      session.userId,
     );
   }
 

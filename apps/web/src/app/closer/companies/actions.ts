@@ -185,7 +185,7 @@ export async function researchCompany(
   _prev: ResearchState,
   formData: FormData,
 ): Promise<ResearchState> {
-  const session = await requireSession();
+  await requireSession();
 
   const organizationId = await closerOrganizationId();
   if (!organizationId) return { error: 'This workspace does not have Closer.' };
@@ -297,7 +297,6 @@ export async function researchCompany(
       'discovered',
       'researching',
       'Research begins',
-      session.userId,
     );
     await advanceLead(
       supabase,
@@ -305,7 +304,6 @@ export async function researchCompany(
       'researching',
       'qualified',
       'Evidence supports a fit',
-      session.userId,
     );
   }
 
@@ -343,7 +341,7 @@ export async function draftOutreach(
   _previous: DraftState,
   form: FormData,
 ): Promise<DraftState> {
-  const session = await requireSession();
+  await requireSession();
 
   const organizationId = await closerOrganizationId();
   if (!organizationId)
@@ -369,7 +367,6 @@ export async function draftOutreach(
       'qualified',
       'ready_for_outreach',
       'A contact and an angle exist',
-      session.userId,
     );
 
     revalidatePath('/closer/approvals');
