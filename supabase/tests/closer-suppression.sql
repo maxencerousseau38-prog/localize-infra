@@ -27,6 +27,17 @@ declare
   lead_a public.closer_leads;
   lead_b public.closer_leads;
   stage_now public.closer_stage;
+  c_late public.closer_companies;
+  ct_late public.closer_contacts;
+  lead_late public.closer_leads;
+  ev_late public.closer_evidence;
+  msg_late public.closer_messages;
+  msg_sent public.closer_messages;
+  c_early public.closer_companies;
+  ct_early public.closer_contacts;
+  lead_early public.closer_leads;
+  ev_early public.closer_evidence;
+  state_now public.closer_message_state;
   n int; ok boolean; r text := '';
 begin
   insert into auth.users (id, instance_id, aud, role, email, encrypted_password, created_at, updated_at)
@@ -151,6 +162,91 @@ begin
     org,'NoDomainTwo',null,'github_repository','https://github.com/t/d','t/d');
   exception when others then ok := false; end;
   r := r || format('nodomain-company-still-recordable=%s(want t); ', ok);
+
+  /* ---- an opt-out arriving AFTER approval ---------------------------- */
+  --
+  -- The audit finding. `closer_mark_message_sent` checked only the message's
+  -- state, so a message approved before an opt-out could still be recorded as
+  -- sent afterwards — and went on being offered on the approvals screen with no
+  -- warning at all. Nothing here sends, so the human copying the text out is
+  -- the only real send, and that screen is where they copy it from.
+
+  c_late := public.closer_upsert_company(
+    org,'LateOptOut','late.test.invalid','github_repository','https://github.com/t/e','t/e');
+  ct_late := public.closer_record_contact(
+    c_late.id,'github_repository','https://github.com/t/e','L','Eng','l@late.test.invalid');
+  ev_late := public.closer_record_evidence(
+    c_late.id,'pain','translation_commit_frequency','9 commits in 90 days',
+    'github_commit','https://github.com/t/e/commits', now());
+  lead_late := public.closer_open_lead(c_late.id);
+
+  perform public.closer_set_stage(lead_late.id,'researching','Research begins',u);
+  perform public.closer_set_stage(lead_late.id,'qualified','Evidence supports a fit',u);
+  perform public.closer_set_stage(lead_late.id,'ready_for_outreach','A contact and an angle exist',u);
+
+  msg_late := public.closer_draft_message(
+    lead_late.id, ct_late.id, 'email', 'A message approved before the opt-out.',
+    array[ev_late.id], 'Hello');
+  msg_late := public.closer_approve_message(msg_late.id);
+  r := r || format('approved-before-optout=%s(want approved); ', msg_late.state);
+
+  -- The opt-out lands after the approval.
+  perform public.closer_suppress(org, null, ct_late.email, 'opted_out', 'audit late');
+
+  ok := false;
+  begin perform public.closer_mark_message_sent(msg_late.id);
+  exception when others then ok := true; end;
+  r := r || format('mark-sent-refused-after-late-optout=%s(want t); ', ok);
+
+  select state into state_now from public.closer_messages where id = msg_late.id;
+  r := r || format('message-stays-approved-not-sent=%s(want approved); ', state_now);
+
+  /* ---- an opt-out arriving BEFORE approval --------------------------- */
+  -- Already guarded, asserted here so the pair is checked together and a future
+  -- change cannot fix one order while breaking the other.
+
+  ok := false;
+  begin perform public.closer_approve_message(msg_late.id);
+  exception when others then ok := true; end;
+  r := r || format('approve-refused-after-optout=%s(want t); ', ok);
+
+  /* ---- a send recorded BEFORE the opt-out is left alone --------------- */
+  -- A contact that really happened is a fact, and the fix must not erase it. A
+  -- system that did would be lying about its own history in the direction that
+  -- flatters it.
+  --
+  -- Built on its own company so the earlier suppressions cannot reach it, taken
+  -- all the way to `sent`, and only then suppressed.
+
+  c_early := public.closer_upsert_company(
+    org,'EarlySend','early.test.invalid','github_repository','https://github.com/t/f','t/f');
+  ct_early := public.closer_record_contact(
+    c_early.id,'github_repository','https://github.com/t/f','E','Eng','e@early.test.invalid');
+  ev_early := public.closer_record_evidence(
+    c_early.id,'pain','translation_commit_frequency','7 commits in 90 days',
+    'github_commit','https://github.com/t/f/commits', now());
+  lead_early := public.closer_open_lead(c_early.id);
+
+  perform public.closer_set_stage(lead_early.id,'researching','Research begins',u);
+  perform public.closer_set_stage(lead_early.id,'qualified','Evidence supports a fit',u);
+  perform public.closer_set_stage(lead_early.id,'ready_for_outreach','A contact and an angle exist',u);
+
+  msg_sent := public.closer_draft_message(
+    lead_early.id, ct_early.id, 'email', 'Sent before anything was suppressed.',
+    array[ev_early.id], 'Earlier');
+  msg_sent := public.closer_approve_message(msg_sent.id);
+  perform public.closer_set_stage(lead_early.id,'outreach_approved','A human approved the draft',u);
+  msg_sent := public.closer_mark_message_sent(msg_sent.id);
+  r := r || format('send-recorded-before-optout=%s(want sent); ', msg_sent.state);
+
+  perform public.closer_suppress(org, null, ct_early.email, 'opted_out', 'audit early');
+
+  select state into state_now from public.closer_messages where id = msg_sent.id;
+  r := r || format('earlier-send-still-sent=%s(want sent); ', state_now);
+
+  select count(*) into n from public.closer_messages
+   where id = msg_sent.id and sent_by is not null and sent_at is not null;
+  r := r || format('earlier-send-keeps-its-actor=%s(want 1); ', n);
 
   raise exception 'CLOSER-SUPPRESSION >> %', r;
 end $$;
