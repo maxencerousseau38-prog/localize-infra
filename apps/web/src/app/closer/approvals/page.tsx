@@ -1,4 +1,5 @@
 import { Page, PageHeader, PageMeta, PageSection } from '@/components/page';
+import { optOutReason, suppressionSets } from '@/lib/closer/opt-out-block';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@localize-infra/ui';
@@ -19,7 +20,10 @@ interface MessageRow {
   model: string | null;
   created_at: string;
   edited_at: string | null;
-  closer_leads: { closer_companies: { name: string } | null } | null;
+  closer_leads: {
+    stage: string;
+    closer_companies: { name: string; domain: string | null } | null;
+  } | null;
   closer_contacts: { full_name: string | null; email: string | null } | null;
 }
 
@@ -53,13 +57,32 @@ export default async function CloserApprovalsPage() {
   const { data, error } = await supabase
     .from('closer_messages')
     .select(
-      'id,channel,state,subject,body,grounded_in,model,created_at,edited_at,closer_leads(closer_companies(name)),closer_contacts(full_name,email)',
+      'id,channel,state,subject,body,grounded_in,model,created_at,edited_at,closer_leads(stage,closer_companies(name,domain)),closer_contacts(full_name,email)',
     )
     .in('state', ['pending_approval', 'approved'])
     .order('created_at', { ascending: true })
     .limit(50);
 
   const rows = (data ?? []) as unknown as MessageRow[];
+
+  /*
+   * The suppression list, read once for the whole queue.
+   *
+   * The lead's stage is the usual signal and would nearly always be enough —
+   * `closer_suppress` moves it. This reads the list as well because "nearly
+   * always" is doing too much work in a sentence about consent, and because a
+   * suppression whose lead failed to move is precisely the case a stage check
+   * cannot see. It is also a case this repository has already had once.
+   */
+  const { data: suppressionRows } = await supabase
+    .from('closer_suppressions')
+    .select('domain,email');
+  const suppressions = suppressionSets(
+    (suppressionRows ?? []) as {
+      domain: string | null;
+      email: string | null;
+    }[],
+  );
 
   /*
    * The cited evidence, fetched in one query for the whole queue.
@@ -92,6 +115,14 @@ export default async function CloserApprovalsPage() {
       body: row.body,
       companyName:
         row.closer_leads?.closer_companies?.name ?? 'Unknown company',
+      blockedReason: optOutReason(
+        {
+          leadStage: row.closer_leads?.stage ?? null,
+          companyDomain: row.closer_leads?.closer_companies?.domain ?? null,
+          contactEmail: row.closer_contacts?.email ?? null,
+        },
+        suppressions,
+      ),
       contactName: row.closer_contacts?.full_name ?? null,
       contactEmail: row.closer_contacts?.email ?? null,
       model: row.model,
@@ -111,8 +142,19 @@ export default async function CloserApprovalsPage() {
     };
   });
 
-  const awaiting = messages.filter((m) => m.state === 'pending_approval');
-  const approved = messages.filter((m) => m.state === 'approved');
+  /*
+   * Blocked first, and taken out of both working queues.
+   *
+   * A message an opt-out has overtaken is not a slower item in the same list —
+   * it is one nobody may act on, and leaving it among the actionable ones would
+   * mean the only thing standing between it and a recipient is the operator
+   * remembering. It is shown rather than hidden, because a draft that vanishes
+   * teaches nothing and a person who wrote it will look for it.
+   */
+  const blocked = messages.filter((m) => m.blockedReason !== null);
+  const actionable = messages.filter((m) => m.blockedReason === null);
+  const awaiting = actionable.filter((m) => m.state === 'pending_approval');
+  const approved = actionable.filter((m) => m.state === 'approved');
 
   return (
     <Page>
@@ -144,6 +186,28 @@ export default async function CloserApprovalsPage() {
           </ul>
         )}
       </PageSection>
+
+      {/*
+        Blocked, and said out loud rather than quietly filtered.
+
+        This section exists because the alternative — dropping them from the
+        page — would leave an operator who remembers writing a draft looking
+        for it, and would teach them nothing about why it went. Naming the
+        opt-out is also the only way they learn that the system caught
+        something they would otherwise have had to remember themselves.
+      */}
+      {blocked.length > 0 ? (
+        <PageSection
+          title="Blocked by an opt-out"
+          description="These were written or approved before somebody asked to be left alone. They cannot be approved or recorded as sent, and the database refuses both independently of this screen."
+        >
+          <ul className="space-y-3">
+            {blocked.map((message) => (
+              <ReviewCard key={message.id} message={message} />
+            ))}
+          </ul>
+        </PageSection>
+      ) : null}
 
       {approved.length > 0 ? (
         <PageSection

@@ -1,7 +1,14 @@
 'use client';
 
 import { Button, Input, Textarea } from '@localize-infra/ui';
-import { Check, ExternalLink, PenLine, Send, X } from 'lucide-react';
+import {
+  Check,
+  ExternalLink,
+  PenLine,
+  Send,
+  ShieldAlert,
+  X,
+} from 'lucide-react';
 import * as React from 'react';
 import {
   type ReviewState,
@@ -35,6 +42,15 @@ export interface PendingMessage {
   cited: CitedEvidence[];
   /** Ids cited whose evidence row no longer exists. */
   missing: string[];
+  /**
+   * Why an opt-out has overtaken this message, or null.
+   *
+   * When set, no action is offered at all. The database refuses approving and
+   * recording a send independently, so this is the second of two locks rather
+   * than the only one — but it is the one that stops a person reaching for the
+   * text in the first place.
+   */
+  blockedReason: string | null;
 }
 
 function Feedback({ state }: { state: ReviewState }) {
@@ -84,6 +100,7 @@ export function ReviewCard({ message }: { message: PendingMessage }) {
   >(markMessageSent, {});
 
   const awaiting = message.state === 'pending_approval';
+  const blocked = message.blockedReason !== null;
 
   return (
     <li className="rounded-lg border border-subtle">
@@ -191,7 +208,27 @@ export function ReviewCard({ message }: { message: PendingMessage }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-t border-subtle px-4 py-3">
-        {awaiting ? (
+        {blocked ? (
+          /*
+           * No control at all, not a disabled one. A greyed-out button invites
+           * a person to look for the way to enable it; a sentence tells them
+           * there is not one.
+           */
+          <p
+            role="alert"
+            className="flex items-start gap-2 text-caption text-failed-text"
+          >
+            <ShieldAlert
+              aria-hidden="true"
+              className="mt-0.5 size-4 shrink-0"
+            />
+            <span>
+              {message.blockedReason} Nothing further can be done with this
+              message — copying it out would contact somebody who asked not to
+              be.
+            </span>
+          </p>
+        ) : awaiting ? (
           <>
             <form action={approve}>
               <input type="hidden" name="messageId" value={message.id} />
