@@ -13,7 +13,11 @@ import {
   canReachRepository,
   installationIdFor,
 } from '@/lib/github/repositories';
-import { checkTranslations, describeFindings } from '@/lib/runs/quality';
+import {
+  checkTranslations,
+  describeFindings,
+  qualityBlock,
+} from '@/lib/runs/quality';
 import { createClient } from '@/lib/supabase/server';
 import {
   buildKeyCatalog,
@@ -522,7 +526,7 @@ ${describeFindings(quality)}`,
               keysMissing > 0
                 ? `\n\nNote: ${keysMissing} string(s) were not translated and are absent from these files. Re-run to attempt them again.`
                 : ''
-            }`,
+            }\n\n${qualityBlock(quality)}`,
           },
           files,
         ),

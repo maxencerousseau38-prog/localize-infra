@@ -130,3 +130,28 @@ export function describeFindings(report: QualityReport, limit = 5): string {
   if (remaining > 0) lines.push(`…and ${remaining} more`);
   return lines.join('\n');
 }
+
+/**
+ * The verdict, for the pull request body.
+ *
+ * The reviewer is on GitHub, not on a dashboard, so the checks that ran belong
+ * where they are looking. Only ever rendered for a report that passed — the
+ * gate refuses to open a pull request otherwise, so a "Quality" section listing
+ * failures could not exist without the gate having been bypassed.
+ *
+ * `checked` counts every string in the files being committed, not only the
+ * newly translated ones. That is the honest number: the gate examines what the
+ * pull request contains, including translations it preserved from an earlier
+ * run, so a placeholder broken months ago is caught the next time these files
+ * move.
+ */
+export function qualityBlock(report: QualityReport): string {
+  return [
+    '### Quality',
+    '',
+    '- ✓ Placeholders preserved',
+    '- ✓ ICU messages parse',
+    '',
+    `Checked ${report.checked} string(s) in the files below before opening this pull request.`,
+  ].join('\n');
+}

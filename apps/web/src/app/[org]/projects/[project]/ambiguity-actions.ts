@@ -6,6 +6,7 @@ import {
   requireSession,
 } from '@/lib/data/workspace';
 import { installationIdFor } from '@/lib/github/repositories';
+import { checkTranslations, describeFindings } from '@/lib/runs/quality';
 import { createClient } from '@/lib/supabase/server';
 import {
   buildLocaleFiles,
@@ -177,7 +178,7 @@ export async function approveRun(
 
   const { data: rows, error: rowsError } = await supabase
     .from('run_translations')
-    .select('locale,translation_key,proposed_text')
+    .select('locale,translation_key,proposed_text,source_text')
     .eq('run_id', runId);
 
   if (rowsError) {
@@ -223,6 +224,45 @@ export async function approveRun(
     decisions,
     localesDir,
   );
+
+  /*
+   * The same gate the unattended path runs, on this path too.
+   *
+   * `run-actions.ts` carries a comment warning that these two PR builders have
+   * already drifted twice. Wiring the quality checks into one of them and not
+   * the other would have been a third time — and the worse half to miss, since
+   * this is the path where a person edited the proposals and would reasonably
+   * assume somebody checked the result.
+   *
+   * Checked against the **files being committed**, not against `proposed_text`:
+   * `buildLocaleFiles` applies the reviewer's decisions, so the rows and the
+   * bytes are not the same thing. Parsing what will land is the only version of
+   * this check that cannot be out of date.
+   */
+  const source: Record<string, string> = {};
+  for (const row of rows as {
+    translation_key: string;
+    source_text: string;
+  }[]) {
+    source[row.translation_key] = row.source_text;
+  }
+
+  const committed = files.map((file) => ({
+    locale:
+      file.path
+        .split('/')
+        .pop()
+        ?.replace(/\.json$/, '') ?? file.path,
+    entries: JSON.parse(file.content) as Record<string, string>,
+  }));
+
+  const quality = checkTranslations(source, committed);
+  if (!quality.passed) {
+    return {
+      error: `Quality checks failed on ${quality.findings.length} translation(s), so no pull request was opened.
+${describeFindings(quality)}`,
+    };
+  }
 
   const apiUrl = process.env.LOCALIZE_API_URL ?? 'http://127.0.0.1:8787';
   const apiToken = process.env.LOCALIZE_API_TOKEN ?? '';
