@@ -18,6 +18,7 @@ import { notFound } from 'next/navigation';
 import { RepositorySection } from './repository-section';
 import { ReviewSection } from './review-section';
 import { RunsSection } from './runs-section';
+import { ScanSection } from './scan-section';
 
 export const metadata: Metadata = { title: 'Project' };
 
@@ -145,6 +146,18 @@ export default async function ProjectPage({
           proposals={proposals}
         />
       ) : null}
+
+      {/*
+        Before the run, because it answers the question the run costs money to
+        answer. Same gate as the run: reading the repository needs the same
+        installation, so offering a scan where a run is impossible would be a
+        button that cannot work.
+      */}
+      <ScanSection
+        orgSlug={org}
+        projectSlug={project.slug}
+        canScan={Boolean(installationId) && connected}
+      />
 
       <RunsSection
         orgSlug={org}
