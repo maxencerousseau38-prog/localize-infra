@@ -43,6 +43,8 @@ declare
   lead_f1 public.closer_leads;
   r_f2 public.closer_replies;
   actor_seen uuid;
+  c_c3 public.closer_companies;
+  ct_c3 public.closer_contacts;
   stage_text text;
   n int; ok boolean; r text := '';
 begin
@@ -359,12 +361,39 @@ begin
   r := r || format('f4-padded=%s(want t); ',
     public.closer_is_suppressed(org, null, '  a@with-domain.test.invalid  '));
 
-  -- The other direction: a suppression written in a non-canonical form must
-  -- still catch the plain address. Canonicalising only the incoming value would
-  -- have left the stored side able to miss.
+  -- The other direction: a suppression whose STORED value is non-canonical must
+  -- still catch the plain address.
+  --
+  -- An earlier version of this wrote through `closer_suppress`, which
+  -- canonicalises on the way in — so the stored value was already clean and the
+  -- match was trivial. It asserted nothing about the arm it named. The row is
+  -- now inserted directly, in the shape rows written before the canonicalisation
+  -- migration actually have, which is the only way to exercise it.
+  perform set_config('role','postgres',true);
+  insert into public.closer_suppressions (organization_id, domain, email, reason, note)
+  values (org, 'legacy.test.invalid.', null, 'opted_out', 'pre-canonicalisation shape');
+  insert into public.closer_suppressions (organization_id, domain, email, reason, note)
+  -- Lowercase, because `closer_suppressions_email_check` has required that
+  -- since the first migration. The trailing dot is the part canonicalisation
+  -- added, and the only part a legacy row can differ by.
+  values (org, null, 'old@legacy2.test.invalid.', 'opted_out', 'pre-canonicalisation shape');
+  perform set_config('request.jwt.claims', json_build_object('sub',u,'role','authenticated')::text, true);
+  perform set_config('role','authenticated',true);
+
+  r := r || format('f4-legacy-row-kept-its-shape=%s(want legacy.test.invalid.); ',
+    (select domain from public.closer_suppressions
+      where organization_id = org and domain like 'legacy.%' limit 1));
+  r := r || format('f4-legacy-domain-row-matches-address=%s(want t); ',
+    public.closer_is_suppressed(org, null, 'someone@legacy.test.invalid'));
+  r := r || format('f4-legacy-domain-row-matches-domain=%s(want t); ',
+    public.closer_is_suppressed(org, 'legacy.test.invalid', null));
+  r := r || format('f4-legacy-email-row-matches-address=%s(want t); ',
+    public.closer_is_suppressed(org, null, 'old@legacy2.test.invalid'));
+  r := r || format('f4-legacy-rows-do-not-overmatch=%s(want f); ',
+    public.closer_is_suppressed(org, null, 'x@nothing-to-do-with-it.test.invalid'));
+
+  -- Written through the function, the stored value is canonical.
   perform public.closer_suppress(org, '  CANON.TEST.INVALID.  ', null, 'opted_out', 'f4');
-  r := r || format('f4-noncanonical-suppression-matches=%s(want t); ',
-    public.closer_is_suppressed(org, null, 'someone@canon.test.invalid'));
   r := r || format('f4-stored-domain-is-canonical=%s(want canon.test.invalid); ',
     (select domain from public.closer_suppressions
       where organization_id = org and domain like '%canon%' limit 1));
@@ -379,6 +408,57 @@ begin
   -- An address with no '@' has no domain, and must not be read as one.
   r := r || format('f4-no-at-sign-is-not-a-domain=%s(want f); ',
     public.closer_is_suppressed(org, null, 'with-domain.test.invalid'));
+
+  /* ---- C2: rows predating canonicalisation are backfilled -------------- */
+  --
+  -- The canonicalisation migration canonicalised on write and left existing
+  -- rows alone. The guard compensates at comparison time — asserted above — but
+  -- identity does not: `closer_upsert_company` canonicalises its input, so a
+  -- company row holding `acme.example.` stopped being found by
+  -- `on conflict (organization_id, domain)`. Reproduced: rediscovery produced a
+  -- second company row and split the evidence between them.
+
+  perform set_config('role','postgres',true);
+  insert into public.closer_companies (organization_id,name,domain,discovered_from,discovered_url)
+  values (org,'C2 Legacy','c2-legacy.test.invalid.','github_repository','https://github.com/c/2');
+  update public.closer_companies cc
+     set domain = public.closer_canonical_domain(cc.domain)
+   where cc.domain is not null
+     and cc.domain is distinct from public.closer_canonical_domain(cc.domain)
+     and not exists (select 1 from public.closer_companies o
+                     where o.organization_id = cc.organization_id and o.id <> cc.id
+                       and o.domain = public.closer_canonical_domain(cc.domain));
+  perform set_config('request.jwt.claims', json_build_object('sub',u,'role','authenticated')::text, true);
+  perform set_config('role','authenticated',true);
+
+  r := r || format('c2-backfilled=%s(want c2-legacy.test.invalid); ',
+    (select domain from public.closer_companies where organization_id=org and name='C2 Legacy'));
+  perform public.closer_upsert_company(org,'C2 Legacy','c2-legacy.test.invalid','github_repository','https://github.com/c/2','c/2');
+  select count(*) into n from public.closer_companies where organization_id=org and name='C2 Legacy';
+  r := r || format('c2-rediscovery-merges-not-duplicates=%s(want 1); ', n);
+
+  /* ---- C3: an address-only opt-out also stops rediscovery -------------- */
+  --
+  -- The discovery check looked at the domain only, so an address-level opt-out
+  -- left the company free to reappear. Reproduced with the four guards measured
+  -- separately: lead stopped, drafting refused, fresh lead refused — and the
+  -- company row re-upserted anyway. Three out of four is the same symptom the
+  -- earlier fix was written for, arriving by the other identifier.
+
+  c_c3 := public.closer_upsert_company(org,'C3','c3.test.invalid','github_repository','https://github.com/c/3','c/3');
+  ct_c3 := public.closer_record_contact(c_c3.id,'github_repository','https://github.com/c/3','C','Eng','c3@c3.test.invalid');
+  perform public.closer_suppress(org, null, ct_c3.email, 'opted_out', 'c3');
+
+  ok := false;
+  begin perform public.closer_upsert_company(org,'C3','c3.test.invalid','github_repository','https://github.com/c/3','c/3');
+  exception when others then ok := true; end;
+  r := r || format('c3-rediscovery-refused-on-address-optout=%s(want t); ', ok);
+
+  -- Still a fix rather than a blanket block.
+  ok := true;
+  begin perform public.closer_upsert_company(org,'C3ok','c3-unrelated.test.invalid','github_repository','https://github.com/c/3','c/3');
+  exception when others then ok := false; end;
+  r := r || format('c3-unrelated-company-still-discoverable=%s(want t); ', ok);
 
   raise exception 'CLOSER-SUPPRESSION >> %', r;
 end $$;
