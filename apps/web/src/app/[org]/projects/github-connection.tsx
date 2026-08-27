@@ -1,4 +1,9 @@
-import { installUrl, readOAuthConfig, signState } from '@/lib/github/install';
+import {
+  installBlockers,
+  installUrl,
+  readOAuthConfig,
+  signState,
+} from '@/lib/github/install';
 import { Badge } from '@localize-infra/ui';
 
 /**
@@ -32,6 +37,7 @@ export function GitHubConnection({
   const oauth = readOAuthConfig();
   const state = signState(organizationId);
   const canInstall = Boolean(oauth && appSlug && state);
+  const blockers = canInstall ? [] : installBlockers();
 
   return (
     <section
@@ -76,10 +82,30 @@ export function GitHubConnection({
       ) : (
         <p className="mt-3 max-w-[64ch] text-small leading-6 text-secondary">
           Connecting your own GitHub account is not available on this
-          deployment: the app has no OAuth client secret, so the callback cannot
-          prove that whoever completes an install actually owns it. Rather than
-          store an installation id it cannot verify, the flow is switched off.
-          The CLI still works against a local clone.
+          deployment: the callback cannot prove that whoever completes an
+          install actually owns it, so rather than store an installation id it
+          cannot verify, the flow is switched off.
+          {/*
+            The variables, named. This used to end with "The CLI still works
+            against a local clone", which was the only exit offered and is not
+            a door — `packages/cli` is not published, so a developer outside
+            this repository cannot take it. Naming what is missing is the one
+            thing a reader can act on, and matches how the Closer surfaces
+            report an absent model key.
+          */}
+          {blockers.length > 0 ? (
+            <>
+              {' '}
+              Missing:{' '}
+              {blockers.map((name, index) => (
+                <span key={name}>
+                  {index > 0 ? ', ' : ''}
+                  <span className="font-mono text-primary">{name}</span>
+                </span>
+              ))}
+              .
+            </>
+          ) : null}
         </p>
       )}
     </section>

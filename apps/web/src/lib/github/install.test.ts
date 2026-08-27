@@ -190,3 +190,63 @@ describe('installation ownership', () => {
     expect(await verifyInstallationOwnership('code', 42)).toBeNull();
   });
 });
+
+describe('installBlockers', () => {
+  /*
+   * The connection panel used to end its explanation with "The CLI still works
+   * against a local clone". That was the only exit it offered and it is not a
+   * door: `packages/cli` is not published, so a developer outside this
+   * repository cannot take it. What replaced it is this list, so it is worth
+   * asserting that the list is right.
+   */
+  it('is empty when everything the flow needs is present', async () => {
+    // The shared beforeEach sets every variable the OAuth tests need; the slug
+    // is only read by this function, so it is set here.
+    process.env.GITHUB_APP_SLUG = 'localize-infra';
+    process.env.GITHUB_OAUTH_CLIENT_SECRET = 'secret';
+    const { installBlockers } = await import('./install');
+    expect(installBlockers()).toEqual([]);
+  });
+
+  it('names the client secret, the one thing production is actually missing', async () => {
+    process.env.GITHUB_APP_SLUG = 'localize-infra';
+    // biome-ignore lint/performance/noDelete: the code reads absence, not ''
+    delete process.env.GITHUB_OAUTH_CLIENT_SECRET;
+    const { installBlockers } = await import('./install');
+    expect(installBlockers()).toEqual(['GITHUB_OAUTH_CLIENT_SECRET']);
+  });
+
+  /*
+   * The state signature reuses the App private key rather than carrying one of
+   * its own, so an unconfigured App shows up here as the key — the variable
+   * somebody would actually have to set — rather than as a separate name for
+   * something that does not exist.
+   */
+  it('reports the private key when the app itself is unconfigured', async () => {
+    process.env.GITHUB_APP_SLUG = 'localize-infra';
+    process.env.GITHUB_OAUTH_CLIENT_SECRET = 'secret';
+    // biome-ignore lint/performance/noDelete: the code reads absence, not ''
+    delete process.env.GITHUB_APP_PRIVATE_KEY;
+    const { installBlockers } = await import('./install');
+    expect(installBlockers()).toContain('GITHUB_APP_PRIVATE_KEY');
+  });
+
+  it('names every missing variable rather than stopping at the first', async () => {
+    for (const name of [
+      'GITHUB_APP_SLUG',
+      'GITHUB_OAUTH_CLIENT_ID',
+      'GITHUB_OAUTH_CLIENT_SECRET',
+    ]) {
+      // biome-ignore lint/performance/noDelete: the code reads absence, not ''
+      delete process.env[name];
+    }
+    const { installBlockers } = await import('./install');
+    expect(installBlockers()).toEqual(
+      expect.arrayContaining([
+        'GITHUB_APP_SLUG',
+        'GITHUB_OAUTH_CLIENT_ID',
+        'GITHUB_OAUTH_CLIENT_SECRET',
+      ]),
+    );
+  });
+});

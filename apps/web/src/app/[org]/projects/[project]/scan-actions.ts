@@ -1,0 +1,154 @@
+'use server';
+
+import { rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import {
+  findOrganization,
+  findProject,
+  mayUsePrivateRepositories,
+  requireSession,
+} from '@/lib/data/workspace';
+import { materialiseRepository } from '@/lib/github/materialise';
+import { canReachRepository } from '@/lib/github/repositories';
+import { type Coverage, buildCoverage } from '@/lib/runs/coverage';
+import {
+  buildKeyCatalog,
+  detectFramework,
+  extractFromProject,
+  readLocaleFile,
+} from '@localize-infra/core';
+
+/**
+ * Look at a repository and say what a run would do, without doing it.
+ *
+ * The brief's first-value screen wants real numbers before a developer commits
+ * to anything: how many keys, how many locales, how much is missing. Every one
+ * of those was already computed — but only *during* a run, interleaved with the
+ * model calls that cost money. A developer had to pay to find out whether it
+ * was worth paying.
+ *
+ * This is the same first half of the pipeline, stopping where the spending
+ * starts. It calls `materialiseRepository`, `detectFramework`,
+ * `extractFromProject` and `readLocaleFile` — the run's own functions, not
+ * copies — so what it reports and what the run does cannot drift.
+ *
+ * **It writes nothing.** No `runs` row is created, deliberately: a scan is not
+ * a run, and inserting one would put a row that translated nothing into the
+ * activation funnel and into the history a developer reads. The cost of
+ * recomputing on the next visit is a tarball and a directory walk, with no
+ * model call in it.
+ */
+
+export interface ScanState {
+  error?: string;
+  scan?: {
+    framework: string;
+    sourceLocale: string;
+    localesDir: string;
+    coverage: Coverage;
+  };
+}
+
+export async function scanProject(
+  _previous: ScanState,
+  form: FormData,
+): Promise<ScanState> {
+  await requireSession();
+
+  const orgSlug = String(form.get('orgSlug') ?? '');
+  const projectSlug = String(form.get('projectSlug') ?? '');
+
+  const organization = await findOrganization(orgSlug);
+  if (!organization) return { error: 'That workspace is not available.' };
+
+  const project = await findProject(organization.id, projectSlug);
+  if (!project) return { error: 'That project is not available.' };
+
+  if (!project.repository_owner || !project.repository_name) {
+    return { error: 'Connect a repository before scanning.' };
+  }
+
+  /*
+   * The same two checks the run makes, in the same order. A scan reads the
+   * repository, so it needs exactly the permission a run needs — asking less
+   * here would make the scan a way to read a repository the run would refuse.
+   */
+  const repository = await canReachRepository(
+    organization.id,
+    project.repository_owner,
+    project.repository_name,
+  );
+  if (!repository) {
+    return {
+      error:
+        'This workspace cannot reach that repository. Check the installation on GitHub.',
+    };
+  }
+  if (
+    repository.private &&
+    !(await mayUsePrivateRepositories(organization.id))
+  ) {
+    return { error: 'This plan does not cover private repositories.' };
+  }
+
+  let workdir: string | null = null;
+  try {
+    const materialised = await materialiseRepository(
+      project.repository_owner,
+      project.repository_name,
+      project.repository_branch ?? 'main',
+      organization.id,
+    );
+    workdir = materialised.dir;
+
+    if (materialised.truncated) {
+      // Same refusal as the run, and for the same reason: a partial checkout
+      // would produce a key count that looks complete and is not.
+      return {
+        error:
+          'GitHub truncated the repository tree, so the count would have been taken against an incomplete checkout.',
+      };
+    }
+
+    const detected = detectFramework(workdir);
+    if (!detected) {
+      return {
+        error:
+          'No supported framework detected. Supported: Next.js, Vite + React, React Native.',
+      };
+    }
+
+    const fresh = buildKeyCatalog(
+      extractFromProject(workdir, detected.sourceGlobs),
+    );
+    if (Object.keys(fresh).length === 0) {
+      return {
+        error:
+          'No translatable strings were found. Nothing here needs localizing yet.',
+      };
+    }
+
+    const localesDir = join(workdir, detected.localesDir);
+    const existing: Record<string, Record<string, string>> = {};
+    for (const locale of project.target_locales) {
+      existing[locale] = readLocaleFile(localesDir, locale);
+    }
+
+    return {
+      scan: {
+        framework: detected.name,
+        sourceLocale: project.source_locale,
+        localesDir: detected.localesDir,
+        coverage: buildCoverage(fresh, existing, project.target_locales),
+      },
+    };
+  } catch (error) {
+    return {
+      error: `Could not scan the repository: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  } finally {
+    // The checkout is a temporary directory this request owns. Leaving it
+    // behind would fill the disk one scan at a time.
+    if (workdir) await rm(workdir, { recursive: true, force: true });
+  }
+}

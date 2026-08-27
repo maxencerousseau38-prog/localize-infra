@@ -7,10 +7,12 @@ import {
   requireSession,
 } from '@/lib/data/workspace';
 import { readGitHubApp } from '@/lib/github/config';
+import { loadFunnel } from '@/lib/metrics/load';
 import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Activation } from './activation';
 import { GitHubConnection } from './github-connection';
 import { GitHubResult } from './github-result';
 import { NewProject } from './new-project';
@@ -43,10 +45,16 @@ export default async function ProjectsPage({
   // must be indistinguishable from one that does not exist.
   if (!organization) notFound();
 
-  const [projects, role, installation] = await Promise.all([
+  const [projects, role, installation, funnel] = await Promise.all([
     listProjects(organization.id),
     currentRole(organization.id),
     findGitHubInstallation(organization.id),
+    /*
+     * Derived from rows this workspace already has — no events table is read,
+     * because none is written. Four queries in total on this page, all under
+     * RLS.
+     */
+    loadFunnel(organization.id, organization.created_at),
   ]);
 
   // The slug is public (it is in the install URL), so reading it from the App
@@ -76,6 +84,8 @@ export default async function ProjectsPage({
         appSlug={appSlug}
         connected={installation}
       />
+
+      <Activation funnel={funnel} />
 
       {projects.length === 0 ? (
         // Names what is missing and offers exactly one way to create it

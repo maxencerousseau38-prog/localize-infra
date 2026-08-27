@@ -13,6 +13,11 @@ import {
   canReachRepository,
   installationIdFor,
 } from '@/lib/github/repositories';
+import {
+  checkTranslations,
+  describeFindings,
+  qualityBlock,
+} from '@/lib/runs/quality';
 import { createClient } from '@/lib/supabase/server';
 import {
   buildKeyCatalog,
@@ -384,6 +389,51 @@ export async function startRun(
       });
     }
 
+    /*
+     * The quality gate, before every other decision about this run.
+     *
+     * `packages/eval` has carried deterministic placeholder and ICU checks
+     * since Sprint 0, gated in CI at 99.5% — and nothing on this path ran
+     * them. A run could commit a translation whose `%{count}` had become
+     * `%{compte}` and open the pull request with a clean description.
+     *
+     * First, and not after the ambiguity gate, because these two failures are
+     * different in kind. An escalation says a human must choose between two
+     * defensible readings; a broken placeholder says the file is wrong. Sending
+     * a wrong file to `awaiting_review` would invite somebody to approve it.
+     */
+    const byLocale = new Map<string, Record<string, string>>();
+    for (const proposal of proposals) {
+      const entries = byLocale.get(proposal.locale) ?? {};
+      entries[proposal.translation_key] = proposal.proposed_text;
+      byLocale.set(proposal.locale, entries);
+    }
+    const quality = checkTranslations(
+      fresh,
+      [...byLocale].map(([locale, entries]) => ({ locale, entries })),
+    );
+
+    if (!quality.passed) {
+      await supabase.rpc('finish_run', {
+        p_run_id: run.id,
+        p_status: 'failed',
+        p_stage: 'translate',
+        p_framework: framework,
+        p_keys_extracted: keysExtracted,
+        p_keys_translated: keysTranslated,
+        p_locales_succeeded: localesSucceeded,
+        p_locales_failed: localesFailed,
+        // Verbatim, like every other failure this pipeline reports: a developer
+        // comparing this against their own files must see the same strings.
+        p_error: `${quality.findings.length} of ${quality.checked} translation(s) failed a quality check, so no pull request was opened.
+${describeFindings(quality)}`,
+      });
+      revalidatePath(`/${organization.slug}/projects/${project.slug}`);
+      return {
+        error: `Quality checks failed on ${quality.findings.length} translation(s). No pull request was opened.`,
+      };
+    }
+
     // The gate. Invariant 4 says the agent raises ambiguities rather than
     // guessing them, and a pipeline that raised them and opened the pull
     // request anyway would be guessing with extra steps.
@@ -476,7 +526,7 @@ export async function startRun(
               keysMissing > 0
                 ? `\n\nNote: ${keysMissing} string(s) were not translated and are absent from these files. Re-run to attempt them again.`
                 : ''
-            }`,
+            }\n\n${qualityBlock(quality)}`,
           },
           files,
         ),
