@@ -26,7 +26,6 @@ export async function advanceLead(
   from: string,
   to: string,
   reason: string,
-  actor: string | null,
 ): Promise<'moved' | 'elsewhere' | 'failed'> {
   const { data: lead } = await supabase
     .from('closer_leads')
@@ -36,11 +35,15 @@ export async function advanceLead(
 
   if (!lead || lead.stage !== from) return 'elsewhere';
 
+  /*
+   * No actor argument. `closer_set_stage` reads `auth.uid()` itself — the
+   * parameter used to be caller-supplied and was reproduced attributing a
+   * stage change to an account that was not even a member of the workspace.
+   */
   const { error } = await supabase.rpc('closer_set_stage', {
     p_lead_id: leadId,
     p_to_stage: to,
     p_reason: reason,
-    p_actor: actor,
   });
 
   /*

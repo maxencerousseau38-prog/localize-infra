@@ -40,7 +40,7 @@ export async function recordReply(
   _previous: RecordReplyState,
   form: FormData,
 ): Promise<RecordReplyState> {
-  const session = await requireSession();
+  await requireSession();
   const organizationId = await closerOrganizationId();
   if (!organizationId)
     return { error: 'Closer is not enabled for this workspace' };
@@ -77,7 +77,6 @@ export async function recordReply(
     'contacted',
     'replied',
     'They answered',
-    session.userId,
   );
 
   if (optOut) {
@@ -169,7 +168,7 @@ export async function confirmReplyIntent(
   _previous: ConfirmState,
   form: FormData,
 ): Promise<ConfirmState> {
-  const session = await requireSession();
+  await requireSession();
   const supabase = await createClient();
 
   const replyId = String(form.get('replyId') ?? '');
@@ -198,7 +197,6 @@ export async function confirmReplyIntent(
     p_lead_id: reply.lead_id,
     p_to_stage: moveTo,
     p_reason: `Reply read as ${intent}`,
-    p_actor: session.userId,
   });
 
   revalidatePath('/closer/replies');

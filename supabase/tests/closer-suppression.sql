@@ -38,6 +38,12 @@ declare
   lead_early public.closer_leads;
   ev_early public.closer_evidence;
   state_now public.closer_message_state;
+  c_f1 public.closer_companies;
+  ct_f1 public.closer_contacts;
+  lead_f1 public.closer_leads;
+  r_f2 public.closer_replies;
+  actor_seen uuid;
+  stage_text text;
   n int; ok boolean; r text := '';
 begin
   insert into auth.users (id, instance_id, aud, role, email, encrypted_password, created_at, updated_at)
@@ -75,20 +81,20 @@ begin
   /* ---- transitions --------------------------------------------------- */
 
   ok := false;
-  begin perform public.closer_set_stage(lead_a.id,'won','Skipping the funnel',u);
+  begin perform public.closer_set_stage(lead_a.id,'won','Skipping the funnel');
   exception when others then ok := true; end;
   r := r || format('illegal-edge-refused=%s(want t); ', ok);
 
   ok := false;
-  begin perform public.closer_set_stage(lead_a.id,'researching','   ',u);
+  begin perform public.closer_set_stage(lead_a.id,'researching','   ');
   exception when others then ok := true; end;
   r := r || format('empty-reason-refused=%s(want t); ', ok);
 
   -- Walk both leads deep enough that stopping them is a real move.
-  perform public.closer_set_stage(lead_a.id,'researching','Research begins',u);
-  perform public.closer_set_stage(lead_a.id,'qualified','Evidence supports a fit',u);
-  perform public.closer_set_stage(lead_b.id,'researching','Research begins',u);
-  perform public.closer_set_stage(lead_b.id,'qualified','Evidence supports a fit',u);
+  perform public.closer_set_stage(lead_a.id,'researching','Research begins');
+  perform public.closer_set_stage(lead_a.id,'qualified','Evidence supports a fit');
+  perform public.closer_set_stage(lead_b.id,'researching','Research begins');
+  perform public.closer_set_stage(lead_b.id,'qualified','Evidence supports a fit');
 
   select count(*) into n from public.closer_stage_transitions where from_stage = 'do_not_contact';
   r := r || format('do-not-contact-terminal=%s(want 0); ', n);
@@ -180,9 +186,9 @@ begin
     'github_commit','https://github.com/t/e/commits', now());
   lead_late := public.closer_open_lead(c_late.id);
 
-  perform public.closer_set_stage(lead_late.id,'researching','Research begins',u);
-  perform public.closer_set_stage(lead_late.id,'qualified','Evidence supports a fit',u);
-  perform public.closer_set_stage(lead_late.id,'ready_for_outreach','A contact and an angle exist',u);
+  perform public.closer_set_stage(lead_late.id,'researching','Research begins');
+  perform public.closer_set_stage(lead_late.id,'qualified','Evidence supports a fit');
+  perform public.closer_set_stage(lead_late.id,'ready_for_outreach','A contact and an angle exist');
 
   msg_late := public.closer_draft_message(
     lead_late.id, ct_late.id, 'email', 'A message approved before the opt-out.',
@@ -227,15 +233,15 @@ begin
     'github_commit','https://github.com/t/f/commits', now());
   lead_early := public.closer_open_lead(c_early.id);
 
-  perform public.closer_set_stage(lead_early.id,'researching','Research begins',u);
-  perform public.closer_set_stage(lead_early.id,'qualified','Evidence supports a fit',u);
-  perform public.closer_set_stage(lead_early.id,'ready_for_outreach','A contact and an angle exist',u);
+  perform public.closer_set_stage(lead_early.id,'researching','Research begins');
+  perform public.closer_set_stage(lead_early.id,'qualified','Evidence supports a fit');
+  perform public.closer_set_stage(lead_early.id,'ready_for_outreach','A contact and an angle exist');
 
   msg_sent := public.closer_draft_message(
     lead_early.id, ct_early.id, 'email', 'Sent before anything was suppressed.',
     array[ev_early.id], 'Earlier');
   msg_sent := public.closer_approve_message(msg_sent.id);
-  perform public.closer_set_stage(lead_early.id,'outreach_approved','A human approved the draft',u);
+  perform public.closer_set_stage(lead_early.id,'outreach_approved','A human approved the draft');
   msg_sent := public.closer_mark_message_sent(msg_sent.id);
   r := r || format('send-recorded-before-optout=%s(want sent); ', msg_sent.state);
 
@@ -247,6 +253,89 @@ begin
   select count(*) into n from public.closer_messages
    where id = msg_sent.id and sent_by is not null and sent_at is not null;
   r := r || format('earlier-send-keeps-its-actor=%s(want 1); ', n);
+
+  /* ---- F1: a suppressed domain covers addresses at that domain ------- */
+  --
+  -- `closer_is_suppressed` compared the domain list to the *company's* domain
+  -- column and addresses by exact equality; the domain inside an address was
+  -- never compared to anything. A company with a null domain — the case
+  -- `closer_upsert_company` deliberately keeps — was therefore invisible to a
+  -- domain-level opt-out. Reproduced all the way to an approved message before
+  -- the fix.
+
+  -- (a) the domain itself, the case that always worked
+  r := r || format('f1-known-domain-suppressed=%s(want t); ',
+    public.closer_is_suppressed(org, 'with-domain.test.invalid', null));
+
+  -- (b) the finding: an address at that domain, company domain null
+  r := r || format('f1-address-at-suppressed-domain=%s(want t); ',
+    public.closer_is_suppressed(org, null, 'anyone@with-domain.test.invalid'));
+
+  -- (c) an address that is on no list, at no suppressed domain
+  r := r || format('f1-unrelated-address=%s(want f); ',
+    public.closer_is_suppressed(org, null, 'nobody@untouched.test.invalid'));
+
+  -- And the whole path, not just the predicate: a null-domain company whose
+  -- contact is at the suppressed domain must not acquire a contact at all.
+  c_f1 := public.closer_upsert_company(
+    org,'F1NullDomain',null,'github_repository','https://github.com/t/h','t/h');
+  ok := false;
+  begin ct_f1 := public.closer_record_contact(
+    c_f1.id,'github_repository','https://github.com/t/h','F','Eng','f@with-domain.test.invalid');
+  exception when others then ok := true; end;
+  r := r || format('f1-contact-at-suppressed-domain-refused=%s(want t); ', ok);
+
+  /* ---- F2: a classification must not erase a confirmed judgement ----- */
+  --
+  -- `model_intent` and `operator_intent` exist to measure how often the
+  -- classifier is right. An agent free to re-classify after confirmation turns
+  -- its own mistakes into agreements, silently, in the direction that flatters
+  -- it. Reproduced: question/not_a_fit became not_a_fit/not_a_fit.
+
+  -- Built here rather than looked for: an earlier version of this block took
+  -- whatever reply happened to exist and skipped itself when none did, which
+  -- is a test that reports success by not running.
+  r_f2 := public.closer_record_reply(
+    msg_sent.id, 'Can you send pricing?', now(), null, null);
+  perform public.closer_classify_reply(r_f2.id,'question',0.8,'Can you send pricing?','m');
+  perform public.closer_confirm_reply_intent(r_f2.id, 'not_a_fit');
+
+  ok := false;
+  begin perform public.closer_classify_reply(r_f2.id,'not_a_fit',0.99,'Can you send pricing?','m');
+  exception when others then ok := true; end;
+  r := r || format('f2-reclassify-after-confirmation-refused=%s(want t); ', ok);
+
+  select model_intent::text || '/' || operator_intent::text into stage_text
+  from public.closer_replies where id = r_f2.id;
+  r := r || format('f2-disagreement-preserved=%s(want question/not_a_fit); ', stage_text);
+
+  -- Re-classifying a reply nobody has judged yet stays allowed: that is
+  -- re-running a model on something still open, which is ordinary.
+  r_f2 := public.closer_record_reply(
+    msg_sent.id, 'Second reply, unjudged.', now(), null, null);
+  perform public.closer_classify_reply(r_f2.id,'question',0.5,'Second','m');
+  ok := true;
+  begin perform public.closer_classify_reply(r_f2.id,'unclear',0.4,'Second','m');
+  exception when others then ok := false; end;
+  r := r || format('f2-reclassify-before-confirmation-allowed=%s(want t); ', ok);
+
+  /* ---- F3: the actor is derived, never supplied ---------------------- */
+  --
+  -- `closer_set_stage` took `p_actor` and wrote it unchecked. Reproduced: a
+  -- member attributed a stage change to an account that was not even in the
+  -- workspace. The parameter is gone; the four-argument form must not exist.
+
+  ok := not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'closer_set_stage'
+      and pg_get_function_identity_arguments(p.oid) like '%uuid, public.closer_stage, text, uuid%');
+  r := r || format('f3-no-caller-supplied-actor-overload=%s(want t); ', ok);
+
+  lead_f1 := public.closer_open_lead(c_f1.id);
+  perform public.closer_set_stage(lead_f1.id,'researching','Research begins');
+  select actor into actor_seen from public.closer_stage_history
+   where lead_id = lead_f1.id and to_stage = 'researching';
+  r := r || format('f3-actor-is-the-caller=%s(want t); ', actor_seen = u);
 
   raise exception 'CLOSER-SUPPRESSION >> %', r;
 end $$;
