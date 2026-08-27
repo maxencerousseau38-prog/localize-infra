@@ -170,3 +170,37 @@ export async function verifyInstallationOwnership(
     accountType,
   };
 }
+
+/**
+ * Why self-serve installation is switched off, named precisely.
+ *
+ * The connection panel used to end its explanation with "The CLI still works
+ * against a local clone." That was the only exit it offered, and it is not a
+ * door: `packages/cli` is not published to npm, so a developer who is not
+ * already inside this repository cannot take it. CLAUDE.md records the same
+ * dead end from the other direction.
+ *
+ * A reason lives here rather than in the component so it can be tested. What it
+ * returns is the list of environment variables that are actually missing, which
+ * is both the honest answer and the only actionable one — every other
+ * prerequisite for the flow is present and verified.
+ *
+ * Empty means the flow is available.
+ */
+export function installBlockers(): string[] {
+  const missing: string[] = [];
+  if (!process.env.GITHUB_APP_SLUG) missing.push('GITHUB_APP_SLUG');
+  if (!process.env.GITHUB_OAUTH_CLIENT_ID)
+    missing.push('GITHUB_OAUTH_CLIENT_ID');
+  if (!process.env.GITHUB_OAUTH_CLIENT_SECRET) {
+    missing.push('GITHUB_OAUTH_CLIENT_SECRET');
+  }
+  /*
+   * The state signature reuses the App private key rather than carrying a
+   * secret of its own, so its absence is the App being unconfigured rather
+   * than a separate omission. Named as the key, because that is the variable
+   * somebody would have to set.
+   */
+  if (!readGitHubApp()) missing.push('GITHUB_APP_PRIVATE_KEY');
+  return missing;
+}
