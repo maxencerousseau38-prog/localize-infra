@@ -337,5 +337,48 @@ begin
    where lead_id = lead_f1.id and to_stage = 'researching';
   r := r || format('f3-actor-is-the-caller=%s(want t); ', actor_seen = u);
 
+  /* ---- F4: the domain of an address is canonicalised before matching -- */
+  --
+  -- The previous fix compared `s.domain` to `split_part(email,'@',2)`, which is
+  -- string equality on a token neither canonicalised nor reliably extracted. An
+  -- audit reproduced five ways past it, each reaching an approved message:
+  -- a trailing dot, two of them, a quoted local part containing '@' (so
+  -- `split_part` returned the wrong token entirely), an uppercase variant of
+  -- the same, and an address padded with spaces.
+  --
+  -- `with-domain.test.invalid` is suppressed by domain earlier in this suite.
+
+  r := r || format('f4-trailing-dot=%s(want t); ',
+    public.closer_is_suppressed(org, null, 'a@with-domain.test.invalid.'));
+  r := r || format('f4-two-trailing-dots=%s(want t); ',
+    public.closer_is_suppressed(org, null, 'a@with-domain.test.invalid..'));
+  r := r || format('f4-quoted-local-part-with-at=%s(want t); ',
+    public.closer_is_suppressed(org, null, '"a@b"@with-domain.test.invalid'));
+  r := r || format('f4-uppercase-and-dot=%s(want t); ',
+    public.closer_is_suppressed(org, null, 'A@WITH-DOMAIN.TEST.INVALID.'));
+  r := r || format('f4-padded=%s(want t); ',
+    public.closer_is_suppressed(org, null, '  a@with-domain.test.invalid  '));
+
+  -- The other direction: a suppression written in a non-canonical form must
+  -- still catch the plain address. Canonicalising only the incoming value would
+  -- have left the stored side able to miss.
+  perform public.closer_suppress(org, '  CANON.TEST.INVALID.  ', null, 'opted_out', 'f4');
+  r := r || format('f4-noncanonical-suppression-matches=%s(want t); ',
+    public.closer_is_suppressed(org, null, 'someone@canon.test.invalid'));
+  r := r || format('f4-stored-domain-is-canonical=%s(want canon.test.invalid); ',
+    (select domain from public.closer_suppressions
+      where organization_id = org and domain like '%canon%' limit 1));
+
+  -- And it must stay a fix rather than a blanket block: a different domain is
+  -- untouched, and a subdomain remains a distinct party by design.
+  r := r || format('f4-unrelated-domain-still-reachable=%s(want f); ',
+    public.closer_is_suppressed(org, null, 'ok@somewhere-else.test.invalid'));
+  r := r || format('f4-subdomain-still-distinct=%s(want f); ',
+    public.closer_is_suppressed(org, null, 'a@mail.with-domain.test.invalid'));
+
+  -- An address with no '@' has no domain, and must not be read as one.
+  r := r || format('f4-no-at-sign-is-not-a-domain=%s(want f); ',
+    public.closer_is_suppressed(org, null, 'with-domain.test.invalid'));
+
   raise exception 'CLOSER-SUPPRESSION >> %', r;
 end $$;
