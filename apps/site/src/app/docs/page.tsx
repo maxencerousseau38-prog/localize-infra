@@ -233,7 +233,9 @@ export default function DocsPage() {
                       run yourself.
                     </p>
                     <p className="mt-3">
-                      There is no hosted API. Run it without a token and the
+                      The hosted API is not open to the public — every route on
+                      it needs a bearer token only we hold — so the one you
+                      point at is your own. Run the CLI without a token and the
                       command stops on a{' '}
                       <Link
                         href="#errors"
@@ -261,9 +263,9 @@ export default function DocsPage() {
                     </p>
                     <p className="mt-3">
                       It also needs a running API instance to translate against.
-                      There is no hosted one — you run it yourself, with your
-                      own provider key. There are no accounts, no projects and
-                      no dashboard behind any of this.
+                      The hosted one is not open to the public, so you run it
+                      yourself, with your own provider key. There are no
+                      accounts, no projects and no dashboard behind any of this.
                     </p>
                   </>
                 )}
@@ -280,9 +282,9 @@ export default function DocsPage() {
                 <>
                   <p>
                     Installing the CLI is one command. Running it is three,
-                    because the translation step goes through an API and there
-                    is no hosted one — so the repository is still needed, for
-                    the API rather than for the CLI.
+                    because the translation step goes through an API and the
+                    hosted one is not open to the public — so the repository is
+                    still needed, for the API rather than for the CLI.
                   </p>
                   <CodeBlock label="Install the CLI">
                     {'npx @localize-infra/cli --help'}
