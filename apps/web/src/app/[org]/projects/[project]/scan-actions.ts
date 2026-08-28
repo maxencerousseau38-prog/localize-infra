@@ -1,5 +1,6 @@
 'use server';
 
+import { existsSync, statSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
@@ -16,6 +17,7 @@ import {
   detectFramework,
   extractFromProject,
   readLocaleFile,
+  repoRelativePath,
 } from '@localize-infra/core';
 
 /**
@@ -73,11 +75,17 @@ export async function scanProject(
    * repository, so it needs exactly the permission a run needs — asking less
    * here would make the scan a way to read a repository the run would refuse.
    */
-  const repository = await canReachRepository(
-    organization.id,
-    project.repository_owner,
-    project.repository_name,
-  );
+  /*
+   * The arguments used to be positional, and this call had them shifted one
+   * place left — it asked whether a repository *named after the workspace's
+   * UUID* existed. None does, so this returned null every time and the scan
+   * refused every repository, including the ones it could reach.
+   */
+  const repository = await canReachRepository({
+    owner: project.repository_owner,
+    name: project.repository_name,
+    organizationId: organization.id,
+  });
   if (!repository) {
     return {
       error:
@@ -110,16 +118,37 @@ export async function scanProject(
       };
     }
 
-    const detected = detectFramework(workdir);
+    /*
+     * Where the project actually is, which is not always the checkout root.
+     *
+     * Detection and extraction both take this rather than `workdir`. Reading
+     * happens *inside* the checkout; the paths this function reports back are
+     * relative to the **repository**, which is a different thing and the reason
+     * `repoRelativePath` exists.
+     */
+    const rootDir = project.root_dir;
+    const projectDir = rootDir ? join(workdir, rootDir) : workdir;
+
+    if (!existsSync(projectDir) || !statSync(projectDir).isDirectory()) {
+      // Named before detection runs, because "No supported framework detected"
+      // is what a missing directory would otherwise report — sending someone
+      // to look for a framework problem when they have a typo.
+      return {
+        error: `This project is set to the subdirectory ${rootDir}, which does not exist on branch ${project.repository_branch ?? 'main'}. Check the path, or clear it to scan the repository root.`,
+      };
+    }
+
+    const detected = detectFramework(projectDir);
     if (!detected) {
       return {
-        error:
-          'No supported framework detected. Supported: Next.js, Vite + React, React Native.',
+        error: rootDir
+          ? `No supported framework detected in ${rootDir}. Supported: Next.js, Vite + React, React Native.`
+          : 'No supported framework detected. Supported: Next.js, Vite + React, React Native. If this is a monorepo, set the subdirectory the app lives in.',
       };
     }
 
     const fresh = buildKeyCatalog(
-      extractFromProject(workdir, detected.sourceGlobs),
+      extractFromProject(projectDir, detected.sourceGlobs),
     );
     if (Object.keys(fresh).length === 0) {
       return {
@@ -128,7 +157,7 @@ export async function scanProject(
       };
     }
 
-    const localesDir = join(workdir, detected.localesDir);
+    const localesDir = join(projectDir, detected.localesDir);
     const existing: Record<string, Record<string, string>> = {};
     for (const locale of project.target_locales) {
       existing[locale] = readLocaleFile(localesDir, locale);
@@ -138,7 +167,9 @@ export async function scanProject(
       scan: {
         framework: detected.name,
         sourceLocale: project.source_locale,
-        localesDir: detected.localesDir,
+        // Reported relative to the repository, not to the checkout: this is
+        // the path a developer will look for in their own tree.
+        localesDir: repoRelativePath(rootDir, detected.localesDir),
         coverage: buildCoverage(fresh, existing, project.target_locales),
       },
     };

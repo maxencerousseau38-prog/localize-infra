@@ -175,7 +175,8 @@ inconnue répondent à l'identique. Vérifié : ce raccourci n'existe pas.
 **Deux projets Supabase, séparés depuis le 2026-08-17.** Développement et
 tests d'acceptation : `localize-infra` (`aguwalokxfgtqbzmdjbs`). Production :
 `localize-infra-prod` (`ijgheekdihgssktyweyy`). Les deux en `eu-west-3`, les
-seize migrations appliquées de part et d'autre.
+vingt-neuf migrations appliquées de part et d'autre — le compte disait
+« seize » et il en manquait douze au moment où la vingt-neuvième a été écrite.
 
 Ils n'en formaient qu'un, et ce n'était pas un détail : le compte semé par
 `supabase/seeds/dev-user.sql` — mot de passe écrit dans ce dépôt, fichier qui

@@ -1,5 +1,6 @@
 'use server';
 
+import { existsSync, statSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
@@ -28,6 +29,7 @@ import {
   mergeTranslations,
   pendingKeys,
   readLocaleFile,
+  repoRelativePath,
 } from '@localize-infra/core';
 import { TranslateBatchResponseSchema } from '@localize-infra/schemas';
 import { revalidatePath } from 'next/cache';
@@ -100,11 +102,11 @@ export async function startRun(
    * repositories are unaffected: /pricing promises those are free and
    * unlimited, so there is nothing to check for them.
    */
-  const repository = await canReachRepository(
-    project.repository_owner,
-    project.repository_name,
-    organization.id,
-  );
+  const repository = await canReachRepository({
+    owner: project.repository_owner,
+    name: project.repository_name,
+    organizationId: organization.id,
+  });
   if (
     repository?.private &&
     !(await mayUsePrivateRepositories(organization.id))
@@ -179,13 +181,40 @@ export async function startRun(
       );
     }
 
-    const detected = detectFramework(workdir);
+    /*
+     * Reading and writing are two different roots, and conflating them is the
+     * one mistake this feature can make that produces a plausible-looking pull
+     * request.
+     *
+     *   read  — `<workdir>/<rootDir>/<localesDir>`, inside a temporary checkout
+     *   write — `<rootDir>/<localesDir>`, inside the customer's repository
+     *
+     * Committing the first would open a pull request adding a tree named after
+     * a temp directory, next to the real one, which is exactly the failure the
+     * `locales_dir` stamp was introduced to stop at the approval path.
+     * `repoRelativePath` is the only thing allowed to build a committed path.
+     */
+    const rootDir = project.root_dir;
+    const projectDir = rootDir ? join(workdir, rootDir) : workdir;
+
+    if (!existsSync(projectDir) || !statSync(projectDir).isDirectory()) {
+      throw new Error(
+        `This project is set to the subdirectory ${rootDir}, which does not exist on branch ${project.repository_branch ?? 'main'}. Check the path, or clear it to run against the repository root.`,
+      );
+    }
+
+    const detected = detectFramework(projectDir);
     if (!detected) {
       throw new Error(
-        'No supported framework detected. Supported: Next.js, Vite + React, React Native.',
+        rootDir
+          ? `No supported framework detected in ${rootDir}. Supported: Next.js, Vite + React, React Native.`
+          : 'No supported framework detected. Supported: Next.js, Vite + React, React Native. If this is a monorepo, set the subdirectory the app lives in.',
       );
     }
     framework = detected.name;
+    // Built once, used for every committed path and for the stamp the approval
+    // path reads back. One expression, so the two cannot disagree.
+    const committedLocalesDir = repoRelativePath(rootDir, detected.localesDir);
 
     /*
      * Progress is written down, not accumulated in memory.
@@ -219,7 +248,7 @@ export async function startRun(
     };
 
     await advance('extract');
-    const extracted = extractFromProject(workdir, detected.sourceGlobs);
+    const extracted = extractFromProject(projectDir, detected.sourceGlobs);
     const fresh = buildKeyCatalog(extracted);
     keysExtracted = Object.keys(fresh).length;
 
@@ -229,7 +258,7 @@ export async function startRun(
       );
     }
 
-    const localesDir = join(workdir, detected.localesDir);
+    const localesDir = join(projectDir, detected.localesDir);
     const sourceLocale = project.source_locale;
     const mergedSource = mergeLocaleFile(localesDir, sourceLocale, fresh);
 
@@ -242,7 +271,7 @@ export async function startRun(
 
     const files: { path: string; content: string }[] = [
       {
-        path: `${detected.localesDir}/${sourceLocale}.json`,
+        path: `${committedLocalesDir}/${sourceLocale}.json`,
         content: `${JSON.stringify(mergedSource, null, 2)}\n`,
       },
     ];
@@ -344,7 +373,7 @@ export async function startRun(
         const merged = mergeTranslations(fresh, existing, translated);
 
         files.push({
-          path: `${detected.localesDir}/${locale}.json`,
+          path: `${committedLocalesDir}/${locale}.json`,
           content: `${JSON.stringify(merged, null, 2)}\n`,
         });
         // Written down so the review screen shows what will actually be
@@ -385,7 +414,7 @@ export async function startRun(
         // Stamped here because this is the only moment the path is known: it
         // comes from framework detection against a checkout this request is
         // holding open, and approval happens later with no checkout in reach.
-        p_locales_dir: detected.localesDir,
+        p_locales_dir: committedLocalesDir,
       });
     }
 

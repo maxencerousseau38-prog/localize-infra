@@ -11,6 +11,7 @@ import {
   installationIdFor,
 } from '@/lib/github/repositories';
 import { createClient } from '@/lib/supabase/server';
+import { InvalidRootDir, normaliseRootDir } from '@localize-infra/core';
 import { revalidatePath } from 'next/cache';
 
 export interface ConnectState {
@@ -18,14 +19,18 @@ export interface ConnectState {
 }
 
 /**
- * Points a project at a repository.
+ * Points a project at a repository, and optionally at a subdirectory inside it.
  *
  * Three checks, in this order, all server-side:
- *  1. the caller is an operator — the installation is shared, so this is the
- *     gate that stops one tenant reaching another's repositories;
- *  2. the caller can see the project — RLS does this, via findProject;
- *  3. the installation can actually reach the repository — so a crafted post
- *     cannot record a pointer to something that was never granted.
+ *  1. the caller can see the project — RLS does this, via findProject;
+ *  2. the workspace's own installation can actually reach the repository — so
+ *     a crafted post cannot record a pointer to something never granted;
+ *  3. private repositories need the paid capability.
+ *
+ * This list used to open with "the caller is an operator — the installation is
+ * shared", describing a gate the body of this function has not had since
+ * `isOperator` was deleted for having no callers. The authorization is the
+ * installation itself now, and step 2 is where it happens.
  *
  * The form only ever offers reachable repositories, but a form is a
  * convenience and not a control.
@@ -53,6 +58,26 @@ export async function connectRepository(
   const [owner, name] = selection.split('/');
   if (!owner || !name) return { error: 'Choose a repository.' };
 
+  /*
+   * The subdirectory, normalised before anything else looks at it.
+   *
+   * A monorepo is the common shape and the pipeline could not address one: it
+   * ran `detectFramework` at the root of the checkout, found nothing, and said
+   * "No supported framework detected" — true, unhelpful, and with no way out.
+   *
+   * `normaliseRootDir` throws rather than returning a flag because every
+   * refusal has a different sentence to say, and the person typing the value is
+   * the person who needs to read it. Empty is not an error: it means the
+   * repository root, which is where most projects live.
+   */
+  let rootDir: string | null;
+  try {
+    rootDir = normaliseRootDir(String(formData.get('rootDir') ?? ''));
+  } catch (error) {
+    if (error instanceof InvalidRootDir) return { error: error.message };
+    throw error;
+  }
+
   const organization = await findOrganization(orgSlug);
   if (!organization) return { error: 'That workspace is not available.' };
 
@@ -67,7 +92,11 @@ export async function connectRepository(
     };
   }
 
-  const repository = await canReachRepository(owner, name, organization.id);
+  const repository = await canReachRepository({
+    owner,
+    name,
+    organizationId: organization.id,
+  });
   if (!repository) {
     // Reachable rather than merely named: the installation exists but was not
     // granted this repository, which is a different problem from having no
@@ -104,6 +133,7 @@ export async function connectRepository(
       repository_name: repository.name,
       repository_branch: repository.defaultBranch,
       repository_connected_at: new Date().toISOString(),
+      root_dir: rootDir,
     })
     .eq('id', project.id);
 
@@ -135,6 +165,9 @@ export async function disconnectRepository(
       repository_name: null,
       repository_branch: null,
       repository_connected_at: null,
+      // Cleared with the pointer it qualifies. A subdirectory outliving the
+      // repository it was a subdirectory *of* is a value with nothing to mean.
+      root_dir: null,
     })
     .eq('id', project.id);
 
