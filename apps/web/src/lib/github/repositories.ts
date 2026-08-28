@@ -110,12 +110,28 @@ export async function listInstallationRepositories(
  * Checked server-side before a pointer is stored, so a crafted form post
  * cannot record a repository the installation was never granted. The list
  * above is a convenience for the interface; this is the authorization.
+ *
+ * **Named arguments, after three positional strings cost this product its scan
+ * feature.** The signature was `(owner, name, organizationId)` and
+ * `scan-actions.ts` called it `(organizationId, owner, name)` — every argument
+ * one place to the left. All three are `string`, so nothing complained: not the
+ * compiler, not lint, not a test. The lookup then asked whether a repository
+ * named after a UUID existed, no repository ever matched, and the scan answered
+ * "This workspace cannot reach that repository" for every repository the
+ * workspace could in fact reach.
+ *
+ * It failed closed, which is why it was a dead feature rather than a leak. An
+ * object makes the same mistake fail to compile.
  */
-export async function canReachRepository(
-  owner: string,
-  name: string,
-  organizationId: string | null = null,
-): Promise<AvailableRepository | null> {
+export async function canReachRepository({
+  owner,
+  name,
+  organizationId = null,
+}: {
+  owner: string;
+  name: string;
+  organizationId?: string | null;
+}): Promise<AvailableRepository | null> {
   const repositories = await listInstallationRepositories(organizationId);
   return (
     repositories.find(

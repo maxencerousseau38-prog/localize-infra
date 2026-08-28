@@ -129,6 +129,7 @@ export default async function ProjectPage({
                 owner: project.repository_owner,
                 name: project.repository_name,
                 branch: project.repository_branch,
+                rootDir: project.root_dir,
               }
             : null
         }

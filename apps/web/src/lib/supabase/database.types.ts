@@ -74,6 +74,7 @@ export interface Database {
           repository_connected_at: string | null;
           repository_name: string | null;
           repository_owner: string | null;
+          root_dir: string | null;
           source_locale: string;
           target_locales: string[];
           updated_at: string;
@@ -88,6 +89,7 @@ export interface Database {
           repository_connected_at?: string | null;
           repository_name?: string | null;
           repository_owner?: string | null;
+          root_dir?: string | null;
           source_locale?: string;
           target_locales?: string[];
           updated_at?: string;
@@ -102,6 +104,7 @@ export interface Database {
           repository_connected_at?: string | null;
           repository_name?: string | null;
           repository_owner?: string | null;
+          root_dir?: string | null;
           source_locale?: string;
           target_locales?: string[];
           updated_at?: string;

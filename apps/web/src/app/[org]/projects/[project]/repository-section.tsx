@@ -1,18 +1,47 @@
 'use client';
 
 import type { AvailableRepository } from '@/lib/github/repositories';
-import { Badge, Button, Field } from '@localize-infra/ui';
+import { Badge, Button, Field, useFieldControl } from '@localize-infra/ui';
+import type { ComponentProps } from 'react';
 import { useActionState } from 'react';
 import { type ConnectState, connectRepository } from './connect-actions';
 
 const EMPTY: ConnectState = {};
 
+/*
+ * Native controls that claim the id their Field's label points at.
+ *
+ * `Field` renders `<label htmlFor={controlId}>` and expects the control to take
+ * that id through `useFieldControl`, which also carries `aria-describedby` for
+ * the help text and `aria-invalid`. The hook has to run *inside* the Field —
+ * that is where the provider is — so a control cannot be a bare element in the
+ * parent's JSX, it has to be its own component.
+ *
+ * The select below was a bare element, so its label pointed at an id nothing
+ * had: clicking "Repository" focused nothing and a screen reader announced an
+ * unlabelled combo box. The design system's own docstring says a caller cannot
+ * forget this wiring; this caller forgot it.
+ */
+function FieldSelect(props: ComponentProps<'select'>) {
+  return <select {...useFieldControl()} {...props} />;
+}
+
+function FieldInput(props: ComponentProps<'input'>) {
+  return <input {...useFieldControl()} {...props} />;
+}
+
 export interface RepositorySectionProps {
   orgSlug: string;
   projectSlug: string;
   /** Null when nothing is connected yet. */
-  connected: { owner: string; name: string; branch: string | null } | null;
-  /** Empty when GitHub is unconfigured or the caller is not an operator. */
+  connected: {
+    owner: string;
+    name: string;
+    branch: string | null;
+    /** Null means the repository root. */
+    rootDir: string | null;
+  } | null;
+  /** Empty when GitHub is unconfigured, or the installation was granted none. */
   available: AvailableRepository[];
   /** Whether this workspace has its own installation of the App. */
   hasInstallation: boolean;
@@ -23,9 +52,14 @@ export interface RepositorySectionProps {
  * The repository connection, and an honest account of who may use it.
  *
  * The banner is not a disclaimer bolted on — it is the most important thing on
- * the section. This deployment has one shared GitHub App installation, so the
- * feature genuinely is operator-only, and a customer who cannot use it deserves
- * to be told why rather than shown a disabled button.
+ * the section. A workspace with no installation of its own cannot connect
+ * anything, and it deserves to be told why and where to go rather than shown a
+ * disabled button (DESIGN.md §11).
+ *
+ * That paragraph used to say the deployment had "one shared GitHub App
+ * installation, so the feature genuinely is operator-only". Neither half has
+ * been true since installations became per-organization; the operator
+ * allow-list it referred to had no callers when it was deleted.
  */
 export function RepositorySection({
   orgSlug,
@@ -77,6 +111,17 @@ export function RepositorySection({
               {connected.branch ?? 'default'}
             </dd>
           </div>
+          <div>
+            <dt className="text-eyebrow font-medium uppercase text-tertiary">
+              Subdirectory
+            </dt>
+            <dd className="mt-1 font-mono text-caption text-primary">
+              {/* "Repository root" rather than an em dash or a blank: the
+                  absence of a subdirectory is a real answer, and the one most
+                  projects have. */}
+              {connected.rootDir ?? 'Repository root'}
+            </dd>
+          </div>
         </dl>
       ) : null}
 
@@ -119,7 +164,7 @@ export function RepositorySection({
                 posts to a Server Action, and a native control carries its value
                 without JavaScript. The Radix Select renders a button and would
                 need a hidden input to submit at all. */}
-            <select
+            <FieldSelect
               name="repository"
               required
               defaultValue={
@@ -134,7 +179,22 @@ export function RepositorySection({
                   {repo.defaultBranch})
                 </option>
               ))}
-            </select>
+            </FieldSelect>
+          </Field>
+
+          <Field
+            label="Subdirectory"
+            help="Leave empty if the app is at the repository root. In a monorepo, the folder the app lives in — for example apps/web."
+          >
+            <FieldInput
+              type="text"
+              name="rootDir"
+              defaultValue={connected?.rootDir ?? ''}
+              placeholder="apps/web"
+              autoComplete="off"
+              spellCheck={false}
+              className="h-8 w-full rounded-md border border-line bg-canvas px-2 font-mono text-body text-primary placeholder:text-tertiary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus"
+            />
           </Field>
 
           <output aria-live="polite" className="contents">
