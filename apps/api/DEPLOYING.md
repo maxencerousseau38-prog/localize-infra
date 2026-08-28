@@ -70,6 +70,44 @@ POST /v1/translate  valid token     200 (3.31s)
 X-Vercel-Id: cdg1::cdg1
 ```
 
+Re-run on 2026-08-28 against a fresh deployment: identical, 3.20s.
+
+### The escalation path, which the block above cannot see
+
+Every string in that check comes back `confident`, so it passes identically
+whether the ambiguity prompt works or never fires at all. That is the one part
+of this service carrying invariant 4 — the agent raises ambiguities rather than
+guessing them — and a green check that cannot distinguish "working" from
+"silently absent" is the kind of alibi this repository has been caught by
+before.
+
+Two deliberately ambiguous strings, same token, same URL:
+
+```
+POST /v1/translate  valid token     200
+
+nav.book             ambiguous   Réserver
+  question: Is 'Book' here a navigation link to reserve something (verb)
+            or to a books/library section (noun)?
+  alternatives: Réserver / Livre
+
+form.submit_confirm  ambiguous   Êtes-vous sûr de vouloir continuer ?
+  question: Should the dialog address the user formally (vous) or
+            informally (tu)?
+  alternatives: Êtes-vous sûr… / Es-tu sûr…
+```
+
+Both raise a question with two defensible readings instead of picking one. Note
+that `text` is still filled in — the proposal exists so the locale file is
+complete; it is the **pull request** that waits for a person, not the
+translation.
+
+Worth knowing when this is re-run: the model decides what is ambiguous, so
+these exact two strings are not a contract. What is being checked is that
+`confidence: "ambiguous"` with a non-null `question` can come back at all. A
+run where every string returns `confident` proves nothing either way — pick
+strings a translator would genuinely have to ask about.
+
 ## Data residency
 
 Source-derived context — file paths, component names, surrounding code — is sent
