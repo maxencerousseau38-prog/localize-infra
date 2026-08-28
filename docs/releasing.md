@@ -8,9 +8,46 @@ command.
 ## Before anything
 
 1. **Authenticate.** `npm login`. Publishing fails with `ENEEDAUTH` otherwise.
-2. **Own the scope.** `@localize-infra` is unclaimed on the public registry
-   (`npm view @localize-infra/core` → 404). Create an npm organisation named
-   `localize-infra`, or the scoped publish is rejected.
+2. **Own the scope.** This said the scope was "unclaimed on the public registry
+   (`npm view @localize-infra/core` → 404)". The conclusion did not follow from
+   the evidence, and it is wrong: a 404 on a *package* says the package does
+   not exist, which is true of every unpublished name inside a scope somebody
+   else already owns. It never tested the scope at all.
+
+   The endpoint that does test it is `/-/org/<name>/package`, and on
+   2026-08-28 it answered:
+
+   ```
+   /-/org/definitely-not-an-org-8f3a2b1c   404  {"error":"Scope not found"}
+   /-/org/localize-infra-nope-9k2          404  {"error":"Scope not found"}
+   /-/org/localize-infra                   200  {}
+   /-/org/vercel                           200  {"vercel-client":"write",…}
+   ```
+
+   **The scope `localize-infra` is claimed and empty.** The two negative
+   controls matter as much as the result — one of them is a deliberate
+   near-miss, so a 200 cannot be a prefix artefact — and so does running all
+   four in one batch, because npmjs.com answers 403 to everything
+   unauthenticated and the registry rate-limits to 429 under `error code:
+   1015`. Both look like answers and are not; an earlier round of this same
+   check produced four identical 403s and meant nothing.
+
+   What it still does **not** establish is who owns it. The same endpoint
+   returns 200 for `sindresorhus` and `isaacs`, which are user accounts rather
+   than organisations, so 200 means "this name is taken", not "your
+   organisation exists". Two situations produce it: the organisation is yours
+   and empty, or the name belongs to somebody else.
+
+   Only an authenticated call separates them:
+
+   ```bash
+   npm org ls localize-infra
+   ```
+
+   Members listed → publish. Failure → the name is not yours, and changing
+   scope is not a one-line edit: it touches three `package.json` files, the
+   CLI's two internal dependency ranges, and the site copy that names the
+   package.
 3. **Understand that it is permanent.** A published name cannot be reused.
    `npm unpublish` is restricted to a 72-hour window and is a last resort.
 
@@ -66,7 +103,9 @@ npm install /tmp/pack/localize-infra-{schemas,core,cli}-0.1.0.tgz
 npx localize-infra            # prints usage
 ```
 
-This has been run. The tarballs contain `dist/`, `README.md` and `LICENSE` and
+This has been run, most recently on 2026-08-28 — dated because `packages/core`
+changes, and an undated "this has been run" quietly comes to mean "against some
+earlier artefact". The tarballs contain `dist/`, `README.md` and `LICENSE` and
 nothing else — no `src/`, no compiled tests, no `.tsbuildinfo`. The binary links,
 the shebang survives, and framework detection and string extraction work from
 the installed package.
@@ -85,14 +124,29 @@ Wrote 2 key(s) to locales/en.json
 ```
 
 Detection, extraction and `locales/en.json` work locally. Every translation
-fails, because `--api-url` defaults to `http://localhost:8787` and **there is no
-hosted API**. Each user must run `apps/api` themselves with their own provider
-key.
+fails, and this paragraph used to give the reason as "**there is no hosted
+API**". That stopped being true on 2026-08-19: `apps/api` is deployed at
+https://localize-infra-api.vercel.app and answered a real translation in 3.20s
+on 2026-08-28.
 
-So publishing makes the package *installable*, not the command *useful*. A
-one-line `npx` that actually translates requires a hosted API, which is Track B.
-Until that exists, the landing page and `/docs` must keep saying so — publishing
-changes the wording, not the disclosure.
+The conclusion survives, which is exactly why the wrong reason went unnoticed —
+nothing downstream changed, so nothing failed. Two facts now carry it instead:
+
+- `--api-url` still defaults to `http://localhost:8787`, so an unmodified
+  `npx` reaches nothing;
+- every `/v1/*` route requires `API_AUTH_TOKEN`, and no npm user has it.
+  Verified in production the same day: 401 with no token, 401 with a wrong
+  one.
+
+So each user must still run `apps/api` themselves with their own provider key,
+and publishing makes the package *installable*, not the command *useful*.
+
+The blocker is no longer hosting. It is that a one-line `npx` which actually
+translates needs an API reachable **without a shared secret** — per-user
+credentials, or a free tier, or something else that is not "hand every
+installer the operator's bearer token". Until that exists, the landing page and
+`/docs` must keep saying so; publishing changes the wording, not the
+disclosure.
 
 ## Licensing
 
