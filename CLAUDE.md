@@ -39,9 +39,20 @@
   vérifie que le fichier commité correspond au générateur. Un contrôle sans
   entrée applicable affiche « No data », jamais un pourcentage — le corpus ne
   contient aucun message ICU, et afficher « Pass » pour ces deux contrôles était
-  un faux résultat, corrigé. `/docs` documente le chemin réel : le paquet
-  **n'est pas publié sur npm**, donc `npx` ne fonctionne pas ; la page d'accueil
-  le dit désormais au lieu de laisser une commande qui échoue.
+  un faux résultat, corrigé. **Ce point disait que le paquet n'était pas
+  publié sur npm et que `npx` ne fonctionnait pas. Les trois moitiés sont
+  périmées depuis le 2026-08-28** : `@localize-infra/schemas`, `core` et `cli`
+  sont publiés en 0.1.0, `npx @localize-infra/cli init` détecte et extrait
+  depuis un répertoire vide, et la page d'accueil affiche la commande au lieu
+  de s'en excuser. `CLI_PUBLISHED_TO_NPM` porte ce fait à un seul endroit et
+  les deux pages le lisent.
+
+  Ce que `/docs` continue de dire, parce que c'est vrai : installer n'est pas
+  pouvoir s'en servir. Le CLI pointe par défaut sur `http://localhost:8787` et
+  l'API déployée n'est **pas ouverte** — toutes ses routes `/v1/*` exigent un
+  bearer que seul l'opérateur détient. Trois phrases du site affirmaient à la
+  place qu'il n'existait aucune API hébergée ; elles vivaient dans les branches
+  « publié » du drapeau, donc personne ne les avait jamais vues à l'écran.
 
 - `apps/web` (propriétaire) — coquille applicative : barre latérale 240 px
   (feuille latérale sous 1024 px), barre supérieure 48 px, palette de commandes
@@ -200,9 +211,16 @@ Ce qui subsiste, parce que cela ne dépend pas de l'identité du compte : le
 tunnel se termine en cul-de-sac. Un workspace sans installation GitHub arrive
 sur `/layersky/projects` et lit que connecter GitHub n'est pas disponible sur ce
 déploiement, avec pour seule porte de sortie « le CLI fonctionne toujours sur un
-clone local » — un CLI qui n'est pas publié sur npm. C'est vérifiable dans le
-code et sur le déploiement, et c'est pourquoi le secret OAuth et la publication
-du paquet sont des bloquants.
+clone local ». C'est vérifiable dans le code et sur le déploiement.
+
+**Ce passage nommait deux bloquants : le secret OAuth et la publication du
+paquet. Le second est tombé le 2026-08-28**, le CLI est sur npm, donc la porte
+de sortie n'exige plus de cloner quoi que ce soit pour obtenir la commande.
+Elle reste une porte de sortie étroite — traduire demande une API que le
+lecteur héberge lui-même — mais ce n'est plus un cul-de-sac par indisponibilité
+du paquet.
+
+**Le secret OAuth reste, et il est désormais le seul des deux.**
 
 **Il n'existe toujours aucune preuve que quiconque hors de ce projet le
 veuille.** `docs/product/08-critique.md` §C1 — zéro recherche primaire, personas
@@ -276,8 +294,8 @@ Root Directory », la directive `@source` de Tailwind ne trouve plus
 `packages/ui/src`. Le build passe au vert et **30 % de la feuille de style
 disparaît** (44,4 ko → 30,9 ko, mesuré) : les composants partagés perdent leurs
 utilitaires alors que la mise en page tient encore — donc ça ne se voit pas au
-premier coup d'œil. `docs/releasing.md` couvre la publication npm (rien n'est
-publié).
+premier coup d'œil. `docs/releasing.md` couvre la publication npm — il disait
+« rien n'est publié », les trois paquets le sont depuis le 2026-08-28.
 
 M1 Phase 1 (`packages/core`, `packages/cli`) — voir
 `docs/superpowers/specs/2026-08-02-m1-npx-to-pr-design.md` et

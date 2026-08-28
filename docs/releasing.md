@@ -1,9 +1,18 @@
 # Releasing the open-source packages
 
 Three packages are publishable: `@localize-infra/schemas`, `@localize-infra/core`
-and `@localize-infra/cli`. They are prepared for publication but **have not been
-published**. This document is the sequence, and the reasons it is not a single
-command.
+and `@localize-infra/cli`. **All three were published at 0.1.0 on 2026-08-28**;
+this document said they "have not been published" and is corrected here. It
+remains the sequence, and the reasons it is not a single command — which is
+what a 0.2.0 will need.
+
+One thing the first run taught, worth having before the second: the three
+package documents replicated **minutes** apart. `npm view` and
+`npm install @localize-infra/cli` both answered E404 for a window *after* the
+publishes had succeeded, which reads exactly like a failed publish. The
+endpoint that told the truth first was `/-/org/localize-infra/package`, which
+listed all three names while two of them still 404'd. Check that before
+concluding a publish failed, and before re-running one.
 
 ## Before anything
 
