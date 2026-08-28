@@ -153,7 +153,7 @@ export function Hero() {
                   external fact, which is one place that gets forgotten. */}
               <p className="text-small leading-6 text-tertiary">
                 {CLI_PUBLISHED_TO_NPM
-                  ? 'It needs an API you run yourself — there is no hosted one. '
+                  ? 'It needs an API you run yourself — the hosted one is not open. '
                   : 'Not published to npm yet — today it runs from a clone. '}
                 <Link
                   href="/docs#install"

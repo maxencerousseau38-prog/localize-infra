@@ -50,7 +50,12 @@ export const INSTALL_COMMAND = 'npx @localize-infra/cli init';
  * build time would make a green build depend on a third party being reachable,
  * and would let the site's honesty change without a commit.
  *
- * Verified false on 2026-08-22: `npm view @localize-infra/cli` → 404, and the
- * `@localize-infra` scope is unclaimed.
+ * Published on 2026-08-28: `@localize-infra/schemas`, `@localize-infra/core`
+ * and `@localize-infra/cli`, all at 0.1.0, into an organisation scope that
+ * `/-/org/localize-infra/package` now lists all three names under.
+ *
+ * The earlier note here said the scope was "unclaimed". It was not — that read
+ * a 404 on a *package* as evidence about the *scope*, which it never was.
+ * `docs/releasing.md` carries the corrected check.
  */
-export const CLI_PUBLISHED_TO_NPM = false;
+export const CLI_PUBLISHED_TO_NPM = true;
