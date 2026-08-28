@@ -1,4 +1,5 @@
 import {
+  authorizeUrl,
   installBlockers,
   installUrl,
   readOAuthConfig,
@@ -24,10 +25,13 @@ import { Badge } from '@localize-infra/ui';
 export function GitHubConnection({
   organizationId,
   appSlug,
+  appOrigin,
   connected,
 }: {
   organizationId: string;
   appSlug: string | null;
+  /** Origin of this deployment, so the redirect_uri matches what GitHub has. */
+  appOrigin: string;
   connected: {
     account_login: string;
     account_type: string;
@@ -37,6 +41,25 @@ export function GitHubConnection({
   const oauth = readOAuthConfig();
   const state = signState(organizationId);
   const canInstall = Boolean(oauth && appSlug && state);
+
+  /*
+   * The button authorizes; it does not install.
+   *
+   * It used to point at `installations/new`, which is a different thing wearing
+   * the same name. For an account that already has the App, GitHub does not run
+   * an install there — it redirects to the existing installation's settings
+   * page, the callback is never reached, and the workspace stays unconnected
+   * with no error to show for it. That is what the owner hit, and every
+   * workspace after the first on a given account would have hit it too.
+   *
+   * Authorizing works whether or not the App is installed. Which installation
+   * to link is discovered afterwards from the user's own token, in the
+   * callback.
+   */
+  const connectHref =
+    oauth && state
+      ? authorizeUrl(oauth.clientId, state, `${appOrigin}/github/callback`)
+      : null;
   const blockers = canInstall ? [] : installBlockers();
 
   return (
@@ -65,19 +88,36 @@ export function GitHubConnection({
           ). This workspace reads only the repositories that installation was
           granted.
         </p>
-      ) : canInstall && state && appSlug ? (
+      ) : canInstall && connectHref ? (
         <>
           <p className="mt-3 max-w-[64ch] text-small leading-6 text-secondary">
-            Install the app on your own account and choose which repositories it
-            may read. You can change or revoke that selection on GitHub at any
-            time, and nothing here can widen it.
+            Authorise Localize Infra, and it will connect the installation you
+            already have. You choose which repositories the app may read on
+            GitHub, you can change or revoke that at any time, and nothing here
+            can widen it.
           </p>
-          <a
-            href={installUrl(appSlug, state)}
-            className="mt-4 inline-flex h-8 items-center rounded-md bg-primary px-3 text-body font-medium text-inverse transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-          >
-            Connect GitHub
-          </a>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <a
+              href={connectHref}
+              className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-body font-medium text-inverse transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              Connect GitHub
+            </a>
+            {/*
+              The door for the one case authorising cannot solve: authorised,
+              but the app is installed nowhere this person can reach. The
+              callback reports that as `no-installation`, and a message with no
+              way to act on it is the mistake this panel has already made once.
+            */}
+            {appSlug && state ? (
+              <a
+                href={installUrl(appSlug, state)}
+                className="text-small text-secondary underline underline-offset-2 hover:text-primary"
+              >
+                Not installed yet? Install it on GitHub
+              </a>
+            ) : null}
+          </div>
         </>
       ) : (
         <p className="mt-3 max-w-[64ch] text-small leading-6 text-secondary">

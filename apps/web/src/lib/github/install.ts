@@ -106,69 +106,127 @@ export interface VerifiedInstallation {
 }
 
 /**
- * Exchanges the OAuth code and confirms the caller can reach the installation.
+ * Where "Connect GitHub" sends the customer.
  *
- * `GET /user/installations` is the check that matters: it answers, as the user,
- * which installations they have access to. An id that is not in that list was
- * not theirs to connect, whatever the query string said.
+ * **Authorization, not installation.** The button used to point at
+ * `installations/new`, which is a different thing wearing the same name: it
+ * starts an *install*, and GitHub only attaches an OAuth `code` to the way back
+ * if the App happens to have "Request user authorization during installation"
+ * switched on — a setting no API can read.
+ *
+ * Worse, and this is what the owner hit: for an account that **already has the
+ * App**, `installations/new` does not run an install at all. GitHub redirects
+ * to the existing installation's settings page, the callback is never reached,
+ * and nothing happens. Every workspace after the first one on a given account
+ * would have died there.
+ *
+ * Authorizing first works in both cases, because it does not care whether the
+ * App is installed. The installation is discovered afterwards, from the user's
+ * own token.
  */
-export async function verifyInstallationOwnership(
-  code: string,
-  installationId: number,
-): Promise<VerifiedInstallation | null> {
+export function authorizeUrl(
+  clientId: string,
+  state: string,
+  redirectUri: string,
+): string {
+  const url = new URL('https://github.com/login/oauth/authorize');
+  url.searchParams.set('client_id', clientId);
+  url.searchParams.set('state', state);
+  url.searchParams.set('redirect_uri', redirectUri);
+  return url.toString();
+}
+
+/**
+ * The OAuth code for a user token, or null.
+ *
+ * Split out of `verifyInstallationOwnership` so the callback can exchange once
+ * and then ask what the token can reach, instead of having to name an
+ * installation before it has any way of knowing one.
+ */
+export async function exchangeCode(code: string): Promise<string | null> {
   const oauth = readOAuthConfig();
   if (!oauth) return null;
 
-  const tokenResponse = await fetch(
-    'https://github.com/login/oauth/access_token',
-    {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        client_id: oauth.clientId,
-        client_secret: oauth.clientSecret,
-        code,
-      }),
+  const response = await fetch('https://github.com/login/oauth/access_token', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({
+      client_id: oauth.clientId,
+      client_secret: oauth.clientSecret,
+      code,
+    }),
+  });
 
-  if (!tokenResponse.ok) return null;
-  const token = (await tokenResponse.json()) as { access_token?: string };
-  if (!token.access_token) return null;
+  if (!response.ok) return null;
+  const body = (await response.json()) as { access_token?: string };
+  return body.access_token ?? null;
+}
 
-  const installationsResponse = await fetch(
-    'https://api.github.com/user/installations',
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${token.access_token}`,
-      },
+/**
+ * Every installation this user can reach, as themselves.
+ *
+ * This is the check the whole flow rests on. An installation absent from this
+ * list was not the caller's to connect, whatever any query string claimed —
+ * and now that the callback discovers rather than accepts an id, it is also
+ * how the flow learns which installation to link.
+ *
+ * Installations whose account GitHub does not name are dropped: without a login
+ * there is nothing to show a person deciding whether this is the right account.
+ */
+export async function listUserInstallations(
+  token: string,
+): Promise<VerifiedInstallation[]> {
+  const response = await fetch('https://api.github.com/user/installations', {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${token}`,
     },
-  );
+  });
 
-  if (!installationsResponse.ok) return null;
-  const body = (await installationsResponse.json()) as {
+  if (!response.ok) return [];
+  const body = (await response.json()) as {
     installations?: {
       id: number;
       account?: { login?: string; type?: string } | null;
     }[];
   };
 
-  const match = body.installations?.find(
-    (installation) => installation.id === installationId,
-  );
-  if (!match?.account?.login) return null;
+  return (body.installations ?? [])
+    .filter((installation) => Boolean(installation.account?.login))
+    .map((installation) => ({
+      installationId: installation.id,
+      accountLogin: installation.account?.login as string,
+      accountType:
+        installation.account?.type === 'Organization'
+          ? ('Organization' as const)
+          : ('User' as const),
+    }));
+}
 
-  const accountType =
-    match.account.type === 'Organization' ? 'Organization' : 'User';
-  return {
-    installationId: match.id,
-    accountLogin: match.account.login,
-    accountType,
-  };
+/**
+ * Confirms the caller can reach a specific installation.
+ *
+ * Kept, and now built on the two functions above rather than repeating them.
+ * Still the right check for the case where GitHub *did* hand back an
+ * `installation_id` — a fresh install — because it pins the answer to the id
+ * that arrived instead of guessing among several.
+ */
+export async function verifyInstallationOwnership(
+  code: string,
+  installationId: number,
+): Promise<VerifiedInstallation | null> {
+  const token = await exchangeCode(code);
+  if (!token) return null;
+
+  const installations = await listUserInstallations(token);
+  return (
+    installations.find(
+      (installation) => installation.installationId === installationId,
+    ) ?? null
+  );
 }
 
 /**

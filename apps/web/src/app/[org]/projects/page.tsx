@@ -10,6 +10,7 @@ import { readGitHubApp } from '@/lib/github/config';
 import { loadFunnel } from '@/lib/metrics/load';
 import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Activation } from './activation';
@@ -59,6 +60,17 @@ export default async function ProjectsPage({
 
   // The slug is public (it is in the install URL), so reading it from the App
   // rather than hardcoding it keeps the two from drifting.
+  /*
+   * The origin this request arrived on, so the OAuth `redirect_uri` matches the
+   * callback GitHub has registered. Taken from the request rather than from a
+   * constant: a preview deployment and production do not share an origin, and a
+   * hardcoded one would send every preview's callback to production.
+   */
+  const headerList = await headers();
+  const host = headerList.get('x-forwarded-host') ?? headerList.get('host');
+  const proto = headerList.get('x-forwarded-proto') ?? 'https';
+  const appOrigin = host ? `${proto}://${host}` : '';
+
   const appSlug = readGitHubApp()
     ? (process.env.GITHUB_APP_SLUG ?? null)
     : null;
@@ -82,6 +94,7 @@ export default async function ProjectsPage({
       <GitHubConnection
         organizationId={organization.id}
         appSlug={appSlug}
+        appOrigin={appOrigin}
         connected={installation}
       />
 

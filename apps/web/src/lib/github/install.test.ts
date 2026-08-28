@@ -250,3 +250,99 @@ describe('installBlockers', () => {
     );
   });
 });
+
+describe('authorizeUrl', () => {
+  /*
+   * The whole point of the fix. "Connect GitHub" used to send people to
+   * `installations/new`, which for an account that already has the App does not
+   * run an install at all — GitHub redirects to the existing installation's
+   * settings page and the callback is never reached. Authorising works either
+   * way.
+   */
+  it('sends the user to authorize, not to install', async () => {
+    const { authorizeUrl } = await import('./install');
+    const url = new URL(
+      authorizeUrl('cid', 'st', 'https://x.test/github/callback'),
+    );
+    expect(url.origin + url.pathname).toBe(
+      'https://github.com/login/oauth/authorize',
+    );
+    expect(url.pathname).not.toContain('installations');
+  });
+
+  it('carries the client id, the signed state and the callback', async () => {
+    const { authorizeUrl } = await import('./install');
+    const url = new URL(
+      authorizeUrl(
+        'Iv23liTEST',
+        'signed-state',
+        'https://x.test/github/callback',
+      ),
+    );
+    expect(url.searchParams.get('client_id')).toBe('Iv23liTEST');
+    expect(url.searchParams.get('state')).toBe('signed-state');
+    expect(url.searchParams.get('redirect_uri')).toBe(
+      'https://x.test/github/callback',
+    );
+  });
+
+  it('escapes a redirect_uri rather than concatenating it raw', async () => {
+    const { authorizeUrl } = await import('./install');
+    const url = authorizeUrl('cid', 'st', 'https://x.test/github/callback?a=b');
+    expect(url).toContain('redirect_uri=https%3A%2F%2Fx.test');
+    expect(url).not.toContain('callback?a=b&');
+  });
+});
+
+describe('listUserInstallations', () => {
+  const respond = (body: unknown, ok = true) =>
+    vi.fn().mockResolvedValue({ ok, json: async () => body });
+
+  it('returns every installation the token can reach', async () => {
+    vi.stubGlobal(
+      'fetch',
+      respond({
+        installations: [
+          { id: 1, account: { login: 'alice', type: 'User' } },
+          { id: 2, account: { login: 'acme', type: 'Organization' } },
+        ],
+      }),
+    );
+    const { listUserInstallations } = await import('./install');
+    const found = await listUserInstallations('tok');
+    expect(found).toEqual([
+      { installationId: 1, accountLogin: 'alice', accountType: 'User' },
+      { installationId: 2, accountLogin: 'acme', accountType: 'Organization' },
+    ]);
+  });
+
+  /*
+   * Without a login there is nothing to show a person deciding whether this is
+   * the right account, so the row is dropped rather than rendered as blank.
+   */
+  it('drops an installation GitHub did not name', async () => {
+    vi.stubGlobal(
+      'fetch',
+      respond({ installations: [{ id: 1, account: null }] }),
+    );
+    const { listUserInstallations } = await import('./install');
+    expect(await listUserInstallations('tok')).toEqual([]);
+  });
+
+  it('treats anything other than Organization as a user account', async () => {
+    vi.stubGlobal(
+      'fetch',
+      respond({
+        installations: [{ id: 1, account: { login: 'x', type: 'Bot' } }],
+      }),
+    );
+    const { listUserInstallations } = await import('./install');
+    expect((await listUserInstallations('tok'))[0]?.accountType).toBe('User');
+  });
+
+  it('is empty rather than throwing when GitHub refuses', async () => {
+    vi.stubGlobal('fetch', respond({}, false));
+    const { listUserInstallations } = await import('./install');
+    expect(await listUserInstallations('tok')).toEqual([]);
+  });
+});

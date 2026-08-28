@@ -24,18 +24,33 @@ const OUTCOMES: Record<string, { tone: Tone; title: string; body: string }> = {
   },
   'invalid-state': {
     tone: 'degraded',
-    title: 'That install link had expired',
-    body: 'Install links are signed and last ten minutes, so a stale or tampered one is refused rather than trusted. Start the connection again.',
+    title: 'That connection link had expired',
+    body: 'Connection links are signed and last ten minutes, so a stale or tampered one is refused rather than trusted. Start the connection again.',
   },
   'missing-installation': {
     tone: 'degraded',
     title: 'GitHub did not say what was installed',
     body: 'The callback arrived without an installation id. Nothing was recorded. Try the connection again from this page.',
   },
-  'missing-code': {
+  declined: {
     tone: 'degraded',
-    title: 'The install was not authorised',
-    body: 'GitHub returns an authorisation code only when you approve the app as well as install it. Without it, ownership of the installation cannot be proven, so nothing was stored. Run through the install again and accept the authorisation step.',
+    title: 'The authorisation was not completed',
+    body: 'GitHub returned without an authorisation code, which is what happens when the request is declined or abandoned. Nothing was stored. Start the connection again when you are ready.',
+  },
+  'exchange-failed': {
+    tone: 'degraded',
+    title: 'GitHub would not exchange the code',
+    body: 'The authorisation code could not be traded for a token. Codes are single-use and short-lived, so this usually means the link was opened twice or left sitting. Start the connection again.',
+  },
+  'no-installation': {
+    tone: 'degraded',
+    title: 'The app is not installed on any account you can reach',
+    body: 'You authorised Localize Infra, but it has not been installed on a GitHub account yet — authorising and installing are two different things. Install it on the account that owns the repositories, then connect again.',
+  },
+  'choose-installation': {
+    tone: 'degraded',
+    title: 'More than one account has the app installed',
+    body: 'Which one this workspace should read is your decision, not ours, and there is no screen for making it yet — so nothing was linked rather than binding you to whichever GitHub listed first. Until there is, connect from an account that has a single installation.',
   },
   'oauth-not-configured': {
     tone: 'failed',
