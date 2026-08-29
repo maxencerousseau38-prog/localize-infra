@@ -120,6 +120,25 @@ begin
   insert into public.projects (organization_id, name, slug, source_locale, target_locales)
   values (org.id, 'Demo', 'demo', 'en', array['fr','de']);
 
+  /*
+   * A second project, existing only to be written to.
+   *
+   * `playwright.config.ts` sets `fullyParallel: true`, so any test that
+   * mutates a project shared with a reader loses a race sooner or later. The
+   * first version of the target-languages tests mutated 'Demo' and restored it
+   * afterwards; the suite passed once, left 'Demo' with no locales, and failed
+   * on the next run inside a different test — the one asserting the page
+   * reports its real configuration. No amount of restore discipline fixes
+   * that, because the reader can run while the value is emptied.
+   *
+   * So the mutating test owns this row instead. It needs no cleanup: nothing
+   * else reads it, and re-seeding puts it back. `deleteProject` exists but has
+   * no caller anywhere in the app, so a project created by a test could not be
+   * removed by one either.
+   */
+  insert into public.projects (organization_id, name, slug, source_locale, target_locales)
+  values (org.id, 'Languages', 'languages', 'en', array['fr','de']);
+
   perform set_config('role','postgres',true);
 end $$;
 

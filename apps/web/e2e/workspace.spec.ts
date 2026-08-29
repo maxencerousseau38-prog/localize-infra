@@ -105,50 +105,60 @@ test.describe('workspace', () => {
 
   /*
    * The defect this section exists for, asserted end to end: a project with no
-   * target locales must say so, and must not offer a run that would fail with
-   * "Every target locale failed" having attempted none.
+   * target locales must say so, because a run over one used to report that
+   * every locale failed having attempted none.
+   *
+   * **It targets 'languages', not 'demo', and that is the point.**
+   * `playwright.config.ts` sets `fullyParallel: true`, so a test that mutates a
+   * project another test reads loses a race sooner or later. The first version
+   * of this mutated 'demo' and restored it afterwards: the suite passed once,
+   * left 'demo' with no locales, and failed on the next run inside the test
+   * above — which reads them and never writes. Restore discipline cannot fix
+   * that, because the reader can run while the value is emptied. The seed
+   * therefore carries a second project that only this test touches.
+   *
+   * Both cases live in one test for the same reason: two tests mutating one row
+   * would race each other.
    */
-  test('a project with no target languages says a run has nothing to do', async ({
+  test('target languages can be emptied, refused and set again', async ({
     page,
   }) => {
-    await signIn(page, '/acceptance/projects/demo');
+    await signIn(page, '/acceptance/projects/languages');
 
     const targets = page.getByRole('textbox', { name: 'Target locales' });
-    const original = await targets.inputValue();
+    const save = page.getByRole('button', { name: 'Save languages' });
+    await expect(targets).toHaveValue('fr, de');
 
-    try {
-      await targets.fill('');
-      await page.getByRole('button', { name: 'Save languages' }).click();
-      await expect(page.getByText('None configured')).toBeVisible();
-      await expect(
-        page.getByText('A run needs at least one, or it has nothing to do.'),
-      ).toBeVisible();
-    } finally {
-      // Restored whatever happened above: the seeded project is shared with
-      // every other test in this file, and leaving it emptied would break them
-      // in a way that looks unrelated to this one.
-      await targets.fill(original);
-      await page.getByRole('button', { name: 'Save languages' }).click();
-      await expect(targets).toHaveValue(original);
-    }
-  });
+    // Emptied: the state that made every run fail before reaching a model.
+    await targets.fill('');
+    await save.click();
+    // "Saved." is rendered from the action's return value, so it cannot appear
+    // until the write has happened. Asserting the input instead would be true
+    // the instant `fill` returned, which is how the first version of this test
+    // finished before its own restore landed.
+    await expect(page.getByText('Saved.')).toBeVisible();
+    await expect(page.getByText('None configured')).toBeVisible();
+    await expect(
+      page.getByText('A run needs at least one, or it has nothing to do.'),
+    ).toBeVisible();
 
-  test('it refuses a target language that is not a language tag', async ({
-    page,
-  }) => {
-    await signIn(page, '/acceptance/projects/demo');
+    // Refused, and nothing written.
+    await targets.fill('english');
+    await save.click();
+    await expect(page.getByText(/not a language tag/)).toBeVisible();
+    await page.reload();
+    await expect(
+      page.getByRole('textbox', { name: 'Target locales' }),
+    ).toHaveValue('');
 
-    const targets = page.getByRole('textbox', { name: 'Target locales' });
-    const original = await targets.inputValue();
-
-    try {
-      await targets.fill('english');
-      await page.getByRole('button', { name: 'Save languages' }).click();
-      await expect(page.getByText(/not a language tag/)).toBeVisible();
-    } finally {
-      await targets.fill(original);
-      await page.getByRole('button', { name: 'Save languages' }).click();
-    }
+    // Set again, and persisted across a reload rather than merely echoed back.
+    await page.getByRole('textbox', { name: 'Target locales' }).fill('fr, de');
+    await page.getByRole('button', { name: 'Save languages' }).click();
+    await expect(page.getByText('Saved.')).toBeVisible();
+    await page.reload();
+    await expect(
+      page.getByRole('textbox', { name: 'Target locales' }),
+    ).toHaveValue('fr, de');
   });
 
   test('a connected repository is reported as fact, not as intent', async ({
