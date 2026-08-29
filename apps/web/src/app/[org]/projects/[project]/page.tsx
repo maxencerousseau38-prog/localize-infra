@@ -12,9 +12,9 @@ import {
   installationIdFor,
   listInstallationRepositories,
 } from '@/lib/github/repositories';
-import { Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { LocalesSection } from './locales-section';
 import { RepositorySection } from './repository-section';
 import { ReviewSection } from './review-section';
 import { RunsSection } from './runs-section';
@@ -102,23 +102,19 @@ export default async function ProjectPage({
             /{org}/projects/{project.slug}
           </dd>
         </div>
-        <div className="bg-canvas px-4 py-3">
-          <dt className="text-eyebrow font-medium uppercase text-tertiary">
-            Target locales
-          </dt>
-          <dd className="mt-1 flex flex-wrap gap-1.5">
-            {project.target_locales.length === 0 ? (
-              <span className="text-small text-tertiary">None configured</span>
-            ) : (
-              project.target_locales.map((locale) => (
-                <Badge key={locale} tone="neutral">
-                  {locale}
-                </Badge>
-              ))
-            )}
-          </dd>
-        </div>
       </dl>
+
+      {/* Was a read-only row in the summary list above saying "None
+          configured", which was accurate and offered nothing to press — there
+          was no write path for this column anywhere in the app. It is a section
+          now because it is a decision, and because a run without it fails
+          before it reaches a model. */}
+      <LocalesSection
+        orgSlug={org}
+        projectSlug={project.slug}
+        sourceLocale={project.source_locale}
+        targetLocales={project.target_locales}
+      />
 
       <RepositorySection
         orgSlug={org}

@@ -97,3 +97,24 @@ describe('buildCoverage', () => {
     expect(coverage.totalMissing).toBe(0);
   });
 });
+
+/*
+ * The sum of nothing is zero, so `totalMissing === 0` alone reported a project
+ * with no target locales as fully translated. That is the same defect that made
+ * a run say "Every target locale failed" having attempted none: an empty list
+ * read as a finished job rather than as an unconfigured one.
+ */
+describe('a project with no target locales', () => {
+  it('is not complete, it is unconfigured', () => {
+    const coverage = buildCoverage({ a: 'A', b: 'B' }, {}, []);
+    expect(coverage.keys).toBe(2);
+    expect(coverage.locales).toEqual([]);
+    expect(coverage.totalMissing).toBe(0);
+    expect(coverage.complete).toBe(false);
+  });
+
+  it('still calls a fully translated project complete', () => {
+    const coverage = buildCoverage({ a: 'A' }, { fr: { a: 'A-fr' } }, ['fr']);
+    expect(coverage.complete).toBe(true);
+  });
+});

@@ -2,6 +2,7 @@
 
 import { findOrganization, toSlug } from '@/lib/data/workspace';
 import { createClient } from '@/lib/supabase/server';
+import { InvalidLocales, parseTargetLocales } from '@localize-infra/schemas';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -25,6 +26,30 @@ export async function createProject(
 ): Promise<ProjectState> {
   const name = String(formData.get('name') ?? '').trim();
   const sourceLocale = String(formData.get('source_locale') ?? 'en').trim();
+
+  /*
+   * The languages to translate into, settable for the first time.
+   *
+   * This insert used to omit `target_locales` entirely. The column defaulted to
+   * `'{}'`, nothing else in the app ever wrote it, and so every project created
+   * through the product had zero target locales — which made every run over one
+   * iterate its locale loop zero times and fail with "Every target locale
+   * failed. Last error: unknown". Empty is still allowed here, because a
+   * project can be created before that decision is made; what is no longer true
+   * is that it can never be anything else.
+   */
+  let targetLocales: string[];
+  try {
+    targetLocales = parseTargetLocales(
+      formData.get('target_locales') as string,
+      {
+        sourceLocale,
+      },
+    );
+  } catch (error) {
+    if (error instanceof InvalidLocales) return { error: error.message };
+    throw error;
+  }
 
   if (!name) return { error: 'Give the project a name.' };
   if (name.length > 80) return { error: 'Keep the name under 80 characters.' };
@@ -51,6 +76,7 @@ export async function createProject(
     name,
     slug,
     source_locale: sourceLocale,
+    target_locales: targetLocales,
   });
 
   if (error) {
