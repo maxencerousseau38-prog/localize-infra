@@ -117,6 +117,28 @@ export async function startRun(
     };
   }
 
+  /*
+   * Refused before a run row exists, because the alternative is what shipped.
+   *
+   * With no target locales the loop below iterates zero times, so
+   * `localesSucceeded` and `localesFailed` both stay at 0, `failure` stays
+   * null, and the guard after the loop throws "Every target locale failed.
+   * Last error: unknown" — a sentence about failures where nothing was
+   * attempted and no model was called. The first real run against a fixture
+   * repository died exactly this way, in 1.4 seconds, and the message sent the
+   * search towards the provider and ANTHROPIC_API_KEY.
+   *
+   * It is checked here rather than made a better message down there: a run
+   * that cannot do anything should not get a row, a checkout, or a place in
+   * the history somebody reads.
+   */
+  if (project.target_locales.length === 0) {
+    return {
+      error:
+        'This project has no target languages, so a run would have nothing to translate. Add at least one under Languages.',
+    };
+  }
+
   const supabase = await createClient();
   const { data: run, error: startError } = await supabase.rpc('start_run', {
     p_project_id: project.id,
@@ -400,8 +422,10 @@ export async function startRun(
     }
 
     if (localesSucceeded === 0) {
+      // Now true when it fires: the empty-list case is refused above, so
+      // reaching here means locales were attempted and all of them failed.
       throw new Error(
-        `Every target locale failed. Last error: ${failure ?? 'unknown'}`,
+        `All ${localesFailed} target locale(s) failed. Last error: ${failure ?? 'unknown'}`,
       );
     }
 

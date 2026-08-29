@@ -68,6 +68,12 @@ export function buildCoverage(
     keys,
     locales,
     totalMissing,
-    complete: totalMissing === 0,
+    /*
+     * A project with no target locales is not complete, it is unconfigured.
+     * `totalMissing === 0` alone said complete for an empty list — the sum of
+     * nothing is zero — so a scan of a project that could not translate
+     * anything reported that everything was translated.
+     */
+    complete: targetLocales.length > 0 && totalMissing === 0,
   };
 }

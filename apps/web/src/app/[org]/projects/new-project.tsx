@@ -74,6 +74,13 @@ export function NewProject({ orgSlug }: { orgSlug: string }) {
               <Input name="source_locale" defaultValue="en" required />
             </Field>
 
+            <Field
+              label="Target locales"
+              help="The languages to translate into, separated by commas — for example de, ja, es, pt-BR. You can change this later."
+            >
+              <Input name="target_locales" placeholder="de, ja, es, pt-BR" />
+            </Field>
+
             <output aria-live="polite" className="contents">
               {state.error ? (
                 <p className="rounded-md border border-failed bg-failed-bg px-3 py-2 text-small text-failed-text">

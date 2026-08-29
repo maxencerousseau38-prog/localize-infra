@@ -84,9 +84,71 @@ test.describe('workspace', () => {
     await signIn(page, '/acceptance/projects/demo');
 
     await expect(page.getByRole('heading', { name: 'Demo' })).toBeVisible();
-    // Seeded as en with fr and de targets.
-    await expect(page.getByText('fr', { exact: true })).toBeVisible();
-    await expect(page.getByText('de', { exact: true })).toBeVisible();
+
+    /*
+     * Seeded as en with fr and de targets.
+     *
+     * This read the locales as page *text*, which they were while the project
+     * page displayed them as badges in a read-only summary row. They are an
+     * editable field now, because the column had no write path anywhere in the
+     * app and every project therefore had none — which made every run fail
+     * before reaching a model. Asserting the field's value keeps the original
+     * intent (the page reports its real configuration) and additionally proves
+     * the control is populated from the database rather than left blank.
+     */
+    const targets = page.getByRole('textbox', { name: 'Target locales' });
+    await expect(targets).toHaveValue('fr, de');
+    await expect(
+      page.getByRole('button', { name: 'Save languages' }),
+    ).toBeVisible();
+  });
+
+  /*
+   * The defect this section exists for, asserted end to end: a project with no
+   * target locales must say so, and must not offer a run that would fail with
+   * "Every target locale failed" having attempted none.
+   */
+  test('a project with no target languages says a run has nothing to do', async ({
+    page,
+  }) => {
+    await signIn(page, '/acceptance/projects/demo');
+
+    const targets = page.getByRole('textbox', { name: 'Target locales' });
+    const original = await targets.inputValue();
+
+    try {
+      await targets.fill('');
+      await page.getByRole('button', { name: 'Save languages' }).click();
+      await expect(page.getByText('None configured')).toBeVisible();
+      await expect(
+        page.getByText('A run needs at least one, or it has nothing to do.'),
+      ).toBeVisible();
+    } finally {
+      // Restored whatever happened above: the seeded project is shared with
+      // every other test in this file, and leaving it emptied would break them
+      // in a way that looks unrelated to this one.
+      await targets.fill(original);
+      await page.getByRole('button', { name: 'Save languages' }).click();
+      await expect(targets).toHaveValue(original);
+    }
+  });
+
+  test('it refuses a target language that is not a language tag', async ({
+    page,
+  }) => {
+    await signIn(page, '/acceptance/projects/demo');
+
+    const targets = page.getByRole('textbox', { name: 'Target locales' });
+    const original = await targets.inputValue();
+
+    try {
+      await targets.fill('english');
+      await page.getByRole('button', { name: 'Save languages' }).click();
+      await expect(page.getByText(/not a language tag/)).toBeVisible();
+    } finally {
+      await targets.fill(original);
+      await page.getByRole('button', { name: 'Save languages' }).click();
+    }
   });
 
   test('a connected repository is reported as fact, not as intent', async ({
