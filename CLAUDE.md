@@ -20,7 +20,16 @@
   vérifié aujourd'hui — `/health` répond 200, `/v1/translate` répond 401 sans
   jeton.
 - `services/github-app` (propriétaire) — ouverture de PR via Octokit.
-- Validé de bout en bout : une vraie PR ouverte en 22 s sur un dépôt réel.
+- Validé de bout en bout **deux fois, et ce ne sont pas la même preuve.**
+  Cette ligne portait la première : le CLI, contre un clone local. La seconde
+  est le produit lui-même, le 2026-08-29 — depuis `/layersky/projects`, sans
+  aucune intervention manuelle entre le bouton « Run pipeline » et la pull
+  request. Run `b6fbbf11` : framework « Vite + React » détecté, 3 clés
+  extraites, 12 traduites, 4 locales (`fr`, `de`, `ja`, `es`), 0 échec, PR #9
+  ouverte sur `maxencerousseau38-prog/localize-infra-fixture-vite` en 22 s
+  (21:32:30 → 21:32:52 UTC), fusionnée en squash le 2026-08-29 (`665b765`).
+  C'est la seconde qui dit que le produit fonctionne ; la première ne disait
+  que ça de la bibliothèque.
 
 **Frontend**
 - `packages/ui` (propriétaire) — tokens de design en 3 couches, primitives.
@@ -167,30 +176,66 @@ depuis le 2026-08-23**, obtenu par `GET /app` authentifié comme l'App avec la
 clé privée déjà présente dans `.env` : le `client_id` est public par
 construction, il figure dans toute URL d'autorisation.
 
-**Le secret, lui, n'est récupérable par aucune API** — GitHub ne l'affiche
+**Le secret, lui, n'était récupérable par aucune API** — GitHub ne l'affiche
 qu'une fois, à la génération, dans les réglages de l'App. C'est cette asymétrie,
-et non un oubli, qui fait que la moitié de ce blocage était automatisable et
+et non un oubli, qui a fait que la moitié de ce blocage était automatisable et
 l'autre non.
 
-Ajouter le `client_id` seul ne peut rien activer à moitié : `readOAuthConfig()`
-renvoie `null` sans la paire, et `canInstall` en dépend. Le flux reste donc coupé
-et continue de le dire, plutôt que de stocker un `installation_id` non vérifié.
+**Il a été posé à la main le 2026-08-28, et ce blocage est tombé.** Ce passage
+disait « le flux reste donc coupé et continue de le dire » ; ce n'est plus vrai.
+`GITHUB_OAUTH_CLIENT_SECRET` est configuré sur le projet Vercel, donc
+`readOAuthConfig()` renvoie la paire et `canInstall` est vrai.
 
-Restent aussi deux réglages sur l'App, ni modifiables ni **lisibles** par API :
+La preuve n'est pas le réglage mais son résultat :
+`organization_github_installations` porte l'installation `151289538`
+(`maxencerousseau38-prog`, compte utilisateur) pour `layersky`, connectée le
+2026-08-28 à 12:26 **par le flux OAuth de l'interface** — le seul chemin qui
+exige le secret, puisque c'est lui qui échange le `code` puis vérifie
+l'installation contre le jeton de l'utilisateur. Une ligne posée en SQL aurait
+exactement la même apparence en base ; c'est le propriétaire qui a confirmé le
+chemin emprunté, et c'est pour ça que la question a été posée plutôt que
+déduite.
+
+Les deux réglages de l'App restent ni modifiables ni **lisibles** par API :
 « Request user authorization (OAuth) during installation », et l'URL de callback
 `https://localize-infra-web.vercel.app/github/callback`. Sonder
-`login/oauth/authorize` ne les révèle pas — GitHub redirige vers sa page de
-connexion avant de valider `redirect_uri`, donc une URL enregistrée et une URL
-inconnue répondent à l'identique. Vérifié : ce raccourci n'existe pas.
+`login/oauth/authorize` ne les révèle toujours pas — GitHub redirige vers sa
+page de connexion avant de valider `redirect_uri`, donc une URL enregistrée et
+une URL inconnue répondent à l'identique. Mais ils sont désormais **constatés
+corrects** au lieu d'être supposés : un flux qui va jusqu'à écrire la ligne
+prouve les deux. C'est la preuve que le sondage ne pouvait pas donner.
+
+**`apps/web/DEPLOYING.md` n'avait pas suivi** — son tableau portait encore
+`GITHUB_OAUTH_CLIENT_SECRET` en « no » et la phrase « The one thing still
+blocking self-serve ». Corrigé dans le même commit que ce paragraphe, pour que
+les deux fichiers ne puissent pas diverger d'une PR.
 
 **Deux projets Supabase, séparés depuis le 2026-08-17.** Développement et
 tests d'acceptation : `localize-infra` (`aguwalokxfgtqbzmdjbs`). Production :
-`localize-infra-prod` (`ijgheekdihgssktyweyy`). Les deux en `eu-west-3`, les
-vingt-neuf migrations appliquées de part et d'autre — le compte disait
-« seize » et il en manquait douze au moment où la vingt-neuvième a été écrite.
+`localize-infra-prod` (`ijgheekdihgssktyweyy`). Les deux en `eu-west-3`.
 
-Ils n'en formaient qu'un, et ce n'était pas un détail : le compte semé par
-`supabase/seeds/dev-user.sql` — mot de passe écrit dans ce dépôt, fichier qui
+**Ce compte a été faux deux fois, et « appliquées de part et d'autre » l'était
+aussi.** Il a dit « seize », puis « vingt-neuf ». Au 2026-08-30 : trente
+fichiers dans `supabase/migrations`, trente lignes appliquées en production, et
+**trente-deux** en développement.
+
+Les deux surnuméraires ne sont pas un retard de la production. Ce sont deux
+correctifs appliqués en développement puis repliés dans la version finale avant
+qu'elle n'atteigne la production — `project_target_locales_per_element_shape`
+et `closer_sent_respects_optout_restore`. Le premier est celui que le
+commentaire de `20260829000100` raconte : une contrainte qui acceptait
+l'élément unique `'fr,de'`, prise en insérant la valeur et non en relisant
+l'expression.
+
+D'où la règle à retenir plutôt que le nombre : **compter les lignes des deux
+côtés ne prouve pas l'égalité des schémas**, puisque les historiques divergent
+légitimement. Ce qui la prouve est de comparer les objets. Vérifié le
+2026-08-30 sur `projects` : `root_dir`,
+`projects_root_dir_is_a_safe_subdirectory` et
+`projects_target_locales_are_valid` sont bien présents en production.
+
+**Ces deux projets n'en formaient qu'un**, et ce n'était pas un détail : le
+compte semé par `supabase/seeds/dev-user.sql` — mot de passe écrit dans ce dépôt, fichier qui
 précise « NOT for production » — s'authentifiait contre le déploiement public.
 Vérifié, puis re-vérifié après la bascule : le même appel renvoie désormais
 `Invalid login credentials`.
@@ -207,20 +252,31 @@ une inscription indépendante parce que l'adresse est sur un autre domaine que
 celui habituel du propriétaire : une déduction à partir d'un domaine e-mail,
 écrite comme un fait sur un inconnu, sans rien vérifier.
 
-Ce qui subsiste, parce que cela ne dépend pas de l'identité du compte : le
-tunnel se termine en cul-de-sac. Un workspace sans installation GitHub arrive
-sur `/layersky/projects` et lit que connecter GitHub n'est pas disponible sur ce
-déploiement, avec pour seule porte de sortie « le CLI fonctionne toujours sur un
-clone local ». C'est vérifiable dans le code et sur le déploiement.
+**Ce paragraphe décrivait ensuite un tunnel qui se termine en cul-de-sac** —
+un workspace arrivant sur `/layersky/projects` et lisant que connecter GitHub
+n'est pas disponible sur ce déploiement, avec pour seule porte de sortie « le
+CLI fonctionne toujours sur un clone local ». C'était vrai, et ça ne l'est plus
+depuis le 2026-08-28 : le secret OAuth est posé, le bouton s'affiche, et le
+tunnel a été parcouru en entier le 2026-08-29 — connexion GitHub, projet,
+langues cibles, run, pull request fusionnée.
 
 **Ce passage nommait deux bloquants : le secret OAuth et la publication du
-paquet. Le second est tombé le 2026-08-28**, le CLI est sur npm, donc la porte
-de sortie n'exige plus de cloner quoi que ce soit pour obtenir la commande.
-Elle reste une porte de sortie étroite — traduire demande une API que le
-lecteur héberge lui-même — mais ce n'est plus un cul-de-sac par indisponibilité
-du paquet.
+paquet. Les deux sont tombés le 2026-08-28.** Le CLI est sur npm, donc la porte
+de sortie n'exige plus de cloner quoi que ce soit pour obtenir la commande —
+elle reste étroite, traduire demandant une API que le lecteur héberge lui-même.
+Et le secret OAuth est configuré, donc un workspace peut connecter sa propre
+installation depuis l'interface au lieu de lire qu'il ne peut pas.
 
-**Le secret OAuth reste, et il est désormais le seul des deux.**
+**Ce qui reste sur le chemin du « vendable » n'est donc plus technique.** Le
+parcours complet — inscription, connexion GitHub, projet, langues, run, pull
+request — est franchissable depuis l'interface pour un dépôt **public**.
+
+Deux réserves, et ce sont des faits, pas des nuances. Un dépôt **privé** exige
+encore `organization_entitlements.private_repositories`, qui n'a aucun chemin
+produit et se pose à la main : c'est ainsi que `layersky` a pu viser le fixture,
+qui est privé — accordé le 2026-08-28, `plan` laissé à `free`, aucune
+facturation derrière, et le `granted_reason` de la ligne le dit. Et personne ne
+peut payer, ce qui est le sujet du paragraphe sur la facturation plus haut.
 
 **Il n'existe toujours aucune preuve que quiconque hors de ce projet le
 veuille.** `docs/product/08-critique.md` §C1 — zéro recherche primaire, personas
