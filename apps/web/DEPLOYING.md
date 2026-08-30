@@ -77,7 +77,7 @@ from reading the toggle.
 | `GITHUB_APP_PRIVATE_KEY` | yes | The PEM inline; the `_PATH` form is local-only |
 | `GITHUB_APP_SLUG` | yes | Builds the App installation URL |
 | `GITHUB_OAUTH_CLIENT_ID` | yes | Proves the caller owns the installation they name. Read from `GET /app` — see below |
-| `GITHUB_OAUTH_CLIENT_SECRET` | **no** | The one thing still blocking self-serve. Not retrievable by API — see below |
+| `GITHUB_OAUTH_CLIENT_SECRET` | yes | Completes the pair the callback needs. Set by hand on 2026-08-28 — see below |
 
 **Two rows left this table on 2026-08-23**, removed from the project rather
 than merely undocumented: `GITHUB_APP_INSTALLATION_ID` and
@@ -110,32 +110,44 @@ What separates tenants is structural on both paths now.
 `installationId` so the pull request is opened by the same installation that
 read the repository. The write path did not do this and was blocker 2b.
 
-What is **not** yet multi-tenant is the step before all of it: no customer can
-trigger their own installation while `GITHUB_OAUTH_CLIENT_ID` /
-`GITHUB_OAUTH_CLIENT_SECRET` are missing, so in practice there is still one
-installation on this deployment — the operator's.
+**The step before all of it is now multi-tenant too.** This said no customer
+could trigger their own installation while `GITHUB_OAUTH_CLIENT_ID` /
+`GITHUB_OAUTH_CLIENT_SECRET` were missing, so in practice there was one
+installation on this deployment — the operator's. The pair is complete since
+2026-08-28, `readOAuthConfig()` returns it, and `canInstall` is true, so the
+button is rendered rather than replaced by its blockers.
 
-**`GITHUB_OAUTH_CLIENT_ID` is set; `GITHUB_OAUTH_CLIENT_SECRET` is not.** The id
-came from `GET /app` authenticated as the App — it is public by construction, it
-appears in every authorize URL a user sees. The secret is not retrievable by any
-API: GitHub shows it once, at generation, in the App's settings page. That
-asymmetry is the reason one half of this was automatable and the other was not.
+**Both are set.** The id came from `GET /app` authenticated as the App on
+2026-08-23 — it is public by construction, it appears in every authorize URL a
+user sees. The secret could not follow the same way: no API returns it, GitHub
+shows it once at generation in the App's settings page. That asymmetry is why
+one half of this was automatable and the other had to be typed by a person, on
+2026-08-28.
 
-The flow stays unavailable until both are present — `readOAuthConfig()` returns
-null unless it has the pair — so the callback still cannot prove that whoever
-completes an install actually owns it, and `GitHubConnection` still says so
-rather than storing an unverified installation id. Adding the id alone changes
-nothing a customer can see, by design.
+**The evidence is not the setting, it is what the setting produced.**
+`organization_github_installations` holds installation `151289538`
+(`maxencerousseau38-prog`) for `layersky`, written on 2026-08-28 at 12:26 by the
+OAuth flow in the interface — the only path that needs the secret, since it is
+the exchange of `code` for a user token, followed by checking the installation
+against what that token can reach. A row placed by hand would look identical in
+the database; the owner confirmed which path was taken.
 
-Two settings on the App remain, and neither is writable through the API:
-ticking "Request user authorization (OAuth) during installation", and setting
-the callback URL to `https://localize-infra-web.vercel.app/github/callback`.
-Neither is *readable* through the API either — `GET /app` has no field for them,
-and probing `login/oauth/authorize` cannot tell a registered callback URL from
-an unregistered one, because GitHub redirects to its login page before it
-validates `redirect_uri`. Checked, and it is not a shortcut that exists.
+So the callback can now prove that whoever completes an install owns it, which
+is the whole reason the flow was withheld while the pair was incomplete.
 
-The secret is added by whoever generates it, in their own terminal:
+Two settings on the App are still neither writable nor *readable* through the
+API: "Request user authorization (OAuth) during installation", and the callback
+URL `https://localize-infra-web.vercel.app/github/callback`. `GET /app` has no
+field for them, and probing `login/oauth/authorize` cannot tell a registered
+callback URL from an unregistered one, because GitHub redirects to its login
+page before it validates `redirect_uri`. That shortcut was checked and does not
+exist.
+
+They no longer need one. A flow that ran to completion and wrote the row proves
+both settings are correct — which is the evidence probing could never supply.
+
+This is how it was added, and how it would be rotated — by whoever generates
+it, in their own terminal:
 
 ```sh
 VERCEL_ORG_ID=team_jkFQHiZ8OitJujErZvg9oJFb \
