@@ -181,8 +181,21 @@ alter type public.run_status add value 'no_changes';
 -- of the guard would let a second call overwrite it — the same history rewrite
 -- the guard exists to stop.
 --
--- Only the guard changes. The signature is identical, so the existing grants
--- still apply and are not repeated here.
+-- **This body is copied from the live definition, not from 20260817213612.**
+-- The plan that produced this migration copied the original `run_rpcs` body and
+-- claimed "only the guard changes". That was false: 20260817000500 had already
+-- replaced this function, and the original body is missing three things that
+-- are in the running one — the pr_url format check, the `greatest(…, 0)` bounds
+-- on the counters, and the `left(…, 4000)` truncation on the error column.
+-- `create or replace function` replaces the whole body, so shipping the plan's
+-- version would have silently deleted all three, one of them added after a
+-- security review found a stored `javascript:` URL was one click from running
+-- in a colleague's session.
+--
+-- The lesson worth keeping, since this repository has been caught by it before:
+-- the current definition of a replaceable object is what the database holds,
+-- never the migration that first created it. This body was read back with
+-- `pg_get_functiondef` and the only edit is `'no_changes'` in the guard.
 create or replace function public.finish_run(
   p_run_id uuid,
   p_status public.run_status,
@@ -213,20 +226,27 @@ begin
   if not public.is_org_member(existing.organization_id) then
     raise exception 'not a member of this workspace' using errcode = '42501';
   end if;
-
   if existing.status in ('succeeded','partial','failed','no_changes') then
     raise exception 'run % is already finished', p_run_id using errcode = '55000';
+  end if;
+
+  if p_pr_url is not null
+     and p_pr_url !~ '^https://github\.com/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/pull/[0-9]+$' then
+    raise exception 'pr_url must be a github.com pull request URL'
+      using errcode = '22023';
   end if;
 
   update public.runs set
     status = p_status,
     stage = p_stage,
     framework = coalesce(p_framework, framework),
-    keys_extracted = p_keys_extracted,
-    keys_translated = p_keys_translated,
-    locales_succeeded = p_locales_succeeded,
-    locales_failed = p_locales_failed,
-    error = p_error,
+    keys_extracted = greatest(p_keys_extracted, 0),
+    keys_translated = greatest(p_keys_translated, 0),
+    locales_succeeded = greatest(p_locales_succeeded, 0),
+    locales_failed = greatest(p_locales_failed, 0),
+    -- Bounded: this is provider output rendered on a page, and an unbounded
+    -- error field is a way to store a great deal of someone else's text.
+    error = left(p_error, 4000),
     pr_url = p_pr_url,
     pr_number = p_pr_number,
     branch = p_branch,
@@ -238,6 +258,19 @@ begin
 end;
 $$;
 ```
+
+> **Corrected after the first attempt shipped the wrong body.** This step
+> originally copied `finish_run` from `20260817213612_run_rpcs.sql` and said
+> "only the guard changes". `20260817000500_constrain_run_pr_url.sql` had
+> already replaced the function, and the original body lacks three things the
+> running one has: the `pr_url` format check, `greatest(…, 0)` on the four
+> counters, and `left(…, 4000)` on the error column. Since `create or replace
+> function` replaces the whole body, the first version would have deleted all
+> three — including a check added after a security review. The body above was
+> read back from the live database with `pg_get_functiondef`. **When replacing
+> a function, read the current definition from the database, never from the
+> migration that first created it.**
+
 
 - [ ] **Step 3: Apply both migrations to the development project and verify**
 
