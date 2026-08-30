@@ -9,7 +9,7 @@
 -- of the guard would let a second call overwrite it — the same history rewrite
 -- the guard exists to stop.
 --
--- **This body is copied from the live definition, not from 20260817213612.**
+-- **This body is copied from the live definition, not from 20260817000400_run_rpcs.sql.**
 -- The plan that produced this migration copied the original `run_rpcs` body and
 -- claimed "only the guard changes". That was false: 20260817000500 had already
 -- replaced this function, and the original body is missing three things that
