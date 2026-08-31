@@ -20,14 +20,7 @@
 export interface RunRow {
   created_at: string;
   finished_at: string | null;
-  status:
-    | 'queued'
-    | 'running'
-    | 'succeeded'
-    | 'partial'
-    | 'failed'
-    | 'awaiting_review'
-    | 'no_changes';
+  status: 'queued' | 'running' | 'succeeded' | 'partial' | 'failed';
   pr_url: string | null;
   /** Null until something asks GitHub. See `mergeRate` below. */
   pr_merged_at?: string | null;
@@ -134,16 +127,13 @@ export function buildFunnel(input: FunnelInput): Funnel {
    * successful one, so it is counted apart rather than folded into either.
    * Hiding it would make the drop between `run_finished` and
    * `pull_request_created` look like breakage when it is the product working.
-   *
-   * Read directly off `status` rather than inferred from finished-and-no-PR:
-   * that predicate was exact only while `awaiting_review` was the sole status
-   * able to satisfy "finished, no PR, not failed". `no_changes` now also
-   * satisfies it — a run with nothing to translate finishes with no PR and no
-   * failure — and the predicate cannot tell "waiting on you" from "nothing was
-   * needed from you" without naming the one status that actually means the
-   * former.
    */
-  const awaiting = input.runs.filter((run) => run.status === 'awaiting_review');
+  const awaiting = input.runs.filter(
+    (run) =>
+      run.finished_at !== null &&
+      run.pr_url === null &&
+      run.status !== 'failed',
+  );
   steps.push({
     step: 'awaiting_review',
     count: awaiting.length,

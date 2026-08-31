@@ -81,62 +81,67 @@
   La contrainte, elle, ne bouge pas : ne jamais remplacer un écran vide par des
   données inventées.
 
-  **Relivré le 2026-08-31 comme expérience, pas comme correction.** Ce code a
-  été fusionné (#60), reverté le jour même (#61) parce que le bouton « Run
-  pipeline » ne produisait plus rien en production — ni ligne de run, ni
-  message — puis relivré ici pour savoir si la panne se reproduit.
+  **`no_changes` casse le chemin de run, et c'est établi par expérience.** Il a
+  été fusionné (#60), reverté (#61), relivré délibérément pour tester (#62),
+  puis reverté de nouveau. Quatre clics, deux configurations, aucun écart :
 
-  Ce qui est établi : trois hypothèses sont mortes, preuves à l'appui. Le
-  `dist` de `packages/core` n'était pas périmé (le log de build du déploiement
-  cassé dit `core:build: cache miss, executing`), la clé de cache turbo de
-  `core` couvre bien ses sources, et le build était propre. Les avertissements
-  `turbo.json` sur les variables d'environnement sont identiques sur le
-  déploiement sain — du bruit.
+  | Code déployé | Clic | Résultat |
+  |---|---|---|
+  | `ba62ae5` sans | 14:01 | run écrit, PR #10 |
+  | `30b84ba` avec | ~14:2x | **rien** |
+  | `93767cb` sans | 15:07 | run écrit, PR #11 |
+  | `e989228` avec | 16:2x | **rien** |
 
-  Ce qui ne l'est pas : **la cause**. Les logs runtime avaient expiré, la
-  reproduction locale bute sur l'absence de session, et la reproduction en
-  preview est impossible parce que la base de développement n'a aucun projet
-  avec un dépôt connecté. La corrélation avec ce code repose sur **un seul
-  clic raté** — et `canReachRepository` appelle GitHub avant `start_run` et
-  hors du `try`, si bien qu'une défaillance transitoire produirait le même
-  symptôme sans que ce code y soit pour rien.
+  « Rien » veut dire : aucune ligne dans `runs`, aucun message à l'écran,
+  aucune PR. Or `start_run` écrit la ligne avant tout travail — donc l'action
+  n'atteint jamais sa première instruction utile. Le badge « No changes
+  needed » aperçu deux fois venait d'une page en cache, pas des données :
+  vérifié, l'entrée en tête de liste était celle du run précédent.
 
-  Si la panne se reproduit, c'est ce code. Sinon, le revert était inutile et la
-  cause est ailleurs. Dans les deux cas, `npx vercel logs` lancé pendant la
-  panne donne l'exception — la CLI fonctionne avec le jeton déjà présent sur la
-  machine du propriétaire, ce qui a manqué toute la première fois.
+  **La cause reste inconnue.** Sont éliminés avec preuve : le `dist` périmé (le
+  log de build dit `core:build: cache miss, executing`), la clé de cache turbo,
+  un build anormal, les six sorties anticipées de `startRun` — qui affichent
+  toutes un message — et la session expirée, qui redirige. Ce qui reste est une
+  exception non rattrapée entre le clic et `start_run`, portion qui vit hors du
+  `try`.
 
-  **Un run qui ne trouve rien à traduire finit en `no_changes` et n'ouvre aucune
-  PR.** Il ouvrait une pull request à zéro fichier modifié : les fichiers
-  produits étaient identiques à la branche, donc l'arbre créé avait le SHA de
-  base et le commit était vide. Deux de ces PR traînent encore sur le fixture,
-  ouvertes en août. `catalogsEqual` (packages/core) compare les catalogues
-  **parsés**, pas les octets — comparer le JSON sérialisé aurait remplacé la PR
-  vide par une PR de reformatage à chaque run.
+  **Ce qui a empêché de trancher, et qu'il faut corriger avant de réessayer :**
+  la rétention des logs runtime Vercel est de l'ordre de la minute sur ce
+  projet — une lecture *a posteriori* ne rend rien, et un `vercel logs --follow`
+  lancé juste avant le clic a rendu zéro ligne. Reproduire en preview est
+  impossible tant que la base de développement n'a aucun projet avec un dépôt
+  connecté : un run y sort sur « Connect a repository before running ». Tant
+  que l'un de ces deux points n'est pas réglé, relivrer ne fera que recasser la
+  production.
 
-  Cas résiduel, pas couvert par la phrase ci-dessus : si `localesFailed > 0`
-  alors que rien n'a changé, le run n'emprunte pas cette branche — elle exige
-  `localesFailed === 0` — et atteint quand même `/v1/open-pr`, qui peut encore
-  ouvrir une PR vide. Elle est alors étiquetée `partial`, pas `no_changes`.
+  Le paragraphe qui suit décrit le premier revert et reste valable.
 
-  **`packages/cli` et `apps/api` gardent le défaut.** Ils appellent
-  `/v1/open-pr` sans comparer, donc un CLI lancé deux fois de suite produit
-  toujours une PR vide. Le correctif durable serait côté API — comparer le SHA
-  d'arbre obtenu à celui de la base après `createTree` — mais il exige de
-  réordonner `open-pr.ts`, dont le `createRef` précède le `createTree`, et de
-  changer le contrat de `/v1/open-pr`, donc `packages/schemas` et les deux
-  appelants. Non fait, et su.
+  **L'état `no_changes` a été fusionné le 2026-08-31 (#60) puis reverté le jour
+  même.** Il devait empêcher un run sans rien à traduire d'ouvrir une pull
+  request vide. Ce qu'il a produit en production : le bouton « Run pipeline »
+  répond, et il ne se passe **rien** — aucune ligne de run en base, aucun
+  message à l'écran. Le même geste fonctionnait vingt minutes plus tôt sur
+  `ba62ae5` (run à 14:01, PR #10, vide comme prévu). Le seul écart entre les
+  deux est ce merge.
 
-  **Et ce chemin n'a aucune couverture automatisée.** `run-actions.ts` n'a pas
-  de fichier de test : c'est un server action à effets fs, réseau et Supabase.
-  Extraire le calcul en fonction pure a été proposé puis écarté délibérément —
-  `catalogsEqual` est déjà testé, et la composition extraite ne serait qu'un
-  `||` entre deux appels couverts. Le risque réel n'est pas le calcul mais le
-  **câblage** : quelles paires sont comparées. Une extraction ne le protège
-  pas, et ce dépôt s'est déjà fait avoir exactement là — trois arguments
-  positionnels inversés dans `canReachRepository`, que ni le compilateur ni un
-  test n'ont vus. La seule vérification de ce chemin est donc manuelle, sur le
-  fixture réel.
+  La cause n'était pas diagnostiquée au moment du revert — les six sorties
+  anticipées de `startRun` affichent toutes un message, une session expirée
+  redirige, et `catalogsEqual` est bien présent dans `packages/core/dist`, donc
+  ce n'est pas le `dist` périmé de M1 Phase 2. Restait une exception non
+  rattrapée avant `start_run`, portion qui vit hors du `try` et ne laisse donc
+  ni ligne ni message. Les logs de fonction Vercel n'ont pas été lus : le
+  connecteur répond 403 sur ce projet et la CLI n'était pas installée.
+
+  **Les trois migrations sont volontairement conservées.** `run_status` porte
+  toujours `no_changes`, et `finish_run` comme `advance_run` le traitent comme
+  terminal. Rien ne l'écrit plus, aucune ligne ne le porte (vérifié : zéro des
+  deux côtés), et retirer les fichiers ferait mentir le dépôt sur ce que les
+  bases contiennent réellement. L'écart est donc assumé et écrit ici plutôt que
+  découvert plus tard.
+
+  Ce qui revient avec le revert : un run sans rien à traduire ouvre de nouveau
+  une pull request à zéro fichier. Trois existent déjà sur le fixture — #1, #2
+  et #10, cette dernière fermée le 2026-08-31.
 
   CSP à nonce par requête (`src/proxy.ts`), à l'inverse d'`apps/site` : les deux
   configurations documentent leur arbitrage et pourquoi il ne se transpose pas.
