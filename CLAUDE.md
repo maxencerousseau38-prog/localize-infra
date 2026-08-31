@@ -80,6 +80,34 @@
 
   La contrainte, elle, ne bouge pas : ne jamais remplacer un écran vide par des
   données inventées.
+
+  **Un run qui ne trouve rien à traduire finit en `no_changes` et n'ouvre aucune
+  PR.** Il ouvrait une pull request à zéro fichier modifié : les fichiers
+  produits étaient identiques à la branche, donc l'arbre créé avait le SHA de
+  base et le commit était vide. Deux de ces PR traînent encore sur le fixture,
+  ouvertes en août. `catalogsEqual` (packages/core) compare les catalogues
+  **parsés**, pas les octets — comparer le JSON sérialisé aurait remplacé la PR
+  vide par une PR de reformatage à chaque run.
+
+  **`packages/cli` et `apps/api` gardent le défaut.** Ils appellent
+  `/v1/open-pr` sans comparer, donc un CLI lancé deux fois de suite produit
+  toujours une PR vide. Le correctif durable serait côté API — comparer le SHA
+  d'arbre obtenu à celui de la base après `createTree` — mais il exige de
+  réordonner `open-pr.ts`, dont le `createRef` précède le `createTree`, et de
+  changer le contrat de `/v1/open-pr`, donc `packages/schemas` et les deux
+  appelants. Non fait, et su.
+
+  **Et ce chemin n'a aucune couverture automatisée.** `run-actions.ts` n'a pas
+  de fichier de test : c'est un server action à effets fs, réseau et Supabase.
+  Extraire le calcul en fonction pure a été proposé puis écarté délibérément —
+  `catalogsEqual` est déjà testé, et la composition extraite ne serait qu'un
+  `||` entre deux appels couverts. Le risque réel n'est pas le calcul mais le
+  **câblage** : quelles paires sont comparées. Une extraction ne le protège
+  pas, et ce dépôt s'est déjà fait avoir exactement là — trois arguments
+  positionnels inversés dans `canReachRepository`, que ni le compilateur ni un
+  test n'ont vus. La seule vérification de ce chemin est donc manuelle, sur le
+  fixture réel.
+
   CSP à nonce par requête (`src/proxy.ts`), à l'inverse d'`apps/site` : les deux
   configurations documentent leur arbitrage et pourquoi il ne se transpose pas.
 
