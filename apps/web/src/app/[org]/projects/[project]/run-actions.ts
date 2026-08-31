@@ -14,6 +14,7 @@ import {
   canReachRepository,
   installationIdFor,
 } from '@/lib/github/repositories';
+import { isNextControlFlowError } from '@/lib/runs/control-flow';
 import {
   checkTranslations,
   describeFindings,
@@ -84,58 +85,104 @@ export async function startRun(
    * installation was shared.
    */
 
-  const organization = await findOrganization(orgSlug);
-  if (!organization) return { error: 'That workspace is not available.' };
-
-  const project = await findProject(organization.id, projectSlug);
-  if (!project) return { error: 'That project is not available.' };
-  if (!project.repository_owner || !project.repository_name) {
-    return { error: 'Connect a repository before running.' };
-  }
-
   /*
-   * Checked again here, not only at connect time.
+   * Everything from here to `start_run` runs inside a try, and it did not.
    *
-   * An entitlement can lapse after a repository was connected — a subscription
-   * ends, a grant is withdrawn — and a check that only ran once would leave the
-   * capability permanently attached to whoever had it first. Public
-   * repositories are unaffected: /pricing promises those are free and
-   * unlimited, so there is nothing to check for them.
+   * `start_run` writes the run row before any work, so a throw *before* it
+   * leaves no row — and, being uncaught, no message either. The server action
+   * rejects, the client state never updates, and the button reads as dead: the
+   * user clicks and the page does not move. That is not a hypothetical. It
+   * happened twice in production, on 2026-08-31, and cost two reverts and four
+   * deploys to characterise, because the one thing the product could have said
+   * — the exception — was the one thing it threw away.
+   *
+   * `canReachRepository` is the reason this stretch can throw at all: it calls
+   * GitHub through Octokit, so a rate limit, an expired installation token or
+   * any transport fault surfaces here as an exception rather than a value.
+   *
+   * The catch reports and does not swallow: a Next control-flow throw is
+   * re-raised untouched, because `requireSession()` redirects by throwing and
+   * catching that would replace a navigation to /login with silence — the same
+   * dead button, one layer up.
    */
-  const repository = await canReachRepository({
-    owner: project.repository_owner,
-    name: project.repository_name,
-    organizationId: organization.id,
-  });
-  if (
-    repository?.private &&
-    !(await mayUsePrivateRepositories(organization.id))
-  ) {
-    return {
-      error:
-        'This project points at a private repository, which needs a paid plan. Public repositories are free and unlimited.',
-    };
-  }
+  let organization: NonNullable<Awaited<ReturnType<typeof findOrganization>>>;
+  let project: NonNullable<Awaited<ReturnType<typeof findProject>>>;
 
-  /*
-   * Refused before a run row exists, because the alternative is what shipped.
-   *
-   * With no target locales the loop below iterates zero times, so
-   * `localesSucceeded` and `localesFailed` both stay at 0, `failure` stays
-   * null, and the guard after the loop throws "Every target locale failed.
-   * Last error: unknown" — a sentence about failures where nothing was
-   * attempted and no model was called. The first real run against a fixture
-   * repository died exactly this way, in 1.4 seconds, and the message sent the
-   * search towards the provider and ANTHROPIC_API_KEY.
-   *
-   * It is checked here rather than made a better message down there: a run
-   * that cannot do anything should not get a row, a checkout, or a place in
-   * the history somebody reads.
-   */
-  if (project.target_locales.length === 0) {
+  try {
+    const foundOrganization = await findOrganization(orgSlug);
+    if (!foundOrganization) {
+      return { error: 'That workspace is not available.' };
+    }
+    organization = foundOrganization;
+
+    const foundProject = await findProject(organization.id, projectSlug);
+    if (!foundProject) return { error: 'That project is not available.' };
+    project = foundProject;
+    if (!project.repository_owner || !project.repository_name) {
+      return { error: 'Connect a repository before running.' };
+    }
+
+    /*
+     * Checked again here, not only at connect time.
+     *
+     * An entitlement can lapse after a repository was connected — a subscription
+     * ends, a grant is withdrawn — and a check that only ran once would leave the
+     * capability permanently attached to whoever had it first. Public
+     * repositories are unaffected: /pricing promises those are free and
+     * unlimited, so there is nothing to check for them.
+     */
+    const repository = await canReachRepository({
+      owner: project.repository_owner,
+      name: project.repository_name,
+      organizationId: organization.id,
+    });
+    if (
+      repository?.private &&
+      !(await mayUsePrivateRepositories(organization.id))
+    ) {
+      return {
+        error:
+          'This project points at a private repository, which needs a paid plan. Public repositories are free and unlimited.',
+      };
+    }
+
+    /*
+     * Refused before a run row exists, because the alternative is what shipped.
+     *
+     * With no target locales the loop below iterates zero times, so
+     * `localesSucceeded` and `localesFailed` both stay at 0, `failure` stays
+     * null, and the guard after the loop throws "Every target locale failed.
+     * Last error: unknown" — a sentence about failures where nothing was
+     * attempted and no model was called. The first real run against a fixture
+     * repository died exactly this way, in 1.4 seconds, and the message sent the
+     * search towards the provider and ANTHROPIC_API_KEY.
+     *
+     * It is checked here rather than made a better message down there: a run
+     * that cannot do anything should not get a row, a checkout, or a place in
+     * the history somebody reads.
+     */
+    if (project.target_locales.length === 0) {
+      return {
+        error:
+          'This project has no target languages, so a run would have nothing to translate. Add at least one under Languages.',
+      };
+    }
+  } catch (error) {
+    // Re-raised untouched: this is Next navigating, not a fault. See
+    // `isNextControlFlowError` for why the digest value is matched and not its
+    // presence.
+    if (isNextControlFlowError(error)) throw error;
+
+    /*
+     * Verbatim (DESIGN.md §8), like every other failure this pipeline reports:
+     * a developer comparing this against their own logs must see the same
+     * string. No run row exists to carry it, so the returned state is the only
+     * place it can be said.
+     */
     return {
-      error:
-        'This project has no target languages, so a run would have nothing to translate. Add at least one under Languages.',
+      error: `Could not start a run: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     };
   }
 
