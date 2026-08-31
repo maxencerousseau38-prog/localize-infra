@@ -8,9 +8,9 @@ import {
   requireSession,
 } from '@/lib/data/workspace';
 import {
+  type RunStatus,
   pipelineStageId,
   runProgress,
-  type RunStatus,
 } from '@/lib/runs/progress';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
@@ -144,8 +144,8 @@ export default async function RunDetailPage({ params }: Params) {
       // run that never touched it. `reachedIndex` already knows where it
       // stopped; let it govern instead.
       progress.kind === 'finished' &&
-        run.status !== 'failed' &&
-        run.status !== 'no_changes'
+      run.status !== 'failed' &&
+      run.status !== 'no_changes'
         ? ('done' as const)
         : i < reachedIndex
           ? ('done' as const)
@@ -196,9 +196,7 @@ export default async function RunDetailPage({ params }: Params) {
   // reads that as a shortfall the size of the whole catalogue instead of the
   // zero it is.
   const shortfall =
-    run.status === 'no_changes'
-      ? 0
-      : Math.max(0, owed - run.keys_translated);
+    run.status === 'no_changes' ? 0 : Math.max(0, owed - run.keys_translated);
 
   return (
     <Page>

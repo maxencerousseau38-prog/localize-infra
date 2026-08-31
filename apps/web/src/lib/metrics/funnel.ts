@@ -143,9 +143,7 @@ export function buildFunnel(input: FunnelInput): Funnel {
    * needed from you" without naming the one status that actually means the
    * former.
    */
-  const awaiting = input.runs.filter(
-    (run) => run.status === 'awaiting_review',
-  );
+  const awaiting = input.runs.filter((run) => run.status === 'awaiting_review');
   steps.push({
     step: 'awaiting_review',
     count: awaiting.length,
