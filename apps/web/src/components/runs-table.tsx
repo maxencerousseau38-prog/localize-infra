@@ -37,7 +37,8 @@ export interface RunTableRow {
     | 'awaiting_review'
     | 'succeeded'
     | 'partial'
-    | 'failed';
+    | 'failed'
+    | 'no_changes';
   stage: string;
   framework: string | null;
   keysExtracted: number;
@@ -60,6 +61,11 @@ const STATE: Record<RunTableRow['status'], { tone: Tone; label: string }> = {
   succeeded: { tone: 'confident', label: 'Succeeded' },
   partial: { tone: 'degraded', label: 'Partial' },
   failed: { tone: 'failed', label: 'Failed' },
+  // Neutral, not confident. Confident is the colour of a pull request being
+  // waiting for you; this run produced nothing to look at. Painting it the
+  // same green would make "your translations are ready" and "there was
+  // nothing to do" the same signal at a glance.
+  no_changes: { tone: 'neutral', label: 'No changes needed' },
 };
 
 const FILTERS = [
@@ -67,6 +73,7 @@ const FILTERS = [
   { value: 'awaiting_review', label: 'Needs you' },
   { value: 'succeeded', label: 'Succeeded' },
   { value: 'failed', label: 'Failed' },
+  { value: 'no_changes', label: 'No changes' },
 ] as const;
 
 type Filter = (typeof FILTERS)[number]['value'];
