@@ -135,13 +135,32 @@ describe('buildFunnel', () => {
     const funnel = buildFunnel(
       input({
         runs: [
-          run({ pr_url: null, status: 'succeeded' }),
+          run({ pr_url: null, status: 'awaiting_review' }),
           run({ pr_url: null, status: 'failed' }),
         ],
       }),
     );
     expect(funnel.steps.find((s) => s.step === 'awaiting_review')?.count).toBe(
       1,
+    );
+  });
+
+  /*
+   * The regression this finding exists for. Before the status was read
+   * directly, "finished, no PR, not failed" was true of `awaiting_review`
+   * *and* `no_changes` — a run with nothing to translate finishes with no PR
+   * and no failure, same as one genuinely waiting on a person. Reporting it
+   * as "Awaiting your answer" would tell a workspace it owes an answer to a
+   * run that already finished cleanly.
+   */
+  it('does not count a no_changes run as awaiting review', () => {
+    const funnel = buildFunnel(
+      input({
+        runs: [run({ pr_url: null, status: 'no_changes' })],
+      }),
+    );
+    expect(funnel.steps.find((s) => s.step === 'awaiting_review')?.count).toBe(
+      0,
     );
   });
 
