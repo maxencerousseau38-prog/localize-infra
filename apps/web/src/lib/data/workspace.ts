@@ -149,7 +149,9 @@ export type RunStatus =
   | 'partial'
   | 'failed'
   /** Stopped on purpose: the agent found something it will not guess at. */
-  | 'awaiting_review';
+  | 'awaiting_review'
+  /** Finished with nothing to do: every key was already translated. */
+  | 'no_changes';
 
 export interface RunRecord {
   id: string;
