@@ -17,8 +17,7 @@ export interface RunRow {
     | 'succeeded'
     | 'partial'
     | 'failed'
-    | 'awaiting_review'
-    | 'no_changes';
+    | 'awaiting_review';
   stage: string;
   framework: string | null;
   keysExtracted: number;
@@ -82,9 +81,6 @@ const STATUS: Record<RunRow['status'], { tone: Tone; label: string }> = {
   // not fail and did not finish — it found something it will not guess at and
   // stopped to ask. Painting it amber would read as degraded, and it is not.
   awaiting_review: { tone: 'ambiguous', label: 'Needs your call' },
-  // Neutral, not confident — see runs-table.tsx for why the two successes are
-  // not the same colour.
-  no_changes: { tone: 'neutral', label: 'No changes needed' },
 };
 
 export function RunsSection({

@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   buildKeyCatalog,
-  catalogsEqual,
   mergeLocaleFile,
   mergeTranslations,
   pendingKeys,
@@ -232,37 +231,5 @@ describe('pendingKeys', () => {
   it('asks for nothing when every key is already translated', () => {
     // A repeat run with no source changes must not pay a model at all.
     expect(pendingKeys({ a: 'A' }, { a: 'Ah' })).toEqual([]);
-  });
-});
-
-describe('catalogsEqual', () => {
-  it('is true for the same keys and values', () => {
-    expect(catalogsEqual({ a: 'A', b: 'B' }, { b: 'B', a: 'A' })).toBe(true);
-  });
-
-  it('is true for two empty catalogs', () => {
-    expect(catalogsEqual({}, {})).toBe(true);
-  });
-
-  it('is false when a value differs', () => {
-    expect(catalogsEqual({ a: 'A' }, { a: 'Ah' })).toBe(false);
-  });
-
-  it('is false when a key was added', () => {
-    expect(catalogsEqual({ a: 'A' }, { a: 'A', b: 'B' })).toBe(false);
-  });
-
-  it('is false when a key was removed', () => {
-    expect(catalogsEqual({ a: 'A', b: 'B' }, { a: 'A' })).toBe(false);
-  });
-
-  // The reason this compares parsed catalogs and not serialised bytes: a
-  // repository whose locale files are indented differently would otherwise
-  // produce a formatting-only pull request on every single run.
-  it('ignores key order, which is what serialisation would not', () => {
-    expect(
-      JSON.stringify({ a: 'A', b: 'B' }) === JSON.stringify({ b: 'B', a: 'A' }),
-    ).toBe(false);
-    expect(catalogsEqual({ a: 'A', b: 'B' }, { b: 'B', a: 'A' })).toBe(true);
   });
 });
