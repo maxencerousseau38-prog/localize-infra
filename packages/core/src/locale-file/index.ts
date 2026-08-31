@@ -125,19 +125,3 @@ export function mergeTranslations(
   }
   return merged;
 }
-
-/**
- * Whether two catalogs carry the same translations.
- *
- * Compared as parsed key/value maps, deliberately, and not as the JSON this
- * pipeline would write. `JSON.stringify(..., 2)` normalises indentation, so a
- * repository formatted differently from our output would differ on every byte
- * comparison while carrying identical translations — and the pipeline would
- * open a reformatting pull request on every run. That is the same noise as the
- * empty pull request this function exists to prevent, wearing a better excuse.
- */
-export function catalogsEqual(a: LocaleCatalog, b: LocaleCatalog): boolean {
-  const keys = Object.keys(a);
-  if (keys.length !== Object.keys(b).length) return false;
-  return keys.every((key) => key in b && a[key] === b[key]);
-}
