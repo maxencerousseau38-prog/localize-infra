@@ -105,7 +105,16 @@
   exception non rattrapée entre le clic et `start_run`, portion qui vit hors du
   `try`.
 
-  **Ce qui a empêché de trancher, et qu'il faut corriger avant de réessayer :**
+  **Le premier blocage est levé.** La section entre le clic et `start_run`
+  vivait hors du `try`, donc une exception y était perdue : pas de ligne, pas
+  de message, un bouton mort. Elle est désormais enveloppée et renvoie
+  l'exception verbatim à l'écran. Une prochaine occurrence se dira d'elle-même,
+  sans logs et sans preview. Le `catch` relaie intact ce que Next lève pour
+  naviguer — `isNextControlFlowError` (`lib/runs/control-flow.ts`) distingue les
+  digests de contrôle d'un digest d'erreur réel, qui existe aussi en production
+  et qu'un test couvre.
+
+  **Ce qui reste à corriger avant de réessayer :**
   la rétention des logs runtime Vercel est de l'ordre de la minute sur ce
   projet — une lecture *a posteriori* ne rend rien, et un `vercel logs --follow`
   lancé juste avant le clic a rendu zéro ligne. Reproduire en preview est
