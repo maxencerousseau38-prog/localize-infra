@@ -89,6 +89,11 @@
   **parsés**, pas les octets — comparer le JSON sérialisé aurait remplacé la PR
   vide par une PR de reformatage à chaque run.
 
+  Cas résiduel, pas couvert par la phrase ci-dessus : si `localesFailed > 0`
+  alors que rien n'a changé, le run n'emprunte pas cette branche — elle exige
+  `localesFailed === 0` — et atteint quand même `/v1/open-pr`, qui peut encore
+  ouvrir une PR vide. Elle est alors étiquetée `partial`, pas `no_changes`.
+
   **`packages/cli` et `apps/api` gardent le défaut.** Ils appellent
   `/v1/open-pr` sans comparer, donc un CLI lancé deux fois de suite produit
   toujours une PR vide. Le correctif durable serait côté API — comparer le SHA

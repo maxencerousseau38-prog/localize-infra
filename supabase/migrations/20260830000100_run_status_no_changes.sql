@@ -2,9 +2,11 @@
 --
 -- The pipeline called /v1/open-pr unconditionally once the quality and
 -- ambiguity gates passed. When every key was already translated, the files it
--- committed were byte-identical to the branch, so GitHub produced an empty
--- commit and a pull request with zero changed files. Two such pull requests
--- are still open on the fixture repository from August.
+-- committed were unchanged from the branch under `catalogsEqual` — the
+-- semantic equality that matters here, not a byte comparison of the files on
+-- disk — so GitHub produced an empty commit and a pull request with zero
+-- changed files. Two such pull requests are still open on the fixture
+-- repository from August.
 --
 -- A distinct status rather than `succeeded` with a null `pr_url`: those are two
 -- different outcomes, and telling them apart by testing a nullable column for
@@ -14,4 +16,4 @@
 -- Alone in its own migration. `alter type ... add value` and any statement that
 -- *uses* the new value cannot share a transaction, and Supabase runs each
 -- migration in one. Splitting removes the question entirely.
-alter type public.run_status add value 'no_changes';
+alter type public.run_status add value if not exists 'no_changes';

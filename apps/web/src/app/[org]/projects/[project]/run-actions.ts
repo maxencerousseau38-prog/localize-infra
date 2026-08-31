@@ -484,7 +484,15 @@ export async function startRun(
      * did not cause.
      */
     if (!anyChanged && localesFailed === 0 && escalations.length === 0) {
-      await supabase.rpc('finish_run', {
+      // Checked, unlike every other write in this block: this is the one path
+      // whose only observable effect *is* this write. Every other branch that
+      // reaches here has already committed or already thrown, so a write
+      // failure has something else to fall back on. This one does not — if
+      // `finish_run` fails silently, the row stays at running/translate
+      // forever, the user is told nothing, and it reads as stalled five
+      // minutes later. Throwing routes the failure through the catch/finally
+      // below, which is what closes the run as `failed` with a real message.
+      const { error: finishError } = await supabase.rpc('finish_run', {
         p_run_id: run.id,
         p_status: 'no_changes',
         p_stage: 'translate',
@@ -498,6 +506,11 @@ export async function startRun(
         p_pr_number: null,
         p_branch: null,
       });
+      if (finishError) {
+        throw new Error(
+          `Could not record this run as finished: ${finishError.message}`,
+        );
+      }
       revalidatePath(`/${organization.slug}/projects/${project.slug}`);
       return { runId: run.id };
     }
