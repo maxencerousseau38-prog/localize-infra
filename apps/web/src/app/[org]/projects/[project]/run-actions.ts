@@ -294,12 +294,22 @@ export async function startRun(
     /*
      * Whether this run has anything to commit.
      *
-     * `existing` is read from a checkout of the base branch, so comparing the
-     * merge against it is comparing against exactly what a pull request would
-     * be opened on top of. Nothing here costs a network call: both sides are
+     * Compared against `fresh`, the catalogue just extracted from source, not
+     * `mergedSource`. `mergeLocaleFile` (packages/core) hardcodes
+     * `locale === 'en'` to decide which side wins a conflict, so for any
+     * project whose `source_locale` is not literally `'en'` — `fr`, `de`,
+     * `en-US`, all real and only shape-validated — the merge keeps the stale
+     * `existingSource` value even when the source string genuinely changed.
+     * `mergedSource` would then equal `existingSource` by construction and
+     * this run would report `no_changes` on a source edit it never saw.
+     * `fresh` is the authoritative source catalogue regardless of locale
+     * string, so it is what an actual change must be detected against.
+     * `existing` is read from a checkout of the base branch, so comparing
+     * against it is comparing against exactly what a pull request would be
+     * opened on top of. Nothing here costs a network call: both sides are
      * already in memory.
      */
-    let anyChanged = !catalogsEqual(mergedSource, existingSource);
+    let anyChanged = !catalogsEqual(fresh, existingSource);
 
     await advance('translate', { keysExtracted });
     if (!apiToken) {
