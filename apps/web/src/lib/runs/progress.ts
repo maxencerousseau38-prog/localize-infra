@@ -25,9 +25,7 @@ export type RunStatus =
   | 'awaiting_review'
   | 'succeeded'
   | 'partial'
-  | 'failed'
-  /** Finished with nothing to do: every key was already translated. */
-  | 'no_changes';
+  | 'failed';
 
 /**
  * How long a run may be silent before it is reported as stalled.
@@ -51,21 +49,13 @@ export type RunProgress =
   | { kind: 'active'; stage: RunStage | string }
   | { kind: 'stalled'; stage: RunStage | string; silentForMs: number }
   | { kind: 'awaiting-review' }
-  | {
-      kind: 'finished';
-      status: 'succeeded' | 'partial' | 'failed' | 'no_changes';
-    };
+  | { kind: 'finished'; status: 'succeeded' | 'partial' | 'failed' };
 
 export function runProgress(input: RunProgressInput): RunProgress {
   const { status, stage, progressAt } = input;
   const now = input.now ?? Date.now();
 
-  if (
-    status === 'succeeded' ||
-    status === 'partial' ||
-    status === 'failed' ||
-    status === 'no_changes'
-  ) {
+  if (status === 'succeeded' || status === 'partial' || status === 'failed') {
     return { kind: 'finished', status };
   }
   if (status === 'awaiting_review') return { kind: 'awaiting-review' };

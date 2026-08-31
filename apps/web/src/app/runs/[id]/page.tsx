@@ -7,11 +7,7 @@ import {
   listRunTranslations,
   requireSession,
 } from '@/lib/data/workspace';
-import {
-  type RunStatus,
-  pipelineStageId,
-  runProgress,
-} from '@/lib/runs/progress';
+import { pipelineStageId, runProgress } from '@/lib/runs/progress';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
   Badge,
@@ -32,30 +28,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { title: `Run ${id.slice(0, 8)}` };
 }
 
-const RUN_STATE: Record<RunStatus, { tone: Tone; label: string }> = {
+const RUN_STATE: Record<string, { tone: Tone; label: string }> = {
   queued: { tone: 'neutral', label: 'Queued' },
   running: { tone: 'neutral', label: 'Running' },
   awaiting_review: { tone: 'ambiguous', label: 'Needs your call' },
   succeeded: { tone: 'confident', label: 'Succeeded' },
   partial: { tone: 'degraded', label: 'Partial' },
   failed: { tone: 'failed', label: 'Failed' },
-  no_changes: { tone: 'neutral', label: 'No changes needed' },
 };
-
-/**
- * Guards the one place a run's stored status crosses into this exhaustive
- * map. `RUN_STATE` is now `Record<RunStatus, …>`, so a status this file knows
- * about but forgot to render is a compile error — that is the point. But
- * `runs` has no generated types (see `database.types.ts`), so `findRun` casts
- * its row to `RunRecord` without checking the enum at runtime: a value
- * Postgres accepts that this union does not yet know about would otherwise
- * index `RUN_STATE` with a key it does not have and throw, taking the whole
- * page down instead of mis-rendering one badge. This is the runtime half of
- * that safety; `Record<RunStatus, …>` above is the compile-time half.
- */
-function isKnownRunStatus(status: string): status is RunStatus {
-  return status in RUN_STATE;
-}
 
 function duration(ms: number | null): string {
   if (ms === null) return '—';
@@ -114,9 +94,7 @@ export default async function RunDetailPage({ params }: Params) {
     listRunTranslations(run.id),
   ]);
 
-  const state = isKnownRunStatus(run.status)
-    ? RUN_STATE[run.status]
-    : RUN_STATE.failed;
+  const state = RUN_STATE[run.status] ?? RUN_STATE.failed;
   const progress = runProgress({
     status: run.status,
     stage: run.stage,
@@ -138,14 +116,7 @@ export default async function RunDetailPage({ params }: Params) {
     id: stage.id,
     name: stage.name,
     state:
-      // `no_changes` reaches `finished` without opening a pull request — it
-      // stops at `translate` on purpose (see run-actions.ts) — so it must not
-      // take this branch, or the Pull request stage paints itself done for a
-      // run that never touched it. `reachedIndex` already knows where it
-      // stopped; let it govern instead.
-      progress.kind === 'finished' &&
-      run.status !== 'failed' &&
-      run.status !== 'no_changes'
+      progress.kind === 'finished' && run.status !== 'failed'
         ? ('done' as const)
         : i < reachedIndex
           ? ('done' as const)
@@ -191,12 +162,7 @@ export default async function RunDetailPage({ params }: Params) {
    * stores it. This derivation is the closest honest thing until one does.
    */
   const owed = run.keys_extracted * run.locales_succeeded;
-  // `no_changes` succeeds every locale and translates nothing, by design —
-  // every key already had a value. Without this guard the arithmetic above
-  // reads that as a shortfall the size of the whole catalogue instead of the
-  // zero it is.
-  const shortfall =
-    run.status === 'no_changes' ? 0 : Math.max(0, owed - run.keys_translated);
+  const shortfall = Math.max(0, owed - run.keys_translated);
 
   return (
     <Page>
@@ -307,17 +273,7 @@ export default async function RunDetailPage({ params }: Params) {
         title="Locales"
         description="What the run proposed for each target language."
       >
-        {run.status === 'no_changes' ? (
-          // The branch that reaches `no_changes` returns before recording any
-          // proposal (run-actions.ts), so `byLocale` is empty and every target
-          // locale would otherwise fall into `unattempted` below and render a
-          // red "No proposals" badge — the same red a locale that genuinely
-          // failed gets. Every target locale did succeed here; there was
-          // nothing left to translate.
-          <p className="text-small text-tertiary">
-            Every key already had a translation. Nothing was proposed.
-          </p>
-        ) : byLocale.size === 0 && unattempted.length === 0 ? (
+        {byLocale.size === 0 && unattempted.length === 0 ? (
           <p className="text-small text-tertiary">
             This run recorded no proposals.
           </p>
