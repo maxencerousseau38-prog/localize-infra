@@ -12,6 +12,7 @@ import {
   installationIdFor,
   listInstallationRepositories,
 } from '@/lib/github/repositories';
+import { runAvailability } from '@/lib/runs/availability';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { LocalesSection } from './locales-section';
@@ -72,13 +73,17 @@ export default async function ProjectPage({
   const connected = Boolean(
     project.repository_owner && project.repository_name,
   );
-  const runReason = !gitHubConfigured
-    ? 'This deployment has no GitHub App configured, so a run has nowhere to open a pull request.'
-    : !installationId
-      ? 'Install the Localize GitHub App on your account before running.'
-      : !connected
-        ? 'Connect a repository before running.'
-        : null;
+  /*
+   * One call, not two expressions. `canRun` and the reason used to be computed
+   * independently and nothing made them agree — see `runAvailability` for what
+   * that cost.
+   */
+  const { canRun, reason: runReason } = runAvailability({
+    gitHubConfigured,
+    installationId,
+    connected,
+    targetLocales: project.target_locales,
+  });
 
   return (
     <Page>
@@ -159,7 +164,7 @@ export default async function ProjectPage({
       <RunsSection
         orgSlug={org}
         projectSlug={project.slug}
-        canRun={Boolean(installationId) && connected}
+        canRun={canRun}
         reason={runReason}
         runs={runs.map((run) => ({
           id: run.id,
