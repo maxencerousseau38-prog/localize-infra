@@ -81,89 +81,65 @@
   La contrainte, elle, ne bouge pas : ne jamais remplacer un écran vide par des
   données inventées.
 
-  **`no_changes` a été accusé à tort, et ce paragraphe l'a écrit comme un
-  fait.** Il disait « casse le chemin de run, et c'est établi par expérience »,
-  sur la foi de quatre observations concordantes. Les deux suivantes l'ont
-  démenti. Le code a été fusionné (#60), reverté (#61), relivré pour tester
-  (#62), reverté de nouveau (#63) — trois de ces quatre gestes reposaient sur
-  une conclusion fausse.
+  **`no_changes` n'a jamais rien cassé. Les clics partaient sur le mauvais
+  projet.** Ce paragraphe l'a affirmé coupable deux fois — d'abord « établi par
+  expérience », puis « un blocage côté client, cause inconnue ». Les deux
+  étaient faux, et les deux ont été écrits avec l'assurance d'un fait.
 
-  Le relevé complet du 2026-08-31 :
+  L'organisation `layersky` porte **deux** projets, tous deux branchés sur le
+  dépôt fixture :
 
-  | Clic | Commit servi | `no_changes` | Run créé |
-  |---|---|---|---|
-  | 14:01 | `ba62ae5` | non | oui — PR #10 |
-  | ~14:2x | `30b84ba` | oui | non |
-  | 15:07 | `93767cb` | non | oui — PR #11 |
-  | ~16:2x | `e989228` | oui | non |
-  | ~17:0x | `e311200` | **non** | **non** |
-  | ~17:1x | `e311200` | non | non — en navigation privée |
+  | Projet | `target_locales` | Runs créés |
+  |---|---|---|
+  | `localize-infra-test` — « Localize Infra Test » | **vide** | **0, jamais** |
+  | `localize-infra-test-2` — « localize-infra test #2 » | `fr, de, ja, es` | les 7, sans exception |
 
-  Les deux dernières lignes cassent la corrélation : l'échec persiste sans le
-  code accusé.
+  `startRun` refuse un projet sans langue cible **avant** `start_run`, donc sans
+  écrire de ligne :
 
-  **Ce qui est mesuré.** Aucun run créé depuis 15:07, dans aucune des deux
-  bases. Aucune PR au-delà de #11. Et surtout : **aucune requête POST ne part
-  au clic**, relevé dans l'onglet Réseau. Le serveur n'est donc jamais
-  sollicité, ce qui disqualifie d'office toute explication côté serveur —
-  `no_changes` compris.
+      if (project.target_locales.length === 0) return { error: '…' };
 
-  **Ce qui est éliminé, avec preuve.** Le `dist` périmé (le log de build du
-  déploiement incriminé dit `core:build: cache miss, executing`) ; la clé de
-  cache turbo, `packages/core` n'ayant pas de `turbo.json` ; un build anormal ;
-  les six sorties anticipées de `startRun`, qui affichent toutes un message ;
-  la session expirée, qui redirige ; et la chaîne GitHub — authentification
-  App, jeton d'installation, deux dépôts atteignables dont le fixture privé,
-  quota à 4992/5000, vérifié directement le 2026-08-31.
+  Chaque « rien ne se passe » du 2026-08-31 est un clic sur le projet vide.
+  Chaque « ça marche » est un clic sur `#2`. La variable qui changeait n'était
+  pas le code déployé, c'était le projet ouvert dans l'onglet.
 
-  **Ce qui reste.** Un blocage côté client qui empêche la soumission du
-  formulaire sans rien écrire en console. Cause inconnue. Le bouton **Scan**,
-  qui emprunte le même mécanisme, ne part pas non plus — ce n'est donc pas
-  propre au run.
+  **Coût de l'erreur** : deux reverts, une relivraison, cinq déploiements de
+  production, et deux affirmations fausses inscrites ici. La cause tenait dans
+  une requête que rien n'empêchait de faire dès le premier échec — joindre
+  `runs` à `projects` pour voir sur quel projet les runs réussis atterrissaient.
+  Toutes les vérifications faites à la place — logs Vercel, santé de l'App
+  GitHub, nonces CSP, chunks servis, `dist` compilé, cache turbo — portaient sur
+  une chaîne qui n'a jamais été en cause.
 
-  **Le piège qui a produit cinq fausses lectures, et qui vaut pour la suite.**
-  La liste des runs se rafraîchit après un clic et montre l'entrée la plus
-  récente. Un clic qui ne produit rien laisse donc en tête le run **précédent**,
-  avec son badge et son lien de pull request — indiscernable d'un résultat neuf.
-  Cinq observations d'écran ont été rapportées comme des succès et démenties par
-  la base, dont deux « No changes needed » alors qu'aucune ligne ne portait ce
-  statut. **Ne jamais conclure d'un run depuis l'écran : lire la ligne en base
-  et le numéro de PR.**
+  **La règle qui en sort, et qui vaut au-delà de ce bug** : quand deux
+  configurations donnent des résultats opposés, vérifier d'abord que l'entrée
+  est la même. Ici les runs portaient leur `project_id` depuis le début.
 
-  **La leçon de méthode**, parce qu'elle a coûté deux reverts, une relivraison
-  et cinq déploiements de production : la mesure décisive — une requête POST
-  part-elle ? — a été demandée quatre fois sans jamais être rendue bloquante,
-  pendant que des hypothèses serveur étaient testées par déploiement successif.
-  L'absence totale de trace serveur dès la première panne — pas de ligne, pas de
-  message, pas de log — désignait déjà le client. Une capture `vercel logs`
-  lancée juste avant un clic a rendu zéro ligne, ce qui a été mis sur le compte
-  d'une rétention courte alors que c'était la réponse.
+  **Le piège d'affichage, lui, est réel et reste à traiter.** La liste des runs
+  se rafraîchit après un clic et montre l'entrée la plus récente. Un clic sans
+  effet laisse donc le run **précédent** en tête, avec son badge et son lien de
+  pull request — indiscernable d'un résultat neuf. Cinq lectures d'écran ont été
+  rapportées comme des succès et démenties par la base. **Ne jamais conclure
+  qu'un run a eu lieu depuis l'écran : lire la ligne en base et le numéro de
+  PR.**
 
-  Ce que ça ne change pas : le code de `no_changes` est écrit, revu, et tous les
-  findings de la revue finale y sont corrigés — dont le Critical de
-  `/runs/[id]`, qui affichait « Failed » et un décompte de traductions
-  manquantes inventé. Le relivrer ne demandera aucune réécriture. Mais rien ne
-  justifie de le faire tant que le clic lui-même ne fonctionne pas.
+  **Un projet sans langue cible est un piège qui rejouera.** Il affiche le
+  bouton, accepte le clic, et refuse en silence côté base. Soit
+  `localize-infra-test` reçoit des langues, soit il disparaît.
 
-  **Un correctif utile subsiste de l'épisode.** La section entre le clic et
-  `start_run` vivait hors du `try` : une exception y était perdue, sans ligne et
-  sans message. Elle est désormais enveloppée et renvoie l'exception verbatim à
-  l'écran (#64). `isNextControlFlowError` (`lib/runs/control-flow.ts`) relaie
-  intact ce que Next lève pour naviguer, en testant la **valeur** du digest et
-  non sa présence — une vraie `Error` en porte un aussi en production. Ce
-  correctif n'a encore jamais eu l'occasion de servir, puisque aucune requête
-  n'atteint le serveur.
+  **Deux acquis de l'épisode, indépendants de la fausse piste.** La section
+  entre le clic et `start_run` vivait hors du `try` : une exception y était
+  perdue, sans ligne et sans message. Elle est enveloppée depuis #64 et renvoie
+  l'exception verbatim à l'écran ; `isNextControlFlowError`
+  (`lib/runs/control-flow.ts`) relaie intact ce que Next lève pour naviguer, en
+  testant la **valeur** du digest et non sa présence. Et la revue finale de #60
+  a trouvé un vrai défaut : `/runs/[id]` portait une troisième table de statut,
+  en `Record<string, …>` avec un repli sur `failed`, qui affichait « Failed »
+  et un décompte de traductions manquantes fabriqué. Corrigé, et la table est
+  désormais indexée par l'union.
 
-  **Les trois migrations restent appliquées et leurs fichiers conservés.**
-  `run_status` porte toujours `no_changes`, et `finish_run` comme `advance_run`
-  le traitent comme terminal. Rien ne l'écrit, aucune ligne ne le porte —
-  vérifié à zéro des deux côtés. Retirer les fichiers ferait mentir le dépôt sur
-  ce que les bases contiennent : l'écart est assumé et écrit ici plutôt que
-  découvert plus tard.
-
-  Ce qui revient avec le revert : un run sans rien à traduire ouvre de nouveau
-  une pull request à zéro fichier. Trois existent sur le fixture — #1, #2 et
-  #11, plus #10 fermée le 2026-08-31.
+  **Les trois migrations sont appliquées aux deux bases.** `run_status` porte
+  `no_changes`, `finish_run` et `advance_run` le traitent comme terminal.
 
   CSP à nonce par requête (`src/proxy.ts`), à l'inverse d'`apps/site` : les deux
   configurations documentent leur arbitrage et pourquoi il ne se transpose pas.
