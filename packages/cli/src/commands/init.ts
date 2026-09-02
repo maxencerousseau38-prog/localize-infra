@@ -184,12 +184,22 @@ export async function runInit(
         },
         apiToken,
       );
+      /*
+       * A run that changed nothing returns without a `pr`, and that is not a
+       * failure. The API answers 409 when every file in the request already
+       * matches the base branch — a repository that is simply up to date —
+       * and `requestPr` reports that as an outcome rather than throwing.
+       *
+       * Before this, the API opened a pull request with zero changed files and
+       * the CLI printed its URL as a success. Five of those appeared on the
+       * fixture repository in two days.
+       */
       return {
         ok: true,
         framework: framework.name,
         keysWritten,
         locales: localeResults,
-        pr: prResult,
+        ...(prResult.opened ? { pr: prResult.pr } : {}),
       };
     }
   }

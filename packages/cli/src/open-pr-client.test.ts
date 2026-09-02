@@ -20,6 +20,7 @@ describe('requestPr', () => {
       'fetch',
       vi.fn(async () => ({
         ok: true,
+        status: 200,
         json: async () => ({
           prUrl: 'https://github.com/acme/widgets/pull/1',
           prNumber: 1,
@@ -32,9 +33,37 @@ describe('requestPr', () => {
       'test-token',
     );
     expect(result).toEqual({
-      prUrl: 'https://github.com/acme/widgets/pull/1',
-      prNumber: 1,
+      opened: true,
+      pr: {
+        prUrl: 'https://github.com/acme/widgets/pull/1',
+        prNumber: 1,
+      },
     });
+  });
+
+  /*
+   * 409 is the API saying the request changes nothing — every file in it is
+   * already on the base branch. Reported as an outcome, not thrown: a
+   * repository that is up to date has not failed, and throwing here made the
+   * CLI announce a failed run for the most ordinary success there is.
+   *
+   * Asserted before the generic non-2xx path below, because that path is what
+   * used to swallow this case into the same error every real failure produces.
+   */
+  it('reports a 409 as nothing to open, not as a failure', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: false,
+        status: 409,
+        text: async () =>
+          'Nothing to open: the files in this request are identical to the base branch.',
+      })),
+    );
+
+    await expect(
+      requestPr('http://localhost:8787', request, 'test-token'),
+    ).resolves.toEqual({ opened: false });
   });
 
   it('sends the api token as a Bearer Authorization header', async () => {
