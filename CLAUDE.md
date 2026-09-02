@@ -138,6 +138,23 @@
   et un décompte de traductions manquantes fabriqué. Corrigé, et la table est
   désormais indexée par l'union.
 
+  **Le décompte des PR vides sur le fixture était faux, et il avait été recopié
+  quatre fois.** Quatre fichiers affirmaient « deux PR vides, #1 et #2, ouvertes
+  depuis août » — un commentaire de `run-actions.ts`, une migration, le plan, et
+  ce fichier. Personne ne les avait ouvertes. **#1 contient `locales/es.json`,
+  #2 contient `locales/en.json` et `locales/fr.json`** : de vraies traductions,
+  issues de la validation de M1 en août.
+
+  Les PR réellement vides étaient **#10 à #14**, cinq en deux jours, toutes
+  produites par le défaut que `no_changes` corrige, toutes fermées le
+  2026-09-02. C'est d'ailleurs un meilleur argument que celui qui était avancé :
+  cinq en deux jours, pas deux en trois semaines.
+
+  Le mécanisme est celui que ce fichier documente à répétition — une affirmation
+  écrite une fois, puis recopiée de fichier en fichier sans que personne
+  retourne à la source. Elle a fini dans du code livré. `gh pr view N
+  --json changedFiles` la démentait en une commande.
+
   **Les trois migrations sont appliquées aux deux bases.** `run_status` porte
   `no_changes`, `finish_run` et `advance_run` le traitent comme terminal.
 

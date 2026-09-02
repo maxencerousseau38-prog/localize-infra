@@ -5,8 +5,10 @@
 -- committed were unchanged from the branch under `catalogsEqual` — the
 -- semantic equality that matters here, not a byte comparison of the files on
 -- disk — so GitHub produced an empty commit and a pull request with zero
--- changed files. Two such pull requests are still open on the fixture
--- repository from August.
+-- changed files. It produced five of them on the fixture repository in two
+-- days, #10 through #14, all since closed. This comment first said "two such
+-- pull requests are still open ... from August", meaning #1 and #2; both hold
+-- real translations, and the claim had been copied without opening them.
 --
 -- A distinct status rather than `succeeded` with a null `pr_url`: those are two
 -- different outcomes, and telling them apart by testing a nullable column for

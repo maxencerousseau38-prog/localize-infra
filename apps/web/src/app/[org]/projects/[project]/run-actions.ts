@@ -510,7 +510,13 @@ export async function startRun(
      * This used to fall straight through to /v1/open-pr, which created a
      * branch, blobs whose SHAs already existed, a tree identical to the base
      * tree and therefore an empty commit — a pull request with zero changed
-     * files. Two of them are still open on the fixture repository.
+     * files. It produced five of them on the fixture repository in two days,
+     * #10 through #14, all since closed.
+     *
+     * That count used to read "two of them are still open", naming #1 and #2.
+     * Both are real translations — es.json in one, en.json and fr.json in the
+     * other — and the claim was copied from CLAUDE.md into four places without
+     * anyone opening them.
      *
      * Placed after the all-failed guard and gated on `localesFailed === 0`: a
      * run where a locale threw has not established that there was nothing to
