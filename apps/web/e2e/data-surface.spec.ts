@@ -66,24 +66,114 @@ async function open(page: Page, path: string) {
   );
 }
 
+/*
+ * The run that found nothing to do.
+ *
+ * Every assertion here failed before the fix, and none of them is about the
+ * decision that produces the status — that decision is unit-tested through
+ * `catalogsEqual`. What broke was everything downstream: the status reached
+ * surfaces that had opted out of exhaustiveness, and each of them dressed a
+ * successful no-op as a failure.
+ *
+ * A review found it by reading. Nothing executable would have: `run-actions.ts`
+ * has no test file, and a pure decision function extracted from it would have
+ * passed while this page said "Failed". A seeded row is the cheapest thing that
+ * exercises the whole render, which is why it is a fixture and not a mock.
+ */
+test.describe('a run that found nothing to do', () => {
+  async function openTheRun(page: Page) {
+    await open(page, '/runs');
+    await page
+      .getByRole('row')
+      .filter({ hasText: 'No changes needed' })
+      .getByRole('link')
+      .first()
+      .click();
+    await expect(page.getByText('No changes needed').first()).toBeVisible();
+  }
+
+  test('is listed as its own outcome, not folded into success', async ({
+    page,
+  }) => {
+    await open(page, '/runs');
+    const row = page.getByRole('row').filter({ hasText: 'No changes needed' });
+    await expect(row).toHaveCount(1);
+    // It opened no pull request, so the cell that would carry the link is empty
+    // rather than pointing somewhere.
+    await expect(row.getByRole('link', { name: /pull/i })).toHaveCount(0);
+  });
+
+  test('is not dressed as a failure on its detail page', async ({ page }) => {
+    await openTheRun(page);
+
+    // The defect: `RUN_STATE` was `Record<string, …>` with a `?? RUN_STATE.failed`
+    // fallback, so an unlisted status rendered the word "Failed" — flatly
+    // contradicting the two list surfaces that already said otherwise.
+    await expect(page.getByText('Failed', { exact: true })).toHaveCount(0);
+  });
+
+  test('does not paint a pull request stage it never reached', async ({
+    page,
+  }) => {
+    await openTheRun(page);
+
+    // `no_changes` reaches `kind: 'finished'`, and the all-stages-done branch
+    // keyed on that alone — so the one status that opens no pull request was
+    // the one marking that stage complete. State reaches assistive technology
+    // as a word, which is what this reads.
+    const pullRequest = page
+      .getByRole('listitem')
+      .filter({ hasText: 'Pull request' });
+    await expect(pullRequest).toContainText('Not yet');
+    await expect(pullRequest).not.toContainText('Completed');
+  });
+
+  test('claims no missing translations', async ({ page }) => {
+    await openTheRun(page);
+
+    // The shortfall is derived as `keys_extracted * locales_succeeded -
+    // keys_translated`, and `keys_translated` is 0 here by design. Ungated,
+    // the seeded run announces four missing translations it was never short
+    // of — a number nobody measured, presented as one.
+    await expect(page.getByText(/translations? missing/)).toHaveCount(0);
+  });
+
+  test('says why it proposed nothing instead of reddening every locale', async ({
+    page,
+  }) => {
+    await openTheRun(page);
+
+    // The branch returns before `record_run_translations`, so every target
+    // locale fell into `unattempted` and took the same red badge a locale that
+    // genuinely failed gets.
+    await expect(
+      page.getByText(
+        'Every key already had a translation. Nothing was proposed.',
+      ),
+    ).toBeVisible();
+    await expect(page.getByText('No proposals')).toHaveCount(0);
+  });
+});
+
 test.describe('/runs', () => {
   test('states its result count', async ({ page }) => {
     await open(page, '/runs');
-    await expect(page.getByText('2 runs')).toBeVisible();
+    await expect(page.getByText('3 runs')).toBeVisible();
   });
 
   test('the filter narrows to the run that needs a person', async ({
     page,
   }) => {
     await open(page, '/runs');
-    await expect(page.locator('tbody tr')).toHaveCount(2);
+    await expect(page.locator('tbody tr')).toHaveCount(3);
 
     await page
       .getByRole('group', { name: 'Filter runs by status' })
       .getByText('Needs you', { exact: true })
       .click();
 
-    // One of the two seeded runs is escalated, and it is the one that survives.
+    // One of the three seeded runs is escalated, and it is the one that
+    // survives.
     await expect(page.locator('tbody tr')).toHaveCount(1);
     await expect(
       page.getByRole('table').getByText('Needs your call'),
@@ -114,19 +204,19 @@ test.describe('/runs', () => {
     // which is already the accessible name of the input's own X. Two controls
     // sharing one name on a screen is ambiguous to anyone navigating by name.
     await table.getByRole('button', { name: 'Show all runs' }).click();
-    await expect(page.locator('tbody tr')).toHaveCount(2);
+    await expect(page.locator('tbody tr')).toHaveCount(3);
   });
 
   test('search matches the fields a run actually carries', async ({ page }) => {
     await open(page, '/runs');
 
-    // Both seeded runs record `Vite + React`, and neither carries a trigger
+    // All three seeded runs record `Vite + React`, and none carries a trigger
     // command — the field this box used to be labelled for. Searching the
     // framework is what the label now promises, so it has to hold.
     await page
       .getByLabel('Search runs by framework or pull request')
       .fill('vite');
-    await expect(page.locator('tbody tr')).toHaveCount(2);
+    await expect(page.locator('tbody tr')).toHaveCount(3);
 
     // Only the finished run opened a pull request.
     await page.getByLabel('Search runs by framework or pull request').fill('1');

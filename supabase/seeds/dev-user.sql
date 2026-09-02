@@ -169,6 +169,7 @@ declare
   proj public.projects;
   finished public.runs;
   waiting public.runs;
+  unchanged public.runs;
 begin
   select id into uid from auth.users where email = 'acceptance@localize-infra.dev';
   select p.* into proj
@@ -226,6 +227,25 @@ begin
     1, 2, 2, 0, null, null, null, null
   );
 
+  -- 3. The run that found nothing to do.
+  --
+  --    `finish_run` with 'no_changes' at stage 'translate' is exactly the call
+  --    run-actions.ts makes when every key already has a translation. No
+  --    `record_run_translations` before it, deliberately: that path returns
+  --    before recording proposals, and a fixture that recorded some would be a
+  --    shape the product cannot produce — the failure the old sample data had.
+  --
+  --    `keys_translated` is 0 while `locales_succeeded` is 2, and that is what
+  --    makes this fixture worth having. /runs/[id] derives a shortfall from
+  --    `keys_extracted * locales_succeeded - keys_translated`, so without the
+  --    guard this status now carries, it announces four missing translations
+  --    for a run that was never short of anything.
+  unchanged := public.start_run(proj.id);
+  perform public.finish_run(
+    unchanged.id, 'no_changes', 'translate', 'Vite + React',
+    2, 0, 2, 0, null, null, null, null
+  );
+
   perform set_config('role','postgres',true);
 
   -- Give the two runs distinct times, on the owner's side of the switch.
@@ -260,6 +280,23 @@ begin
          started_at  = now() - interval '30 minutes',
          finished_at = now() - interval '30 minutes' + interval '9.7 seconds'
    where project_id = proj.id and status = 'awaiting_review';
+
+  -- The oldest of the three, and that is load-bearing.
+  --
+  -- `listLocaleCoverageForViewer` takes the newest run with `keys_extracted > 0`
+  -- across every run the viewer can see, and this one qualifies: it extracted
+  -- two keys and translated none. Seeded newer, it would become the source of
+  -- /locales coverage while carrying no proposals at all, and those assertions
+  -- would read an empty run instead of the succeeded one.
+  --
+  -- 3.1 seconds because a run that opens no pull request skips the whole GitHub
+  -- write. The first real one measured 3.12s, against 14.4s for the empty pull
+  -- requests it replaced.
+  update public.runs
+     set created_at  = now() - interval '3 hours',
+         started_at  = now() - interval '3 hours',
+         finished_at = now() - interval '3 hours' + interval '3.1 seconds'
+   where project_id = proj.id and status = 'no_changes';
 
   /*
    * Closer, on for the seeded workspace.
