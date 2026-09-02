@@ -24,6 +24,7 @@ import { createClient } from '@/lib/supabase/server';
 import {
   buildKeyCatalog,
   buildOpenPrRequest,
+  catalogsEqual,
   detectFramework,
   extractFromProject,
   mergeLocaleFile,
@@ -329,7 +330,33 @@ export async function startRun(
 
     const localesDir = join(projectDir, detected.localesDir);
     const sourceLocale = project.source_locale;
+    /*
+     * Read before merging, because the merge is what we are comparing against.
+     * `mergeLocaleFile` reads this file internally but does not hand it back,
+     * so the "before" has to be taken separately.
+     */
+    const existingSource = readLocaleFile(localesDir, sourceLocale);
     const mergedSource = mergeLocaleFile(localesDir, sourceLocale, fresh);
+
+    /*
+     * Whether this run has anything to commit.
+     *
+     * Compared against `fresh`, the catalogue just extracted from source, not
+     * `mergedSource`. `mergeLocaleFile` (packages/core) hardcodes
+     * `locale === 'en'` to decide which side wins a conflict, so for any
+     * project whose `source_locale` is not literally `'en'` — `fr`, `de`,
+     * `en-US`, all real and only shape-validated — the merge keeps the stale
+     * `existingSource` value even when the source string genuinely changed.
+     * `mergedSource` would then equal `existingSource` by construction and
+     * this run would report `no_changes` on a source edit it never saw.
+     * `fresh` is the authoritative source catalogue regardless of locale
+     * string, so it is what an actual change must be detected against.
+     * `existing` is read from a checkout of the base branch, so comparing
+     * against it is comparing against exactly what a pull request would be
+     * opened on top of. Nothing here costs a network call: both sides are
+     * already in memory.
+     */
+    let anyChanged = !catalogsEqual(fresh, existingSource);
 
     await advance('translate', { keysExtracted });
     if (!apiToken) {
@@ -440,6 +467,7 @@ export async function startRun(
         // output overwrite a translation somebody had corrected by hand — the
         // opposite of what this product promises about manual changes.
         const merged = mergeTranslations(fresh, existing, translated);
+        if (!catalogsEqual(merged, existing)) anyChanged = true;
 
         files.push({
           path: `${committedLocalesDir}/${locale}.json`,
@@ -474,6 +502,64 @@ export async function startRun(
       throw new Error(
         `All ${localesFailed} target locale(s) failed. Last error: ${failure ?? 'unknown'}`,
       );
+    }
+
+    /*
+     * Nothing to commit, so nothing is committed.
+     *
+     * This used to fall straight through to /v1/open-pr, which created a
+     * branch, blobs whose SHAs already existed, a tree identical to the base
+     * tree and therefore an empty commit — a pull request with zero changed
+     * files. Two of them are still open on the fixture repository.
+     *
+     * Placed after the all-failed guard and gated on `localesFailed === 0`: a
+     * run where a locale threw has not established that there was nothing to
+     * do, only that it did not get far enough to find out. Escalations cannot
+     * exist here — they come from model responses, and a run with nothing
+     * pending made no model call — but it is checked rather than assumed,
+     * because that reasoning is about today's control flow and this branch
+     * must not silently swallow a question.
+     *
+     * Before `record_run_translations`, so a repeated click does not add
+     * another dozen `preserved` proposals nobody asked for. The trade is that
+     * the review screen shows nothing for such a run, which is correct: there
+     * is nothing to review.
+     *
+     * The quality gate is skipped for the same reason — it exists to stop this
+     * run from committing something wrong, and this run commits nothing.
+     * Re-checking content already on the branch would report a failure the run
+     * did not cause.
+     */
+    if (!anyChanged && localesFailed === 0 && escalations.length === 0) {
+      // Checked, unlike every other write in this block: this is the one path
+      // whose only observable effect *is* this write. Every other branch that
+      // reaches here has already committed or already thrown, so a write
+      // failure has something else to fall back on. This one does not — if
+      // `finish_run` fails silently, the row stays at running/translate
+      // forever, the user is told nothing, and it reads as stalled five
+      // minutes later. Throwing routes the failure through the catch/finally
+      // below, which is what closes the run as `failed` with a real message.
+      const { error: finishError } = await supabase.rpc('finish_run', {
+        p_run_id: run.id,
+        p_status: 'no_changes',
+        p_stage: 'translate',
+        p_framework: framework,
+        p_keys_extracted: keysExtracted,
+        p_keys_translated: keysTranslated,
+        p_locales_succeeded: localesSucceeded,
+        p_locales_failed: localesFailed,
+        p_error: null,
+        p_pr_url: null,
+        p_pr_number: null,
+        p_branch: null,
+      });
+      if (finishError) {
+        throw new Error(
+          `Could not record this run as finished: ${finishError.message}`,
+        );
+      }
+      revalidatePath(`/${organization.slug}/projects/${project.slug}`);
+      return { runId: run.id };
     }
 
     // Everything proposed is written down before anything is decided, so the
