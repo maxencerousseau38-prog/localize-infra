@@ -151,8 +151,9 @@ git commit -m "feat(core): catalogsEqual, to tell a real diff from a reformat"
 -- The pipeline called /v1/open-pr unconditionally once the quality and
 -- ambiguity gates passed. When every key was already translated, the files it
 -- committed were byte-identical to the branch, so GitHub produced an empty
--- commit and a pull request with zero changed files. Two such pull requests
--- are still open on the fixture repository from August.
+-- commit and a pull request with zero changed files. Five of them were opened
+-- on the fixture repository, #10 through #14, all since closed. This plan first
+-- said "two ... from August", meaning #1 and #2, which are real translations.
 --
 -- A distinct status rather than `succeeded` with a null `pr_url`: those are two
 -- different outcomes, and telling them apart by testing a nullable column for
@@ -569,7 +570,8 @@ Insert immediately **after** that block:
      * This used to fall straight through to /v1/open-pr, which created a
      * branch, blobs whose SHAs already existed, a tree identical to the base
      * tree and therefore an empty commit — a pull request with zero changed
-     * files. Two of them are still open on the fixture repository.
+     * files. Five of them were opened on the fixture repository, #10 through
+     * #14, all since closed.
      *
      * Placed after the all-failed guard and gated on `localesFailed === 0`: a
      * run where a locale threw has not established that there was nothing to
