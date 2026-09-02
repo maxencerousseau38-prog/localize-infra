@@ -54,6 +54,11 @@ export const INSTALL_COMMAND = 'npx @localize-infra/cli init';
  * and `@localize-infra/cli`, all at 0.1.0, into an organisation scope that
  * `/-/org/localize-infra/package` now lists all three names under.
  *
+ * The flag says *published*, not *which version*, and that is deliberate: it
+ * gates copy about `npx` working at all. `cli` is at 0.2.0 in the repository
+ * and awaiting a publish; the pages this flag drives say nothing that a
+ * version could falsify.
+ *
  * The earlier note here said the scope was "unclaimed". It was not — that read
  * a 404 on a *package* as evidence about the *scope*, which it never was.
  * `docs/releasing.md` carries the corrected check.

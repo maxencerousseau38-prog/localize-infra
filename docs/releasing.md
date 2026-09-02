@@ -2,9 +2,18 @@
 
 Three packages are publishable: `@localize-infra/schemas`, `@localize-infra/core`
 and `@localize-infra/cli`. **All three were published at 0.1.0 on 2026-08-28**;
-this document said they "have not been published" and is corrected here. It
-remains the sequence, and the reasons it is not a single command — which is
-what a 0.2.0 will need.
+this document said they "have not been published" and is corrected here.
+
+**`cli` is at 0.2.0 in this repository and still 0.1.0 on npm.** The bump
+carries the empty-pull-request fix: the API now answers 409 when the files in a
+request already match the base branch, and the CLI reports that as an outcome
+instead of throwing. `schemas` and `core` are untouched, and the new CLI code
+uses no new API from either — so this release is **one package, not three**, and
+the ordering section below does not apply to it.
+
+A 0.2.0 rather than a patch: what a user sees changes. `npx localize-infra init
+--open-pr` against an up-to-date repository used to fail with a raw API error
+and now prints that there was nothing to open.
 
 One thing the first run taught, worth having before the second: the three
 package documents replicated **minutes** apart. `npm view` and
@@ -108,7 +117,12 @@ mkdir -p /tmp/pack
 for p in schemas core cli; do (cd packages/$p && npm pack --pack-destination /tmp/pack); done
 
 mkdir -p /tmp/consumer && cd /tmp/consumer && npm init -y
-npm install /tmp/pack/localize-infra-{schemas,core,cli}-0.1.0.tgz
+# Version per package, not one number: cli moved to 0.2.0 and the other two
+# did not. A glob here would silently install whichever tarballs happen to be
+# in the directory, including stale ones from an earlier run.
+npm install /tmp/pack/localize-infra-schemas-0.1.0.tgz \
+            /tmp/pack/localize-infra-core-0.1.0.tgz \
+            /tmp/pack/localize-infra-cli-0.2.0.tgz
 npx localize-infra            # prints usage
 ```
 
