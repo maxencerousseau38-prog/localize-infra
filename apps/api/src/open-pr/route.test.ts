@@ -25,6 +25,7 @@ function fakeOps(
   return {
     createClient: vi.fn(async () => ({}) as never),
     openPr: vi.fn(async () => ({
+      opened: true as const,
       prUrl: 'https://github.com/acme/widgets/pull/1',
       prNumber: 1,
     })),
@@ -121,8 +122,39 @@ describe('openPrRouteHandler', () => {
     );
   });
 
+  /*
+   * 409 rather than a 200 with a missing URL, because `@localize-infra/cli`
+   * 0.1.0 is on npm and parses the 200 body with a schema that requires
+   * `prUrl`. A widened body makes that published client throw a raw ZodError;
+   * a non-2xx it already handles, and reports as a readable sentence.
+   */
+  it('returns 409 when there was nothing to open', async () => {
+    const openPr = vi.fn(async () => ({
+      opened: false as const,
+      reason: 'no_changes' as const,
+    }));
+
+    const result = await openPrRouteHandler(
+      validBody,
+      {
+        app: { appId: '123', privateKey: 'fake-key' },
+        defaultInstallationId: 42,
+      },
+      fakeOps({ openPr }),
+    );
+
+    expect(result.status).toBe(409);
+    expect(result.body).toEqual({
+      error:
+        'Nothing to open: the files in this request are identical to the base branch.',
+    });
+    // No pull request URL anywhere in the response: there is none to give.
+    expect(JSON.stringify(result.body)).not.toContain('pull');
+  });
+
   it('returns 501 when the request names no installation and none is configured', async () => {
     const openPr = vi.fn(async () => ({
+      opened: true as const,
       prUrl: 'https://example.com/pull/1',
       prNumber: 1,
     }));

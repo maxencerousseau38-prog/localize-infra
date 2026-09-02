@@ -100,6 +100,13 @@ async function main(): Promise<void> {
     console.log(
       'No PR opened: all locale translations failed, so there was nothing to include.',
     );
+  } else if (openPr) {
+    // Reached when the API answered 409: every file the request carried is
+    // already on the base branch. Said as the outcome it is, not as a failure —
+    // the repository is up to date, which is the point of running again.
+    console.log(
+      'No PR opened: every translation is already on the base branch.',
+    );
   }
 }
 

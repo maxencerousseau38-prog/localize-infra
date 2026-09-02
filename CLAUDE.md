@@ -155,6 +155,29 @@
   retourne à la source. Elle a fini dans du code livré. `gh pr view N
   --json changedFiles` la démentait en une commande.
 
+  **Le refus est désormais aussi dans l'API, et c'est elle qui a le dernier
+  mot.** `services/github-app/src/open-pr.ts` compare le SHA de l'arbre produit
+  par `createTree` à celui de la base : identiques, il n'y a rien à livrer.
+  `/v1/open-pr` répond alors **409**, et `packages/cli` traite ce code comme un
+  résultat — « No PR opened: every translation is already on the base branch. »
+  — au lieu de lever.
+
+  Ce contrôle vit là et pas chez l'appelant parce que **seule cette couche sait
+  ce que contient la base**. `apps/web` matérialise une copie de la branche et
+  peut comparer le contenu lui-même, ce qu'il fait ; `packages/cli` travaille
+  sur un répertoire local qui peut déjà différer du distant, si bien que sa
+  propre comparaison répondrait à une autre question.
+
+  **409 plutôt qu'un corps 200 élargi, à cause de npm.**
+  `@localize-infra/cli@0.1.0` est publié et parse la réponse 200 avec un schéma
+  qui exige `prUrl`. Un corps sans lui ferait planter ce client sur une
+  `ZodError` illisible ; un non-2xx, il le gère déjà et l'affiche en clair.
+
+  **Et `apps/api` ne suit pas Git.** Fusionner ne déploie pas ce correctif :
+  il faut `npx vercel deploy --prod --archive=tgz` depuis `apps/api`. Tant que
+  ce n'est pas fait, l'API en ligne continue d'ouvrir des PR vides — c'est
+  exactement le piège que ce fichier décrit plus bas, et il s'applique ici.
+
   **Les trois migrations sont appliquées aux deux bases.** `run_status` porte
   `no_changes`, `finish_run` et `advance_run` le traitent comme terminal.
 

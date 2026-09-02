@@ -87,7 +87,35 @@ export async function openPrRouteHandler(
       body: parsed.data.body,
       files: parsed.data.files,
     });
-    return { status: 200, body: OpenPrApiResponseSchema.parse(result) };
+    /*
+     * Nothing to open is not a failure, and not a success carrying a URL that
+     * does not exist. It gets its own status.
+     *
+     * 409 rather than a widened 200 body, and that choice is about a package
+     * already on npm. `@localize-infra/cli@0.1.0` parses the 200 body with a
+     * strict schema requiring `prUrl` and `prNumber`, so a 200 without them
+     * makes that published client throw a raw ZodError. It already handles a
+     * non-2xx by throwing with the status and body text, so a 409 reaches its
+     * user as a readable sentence instead — worse than a typed outcome, far
+     * better than the empty pull request it opens today.
+     */
+    if (!result.opened) {
+      return {
+        status: 409,
+        body: {
+          error:
+            'Nothing to open: the files in this request are identical to the base branch.',
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      body: OpenPrApiResponseSchema.parse({
+        prUrl: result.prUrl,
+        prNumber: result.prNumber,
+      }),
+    };
   } catch (err) {
     // Log the full error server-side for the operator's own diagnostics, but
     // never echo it back to the caller: Octokit/GitHub errors can contain
