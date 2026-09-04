@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "//": "test:e2e names SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY under `env` because turbo filters the environment it hands a task: a variable not named there is absent from it, and nothing is said at the end of the run. The Vercel build log for this repository prints exactly that warning. The first CI run with a database set both variables in the job and the guard step confirmed it, and 55 tests skipped anyway — turbo had not passed them through. A comment key lives here rather than inside the task because turbo rejects unknown keys within one; packages/ui/turbo.json uses the same placement.",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -17,7 +18,6 @@
       "dependsOn": ["^build", "build"],
       "outputs": [],
       "cache": false,
-      "//": "Turbo filters the environment it hands a task: a variable not named here is simply absent, with no warning at the task's end. That is not a guess — the Vercel build log for this repository prints exactly that about SUPABASE_URL. The first CI run with a database set both variables in the job, the guard step confirmed SUPABASE_URL was set, and 55 tests skipped anyway because turbo did not pass them through. Naming them is what makes the database reach the suite.",
       "env": ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]
     },
     "dev": {
