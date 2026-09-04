@@ -72,6 +72,40 @@ X-Vercel-Id: cdg1::cdg1
 
 Re-run on 2026-08-28 against a fresh deployment: identical, 3.20s.
 
+### The no-changes path, exercised against real GitHub
+
+The block above only covers translation. `/v1/open-pr` refusing a request that
+changes nothing is a separate claim, and until 2026-09-04 it rested on four unit
+tests against a fake Octokit — a shape the real API could have contradicted.
+
+Run against the deployed service on 2026-09-04, sending one file byte-identical
+to what `maxencerousseau38-prog/localize-infra-fixture-vite` already holds on
+`main`:
+
+```
+POST /v1/open-pr  valid token, unchanged file
+  409 {"error":"Nothing to open: the files in this request are identical
+       to the base branch."}
+```
+
+What did **not** happen matters as much as the status. Before and after, on the
+fixture repository:
+
+```
+highest pull request     14  ->  14      (no #15)
+localize-infra/* branches 0  ->   0      (no orphan ref)
+main tree sha       5f8f3af  ->  5f8f3af
+```
+
+The branch count is the part no unit test could establish. `createRef` was moved
+after `createTree` precisely so a no-op run leaves nothing behind — the earlier
+order would have traded empty pull requests for orphan branches — and this is
+the first evidence of that ordering holding against GitHub rather than against a
+test double.
+
+The probe is safe to repeat: if the check ever regresses, it opens a pull
+request instead of answering 409, which is visible and closable.
+
 ### The escalation path, which the block above cannot see
 
 Every string in that check comes back `confident`, so it passes identically

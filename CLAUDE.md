@@ -158,7 +158,9 @@
   **Le refus est désormais aussi dans l'API, et c'est elle qui a le dernier
   mot.** `services/github-app/src/open-pr.ts` compare le SHA de l'arbre produit
   par `createTree` à celui de la base : identiques, il n'y a rien à livrer.
-  `/v1/open-pr` répond alors **409**, et `packages/cli` traite ce code comme un
+  `/v1/open-pr` répond alors **409** — vérifié contre le vrai GitHub le
+  2026-09-04, sans PR ni branche orpheline créée, voir `apps/api/DEPLOYING.md` —
+  et `packages/cli` traite ce code comme un
   résultat — « No PR opened: every translation is already on the base branch. »
   — au lieu de lever.
 
