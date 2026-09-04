@@ -73,8 +73,8 @@ localize-infra --version
   let those keys be removed.
 - `--api-url <url>` — base URL of the `apps/api` instance to translate
   against and (if `--open-pr` is set) open a PR through. Defaults to
-  `http://localhost:8787`. There is currently no environment-variable
-  equivalent for this flag (only the API token has one — see below); it
+  `http://localhost:8787`. Also readable from `LOCALIZE_API_URL` when the flag
+  is absent — the flag wins when both are set; it
   must be passed explicitly if `apps/api` isn't running on the default
   local port.
 - `--api-token <token>` — bearer token sent as `Authorization: Bearer
@@ -128,12 +128,22 @@ refusal lives in the API — but the message is only readable from 0.2.0 on.
 
 ### Environment variables
 
-| Variable              | Purpose                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `LOCALIZE_API_TOKEN`   | Bearer token for `apps/api`. Preferred over `--api-token` (see above). |
+| Variable             | Purpose                                                                 |
+| -------------------- | ----------------------------------------------------------------------- |
+| `LOCALIZE_API_URL`   | Base URL of the `apps/api` instance to use. Overridden by `--api-url`.  |
+| `LOCALIZE_API_TOKEN` | Bearer token for `apps/api`. Preferred over `--api-token` (see above). |
 
-`--api-url` has no environment-variable equivalent today — pass it
-explicitly, or rely on the `http://localhost:8787` default.
+The flag wins over the variable for both, and **an empty value counts as
+absent rather than as an override**. `LOCALIZE_API_URL=` in a shell profile,
+or a CI secret that resolved to nothing, would otherwise replace the default
+with an empty string and send every request to `/v1/translate` with no origin
+— a fetch error naming a URL nobody typed.
+
+`LOCALIZE_API_URL` matters more than it looks: the default points at
+`localhost`, and **there is no hosted API open to the public**. The instance
+this command talks to is one you run yourself, so its address is the setting
+you cannot avoid — and until now it was the one you had to retype on every
+invocation.
 
 ## Supported frameworks
 
@@ -147,7 +157,7 @@ supported:
 See `packages/core/src/detect/index.ts` for the exact detection signals and
 source globs used per framework.
 
-## Known extraction limits (v1)
+## Known extraction limits
 
 These are honest boundaries of the current extractor, not a TODO list:
 
