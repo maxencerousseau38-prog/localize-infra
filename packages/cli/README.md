@@ -61,6 +61,8 @@ since `init` always attempts the translation step afterward.
 
 ```bash
 localize-infra init [directory] [--force] [--api-url <url>] [--api-token <token>] [--locales <list>] [--open-pr] [--owner <owner>] [--repo <repo>] [--base-branch <branch>]
+localize-infra --help
+localize-infra --version
 ```
 
 - `directory` — defaults to the current working directory.
@@ -94,6 +96,35 @@ localize-infra init [directory] [--force] [--api-url <url>] [--api-token <token>
 - `--repo <repo>` — GitHub repository name to open the PR against. Required
   when `--open-pr` is set.
 - `--base-branch <branch>` — base branch for the PR. Defaults to `main`.
+- `-h`, `--help` — print usage and exit. Recognised anywhere in the arguments,
+  so `localize-infra init --help` prints help rather than starting a run that
+  calls a model and bills for it.
+- `-v`, `--version` — print the installed version and exit. Read from the
+  package manifest, so it cannot disagree with what npm installed.
+
+### When there is nothing to open (0.2.0)
+
+`--open-pr` against a repository that is already fully translated **no longer
+fails, and no longer opens an empty pull request.** It prints:
+
+```
+No PR opened: every translation is already on the base branch.
+```
+
+Before 0.2.0 the API opened a pull request containing zero changed files —
+Git deduplicates blobs by content, so committing files identical to the base
+branch produces a commit with no diff and a pull request with nothing in it.
+Five of those accumulated on one repository in two days.
+
+The check is made by `apps/api`, not here, because only it knows what the base
+branch holds: this command runs against your working directory, which may
+already differ from the remote, so a comparison made locally would answer a
+different question. The endpoint answers `409` and this command reports it as
+the outcome it is.
+
+**If you are on 0.1.0**, an up-to-date repository gives you a raw API error
+instead of that sentence. The empty pull request is already prevented — the
+refusal lives in the API — but the message is only readable from 0.2.0 on.
 
 ### Environment variables
 
