@@ -16,7 +16,9 @@
     "test:e2e": {
       "dependsOn": ["^build", "build"],
       "outputs": [],
-      "cache": false
+      "cache": false,
+      "//": "Turbo filters the environment it hands a task: a variable not named here is simply absent, with no warning at the task's end. That is not a guess — the Vercel build log for this repository prints exactly that about SUPABASE_URL. The first CI run with a database set both variables in the job, the guard step confirmed SUPABASE_URL was set, and 55 tests skipped anyway because turbo did not pass them through. Naming them is what makes the database reach the suite.",
+      "env": ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]
     },
     "dev": {
       "cache": false,
