@@ -18,7 +18,13 @@
       "dependsOn": ["^build", "build"],
       "outputs": [],
       "cache": false,
-      "env": ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]
+      "env": [
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "GITHUB_APP_ID",
+        "GITHUB_APP_PRIVATE_KEY",
+        "GITHUB_APP_SLUG"
+      ]
     },
     "dev": {
       "cache": false,

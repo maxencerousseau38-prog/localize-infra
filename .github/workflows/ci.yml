@@ -108,4 +108,27 @@ jobs:
           echo "SUPABASE_URL is set; the database-backed specs will run."
 
       - run: npx playwright install --with-deps chromium
+
+      # Fabricated, and safe to fabricate.
+      #
+      # `isGitHubConfigured()` decides which sentence a workspace without an
+      # installation is shown: "has not installed the Localize GitHub App" when
+      # the deployment has App credentials, and "no GitHub App configured" when
+      # it has none. Every real deployment has them, so CI without them tests a
+      # configuration that only a broken deployment has — and workspace.spec.ts
+      # rightly asserts the first sentence.
+      #
+      # These never reach GitHub. `readGitHubApp` only checks that the id is a
+      # non-zero number and the key is non-empty; Octokit is constructed further
+      # down, after `installationIdFor` returns an installation, and no seeded
+      # organization has one. If a future seed adds an installation row, this is
+      # where the confusing failure will come from.
+      - name: Present a configured GitHub App, without a usable one
+        run: |
+          {
+            echo "GITHUB_APP_ID=1"
+            echo "GITHUB_APP_PRIVATE_KEY=deliberately-not-a-key"
+            echo "GITHUB_APP_SLUG=localize-infra"
+          } >> "$GITHUB_ENV"
+
       - run: npm run test:e2e
