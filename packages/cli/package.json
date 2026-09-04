@@ -1,6 +1,17 @@
 {
   "name": "@localize-infra/cli",
   "version": "0.2.0",
+  "description": "Extract hardcoded UI strings from a React codebase, translate them, and open a pull request with the locale files.",
+  "keywords": [
+    "i18n",
+    "l10n",
+    "localization",
+    "internationalization",
+    "translation",
+    "react",
+    "nextjs",
+    "cli"
+  ],
   "private": false,
   "license": "MIT",
   "type": "module",

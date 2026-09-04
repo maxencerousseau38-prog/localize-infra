@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { runInit } from './commands/init.js';
+import { USAGE, parseTopLevel, readVersion } from './meta.js';
 
 function readFlagValue(args: string[], flag: string): string | undefined {
   const index = args.indexOf(flag);
@@ -39,7 +40,25 @@ function findTargetDir(args: string[]): string | undefined {
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const command = args[0];
+
+  /*
+   * Answered before anything else is read, and before `init` can start.
+   *
+   * `--help` and `--version` reached the unknown-command branch until now, so
+   * they printed "Unknown command: --version" and exited 1. Handling them here
+   * also means `localize-infra init --help` prints help instead of starting a
+   * run that calls a model and bills for it.
+   */
+  const top = parseTopLevel(args);
+  if (top.kind === 'help') {
+    console.log(USAGE);
+    return;
+  }
+  if (top.kind === 'version') {
+    console.log(readVersion());
+    return;
+  }
+
   const force = args.includes('--force');
   const apiUrl = readFlagValue(args, '--api-url');
   // --api-token takes precedence over LOCALIZE_API_TOKEN when both are given.
@@ -55,10 +74,11 @@ async function main(): Promise<void> {
   const baseBranch = readFlagValue(args, '--base-branch');
   const targetDir = findTargetDir(args.slice(1));
 
-  if (command !== 'init') {
-    console.error(
-      `Unknown command: ${command ?? '(none)'}\nUsage: localize-infra init [directory] [--force] [--api-url <url>] [--locales <comma,separated,list>] [--open-pr] [--owner <owner>] [--repo <repo>] [--base-branch <branch>] [--api-token <token>]\nAPI token: set the LOCALIZE_API_TOKEN environment variable (recommended). The --api-token flag is also available but leaks the token into shell history and process listings (e.g. \`ps\`); prefer the environment variable. If both are set, --api-token takes precedence.`,
-    );
+  if (top.kind === 'unknown') {
+    // One usage text, in `meta.ts`, so the flags this branch advertises
+    // cannot drift from the ones `--help` prints or the parser accepts. A
+    // test asserts it names every flag consumed.
+    console.error(`Unknown command: ${top.command ?? '(none)'}\n\n${USAGE}`);
     process.exitCode = 1;
     return;
   }
