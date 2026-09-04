@@ -51,5 +51,61 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+
+      # The database these tests read is created here and dies with the job.
+      #
+      # Deliberately not a hosted project. The suites mutate rows and
+      # `fullyParallel` is on, so two pull requests sharing one database would
+      # race — the same failure this repository already fixed at test level by
+      # giving one spec its own project. A per-run stack removes the shared
+      # resource rather than scheduling around it.
+      #
+      # No secret is involved: the local stack's keys are fixed and public by
+      # design. A step here that needs a secret is a step that is wrong.
+      #
+      # This is also the first time `supabase/migrations` is replayed from an
+      # empty database. Both hosted databases were built one migration at a
+      # time through the MCP tool and have never been rebuilt, so a failure
+      # here is a real finding about the sequence — not a flake to retry.
+      - name: Start the database, applying every migration and the seed
+        run: npm run db:local
+
+      # Mapped explicitly, and loudly when the names are wrong.
+      #
+      # `supabase status -o env` emits the stack's own names; the application
+      # reads SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY. The `:?` guards turn a
+      # renamed key into a failed step with a readable message instead of two
+      # empty variables — which would leave the 48 database-backed tests
+      # skipping themselves while this job stayed green, which is precisely how
+      # the gap survived this long.
+      #
+      # Only the key names are printed, never the values.
+      - name: Export the stack's address to the job
+        run: |
+          set -euo pipefail
+          npx supabase status -o env > /tmp/supabase.env
+          echo "keys emitted by supabase status:"
+          cut -d= -f1 /tmp/supabase.env | sed 's/^/  /'
+          set -a; . /tmp/supabase.env; set +a
+          : "${API_URL:?supabase status emitted no API_URL — see the key list above}"
+          : "${ANON_KEY:?supabase status emitted no ANON_KEY — see the key list above}"
+          echo "SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+
+      # The guard that makes this job worth adding.
+      #
+      # data-surface, workspace and auth skip themselves when SUPABASE_URL is
+      # unset — 48 tests, and the job passes anyway. Before this change that was
+      # the steady state and nobody read it. Failing here means a broken
+      # database step can never again be reported as a green suite.
+      - name: Refuse to run the suite without a database
+        run: |
+          test -n "${SUPABASE_URL:-}" || {
+            echo "SUPABASE_URL is empty. The 48 database-backed tests would"
+            echo "skip themselves and this job would pass having proved nothing."
+            exit 1
+          }
+          echo "SUPABASE_URL is set; the database-backed specs will run."
+
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
