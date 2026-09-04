@@ -303,10 +303,19 @@ begin
    *
    * Without this the sidebar has no Closer group and /closer answers 404, which
    * is the correct behaviour and would make the acceptance suite unable to see
-   * the screen at all. Seeded rather than enabled by hand in one database, so a
-   * fresh seed produces a workspace the tests can actually exercise.
+   * the screen at all.
+   *
+   * **This statement had never once run.** It said `org.id`, and `org` is
+   * declared in the block above, not this one — so the whole seed aborted here
+   * with "missing FROM-clause entry for table org". Nobody saw it because
+   * nobody had ever replayed the seed from an empty database; the development
+   * database got its Closer row by hand, which is exactly what the comment
+   * here used to deny.
+   *
+   * `proj.organization_id` rather than a fresh lookup: `proj` is already the
+   * demo project of the acceptance workspace, selected twenty lines above.
    */
   insert into public.closer_workspaces (organization_id, note)
-  values (org.id, 'Seeded development workspace')
+  values (proj.organization_id, 'Seeded development workspace')
   on conflict (organization_id) do nothing;
 end $$;
