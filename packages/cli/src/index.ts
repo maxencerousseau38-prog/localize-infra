@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { runInit } from './commands/init.js';
+import { fromFlagOrEnv } from './config.js';
 import { USAGE, parseTopLevel, readVersion } from './meta.js';
 
 function readFlagValue(args: string[], flag: string): string | undefined {
@@ -60,10 +61,26 @@ async function main(): Promise<void> {
   }
 
   const force = args.includes('--force');
-  const apiUrl = readFlagValue(args, '--api-url');
-  // --api-token takes precedence over LOCALIZE_API_TOKEN when both are given.
-  const apiToken =
-    readFlagValue(args, '--api-token') ?? process.env.LOCALIZE_API_TOKEN;
+  /*
+   * Flag over environment for both, and an empty value counts as neither.
+   *
+   * `--api-url` had no environment equivalent while `--api-token` did, so the
+   * one setting a user cannot avoid — the default points at localhost, and
+   * there is no hosted API open to the public — was the one they had to retype
+   * on every invocation.
+   *
+   * `fromFlagOrEnv` rather than `??` because `LOCALIZE_API_URL=` sets the
+   * variable to the empty string, which `??` keeps: every request would then
+   * be sent to `/v1/translate` with no origin.
+   */
+  const apiUrl = fromFlagOrEnv(
+    readFlagValue(args, '--api-url'),
+    process.env.LOCALIZE_API_URL,
+  );
+  const apiToken = fromFlagOrEnv(
+    readFlagValue(args, '--api-token'),
+    process.env.LOCALIZE_API_TOKEN,
+  );
   const localesArg = readFlagValue(args, '--locales');
   const locales = localesArg
     ? localesArg.split(',').map((locale) => locale.trim())

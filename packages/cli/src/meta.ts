@@ -38,7 +38,8 @@ translates into each target locale, and optionally opens a pull request.
 
 Options:
   --force                     Overwrite existing locale files
-  --api-url <url>             apps/api base URL (default: http://localhost:8787)
+  --api-url <url>             apps/api base URL, or LOCALIZE_API_URL
+                              (default: http://localhost:8787)
   --api-token <token>         Bearer token for apps/api — prefer the environment
                               variable, see below
   --locales <a,b,c>           Target locales (default: de,ja,es,ar,pt-BR)
@@ -48,6 +49,9 @@ Options:
   --base-branch <branch>      Base branch for the pull request (default: main)
   -h, --help                  Print this message
   -v, --version               Print the version
+
+Environment: LOCALIZE_API_URL and LOCALIZE_API_TOKEN are read when the matching
+flag is absent. An empty value counts as absent, not as an override.
 
 API token: set the LOCALIZE_API_TOKEN environment variable (recommended). The
 --api-token flag is also available but leaks the token into shell history and
