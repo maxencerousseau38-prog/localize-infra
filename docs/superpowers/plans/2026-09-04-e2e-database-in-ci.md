@@ -217,7 +217,16 @@ Expected: unchanged from before the run — production 8 runs, development 3. A 
 - Modify: `.github/workflows/ci.yml`
 - Modify: `docs/product/11-mvp-scorecard.md`
 
-`supabase/tests/tenant-isolation.sql` and `supabase/tests/closer-suppression.sql` are pgTAP tests that nothing executes — not CI, not a script, not a documented command. `docs/product/11-mvp-scorecard.md` cites the first as what "asserts RLS isolation". It asserts nothing while nothing runs it.
+> **Corrected on 2026-09-05: these are not pgTAP tests, and `supabase test db`
+> would not have run them.** Each is a single `do $$ … $$` block that builds a
+> verdict string and ends with a deliberate `raise exception`, so the
+> transaction rolls back — which means every one of them exits non-zero on
+> success. The exit code proves nothing and neither does the marker, since a
+> script that aborts early also exits non-zero without reaching its raise.
+> `supabase/tests/run.sh` reads the verdict and compares each check against what
+> it wanted, and fails on a missing verdict line.
+
+`supabase/tests/tenant-isolation.sql` and `supabase/tests/closer-suppression.sql` are database proofs that nothing executes — not CI, not a script, not a documented command. `docs/product/11-mvp-scorecard.md` cites the first as what "asserts RLS isolation". It asserts nothing while nothing runs it.
 
 Task 1 makes them runnable at no extra cost: `supabase test db` runs pgTAP against the stack that is already up.
 
