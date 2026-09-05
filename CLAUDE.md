@@ -91,7 +91,7 @@
 
   | Projet | `target_locales` | Runs créés |
   |---|---|---|
-  | `localize-infra-test` — « Localize Infra Test » | **vide** | **0, jamais** |
+  | `localize-infra-test` — « Localize Infra Test » | **vide** | **0, jamais** — supprimé depuis, voir plus bas |
   | `localize-infra-test-2` — « localize-infra test #2 » | `fr, de, ja, es` | les 7, sans exception |
 
   `startRun` refuse un projet sans langue cible **avant** `start_run`, donc sans
@@ -123,9 +123,27 @@
   qu'un run a eu lieu depuis l'écran : lire la ligne en base et le numéro de
   PR.**
 
-  **Un projet sans langue cible est un piège qui rejouera.** Il affiche le
-  bouton, accepte le clic, et refuse en silence côté base. Soit
-  `localize-infra-test` reçoit des langues, soit il disparaît.
+  **`localize-infra-test` a été supprimé le 2026-09-05, et l'organisation n'a
+  plus qu'un projet.** Il portait 0 run et 0 proposition — créé le 2026-08-29 à
+  00:12, cinq minutes avant `localize-infra test #2`, sur **le même dépôt**, et
+  jamais utilisé. Toute l'activité, 8 runs et 72 propositions, est sur l'autre.
+
+  Deux projets pointant sur un seul dépôt étaient l'ambiguïté elle-même. Lui
+  donner des langues cibles l'aurait rendu utilisable sans la lever : deux
+  projets actifs sur `localize-infra-fixture-vite` produiraient des pull
+  requests concurrentes, et un clic sur le mauvais coûterait cette fois un run
+  réel plutôt qu'un refus silencieux.
+
+  La suppression a demandé un `DELETE` SQL direct : `deleteProject` existe dans
+  le code et **n'a aucun appelant**, donc le produit ne sait pas supprimer un
+  projet. La requête portait son propre garde — `and not exists (select 1 from
+  runs where project_id = ...)` — pour qu'une erreur de slug ne puisse pas
+  emporter une ligne qui compte. Vérifié après : totaux inchangés, 8 runs, 72
+  propositions, 1 organisation, 1 installation.
+
+  Ce qui reste vrai et vaut au-delà de ce cas : **un projet sans langue cible
+  affiche désormais la raison au lieu d'un bouton inopérant** (#67), donc la
+  configuration n'est plus un piège — elle est seulement inutile.
 
   **Deux acquis de l'épisode, indépendants de la fausse piste.** La section
   entre le clic et `start_run` vivait hors du `try` : une exception y était
