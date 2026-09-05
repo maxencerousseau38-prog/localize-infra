@@ -1,6 +1,7 @@
 'use server';
 
 import { findOrganization, toSlug } from '@/lib/data/workspace';
+import { confirmsDeletion } from '@/lib/projects/deletion';
 import { createClient } from '@/lib/supabase/server';
 import { InvalidLocales, parseTargetLocales } from '@localize-infra/schemas';
 import { revalidatePath } from 'next/cache';
@@ -92,20 +93,86 @@ export async function createProject(
   return {};
 }
 
+export interface DeleteProjectState {
+  error?: string;
+}
+
+/**
+ * Delete a project, and everything recorded against it.
+ *
+ * This had no caller anywhere in the application until 2026-09-05 — the
+ * function existed, was reachable as a server action, and no screen offered it.
+ * Removing a project meant a direct `DELETE` against production, which is what
+ * was done once, by hand.
+ *
+ * **The confirmation is checked here, not only in the form.** A server action is
+ * a public endpoint: the input a page renders is a convenience for the person,
+ * and anything that decides whether rows are destroyed has to hold when the
+ * request does not come from that page.
+ *
+ * No organization check: the delete policy restricts this to owners and admins
+ * of the project's own organization, so a project id from another workspace
+ * matches no rows rather than deleting one. The slug is taken from the same
+ * request, so it is checked against the project actually being deleted rather
+ * than trusted.
+ */
 export async function deleteProject(
   orgSlug: string,
   projectId: string,
-): Promise<void> {
+  _prev: DeleteProjectState,
+  formData: FormData,
+): Promise<DeleteProjectState> {
   const supabase = await createClient();
 
-  // No organization check here on purpose: the delete policy already restricts
-  // this to owners and admins of the project's own organization, so a project
-  // id from another workspace matches no rows rather than deleting one.
-  const { error } = await supabase
+  // Read back the row being deleted rather than trusting a slug from the form:
+  // the confirmation must match *this* project, and a caller that is not the
+  // page can send any pair it likes. Under RLS this also answers "may you see
+  // it at all", so a project id from another workspace stops here.
+  const { data: project } = await supabase
+    .from('projects')
+    .select('slug')
+    .eq('id', projectId)
+    .maybeSingle();
+
+  if (!project) return { error: 'That project is not available.' };
+
+  // `FormData.get` returns a File for a file part, and `File` has no `.trim`.
+  // Casting it to `string` would turn a hand-made request into a 500 instead of
+  // a refusal, on an endpoint anyone can reach.
+  const typed = formData.get('confirm');
+
+  if (
+    !confirmsDeletion(typeof typed === 'string' ? typed : null, project.slug)
+  ) {
+    return {
+      error: `Type ${project.slug} exactly to confirm. Nothing has been deleted.`,
+    };
+  }
+
+  /*
+   * `select()` on the delete, so the rows that went are the answer.
+   *
+   * Reading the project above passes under the *select* policy, which admits
+   * every member of the workspace; deleting passes under
+   * `projects_delete_admin`, which admits owners and admins. A member therefore
+   * gets past the confirmation, deletes nothing, and Postgres reports no error
+   * — a redirect to the project list would tell them it worked. The count is
+   * the only thing that distinguishes "deleted" from "was not allowed to".
+   */
+  const { data: deleted, error } = await supabase
     .from('projects')
     .delete()
-    .eq('id', projectId);
-  if (error) throw new Error(`Could not delete the project: ${error.message}`);
+    .eq('id', projectId)
+    .select('id');
+  if (error) return { error: `Could not delete the project: ${error.message}` };
+
+  if (!deleted || deleted.length === 0) {
+    return {
+      error:
+        'Only an owner or an admin of this workspace can delete a project. Nothing has been deleted.',
+    };
+  }
 
   revalidatePath(`/${orgSlug}/projects`);
+  redirect(`/${orgSlug}/projects`);
 }
