@@ -42,6 +42,27 @@
   déclare que l'évaluation humaine n'a pas eu lieu ; `/pricing` ne publie pas
   de tarifs non modélisés ; `/security` divulgue l'écart de résidence UE.
 
+  **La landing avait un héro à 68px et des titres de section à 24px, contre une
+  prose à 17px** — un titre qui ne se classe pas contre son propre corps de
+  texte, l'échec que `DESIGN.md` §3.5 nomme. Les sections emploient désormais
+  `display`/`display-lg`, le palier que `PageHeader` et la bande de clôture
+  utilisaient déjà ; l'échelle est 68 → 40 → 17 (#84). Le héro est passé à 500 :
+  §3.3 bannit 700 parce qu'« à ces tailles cela lit comme un cri », et à 68px
+  l'argument valait aussi pour 600.
+
+  Deux règles du contrat sont passées de la discipline de revue au test. **§4.4**
+  — aucune paire de sections adjacentes ne partage sa signature — était rédigée
+  en forme testable et n'avait jamais été testée ; l'audit des sept sections n'a
+  trouvé aucune violation, donc le test fige un état correct au lieu d'en
+  corriger un mauvais. Et **le balayage responsive échantillonne 640** en plus de
+  768 : l'en-tête débordait de 28px à cette largeur exacte, la frontière `sm` où
+  la barre passait d'un coup de sa sheet à sa rangée desktop complète, et la
+  liste allait de 390 à 768 en l'enjambant.
+
+  La leçon transférable est celle-là, pas les pixels : **un point de bascule est
+  l'endroit où une mise en page change, donc la largeur la plus susceptible
+  d'être fausse et la moins susceptible d'être mesurée.**
+
   `/benchmarks` et `/quality` ne contiennent **aucun chiffre écrit à la main** :
   tout provient de `packages/eval/src/report/benchmarks.json`, généré depuis le
   corpus par `npm run benchmarks:build -w @localize-infra/eval`, et un test
@@ -568,9 +589,32 @@ encore résolu, et à traiter quand la résidence des données UE sera
 réellement adressée.
 
 ## Avant toute UI
-Charger /mnt/skills/public/frontend-design/SKILL.md.
-Produire le plan de design (palette, typo, layout, signature) AVANT le CSS.
-Éviter les défauts IA identifiés dans le skill, notamment l'accent #D97757.
+
+**`DESIGN.md` à la racine fait autorité.** Ce point ne le citait pas, alors qu'il
+se déclare *« this document is the contract »* : 692 lignes, seize sections, et
+un §16 qui tranche la question à laquelle ce paragraphe répondait mal — *« une PR
+qui introduit une valeur absente de ce document est incomplète : soit elle
+emploie un token existant, soit elle amende ce document d'abord, avec le
+raisonnement. »*
+
+L'ordre d'autorité est celui que §15 énonce : `DESIGN.md` → le langage visuel de
+Localize Infra → l'architecture de `packages/ui` → les primitives externes.
+
+Ce que ce point demandait — produire un plan de design (palette, typo, layout,
+signature) avant le CSS — **est déjà fait, et le refaire est le défaut, pas la
+méthode.** La palette, l'échelle typographique en deux registres et la signature
+(§1.4 : la State Rule, l'Iris réservé au seul « votre jugement est requis », le
+pipeline en cinq étapes) sont décidées et testées. Un chantier UI produit donc
+un plan de *composition* — quelles surfaces changent, contre quelles sections du
+contrat — et non une identité neuve.
+
+Reste vrai et vaut d'être relu : éviter les défauts IA du skill, dont l'accent
+#D97757. `DESIGN.md` §1.3 et §14 vont plus loin et sont, eux, opposables.
+
+Le skill : `frontend-design` (plugin `claude-plugins-official`), à invoquer par
+son nom. **Ce point donnait `/mnt/skills/public/frontend-design/SKILL.md`, qui
+n'existe pas sur cette machine** — l'instruction était donc insuivable telle
+qu'écrite, et c'est en la suivant qu'on s'en aperçoit.
 
 ## MCP
 Supabase : migrations, types, RLS (get_advisors systématique). Jamais les traductions.

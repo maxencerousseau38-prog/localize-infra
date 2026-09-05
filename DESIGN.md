@@ -677,8 +677,20 @@ document first with the reasoning.
 Enforced by test today: the type scale (no ad-hoc sizes, both registers,
 editorial steps kept out of the app), token contrast in both schemes, axe on
 every route, ARIA ownership, reduced motion, responsive overflow, the
-sample-data contract, and the §6.3 rule that colour reports the state of
-something that exists.
+sample-data contract, the §6.3 rule that colour reports the state of something
+that exists, and the §4.4 section-signature rule.
+
+That last one had been made testable here and never tested, which is the state
+this section exists to make visible. `apps/site/e2e/section-rhythm.spec.ts`
+reads each section's signature from computed layout rather than from class
+names, so a rewrite that lands on the same shape by another route still counts
+as the same shape.
+
+The responsive sweep now samples 640 as well as 768. It did not, and the header
+overflowed by 28px at exactly 640 — the `sm` boundary, where the bar switched
+from its sheet to its full desktop row in one step. A breakpoint is where a
+layout changes, which makes it the width most likely to be wrong and the one
+least likely to be sampled.
 
 That last one is enforced in both directions, and the second direction is the
 one that keeps it honest. A test forbidding a colour can always be satisfied by
