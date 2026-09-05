@@ -182,20 +182,39 @@ test.describe('workspace', () => {
     }
   });
 
+  /*
+   * Two workspaces, one answer.
+   *
+   * This test used to visit `/not-your-workspace/projects` alone — a slug that
+   * has never existed — and assert 404. That is a true statement about unknown
+   * slugs and says nothing about isolation: an absent workspace answers 404
+   * whether or not RLS works at all. It carried the name it has now while
+   * proving none of it, and passed on every database including empty ones.
+   *
+   * `intruder-co` exists, belongs to somebody else, and is reachable by its
+   * owner — `a workspace with no installation is offered no repositories`
+   * signs in as that owner and loads this very workspace. So the pair is the
+   * proof: 200 for the owner, 404 for anyone else, same URL. Neither test
+   * establishes that alone.
+   *
+   * Both are asserted together because the guarantee is that they are
+   * indistinguishable. A 403 on the real one would confirm the slug is taken,
+   * which is an enumeration oracle; a 404 on both is what closes it.
+   */
   test('a workspace that is not yours is a 404, not a 403', async ({
     page,
   }) => {
     await signIn(page);
-    const response = await page.goto(
-      `${AUTH_URL}/not-your-workspace/projects`,
-      {
-        waitUntil: 'networkidle',
-      },
-    );
 
-    // Indistinguishable from a workspace that does not exist. A 403 would
-    // confirm the slug is taken, which is an enumeration oracle.
-    expect(response?.status()).toBe(404);
+    const unknown = await page.goto(`${AUTH_URL}/not-your-workspace/projects`, {
+      waitUntil: 'networkidle',
+    });
+    expect(unknown?.status()).toBe(404);
+
+    const someoneElses = await page.goto(`${AUTH_URL}/intruder-co/projects`, {
+      waitUntil: 'networkidle',
+    });
+    expect(someoneElses?.status()).toBe(404);
   });
 
   /*
@@ -234,14 +253,33 @@ test.describe('workspace', () => {
     ).toBeVisible();
   });
 
+  /*
+   * The same correction, one level down.
+   *
+   * This visited `/acceptance/projects/does-not-exist` — and `acceptance` is
+   * the workspace the signed-in user owns. It asserted that an unknown project
+   * in your *own* workspace is a 404, under a name promising another
+   * workspace's project. Both halves are worth asserting; only one of them was.
+   *
+   * `intruder-co/theirs` is a project that genuinely exists and belongs to
+   * somebody else, so the 404 here comes from RLS rather than from an empty
+   * result set.
+   */
   test('a project slug from another workspace is also a 404', async ({
     page,
   }) => {
     await signIn(page);
-    const response = await page.goto(
+
+    const mineButAbsent = await page.goto(
       `${AUTH_URL}/acceptance/projects/does-not-exist`,
       { waitUntil: 'networkidle' },
     );
-    expect(response?.status()).toBe(404);
+    expect(mineButAbsent?.status()).toBe(404);
+
+    const theirsAndReal = await page.goto(
+      `${AUTH_URL}/intruder-co/projects/theirs`,
+      { waitUntil: 'networkidle' },
+    );
+    expect(theirsAndReal?.status()).toBe(404);
   });
 });
