@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/landing/section-heading';
 import {
   PIPELINE_STAGES,
   type PipelineStageId,
@@ -45,14 +46,10 @@ const ARTIFACT: Record<PipelineStageId, string> = {
 export function HowItWorks() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-      <div className="max-w-2xl">
-        <p className="text-eyebrow font-medium uppercase text-tertiary">
-          How it works
-        </p>
-        <h2 className="mt-3 font-display text-headline font-semibold text-primary">
-          One command, five stages, no new tab
-        </h2>
-      </div>
+      <SectionHeading
+        eyebrow="How it works"
+        title="One command, five stages, no new tab"
+      />
 
       {/*
        * Three arrangements, because one column of five is wasteful at tablet

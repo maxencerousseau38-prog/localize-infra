@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/landing/section-heading';
 import { Badge, StateRule, type Tone } from '@localize-infra/ui';
 
 /**
@@ -9,10 +10,16 @@ import { Badge, StateRule, type Tone } from '@localize-infra/ui';
  * no code behind it — and that distinction was a line of small grey text at the
  * bottom of each card.
  *
- * Now the status is the organising principle. Full-width rows put the promise
- * at heading scale with its honest state directly beneath, prose to the right,
- * and the State Rule down the leading edge coloured by whether the promise is
- * actually kept. A reader scanning the left column alone gets the truth.
+ * The status is the organising principle: each promise carries its honest state
+ * as a badge, and the State Rule runs down the leading edge coloured by whether
+ * the promise is actually kept. A reader scanning the rules alone gets the
+ * truth.
+ *
+ * **This paragraph described full-width rows — "the promise at heading scale
+ * with its honest state directly beneath, prose to the right".** That version
+ * was replaced by the three abreast below, for the reason the implementation
+ * comment gives, and this docstring kept describing it. Two accounts of the
+ * same component, sixty lines apart, disagreeing about its shape.
  *
  * The rule's tone tracks delivery, not subject matter — the second commitment
  * is *about* ambiguity but is *degraded* in practice, and Iris means one thing
@@ -53,14 +60,10 @@ const COMMITMENTS: Array<{
 export function Commitments() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-      <div className="max-w-2xl">
-        <p className="text-eyebrow font-medium uppercase text-tertiary">
-          Commitments
-        </p>
-        <h2 className="mt-3 font-display text-headline font-semibold text-primary">
-          Three promises, and whether we keep them yet
-        </h2>
-      </div>
+      <SectionHeading
+        eyebrow="Commitments"
+        title="Three promises, and whether we keep them yet"
+      />
 
       {/*
        * Three abreast, not three stacked essays.

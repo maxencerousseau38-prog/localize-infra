@@ -64,7 +64,24 @@ export function Hero() {
               Localization infrastructure
             </p>
 
-            <h1 className="mt-4 max-w-[15ch] font-display text-display-xl font-semibold text-primary lg:text-display-2xl">
+            {/*
+             * 500, not 600, and only at this step.
+             *
+             * §3.3 allows 400, 500 and 600, and bans 700 because "at these
+             * sizes it reads as shouting on a neutral ground". That reason does
+             * not stop at 700: at `display-2xl` (68px) the argument applies to
+             * 600 as well, and the headline was carrying maximum size *and*
+             * maximum weight at once. Compared side by side at 1440, 500 reads
+             * as a statement and 600 as a claim being pressed — which is the
+             * register §1.3 rules out.
+             *
+             * Section headings stay at 600. They run at `display-lg` (40px),
+             * where 600 has the optical weight this has at 500, and `PageHeader`
+             * already sets them there — one step, one weight, rather than a
+             * blanket change that would have made every page title lighter for
+             * a reason that only holds at 68px.
+             */}
+            <h1 className="mt-4 max-w-[15ch] font-display text-display-xl font-medium text-primary lg:text-display-2xl">
               Your copy is a build artifact.
             </h1>
 
