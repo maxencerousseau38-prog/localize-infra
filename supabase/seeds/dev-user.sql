@@ -66,6 +66,10 @@ end $$;
 -- applied while carrying rows from every previous run.
 delete from public.organizations where slug = 'acceptance';
 delete from auth.users where email = 'acceptance@localize-infra.dev';
+-- The member of that workspace, deleted after it: membership rows go with the
+-- organization's cascade, and this account owns no organization of its own, so
+-- nothing restricts it.
+delete from auth.users where email = 'member@localize-infra.dev';
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -132,15 +136,63 @@ begin
    * that, because the reader can run while the value is emptied.
    *
    * So the mutating test owns this row instead. It needs no cleanup: nothing
-   * else reads it, and re-seeding puts it back. `deleteProject` exists but has
-   * no caller anywhere in the app, so a project created by a test could not be
-   * removed by one either.
+   * else reads it, and re-seeding puts it back.
+   *
+   * This added that `deleteProject` had no caller, so a test could not remove a
+   * project it created. True until #81, which gave it one — the deletion test
+   * now creates and removes its own project, and that is why it is re-runnable.
+   * This row still exists because the languages test *mutates* rather than
+   * creates, which no amount of deletion helps.
    */
   insert into public.projects (organization_id, name, slug, source_locale, target_locales)
   values (org.id, 'Languages', 'languages', 'en', array['fr','de']);
 
   perform set_config('role','postgres',true);
 end $$;
+
+-- A member of the acceptance workspace who is not an owner or an admin.
+--
+-- The role split is load-bearing and, until this account existed, untested.
+-- `projects_select_member` admits every member; `projects_delete_admin` admits
+-- only owners and admins. So a member can open a project and cannot delete it,
+-- and `deleteProject` depends on that asymmetry: it reads the project under the
+-- first policy and deletes under the second, which is why it counts the rows
+-- the delete returned instead of trusting the absence of an error.
+--
+-- There is no product path that creates a membership — no invite flow exists —
+-- so this is inserted directly rather than through a function, unlike the
+-- workspaces above.
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  invited_at, confirmation_token, confirmation_sent_at,
+  recovery_token, recovery_sent_at,
+  email_change_token_new, email_change, email_change_sent_at,
+  last_sign_in_at, raw_app_meta_data, raw_user_meta_data,
+  is_super_admin, created_at, updated_at,
+  phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at,
+  email_change_token_current, email_change_confirm_status,
+  banned_until, reauthentication_token, reauthentication_sent_at,
+  is_sso_user, deleted_at, is_anonymous
+)
+values (
+  '00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+  'member@localize-infra.dev', crypt('member-test-pw-12chars', gen_salt('bf')), now(),
+  null, '', null,
+  '', null,
+  '', '', null,
+  null, '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb,
+  false, now(), now(),
+  null, null, '', '', null,
+  '', 0,
+  null, '', null,
+  false, null, false
+);
+
+insert into public.organization_members (organization_id, user_id, role)
+select o.id, u.id, 'member'
+  from public.organizations o, auth.users u
+ where o.slug = 'acceptance'
+   and u.email = 'member@localize-infra.dev';
 
 -- The second tenant, which three tests depend on and the seed never created.
 --

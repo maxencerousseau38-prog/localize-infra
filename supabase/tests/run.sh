@@ -30,7 +30,7 @@ for file in supabase/tests/*.sql; do
   echo "── ${file}"
   output="$(psql "$db" -X -q -f "$file" 2>&1 || true)"
 
-  verdict="$(printf '%s\n' "$output" | grep -oE '(ISOLATION|CLOSER-SUPPRESSION) >>.*' || true)"
+  verdict="$(printf '%s\n' "$output" | grep -oE '(ISOLATION|CLOSER-SUPPRESSION|ROLE-PERMISSIONS) >>.*' || true)"
   if [ -z "$verdict" ]; then
     echo "   FAIL — no verdict line: the script did not reach its raise."
     printf '%s\n' "$output" | tail -20 | sed 's/^/   /'

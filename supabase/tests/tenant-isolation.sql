@@ -6,9 +6,11 @@
 -- transaction so the fixtures roll back and the database is left exactly as it
 -- was found. Read the results out of the error message.
 --
--- Not yet wired into `npm run gates` — that needs a database connection in CI,
--- which needs secrets this repository does not have. Until then it is run by
--- hand and its output is recorded in the pull request that changes any policy.
+-- This said it was "not yet wired into `npm run gates`", needing a database
+-- connection in CI and secrets this repository does not have. Both halves are
+-- stale: the e2e job starts its own Supabase stack, whose keys are public by
+-- design, and `supabase/tests/run.sh` runs every file in this directory and
+-- reads the verdict below. It has not been run by hand since.
 do $$
 declare
   ua uuid := '11111111-1111-1111-1111-111111111111';

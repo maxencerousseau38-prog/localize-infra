@@ -162,6 +162,69 @@ test.describe('workspace', () => {
   });
 
   /*
+   * A member of the workspace is not offered the delete surface.
+   *
+   * Asserted as a pair, in two contexts, on the same URL and the same project —
+   * absent for the member, present for the owner. Absence alone would also be
+   * satisfied by a section that renders for nobody, which is a green test for a
+   * broken feature. This suite has already shipped two assertions that passed
+   * while proving nothing; the shape of the fix was the same both times.
+   *
+   * The member's ability to *open* the project is asserted first, for the same
+   * reason: `projects_select_member` admits them, and a member who saw a 404
+   * would make "no delete surface" true for a reason that has nothing to do
+   * with roles.
+   *
+   * What this cannot reach is the server action itself. The form is exactly
+   * what is not rendered, so there is nothing here to submit, and forging the
+   * request would assert against a build-generated action id rather than
+   * against a policy. The refusal underneath — a member's delete affecting zero
+   * rows, the same user's delete affecting one after promotion to admin — is
+   * proven in supabase/tests/role-permissions.sql, at the layer that enforces
+   * it.
+   */
+  test('a member of the workspace is not offered the delete surface', async ({
+    browser,
+  }) => {
+    const asMember = await browser.newContext();
+    const memberPage = await asMember.newPage();
+    await memberPage.goto(
+      `${AUTH_URL}/login?next=${encodeURIComponent('/acceptance/projects/demo')}`,
+      { waitUntil: 'networkidle' },
+    );
+    await memberPage.getByLabel('Email').fill('member@localize-infra.dev');
+    await memberPage.getByLabel('Password').fill('member-test-pw-12chars');
+    await memberPage.getByRole('button', { name: 'Sign in' }).click();
+    await memberPage.waitForURL((url) => !url.pathname.startsWith('/login'), {
+      timeout: 15_000,
+    });
+
+    // A real member of this workspace, reading a real project.
+    await expect(
+      memberPage.getByRole('heading', { name: 'Demo' }),
+    ).toBeVisible();
+    await expect(
+      memberPage.getByRole('heading', { name: 'Delete this project' }),
+    ).toHaveCount(0);
+    await expect(
+      memberPage.getByRole('button', { name: 'Delete project' }),
+    ).toHaveCount(0);
+    await asMember.close();
+
+    const asOwner = await browser.newContext();
+    const ownerPage = await asOwner.newPage();
+    await signIn(ownerPage, '/acceptance/projects/demo');
+
+    await expect(
+      ownerPage.getByRole('heading', { name: 'Delete this project' }),
+    ).toBeVisible();
+    await expect(
+      ownerPage.getByRole('button', { name: 'Delete project' }),
+    ).toBeVisible();
+    await asOwner.close();
+  });
+
+  /*
    * The whole round trip, because a deletion test that only deletes is a
    * one-shot test: it passes on a fresh database and fails on the second run,
    * which is the failure mode this suite has already had once.
@@ -169,6 +232,12 @@ test.describe('workspace', () => {
    * Creating the project here also keeps it off the shared seed rows. Nothing
    * else in the suite knows this project exists, so a parallel test cannot lose
    * a race against it.
+   *
+   * A run that dies between the create and the delete leaves the row behind —
+   * observed three times while this was being written, on a development
+   * database the suite shares with a person. It is inert: the timestamped slug
+   * collides with nothing, and nothing reads it. CI never accumulates them
+   * because the seed rebuilds the workspace from scratch on every job.
    *
    * The refusal is asserted before the deletion, and it is the half that
    * matters: the confirmation is checked in the server action, not only in the
