@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/landing/section-heading';
 import type * as React from 'react';
 
 /**
@@ -173,20 +174,15 @@ export function Ecosystem() {
   return (
     <section
       aria-labelledby="ecosystem"
-      className="border-y border-subtle bg-surface/40 py-16 sm:py-20"
+      className="border-y border-subtle bg-surface/40 py-20 sm:py-28"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="max-w-2xl">
-          <p className="text-eyebrow font-medium uppercase text-tertiary">
-            Compatibility
-          </p>
-          <h2
-            id="ecosystem"
-            className="mt-3 font-display text-headline font-semibold text-primary"
-          >
-            Nothing else in your stack has to change
-          </h2>
-          <p className="mt-3 text-prose text-secondary">
+        <SectionHeading
+          id="ecosystem"
+          eyebrow="Compatibility"
+          title="Nothing else in your stack has to change"
+        >
+          <p className="mt-4 text-prose text-secondary">
             The CLI reads your repository and writes locale files back to it.
             Your framework, your host and your database carry on exactly as they
             were.{' '}
@@ -196,7 +192,7 @@ export function Ecosystem() {
             — it is where the pull request goes. None of these projects endorse
             this one.
           </p>
-        </div>
+        </SectionHeading>
       </div>
 
       {/*

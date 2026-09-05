@@ -47,7 +47,7 @@ export default function HomePage() {
        * built. Conversion is asked for after the value, never before it.
        */}
       <section className="border-t border-subtle bg-primary">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-end lg:gap-16">
             <div>
               <p className="text-eyebrow font-medium uppercase text-inverse/60">

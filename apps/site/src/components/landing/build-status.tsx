@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/landing/section-heading';
 import { cn } from '@localize-infra/ui';
 import { Check, Minus, Wrench } from 'lucide-react';
 
@@ -95,13 +96,11 @@ export function BuildStatus() {
     <section className="border-t border-subtle bg-surface/40">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-4">
-            <p className="text-eyebrow font-medium uppercase text-tertiary">
-              Status
-            </p>
-            <h2 className="mt-3 font-display text-headline font-semibold text-primary">
-              What actually works today
-            </h2>
+          <SectionHeading
+            className="lg:col-span-4"
+            eyebrow="Status"
+            title="What actually works today"
+          >
             <p className="mt-4 text-prose text-secondary">
               This is an early-access product. Rather than describe the roadmap
               in the present tense, here is the honest state of it.
@@ -110,7 +109,7 @@ export function BuildStatus() {
               Six of eleven capabilities ship today. The rest are named here
               rather than implied elsewhere.
             </p>
-          </div>
+          </SectionHeading>
 
           <div className="lg:col-span-8">
             <ul className="border-t border-subtle">

@@ -11,7 +11,17 @@ import { expect, test } from '@playwright/test';
  * overflow, so the overflow sweep stayed green through both.
  */
 
-const WIDTHS = [390, 768, 1024, 1280, 1440, 1920];
+/*
+ * 640 is here because the header overflowed by 28px at exactly that width and
+ * at no other. It is the `sm` boundary, where the bar switched from the sheet
+ * to its full desktop row in one step; this list went 390 → 768 and stepped
+ * over the only viewport that failed.
+ *
+ * A breakpoint is where a layout changes, which makes it the width most likely
+ * to be wrong and the one least likely to be sampled. Both boundaries the site
+ * actually switches on are now in the list.
+ */
+const WIDTHS = [390, 640, 768, 1024, 1280, 1440, 1920];
 
 test('the hero title uses the step its tier calls for', async ({ page }) => {
   for (const width of WIDTHS) {
