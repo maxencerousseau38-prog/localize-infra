@@ -583,6 +583,52 @@ qu'ils existent, parce que leur symptôme est **un succès**, jamais une erreur.
 CI (`.github/workflows/ci.yml`) fait tourner les mêmes gates, avec `npm ci`
 dans les deux jobs.
 
+**Le job `e2e` démarre sa propre base, et c'est ce qui a rendu 48 tests
+visibles.** `data-surface`, `workspace` et `auth` se sautent eux-mêmes sans
+`SUPABASE_URL` — 48 tests que la CI n'a jamais exécutés, en restant verte tout
+du long. C'est exactement ainsi que le trou a survécu : le job passait en ne
+prouvant rien d'eux.
+
+La pile Supabase est désormais lancée **dans le job** par `npm run db:local`,
+reçoit les 33 migrations puis le seed, et meurt avec lui. Ce n'est pas un pis-
+aller faute de projet hébergé disponible — c'est **plus** isolé : aucun secret
+n'est ajouté, les clés locales étant publiques par conception, et deux PR
+simultanées ne partagent aucune ligne. Un projet dédié aurait rejoué, à
+l'échelle du dépôt, la course que `workspace.spec.ts` avait déjà dû contourner
+en se donnant son propre projet.
+
+**Une étape échoue si `SUPABASE_URL` est vide**, et c'est elle qui vaut plus que
+le câblage : sans elle, une base cassée reproduit l'état d'avant — 48 tests
+sautés, suite verte, rien de prouvé.
+
+**Les migrations sont rejouées depuis une base vide à chaque exécution.** Les
+deux bases hébergées ont été construites migration par migration et n'avaient
+jamais été reconstruites ; c'est la première preuve continue que la séquence
+est rejouable.
+
+**39 assertions de base de données tournent enfin** — 32 dans
+`closer-suppression.sql`, 7 dans `tenant-isolation.sql`. Elles ne sont pas du
+pgTAP : chacune finit par un `raise` délibéré qui annule la transaction, donc
+**elles sortent en échec quand elles réussissent**. `supabase/tests/run.sh` lit
+le verdict et compare chaque paire à ce qu'elle attendait ; ni le code de sortie
+ni la présence du marqueur ne suffisent, puisqu'un script qui avorte à mi-course
+produit les deux.
+
+**Quatre défauts trouvés, tous de la même famille.** Le seed n'allait jamais
+jusqu'au bout — sa dernière instruction citait une variable d'un autre bloc.
+Turbo filtrait l'environnement et il a fallu déclarer les variables sous
+`test:e2e`. Le seed ignorait le locataire `intruder-co` entier. Et les deux
+tests d'isolation visaient des slugs inventés : ils passaient sur n'importe
+quelle base, vide comprise, sans rien prouver de ce que leurs noms annonçaient.
+Chacun n'existait que parce que personne n'avait jamais rejoué le seed.
+
+**Ce qui n'est toujours pas couvert**, et il faut le dire : la suite exerce des
+lignes semées, pas GitHub ni le modèle. Le job pose des identifiants d'App
+GitHub **fabriqués**, ce qui fait prendre à la page la bonne branche sans
+qu'aucun appel réel soit possible — aucune organisation semée n'a
+d'installation, donc Octokit n'est jamais construit. Un run réel, une PR réelle
+et une traduction réelle restent des vérifications manuelles.
+
 **`package-lock.json` doit être généré sous Linux.** C'est la seule contrainte
 non évidente de ce dépôt côté dépendances, et elle a coûté cinq jours de CI
 rouge : npm élague les paquets optionnels de plateforme qui ne correspondent
