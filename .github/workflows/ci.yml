@@ -99,11 +99,20 @@ jobs:
       # unset — 48 tests, and the job passes anyway. Before this change that was
       # the steady state and nobody read it. Failing here means a broken
       # database step can never again be reported as a green suite.
-      # The two proofs in supabase/tests, which nothing has ever run.
+      # Before the proofs, not after. run.sh spent its whole life comparing 39
+      # of the 60 assertions in that directory and reporting success, because
+      # it read only `t`/`f` values. A harness that under-counts has no symptom
+      # of its own — it just says ok — so it gets a guard of its own. Crafted
+      # verdicts through a psql stand-in, no database, which is also why it can
+      # run before one exists to blame.
+      - name: Check the proof harness itself
+        run: bash supabase/tests/harness-selftest.sh
+
+      # The proofs in supabase/tests, which nothing ran until the E2E work.
       #
       # docs/product/11-mvp-scorecard.md cites tenant-isolation.sql as what
       # asserts RLS isolation. It asserted nothing while nothing executed it,
-      # and its own header says so: "not yet wired into npm run gates — that
+      # and its own header said so: "not yet wired into npm run gates — that
       # needs a database connection in CI". There is one now.
       #
       # Not `supabase test db`: these are not pgTAP. Each is a `do $$ … $$`
