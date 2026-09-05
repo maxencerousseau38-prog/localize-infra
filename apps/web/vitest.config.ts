@@ -14,6 +14,29 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/lib/**/*.test.ts'],
+    /*
+     * Three times the default, and the reason is not that anything here is
+     * slow.
+     *
+     * Several of these files call `vi.resetModules()` before each test and then
+     * `await import(...)` inside the test body — deliberately, because the
+     * modules under test read `process.env` at module scope and a cached copy
+     * would carry the previous test's environment. The consequence is that the
+     * import's transform cost is billed to the test's own budget, and
+     * `discovery-count.test.ts` imports a Next server action whose graph is
+     * large.
+     *
+     * On a machine running `turbo run test` across fifteen packages at once,
+     * that transform reliably crossed 5s and two tests failed — the same two,
+     * on clean `master`, three runs out of three. They pass in isolation in
+     * milliseconds. CI never saw it, so `npm run gates` was red locally and
+     * green on the pull request: the exact split this repository has already
+     * been burned by, and the reason it is fixed rather than tolerated.
+     *
+     * This buys headroom for a transform, not for slow logic. A test that
+     * genuinely hangs still fails, three seconds later than before.
+     */
+    testTimeout: 15_000,
   },
   resolve: {
     alias: {
