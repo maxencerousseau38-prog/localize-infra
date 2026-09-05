@@ -651,13 +651,30 @@ deux bases hébergées ont été construites migration par migration et n'avaien
 jamais été reconstruites ; c'est la première preuve continue que la séquence
 est rejouable.
 
-**39 assertions de base de données tournent enfin** — 32 dans
-`closer-suppression.sql`, 7 dans `tenant-isolation.sql`. Elles ne sont pas du
-pgTAP : chacune finit par un `raise` délibéré qui annule la transaction, donc
-**elles sortent en échec quand elles réussissent**. `supabase/tests/run.sh` lit
-le verdict et compare chaque paire à ce qu'elle attendait ; ni le code de sortie
-ni la présence du marqueur ne suffisent, puisqu'un script qui avorte à mi-course
-produit les deux.
+**66 assertions de base de données tournent** — 47 dans
+`closer-suppression.sql`, 13 dans `tenant-isolation.sql`, 6 dans
+`role-permissions.sql`. Elles ne sont pas du pgTAP : chacune finit par un
+`raise` délibéré qui annule la transaction, donc **elles sortent en échec quand
+elles réussissent**. `supabase/tests/run.sh` lit le verdict et compare chaque
+paire à ce qu'elle attendait ; ni le code de sortie ni la présence du marqueur
+ne suffisent, puisqu'un script qui avorte à mi-course produit les deux.
+
+**Ce compte disait 39, et l'écart n'était pas de nouvelles assertions.** 21
+existaient déjà et n'étaient pas vérifiées : `run.sh` lisait `=[tf](want [tf])`
+et abandonnait en silence toute paire dont la valeur n'était pas booléenne. Dans
+`tenant-isolation.sql` cela retirait `creator-role=owner` et **toutes** les
+lectures inter-locataires — `B-sees-A-org`, `B-sees-A-proj`, `B-sees-A-members`,
+c'est-à-dire ce que ce fichier existe pour prouver. `B-sees-A-proj=1(want 0)`
+aurait été rapporté « ok — 7 check(s) ». La comparaison était en outre fausse
+au-delà d'un caractère, ne lisant que le premier de chaque côté : `count=10(want
+1)` passait.
+
+Le défaut n'a été vu que parce que `role-permissions.sql` est entièrement
+numérique, donc rien n'y matchait et il a déclenché « verdict line carries no
+checks » — la garde prévue pour les scripts avortés, qui a fait le travail par
+accident sur un script parfaitement déroulé. **Une garde qui ne mesure qu'une
+partie de ce qu'elle annonce ne se signale pas : son symptôme est un succès.**
+C'est le même motif que le cache turbo et le serveur resté vivant, plus haut.
 
 **Quatre défauts trouvés, tous de la même famille.** Le seed n'allait jamais
 jusqu'au bout — sa dernière instruction citait une variable d'un autre bloc.
