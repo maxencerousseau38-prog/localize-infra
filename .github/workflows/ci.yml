@@ -91,6 +91,7 @@ jobs:
           : "${ANON_KEY:?supabase status emitted no ANON_KEY — see the key list above}"
           echo "SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
           echo "SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
 
       # The guard that makes this job worth adding.
       #
@@ -98,6 +99,22 @@ jobs:
       # unset — 48 tests, and the job passes anyway. Before this change that was
       # the steady state and nobody read it. Failing here means a broken
       # database step can never again be reported as a green suite.
+      # The two proofs in supabase/tests, which nothing has ever run.
+      #
+      # docs/product/11-mvp-scorecard.md cites tenant-isolation.sql as what
+      # asserts RLS isolation. It asserted nothing while nothing executed it,
+      # and its own header says so: "not yet wired into npm run gates — that
+      # needs a database connection in CI". There is one now.
+      #
+      # Not `supabase test db`: these are not pgTAP. Each is a `do $$ … $$`
+      # block that ends with a deliberate raise so the transaction rolls back,
+      # which means every one of them exits non-zero on success. The runner
+      # reads the verdict string and compares each check against what it wanted
+      # — see the header of run.sh for why the exit code and the marker are both
+      # insufficient on their own.
+      - name: Run the database proofs
+        run: bash supabase/tests/run.sh "$DB_URL"
+
       - name: Refuse to run the suite without a database
         run: |
           test -n "${SUPABASE_URL:-}" || {

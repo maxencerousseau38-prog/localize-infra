@@ -44,7 +44,7 @@ stands entirely undisturbed.
 
 | Capability | Evidence |
 |---|---|
-| Postgres, auth, organisations, membership, roles, projects, runs | 16 migrations applied to both Supabase projects; RLS isolation asserted by `supabase/tests/tenant-isolation.sql` |
+| Postgres, auth, organisations, membership, roles, projects, runs | 33 migrations applied to both Supabase projects and replayed from empty on every pull request; RLS isolation asserted by `supabase/tests/tenant-isolation.sql`, **which nothing executed until 2026-09-05** — this row credited it for weeks while it ran nowhere |
 | `/runs`, `/runs/[id]`, `/locales`, `/ambiguity`, `/review`, `/[org]/projects`, `/[org]/projects/[project]` read Postgres under RLS | 98 e2e tests, including 18 against a seeded workspace with real runs |
 | Three deployments live | `/health` 200 on the API, 200 on site and web, probed 2026-08-21 |
 | API is fail-closed | Refuses to start without `API_AUTH_TOKEN`; `/v1/translate` returns 401 without a bearer and with a wrong one, verified in production |
