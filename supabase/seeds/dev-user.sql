@@ -142,6 +142,80 @@ begin
   perform set_config('role','postgres',true);
 end $$;
 
+-- The second tenant, which three tests depend on and the seed never created.
+--
+-- `intruder-co` and its owner existed only in the development database,
+-- inserted by hand. On a fresh database the sign-in in
+-- `workspace.spec.ts:212` timed out, because there was no such account — and
+-- that was the *visible* failure.
+--
+-- The invisible one matters more. Two of those three tests assert that a
+-- workspace which is not yours answers 404, and an absent workspace answers
+-- 404 as well. They passed on every empty database while proving nothing about
+-- isolation, which is exactly the shape of assertion this repository treats as
+-- a defect. Seeding this tenant is what turns them from vacuous to real: the
+-- workspace now exists, its owner can reach it, and a 404 for anybody else is
+-- RLS refusing rather than Postgres finding nothing.
+--
+-- Deleted first, in the same order and for the same reason as the acceptance
+-- rows above: as `authenticated` these deletes are silent no-ops under RLS, so
+-- they run as the seed's own role.
+delete from public.organizations where slug = 'intruder-co';
+delete from auth.users where email = 'intruder@localize-infra.dev';
+
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  invited_at, confirmation_token, confirmation_sent_at,
+  recovery_token, recovery_sent_at,
+  email_change_token_new, email_change, email_change_sent_at,
+  last_sign_in_at, raw_app_meta_data, raw_user_meta_data,
+  is_super_admin, created_at, updated_at,
+  phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at,
+  email_change_token_current, email_change_confirm_status,
+  banned_until, reauthentication_token, reauthentication_sent_at,
+  is_sso_user, deleted_at, is_anonymous
+)
+values (
+  '00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+  'intruder@localize-infra.dev', crypt('intruder-test-pw-8chars', gen_salt('bf')), now(),
+  null, '', null,
+  '', null,
+  '', '', null,
+  null, '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb,
+  false, now(), now(),
+  null, null, '', '', null,
+  '', 0,
+  null, '', null,
+  false, null, false
+);
+
+-- Created through `create_organization` as that user, like the workspace above.
+--
+-- The membership row is the point: it is what makes this a workspace somebody
+-- owns rather than an orphan the tests could not tell from a typo. Written the
+-- same way the application writes it, so the fixture is a shape the product can
+-- actually produce.
+do $$
+declare
+  uid uuid;
+  org public.organizations;
+begin
+  select id into uid from auth.users where email = 'intruder@localize-infra.dev';
+
+  perform set_config('request.jwt.claims', json_build_object('sub', uid, 'role','authenticated')::text, true);
+  perform set_config('role','authenticated',true);
+
+  org := public.create_organization('Intruder Co', 'intruder-co');
+
+  -- No repository and no target languages, deliberately: this workspace exists
+  -- to be refused, not to run anything. `workspace.spec.ts:212` reads it as the
+  -- case of a workspace with no GitHub installation.
+  insert into public.projects (organization_id, name, slug, source_locale, target_locales)
+  values (org.id, 'Theirs', 'theirs', 'en', array[]::text[]);
+
+  perform set_config('role','postgres',true);
+end $$;
+
 -- Two runs, so the authenticated suite has rows to assert over.
 --
 -- Everything above this point gave the suite a workspace and a project; there
