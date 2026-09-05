@@ -110,7 +110,20 @@ export function SiteHeader() {
           Localize&nbsp;Infra
         </Link>
 
-        <nav aria-label="Main" className="hidden sm:block">
+        {/*
+         * The bar switches at `md`, not `sm`.
+         *
+         * At `sm` every part of it appeared at once — the padding stepped to
+         * 24px, the five-link nav to 360px, the theme-and-GitHub cluster to
+         * 105px — and the row then needed 692px on a 640px viewport. It
+         * overflowed by 28px at exactly 640 and nowhere else, so the sweep in
+         * responsive.spec.ts, which tested 390 then 768, stepped over it.
+         *
+         * The nav is what does not fit, so the nav is what moves. Nothing here
+         * is resized: below 768 these controls live in the sheet, where they
+         * already did below 640.
+         */}
+        <nav aria-label="Main" className="hidden md:block">
           <ul className="flex items-center gap-6">
             {NAV.map((item) => (
               <li key={item.href}>
@@ -126,7 +139,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="ms-auto flex items-center gap-3">
-          <div className="hidden sm:flex sm:items-center sm:gap-3">
+          <div className="hidden md:flex md:items-center md:gap-3">
             <ThemeToggle />
             <Button asChild variant="secondary" size="sm">
               <a

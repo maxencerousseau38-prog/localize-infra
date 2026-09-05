@@ -38,7 +38,7 @@ export function SiteNavMenu({
     <DialogRoot open={open} onOpenChange={setOpen}>
       <DialogTrigger
         className={cn(
-          '-me-1 rounded-md p-2 text-secondary sm:hidden',
+          '-me-1 rounded-md p-2 text-secondary md:hidden',
           'transition-colors hover:bg-surface hover:text-primary active:bg-raised',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
         )}
