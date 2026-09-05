@@ -161,6 +161,74 @@ test.describe('workspace', () => {
     ).toHaveValue('fr, de');
   });
 
+  /*
+   * The whole round trip, because a deletion test that only deletes is a
+   * one-shot test: it passes on a fresh database and fails on the second run,
+   * which is the failure mode this suite has already had once.
+   *
+   * Creating the project here also keeps it off the shared seed rows. Nothing
+   * else in the suite knows this project exists, so a parallel test cannot lose
+   * a race against it.
+   *
+   * The refusal is asserted before the deletion, and it is the half that
+   * matters: the confirmation is checked in the server action, not only in the
+   * form, so a wrong name must leave the row where it is.
+   */
+  test('a project can be deleted, and only by naming it', async ({ page }) => {
+    await signIn(page, '/acceptance/projects');
+
+    const name = `Disposable ${Date.now()}`;
+    await page.getByRole('button', { name: 'New project' }).click();
+    await page.getByRole('textbox', { name: /Project name/ }).fill(name);
+    await page.getByRole('button', { name: 'Create project' }).click();
+
+    const link = page.getByRole('link', { name: new RegExp(name) });
+    await expect(link).toBeVisible();
+    await link.click();
+
+    await expect(page).toHaveURL(/\/acceptance\/projects\/disposable-\d+$/);
+    const slug = page.url().split('/').pop() as string;
+
+    const confirm = page.getByRole('textbox', { name: /Project name/ });
+    const remove = page.getByRole('button', { name: 'Delete project' });
+
+    /*
+     * Near-misses, one per way the check could have been written loosely:
+     * case-folded, `startsWith`, `includes`.
+     *
+     * The URL is asserted rather than only the message. A refusal leaves the
+     * previous message on screen, so from the second iteration `toBeVisible`
+     * would pass on the first attempt's output without a second request ever
+     * being made — true, and no longer about what it claims to test. Deleting
+     * redirects to the project list, so staying on this page is the assertion
+     * that nothing was deleted.
+     */
+    for (const wrong of [slug.toUpperCase(), `${slug}-2`, slug.slice(0, -1)]) {
+      await confirm.fill(wrong);
+      await remove.click();
+      // Waited for, not sampled: the message is already on screen from the
+      // previous attempt, so checking the URL before this attempt's request
+      // has settled would read the state of the one before it.
+      await page.waitForLoadState('networkidle');
+      await expect(page.getByText(/Nothing has been deleted/)).toBeVisible();
+      expect(page.url()).toBe(`${AUTH_URL}/acceptance/projects/${slug}`);
+    }
+
+    // Still there after a reload, rather than merely still on screen.
+    await page.reload();
+    await expect(
+      page.getByRole('heading', { name: new RegExp(name) }),
+    ).toBeVisible();
+
+    await page.getByRole('textbox', { name: /Project name/ }).fill(slug);
+    await page.getByRole('button', { name: 'Delete project' }).click();
+
+    await expect(page).toHaveURL(`${AUTH_URL}/acceptance/projects`);
+    await expect(
+      page.getByRole('link', { name: new RegExp(name) }),
+    ).toHaveCount(0);
+  });
+
   test('a connected repository is reported as fact, not as intent', async ({
     page,
   }) => {

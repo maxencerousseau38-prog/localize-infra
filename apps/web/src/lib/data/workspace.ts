@@ -86,6 +86,50 @@ export async function currentRole(
   return data ?? null;
 }
 
+export interface ProjectDeletionImpact {
+  runs: number;
+  proposals: number;
+  questions: number;
+}
+
+/**
+ * What deleting this project would take with it.
+ *
+ * `runs`, `run_translations` and `run_ambiguities` all reference `projects`
+ * with `on delete cascade`, so the delete is not scoped to the row somebody
+ * sees. Counted rather than described: "this cannot be undone" is true of every
+ * delete button ever drawn and tells a person nothing about their own data.
+ *
+ * `head: true` asks Postgres for the count without the rows — the screen needs
+ * three numbers, not seventy-two records it will not render.
+ */
+export async function projectDeletionImpact(
+  projectId: string,
+): Promise<ProjectDeletionImpact> {
+  const supabase = await createClient();
+
+  const [runs, proposals, questions] = await Promise.all([
+    supabase
+      .from('runs')
+      .select('id', { count: 'exact', head: true })
+      .eq('project_id', projectId),
+    supabase
+      .from('run_translations')
+      .select('id', { count: 'exact', head: true })
+      .eq('project_id', projectId),
+    supabase
+      .from('run_ambiguities')
+      .select('id', { count: 'exact', head: true })
+      .eq('project_id', projectId),
+  ]);
+
+  return {
+    runs: runs.count ?? 0,
+    proposals: proposals.count ?? 0,
+    questions: questions.count ?? 0,
+  };
+}
+
 export async function listProjects(organizationId: string): Promise<Project[]> {
   const supabase = await createClient();
   const { data, error } = await supabase

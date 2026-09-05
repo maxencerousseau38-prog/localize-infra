@@ -1,10 +1,12 @@
 import { Page, PageHeader, PageMeta } from '@/components/page';
 import {
+  currentRole,
   findOrganization,
   findProject,
   listRunAmbiguities,
   listRunTranslations,
   listRuns,
+  projectDeletionImpact,
   requireSession,
 } from '@/lib/data/workspace';
 import { isGitHubConfigured } from '@/lib/github/config';
@@ -15,6 +17,7 @@ import {
 import { runAvailability } from '@/lib/runs/availability';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { DangerSection } from './danger-section';
 import { LocalesSection } from './locales-section';
 import { RepositorySection } from './repository-section';
 import { ReviewSection } from './review-section';
@@ -54,6 +57,21 @@ export default async function ProjectPage({
     : [];
 
   const runs = await listRuns(project.id);
+
+  /*
+   * Only for those who can actually delete. `projects_delete_admin` admits
+   * owners and admins, so drawing the section for a member would be a control
+   * that cannot work — the pattern refused next to `ScanSection` and in
+   * `runAvailability`.
+   *
+   * The counts are fetched for the same audience, so a member's page does not
+   * pay for three counts it will not render.
+   */
+  const role = await currentRole(organization.id);
+  const mayDelete = role === 'owner' || role === 'admin';
+  const deletionImpact = mayDelete
+    ? await projectDeletionImpact(project.id)
+    : null;
 
   /*
    * The review gate only has a subject when a run is actually waiting on one.
@@ -182,6 +200,15 @@ export default async function ProjectPage({
           progressAt: run.progress_at,
         }))}
       />
+
+      {mayDelete && deletionImpact ? (
+        <DangerSection
+          orgSlug={org}
+          projectId={project.id}
+          projectSlug={project.slug}
+          impact={deletionImpact}
+        />
+      ) : null}
     </Page>
   );
 }
