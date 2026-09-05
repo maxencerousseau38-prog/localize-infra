@@ -134,12 +134,39 @@
   requests concurrentes, et un clic sur le mauvais coûterait cette fois un run
   réel plutôt qu'un refus silencieux.
 
-  La suppression a demandé un `DELETE` SQL direct : `deleteProject` existe dans
-  le code et **n'a aucun appelant**, donc le produit ne sait pas supprimer un
-  projet. La requête portait son propre garde — `and not exists (select 1 from
-  runs where project_id = ...)` — pour qu'une erreur de slug ne puisse pas
-  emporter une ligne qui compte. Vérifié après : totaux inchangés, 8 runs, 72
-  propositions, 1 organisation, 1 installation.
+  La suppression a demandé un `DELETE` SQL direct, faute de chemin produit. La
+  requête portait son propre garde — `and not exists (select 1 from runs where
+  project_id = ...)` — pour qu'une erreur de slug ne puisse pas emporter une
+  ligne qui compte. Vérifié après : totaux inchangés, 8 runs, 72 propositions,
+  1 organisation, 1 installation.
+
+  **Ce point ajoutait que `deleteProject` n'a aucun appelant et que le produit
+  ne sait donc pas supprimer un projet. Les deux moitiés sont périmées depuis
+  #81** : `/[org]/projects/[project]` porte la surface, réservée aux `owner` et
+  `admin` parce que c'est ce qu'admet `projects_delete_admin`. Elle affiche ce
+  que la suppression emporte — `runs`, `run_translations` et `run_ambiguities`
+  cascadent — compté en base plutôt que décrit, « cette action est irréversible »
+  étant vrai de tout bouton de suppression et n'apprenant rien sur ses propres
+  données.
+
+  **Trois contrôles vivent dans l'action, pas dans le formulaire**, parce qu'une
+  server action est un endpoint public : le nom tapé, comparé au slug **relu
+  depuis la ligne visée** et non à celui envoyé dans la même requête ; le type
+  de ce champ, `FormData.get` rendant un `File` dont `.trim` n'existe pas ; et
+  le **nombre de lignes supprimées**. Ce dernier n'est pas décoratif : la
+  lecture passe sous la policy `select`, qui admet tout membre, la suppression
+  sous `projects_delete_admin`. Sans ce compte, un membre franchit la
+  confirmation, ne supprime rien, ne reçoit aucune erreur et est redirigé comme
+  si ça avait marché. Les deux premiers corrigent des défauts de la première
+  version de #81, trouvés en relisant le diff avant de le commiter.
+
+  Le test e2e crée son propre projet au lieu de viser une ligne du seed — une
+  suite qui supprime un fixture partagé passe une fois et échoue à la deuxième
+  exécution — et il a été vérifié non vacant en desserrant `confirmsDeletion` en
+  insensible à la casse : il rougit, puis repasse au vert une fois restauré.
+  **Non couvert, et il faut le dire** : le chemin « membre non-admin » n'a pas
+  de test, faute de compte membre dans le seed. Le garde-fou est lisible dans
+  l'action ; il n'est prouvé par rien.
 
   Ce qui reste vrai et vaut au-delà de ce cas : **un projet sans langue cible
   affiche désormais la raison au lieu d'un bouton inopérant** (#67), donc la
