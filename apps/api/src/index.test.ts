@@ -85,6 +85,53 @@ describe('app (real index.ts route wiring)', () => {
     expect(await res.json()).toEqual({ ok: true });
   });
 
+  it('returns 200 for /api/version with no Authorization header', async () => {
+    const app = await loadApp();
+    const res = await app.request('/api/version');
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+
+    const body = await res.json();
+    expect(body).toHaveProperty('commit');
+    expect(body).toHaveProperty('environment');
+  });
+
+  /*
+   * The env vars are cleared in beforeEach, so this asserts the branch that
+   * production is most likely to take: this project deploys by CLI archive
+   * rather than from Git, so it may well carry no commit metadata at all.
+   * `null` is the honest answer there; a fabricated sha would be worse than no
+   * endpoint, because it would be believed.
+   */
+  it('reports a null commit rather than a fabricated one when Vercel sets nothing', async () => {
+    const app = await loadApp();
+    const res = await app.request('/api/version');
+
+    expect(await res.json()).toEqual({ commit: null, environment: null });
+  });
+
+  /*
+   * The point of this file: adding a public route must not widen the auth
+   * surface. `/v1/*` is matched by the middleware and `/api/version` is not,
+   * and both halves have to stay true together — asserting only the new route
+   * would pass just as happily if the middleware had been removed.
+   */
+  it('leaves /v1/* authentication untouched', async () => {
+    const app = await loadApp();
+
+    expect((await app.request('/api/version')).status).toBe(200);
+
+    for (const path of ['/v1/translate', '/v1/open-pr']) {
+      const res = await app.request(path, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      expect(res.status, `${path} must still require a bearer`).toBe(401);
+    }
+  });
+
   it('still returns 401 for /v1/translate with a wrong bearer token', async () => {
     const app = await loadApp();
     const res = await app.request('/v1/translate', {

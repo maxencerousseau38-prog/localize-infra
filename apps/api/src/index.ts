@@ -12,6 +12,7 @@ import {
 } from './open-pr/route.js';
 import { getConfiguredProviders } from './router/index.js';
 import { translateRouteHandler } from './translate/route.js';
+import { readVersion } from './version.js';
 
 const ANTHROPIC_MODEL = process.env.API_ANTHROPIC_MODEL ?? 'claude-sonnet-5';
 const OPENAI_MODEL = process.env.API_OPENAI_MODEL ?? 'gpt-4o';
@@ -131,6 +132,31 @@ app.post('/v1/open-pr', async (c) => {
 });
 
 app.get('/health', (c) => c.json({ ok: true }));
+
+/**
+ * Which commit this deployment is running.
+ *
+ * Registered *below* `app.use('/v1/*', …)` with the rest of the public
+ * surface. It would be public wherever it sat — the middleware only matches
+ * `/v1/*` — but index.test.ts asserts against this file's real wiring
+ * precisely because a route added above that line would silently bypass auth,
+ * and a public route placed there teaches the next reader the wrong habit.
+ *
+ * This service needs the endpoint more than `apps/web` did, because it is not
+ * connected to Git: merging to `master` deploys the site and the web app, and
+ * this one only moves when somebody runs `npx vercel deploy --prod`. The commit
+ * on `master` is therefore not evidence about what is deployed here — a gap
+ * already observed on 2026-08-23, when PR #33 was merged while the last API
+ * production build still dated from the previous day.
+ *
+ * `no-store` for the same reason as `apps/web`: the value is constant for the
+ * life of a deployment, so any cache would be correct right up until the moment
+ * the answer matters.
+ */
+app.get('/api/version', (c) => {
+  c.header('cache-control', 'no-store');
+  return c.json(readVersion());
+});
 
 const invokedPath = process.argv[1]?.replace(/\\/g, '/');
 const modulePath = new URL(import.meta.url).pathname.replace(
