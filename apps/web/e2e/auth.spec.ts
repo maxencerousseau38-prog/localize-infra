@@ -57,6 +57,33 @@ test.describe('authentication', () => {
     await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   });
 
+  /*
+   * The build-identity endpoint has to answer without a session, because its
+   * whole purpose is to be checked from outside — a terminal, CI, a signed-out
+   * operator confirming which commit is live.
+   *
+   * `maxRedirects: 0` is what makes this assertion mean anything. Playwright
+   * follows redirects by default, so a protected `/api/version` would redirect
+   * to `/login` and hand back a perfectly good 200 of HTML — the test would
+   * pass while asserting the opposite of what it claims. Refusing redirects
+   * turns that into the 307 it really is.
+   */
+  test('the version endpoint answers signed out', async ({ request }) => {
+    const response = await request.get(`${AUTH_URL}/api/version`, {
+      maxRedirects: 0,
+    });
+
+    expect(response.status(), 'should not redirect to /login').toBe(200);
+    expect(response.headers()['content-type']).toContain('application/json');
+
+    const body = await response.json();
+    expect(body).toHaveProperty('commit');
+    expect(body).toHaveProperty('environment');
+    // Null locally — this is not a Vercel deployment and has no commit to
+    // report. A string on a deployment. A fabricated value in neither case.
+    expect(body.commit === null || typeof body.commit === 'string').toBe(true);
+  });
+
   test('a failed sign-in does not reveal whether the account exists', async ({
     page,
   }) => {

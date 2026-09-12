@@ -10,7 +10,7 @@ import { isSupabaseConfigured, readSupabaseEnv } from './env';
  * the page just works, for anyone. This way a new route is protected until
  * someone deliberately opens it.
  */
-const PUBLIC_PATHS = ['/login', '/auth/callback'];
+const PUBLIC_PATHS = ['/login', '/auth/callback', '/api/version'];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PATHS.some(

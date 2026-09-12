@@ -322,6 +322,23 @@ remet `Age` à zéro ; tant qu'il grimpe, rien n'a été redéployé.
 déployé après la reconnexion — il a fallu un push ultérieur, celui qui porte ce
 paragraphe, pour que les deux projets repartent.
 
+**L'épisode a révélé une asymétrie de vérifiabilité, et elle est corrigée.**
+`apps/site` était contrôlable de l'extérieur — ses URL de déploiement sont
+anonymes, donc l'alias se compare octet par octet à un déploiement *nommé*.
+`apps/web` ne l'était pas : `ssoProtection` vaut `all_except_custom_domains`,
+ce qui laisse l'alias ouvert mais place chaque `localize-infra-web-<hash>`
+derrière le SSO Vercel — il n'y avait donc rien à quoi comparer l'alias. Et le
+commit de reprise ne changeant rien sous `apps/web`, son build était identique
+à l'octet près au build périmé : aucune comparaison de contenu ne pouvait les
+distinguer. Il ne restait que la parole de Vercel.
+
+`GET /api/version` répond désormais `{"commit":…,"environment":…}`, en public et
+lu à l'exécution. `commit` vaut `null` hors Vercel plutôt qu'une valeur
+fabriquée. L'ouverture de cette route est délibérée — la protection est une
+liste blanche dans `lib/supabase/session.ts` — et `e2e/auth.spec.ts` vérifie
+qu'elle répond déconnecté, avec `maxRedirects: 0` pour qu'une redirection vers
+`/login` ne puisse pas passer pour un 200.
+
 Le contrôle que ce paragraphe prescrivait a donc été rejoué, et il passe. Root
 Directory est `apps/web`, et pourtant `bg-confident-bg` et
 `text-ambiguous-text` — deux classes présentes dans `packages/ui/src` et
