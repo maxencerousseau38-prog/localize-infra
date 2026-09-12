@@ -4,12 +4,19 @@ Three packages are publishable: `@localize-infra/schemas`, `@localize-infra/core
 and `@localize-infra/cli`. **All three were published at 0.1.0 on 2026-08-28**;
 this document said they "have not been published" and is corrected here.
 
-**`cli` is at 0.2.0 in this repository and still 0.1.0 on npm.** The bump
-carries the empty-pull-request fix: the API now answers 409 when the files in a
-request already match the base branch, and the CLI reports that as an outcome
-instead of throwing. `schemas` and `core` are untouched, and the new CLI code
-uses no new API from either — so this release is **one package, not three**, and
-the ordering section below does not apply to it.
+**`cli` 0.2.0 is on npm**, published 2026-09-12 at 07:43 UTC, with `latest`
+resolving to it and its dependencies still `^0.1.0` on `core` and `schemas`.
+This line said "still 0.1.0 on npm" until that publish landed, and nothing in
+the repository moved when it did — the publish happens outside Git, so the only
+thing that can carry the fact back is a commit like this one.
+
+The bump carries the empty-pull-request fix: the API now answers 409 when the
+files in a request already match the base branch, and the CLI reports that as an
+outcome instead of throwing. Verified in the published tarball rather than
+assumed from the version number — `dist/index.js` carries "No PR opened: every
+translation is already on the base branch." `schemas` and `core` are untouched,
+and the new CLI code uses no new API from either — so this release was **one
+package, not three**, and the ordering section below did not apply to it.
 
 A 0.2.0 rather than a patch: what a user sees changes. `npx localize-infra init
 --open-pr` against an up-to-date repository used to fail with a raw API error

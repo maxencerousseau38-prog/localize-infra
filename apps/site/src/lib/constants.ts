@@ -55,9 +55,11 @@ export const INSTALL_COMMAND = 'npx @localize-infra/cli init';
  * `/-/org/localize-infra/package` now lists all three names under.
  *
  * The flag says *published*, not *which version*, and that is deliberate: it
- * gates copy about `npx` working at all. `cli` is at 0.2.0 in the repository
- * and awaiting a publish; the pages this flag drives say nothing that a
- * version could falsify.
+ * gates copy about `npx` working at all. This sentence said `cli` was "at 0.2.0
+ * in the repository and awaiting a publish" — true when written, stale from
+ * 2026-09-12 07:43 UTC, when 0.2.0 went to npm and `latest` moved to it. The
+ * drift cost nothing precisely because the flag gates the copy and a version
+ * does not: the pages it drives say nothing a version could falsify.
  *
  * The earlier note here said the scope was "unclaimed". It was not — that read
  * a 404 on a *package* as evidence about the *scope*, which it never was.
