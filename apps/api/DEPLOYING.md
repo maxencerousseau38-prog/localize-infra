@@ -150,3 +150,46 @@ database is `eu-west-3`, which settles the journey to the model but not the mode
 itself. This is the known gap against invariant 5, recorded in CLAUDE.md, and it
 is now on a public URL rather than one developer's machine. That was a deliberate
 decision taken on 2026-08-19, not a drift.
+
+## Which commit is live
+
+```sh
+curl -s https://localize-infra-api.vercel.app/api/version
+```
+
+Public, like `/health`, and outside the `/v1/*` auth middleware — which matches
+on `/v1/*` and is therefore untouched by this route. `index.test.ts` asserts
+both halves together: that `/api/version` answers 200 unauthenticated **and**
+that `/v1/translate` and `/v1/open-pr` still answer 401. Asserting only the
+first would pass just as happily if the middleware had been deleted.
+
+**This service needs the endpoint more than the other two, and may be the one
+least able to answer it.** Both things follow from the same fact: it is not
+connected to Git.
+
+It needs it because merging to `master` deploys the site and the web app and
+**not this** — so the commit on `master` is not evidence about what is running
+here. That gap is not hypothetical; on 2026-08-23 PR #33 was merged while the
+last API production build still dated from the previous day.
+
+It may not be able to answer because `VERCEL_GIT_COMMIT_SHA` is a *Git* system
+variable, and this project deploys by `vercel deploy --prod --archive=tgz`
+rather than from a connected repository. Whether the CLI attaches Git metadata
+to an archive deployment decides whether the value arrives at all. So:
+
+```
+{"commit":"<sha>","environment":"production"}   metadata arrived
+{"commit":null,"environment":"production"}      it did not
+```
+
+A `null` here is **not a bug to fix in this code** — it is the endpoint
+correctly reporting that the deployment carries no commit identity. Reading git
+at runtime, or printing a build-time constant, would replace "I do not know"
+with a claim, which is the one thing this route must never do. If the answer is
+`null` and the commit still needs to be known, the fix is upstream: connect the
+project to Git, or set the variable explicitly at deploy time.
+
+Note also that **this endpoint only updates when you deploy.** Unlike the web
+app, where a merge is the deploy, here the endpoint keeps reporting the previous
+commit until `vercel deploy --prod` is run again — which is precisely the
+condition it exists to make visible.
