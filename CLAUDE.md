@@ -298,6 +298,30 @@ prédiction : fusionner une PR sur `master` déclenche un déploiement de
 production, et une PR ouverte déclenche une preview avec son check GitHub.
 Observé le 2026-08-23 sur la PR #31.
 
+**Cette phrase a été fausse du 2026-09-05 au 2026-09-12, et rien ne l'a
+signalé.** L'App GitHub de Vercel avait perdu l'accès au dépôt. Le dernier
+déploiement des deux projets est resté celui d'`e1c7adf` (2026-09-05 21:16 UTC) ;
+la PR #86, fusionnée le 2026-09-12, n'a produit **ni déploiement, ni check-run
+Vercel, ni même une preview** sur sa branche. L'accès a été rétabli à la main en
+re-sélectionnant « All repositories ».
+
+Ce qui rend le cas instructif, c'est que **tous les signaux habituels sont restés
+verts** : la CI passait, les trois URL répondaient 200, et le site servait son
+build de la semaine précédente sans rien en dire. Le seul témoin était une
+*absence* — zéro deployment pour le commit — et une absence n'alerte personne.
+Le contrôle qui l'a montrée est de demander le déploiement **du commit**
+(`gh api repos/…/deployments`), pas la santé du site.
+
+Le CDN le confirmait indépendamment, et c'est le contrôle le moins cher : sur
+`localize-infra-site.vercel.app`, `Age` dépassait 5,6 jours **et continuait de
+monter**, `Etag` inchangé. Un déploiement de production purge cette entrée et
+remet `Age` à zéro ; tant qu'il grimpe, rien n'a été redéployé.
+
+**Rétablir l'accès ne redéploie pas rétroactivement.** L'intégration réagit aux
+événements de push, donc le commit fusionné pendant la panne est resté non
+déployé après la reconnexion — il a fallu un push ultérieur, celui qui porte ce
+paragraphe, pour que les deux projets repartent.
+
 Le contrôle que ce paragraphe prescrivait a donc été rejoué, et il passe. Root
 Directory est `apps/web`, et pourtant `bg-confident-bg` et
 `text-ambiguous-text` — deux classes présentes dans `packages/ui/src` et
