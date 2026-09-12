@@ -202,12 +202,59 @@ Anyone reaching the URL can create an account and a workspace. That is the
 product working, and it is worth knowing what does and does not bound it.
 
 Running the pipeline is **not** operator-gated — this said it was, and the gate
-was removed with `isOperator` in #24. What bounds a new workspace instead is
-that it has no GitHub installation of its own and cannot create one while the
-OAuth secret is missing, so there is no repository for it to act on. The free
-plan grants public repositories only. Those are structural limits, not a
-whitelist.
+was removed with `isOperator` in #24.
+
+This paragraph then said a new workspace "cannot create [a GitHub installation]
+while the OAuth secret is missing". That stopped being true on **2026-08-28**,
+when the secret was set by hand: the table above and the section below were
+corrected that day and this sentence was not, so one file argued with itself
+for two weeks. `readOAuthConfig()` returns the pair, `canInstall` is true, and a
+new workspace connects its own installation from the interface.
+
+What actually bounds it is repository scope:
+`organization_entitlements.private_repositories` has no product path and is
+granted by hand, so a new workspace reaches **public repositories only**. That
+is a structural limit, not a whitelist.
 
 Vercel's `ssoProtection` is set to `all_except_custom_domains`, which is the
 default and does **not** cover the production alias — `localize-infra-web.vercel.app`
 is served to anonymous requests. Password protection requires a paid plan.
+
+## Which commit is live
+
+```bash
+curl -s https://localize-infra-web.vercel.app/api/version
+# {"commit":"d4ef407…","environment":"production"}
+```
+
+The endpoint is public, and it exists because this question had no cheap answer.
+`apps/site` could always be checked from outside: its deployment URLs are
+anonymous, so the production alias can be compared to a *named* deployment byte
+for byte. `apps/web` could not. `ssoProtection` is
+`all_except_custom_domains` (see above), which leaves the production alias open
+but puts every `localize-infra-web-<hash>.vercel.app` behind Vercel SSO — so
+there was nothing to compare the alias *to*.
+
+That gap was not theoretical. When the Vercel Git integration lost access to the
+repository for a week (2026-09-05 → 2026-09-12, recorded in CLAUDE.md), the site
+could be proven stale and then proven fresh; the web app could only be *reported*
+deployed by Vercel. Worse, the commit that reopened the pipeline changed nothing
+under `apps/web`, so its build output was byte-identical to the stale one —
+no amount of comparing content could have distinguished them.
+
+Two things to know when reading the answer:
+
+- `commit` is **null**, not a fabricated value, when the variable is absent —
+  `next dev`, a self-hosted build, a project with no repository connected.
+  Vercel sets these Git variables to an empty string in that last case, which is
+  why empty is treated as absent.
+- `environment` distinguishes `production` from `preview`. A preview URL
+  answering `"production"` would mean the alias is not what you think it is.
+
+It is read at **request** time, not baked in at build time. A value compiled into
+the bundle proves what the bundle was built from, which is the same question one
+step removed; read at runtime it comes from the deployment actually serving.
+
+Protection is an allow-list in `lib/supabase/session.ts`, so this route had to be
+opened deliberately — and `e2e/auth.spec.ts` asserts it answers signed out, with
+`maxRedirects: 0` so that a redirect to `/login` cannot pass as a 200.
