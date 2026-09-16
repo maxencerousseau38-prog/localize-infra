@@ -1,6 +1,6 @@
 import { SectionHeading } from '@/components/landing/section-heading';
 import { cn } from '@localize-infra/ui';
-import { Check, Minus, Wrench } from 'lucide-react';
+import { Check, Circle, Minus } from 'lucide-react';
 
 /**
  * The honesty section, as a status board.
@@ -18,8 +18,15 @@ import { Check, Minus, Wrench } from 'lucide-react';
  * unshipped is graphite. That is the palette rule applied to the product's own
  * maturity, and it replaces an Iris that had leaked onto "in development" —
  * Iris means your judgement is required, and it is not spent on roadmap state.
+ *
+ * **"In development" is gone because nothing was in development.** Four rows
+ * wore it. One — hosted accounts and projects — had shipped. One — the review
+ * queue — was built and deployed but has never handled a real question. Three —
+ * the SDK, the non-developer surface, billing — had no code and no commits.
+ * "In development" told a reader work was under way on all four. The states
+ * below say which of those each one is.
  */
-type State = 'working' | 'building' | 'unmeasured';
+type State = 'working' | 'unproven' | 'notStarted' | 'unmeasured';
 
 const STATE: Record<
   State,
@@ -31,9 +38,15 @@ const STATE: Record<
     mark: 'border-confident bg-confident text-inverse',
     text: 'text-primary',
   },
-  building: {
-    label: 'In development',
-    icon: Wrench,
+  unproven: {
+    label: 'Built, not yet used',
+    icon: Circle,
+    mark: 'border-subtle bg-raised text-tertiary',
+    text: 'text-secondary',
+  },
+  notStarted: {
+    label: 'Not started',
+    icon: Minus,
     mark: 'border-subtle bg-raised text-tertiary',
     text: 'text-secondary',
   },
@@ -73,23 +86,38 @@ const ITEMS: Array<{ name: string; state: State; note?: string }> = [
     note: 'Through a GitHub App you install',
   },
   {
-    name: 'Review queue for unresolved strings',
-    state: 'building',
-    note: 'They are reported today, not yet resolvable here',
+    name: 'Hosted app: accounts, workspaces, projects, runs',
+    state: 'working',
+    note: 'Early access, sign-up open. Private repositories are not self-serve yet',
+  },
+  {
+    name: 'Answering unresolved strings before the pull request',
+    state: 'unproven',
+    note: 'In the hosted app. No real run has raised a question yet',
   },
   {
     name: 'Typed SDK',
-    state: 'building',
+    state: 'notStarted',
     note: 'A missing key should fail the build, not the user',
   },
-  { name: 'Review surface for non-developers', state: 'building' },
-  { name: 'Hosted accounts, projects and billing', state: 'building' },
+  { name: 'Review surface for non-developers', state: 'notStarted' },
+  {
+    name: 'Billing',
+    state: 'notStarted',
+    note: 'Nothing is priced until the cost of running it is modelled',
+  },
   {
     name: 'Human preference benchmarks per language',
     state: 'unmeasured',
     note: 'The evaluation harness is built; the study has not run',
   },
 ];
+
+/*
+ * Counted, not written. "Six of eleven" was a sentence beside a list, and the
+ * list could change without it.
+ */
+const WORKING = ITEMS.filter((item) => item.state === 'working').length;
 
 export function BuildStatus() {
   return (
@@ -106,8 +134,8 @@ export function BuildStatus() {
               in the present tense, here is the honest state of it.
             </p>
             <p className="mt-4 text-small leading-6 text-tertiary">
-              Six of eleven capabilities ship today. The rest are named here
-              rather than implied elsewhere.
+              {WORKING} of {ITEMS.length} capabilities ship today. The rest are
+              named here rather than implied elsewhere.
             </p>
           </SectionHeading>
 
@@ -144,7 +172,7 @@ export function BuildStatus() {
                       ) : null}
                     </span>
                     {/* The state as words, right-aligned so the column reads as
-                        a single scannable strip rather than eleven labels. */}
+                        a single scannable strip rather than a column of labels. */}
                     <span className="shrink-0 text-caption uppercase tracking-wide text-tertiary">
                       {state.label}
                     </span>

@@ -46,7 +46,10 @@ const COMMITMENTS: Array<{
     body: 'Strings the model could not resolve are reported as questions, never silently filled in.',
     tone: 'degraded',
     status: 'Partly working',
-    detail: 'Reported today. The queue for resolving them is in development.',
+    // "The queue for resolving them is in development" — it was built and
+    // deployed. What keeps this amber is that no real run has used it yet.
+    detail:
+      'Reported today. The hosted app can hold the pull request until they are answered; no real run has needed it yet.',
   },
   {
     title: 'No counters, ever',

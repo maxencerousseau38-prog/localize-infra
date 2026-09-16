@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { CLI_PUBLISHED_TO_NPM } from '../src/lib/constants';
+import { CLI_PUBLISHED_TO_NPM, EXAMPLE_PR_URL } from '../src/lib/constants';
 import { SITE_URL } from '../src/lib/routes';
 
 const ROUTES = [
@@ -517,6 +517,39 @@ test.describe('ecosystem rail', () => {
         () => document.documentElement.scrollWidth - window.innerWidth,
       );
       expect(overflow, `overflowed by ${overflow}px`).toBeLessThanOrEqual(0);
+    });
+  }
+});
+
+/*
+ * The evidence has to be openable by the people it is shown to.
+ *
+ * The landing page linked its central piece of evidence — "See the pull request
+ * it opened" — to a pull request in a private repository, in four places, and
+ * it answered 404 to every visitor. Nobody noticed because everybody who
+ * checked was signed in to GitHub as the owner. A browser test cannot sign out
+ * of GitHub on anyone's behalf, but it can hold the rule that makes the failure
+ * impossible: while `EXAMPLE_PR_URL` says no public pull request exists, no
+ * page links into the fixture repository at all.
+ *
+ * When the repository is made public and the constant set, this stops
+ * applying — and whoever sets it is told, in the constant's own comment, to
+ * check the link signed out first.
+ */
+test.describe('no page links to evidence a visitor cannot open', () => {
+  test.skip(EXAMPLE_PR_URL !== null, 'a public pull request is configured');
+
+  for (const route of ROUTES) {
+    test(`${route} has no link into the private fixture repository`, async ({
+      page,
+    }) => {
+      await page.goto(route, { waitUntil: 'networkidle' });
+      const hrefs = await page
+        .locator('a[href]')
+        .evaluateAll((links) => links.map((a) => a.getAttribute('href') ?? ''));
+      expect(
+        hrefs.filter((href) => href.includes('localize-infra-fixture-vite')),
+      ).toEqual([]);
     });
   }
 });

@@ -61,12 +61,17 @@ export function SiteFooter() {
             <p className="font-display text-title font-semibold text-primary">
               Your translations are files in your repository.
             </p>
+            {/* "Not rows in our database" was absolute, on every page, and the
+                hosted app does keep a run's proposed translations as rows until
+                the pull request lands — that is how it opens exactly what was
+                reviewed. The claim that holds is about what ships. */}
             <p className="mt-3 max-w-[42ch] text-body leading-6 text-secondary">
-              Not rows in our database. Delete the account, run{' '}
+              What ships is a file, not a row in our database. Delete the
+              account, run{' '}
               <code className="font-mono text-small text-primary">
                 git pull
               </code>
-              , and everything is still there.
+              , and everything that shipped is still there.
             </p>
 
             {/* The artifact itself, quietly. This is what a run leaves behind,
@@ -130,8 +135,8 @@ export function SiteFooter() {
             <span className="block h-[2px] w-1/2 rounded-full bg-line" />
           </span>
           <p className="text-small text-tertiary">
-            Early access. The CLI works today; the hosted product is in
-            development.
+            Early access. The CLI and the hosted app both work today; billing
+            does not exist yet.
           </p>
         </div>
       </div>

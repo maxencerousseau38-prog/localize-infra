@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { APP_URL, EXAMPLE_PR_URL } from '../src/lib/constants';
 
 /**
  * The conversion flow.
@@ -9,9 +10,10 @@ import { expect, test } from '@playwright/test';
  *  1. The gate sits after the evidence, not before it. A visitor should
  *     understand the product and see the real pull request before anything asks
  *     them for something.
- *  2. It collects nothing. There is no auth backend (CLAUDE.md), so a sign-up
- *     form here would be the simulation this project forbids — and it would
- *     cost the reader their email address to discover that.
+ *  2. It collects nothing. This site has no auth backend — accounts live on the
+ *     hosted app's own origin — so a sign-up form here would be the simulation
+ *     this project forbids, and it would cost the reader their email address to
+ *     discover that.
  *  3. Someone who already has access is never interrupted. That branch is
  *     unreachable today and is the most expensive one to get wrong, so it is
  *     asserted at the source rather than through the UI.
@@ -46,18 +48,26 @@ test('the dialog asks for nothing it cannot honour', async ({ page }) => {
     dialog.locator('input[type="email"], input[type="password"], form'),
   ).toHaveCount(0);
 
-  // It says so, in the same words the landing page's status board uses.
-  await expect(
-    dialog.getByText(/hosted accounts are not built yet/i),
-  ).toBeVisible();
+  // It names both paths that work today. This asserted "hosted accounts are
+  // not built yet" for as long as they were built.
+  await expect(dialog.getByText(/start from the command line/i)).toBeVisible();
+  await expect(dialog.getByText(/run it from the hosted app/i)).toBeVisible();
 
-  // And it hands over the two things that genuinely work.
+  // The hosted path is a link to the app's own origin, not a form here.
   await expect(
-    dialog.getByRole('link', { name: /see the pull request/i }),
-  ).toBeVisible();
+    dialog.getByRole('link', { name: /open the hosted app/i }),
+  ).toHaveAttribute('href', APP_URL);
   await expect(
     dialog.getByRole('link', { name: /follow on github/i }),
   ).toBeVisible();
+
+  // No link to a pull request a visitor cannot open. It pointed at a private
+  // repository and answered 404 to everyone but its owner.
+  if (EXAMPLE_PR_URL === null) {
+    await expect(
+      dialog.getByRole('link', { name: /pull request/i }),
+    ).toHaveCount(0);
+  }
 });
 
 test('the dialog quotes no price, because none is modelled', async ({

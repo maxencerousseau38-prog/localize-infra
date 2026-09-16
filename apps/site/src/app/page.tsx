@@ -4,7 +4,7 @@ import { Commitments } from '@/components/landing/commitments';
 import { Ecosystem } from '@/components/landing/ecosystem';
 import { Hero } from '@/components/landing/hero';
 import { HowItWorks } from '@/components/landing/how-it-works';
-import { EXAMPLE_PR_URL } from '@/lib/constants';
+import { CLI_PUBLISHED_TO_NPM } from '@/lib/constants';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -56,9 +56,13 @@ export default function HomePage() {
               <h2 className="mt-3 max-w-[18ch] font-display text-display font-semibold text-inverse sm:text-display-lg">
                 Now point it at yours
               </h2>
+              {/* This said extraction "writes a file you own" before anything
+                  leaves the machine. The CLI writes nothing until a token is
+                  configured, and with one it goes straight on to translate —
+                  so the honest version is about what is sent, not when. */}
               <p className="mt-4 max-w-[46ch] text-prose text-inverse/70">
-                Extraction runs locally and writes a file you own. Nothing
-                leaves your machine until you ask for a translation.
+                Extraction runs on your machine. What leaves it is the strings
+                and the code around them, sent to the API you point it at.
               </p>
             </div>
 
@@ -90,14 +94,8 @@ export default function HomePage() {
                * the primary must be an action that works today, and where the
                * nominal one is unavailable — it names a gated beta explicitly —
                * it is demoted and the strongest working action promoted. This
-               * button opens a dialog explaining that hosted accounts are not
-               * built. The pull request is real and open. So the fold keeps the
-               * fill and this becomes an outline.
-               *
-               * The pull request link goes with it, from a second button to
-               * plain text. It is the same destination the hero already sends
-               * people to at full weight; a second button for it here competed
-               * with the one thing this section exists to ask.
+               * button opens a dialog rather than doing the thing it names, so
+               * it stays an outline and the fold keeps the one fill.
                */}
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <GatedAction
@@ -108,15 +106,18 @@ export default function HomePage() {
                 </GatedAction>
               </div>
               <p className="mt-5 text-small text-inverse/60">
-                The CLI runs from a clone today. Read{' '}
-                <a
-                  href={EXAMPLE_PR_URL}
-                  target="_blank"
-                  rel="noreferrer noopener"
+                {/* "The CLI runs from a clone today" stood here for two weeks
+                    after the package reached npm, because it was prose rather
+                    than a read of the flag the hero and /docs already use. */}
+                {CLI_PUBLISHED_TO_NPM
+                  ? 'The CLI is on npm and translates through an API you run yourself. Read '
+                  : 'The CLI runs from a clone today. Read '}
+                <Link
+                  href="/docs#install"
                   className="rounded-sm text-inverse underline underline-offset-2 decoration-inverse/40 hover:decoration-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
-                  the pull request it opened
-                </a>{' '}
+                  the install guide
+                </Link>{' '}
                 or{' '}
                 <Link
                   href="/roadmap"

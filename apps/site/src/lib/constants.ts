@@ -1,16 +1,48 @@
 /**
  * Single source of truth for external references used across the site.
  *
- * The PR link points at a real, merged pull request produced by the real CLI
- * during end-to-end validation. Every claim on this site must be verifiable
- * today (see docs/frontend/07-milestones.md, FE-1 risks) — linking to a genuine
- * artefact instead of a screenshot is the point.
+ * Every claim on this site must be verifiable today (see
+ * docs/frontend/07-milestones.md, FE-1 risks).
  */
 export const GITHUB_REPO_URL =
   'https://github.com/maxencerousseau38-prog/localize-infra';
 
-export const EXAMPLE_PR_URL =
-  'https://github.com/maxencerousseau38-prog/localize-infra-fixture-vite/pull/1';
+/**
+ * The pull request the landing page's run produced, **when a visitor can open
+ * it** — and `null` while they cannot.
+ *
+ * This was `…/localize-infra-fixture-vite/pull/1`, described here as "a real,
+ * merged pull request". Three things were wrong with that, all checkable in one
+ * command each, and none checked:
+ *
+ *   - #1 was never merged. It was closed unmerged on 2026-09-02.
+ *   - The fixture repository is **private**, so the link answered 404 to every
+ *     visitor. The page's central piece of evidence was a dead link, in four
+ *     places, and nothing caught it because the people testing it were signed
+ *     in to GitHub as the owner.
+ *   - The run the page showed was not #1's: its duration came from another run.
+ *
+ * The landing page now shows run `b6fbbf11`, which opened #9 — merged, and the
+ * real product path. #9 lives in the same private repository, so there is
+ * nothing a visitor can follow, and every component that linked here renders
+ * the facts without a link instead of a link that fails.
+ *
+ * **Making the fixture repository public is the one-line fix**: set this to
+ * `https://github.com/maxencerousseau38-prog/localize-infra-fixture-vite/pull/9`
+ * and the links come back everywhere. Check it signed out.
+ */
+export const EXAMPLE_PR_URL: string | null = null;
+
+/**
+ * The hosted application.
+ *
+ * It exists — accounts, workspaces, projects, GitHub connection, runs — and
+ * sign-up is open. The site said for weeks that none of that was built,
+ * because the sentences were written before it was and nothing tied them to it.
+ * Pages that mention the hosted app read this constant rather than spelling
+ * the origin, so attaching a domain is one edit.
+ */
+export const APP_URL = 'https://localize-infra-web.vercel.app';
 
 /**
  * The evaluation harness, which is MIT-licensed.

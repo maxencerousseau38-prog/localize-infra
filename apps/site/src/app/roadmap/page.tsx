@@ -6,10 +6,26 @@ export const metadata: Metadata = {
   alternates: { canonical: '/roadmap' },
   title: 'Roadmap',
   description:
-    'What is shipped, what is being built, and what is deliberately out of scope.',
+    'What is shipped, what is built but not yet proven on a real run, what is planned, and what is deliberately out of scope.',
 };
 
-type Status = 'shipped' | 'building' | 'planned';
+/**
+ * Three states, each checkable.
+ *
+ * This page had "Being built" and "Planned", and both were wrong in the same
+ * direction as the landing page's status board:
+ *
+ *   - "Being built" held placeholder-aware extraction and the typed SDK.
+ *     Extraction had not changed since 2026-08-02, and no SDK code or commit
+ *     existed. Nothing was being built.
+ *   - "Planned" held the ambiguity review queue and hosted accounts, both of
+ *     which were already deployed.
+ *
+ * So `building` is gone. `unproven` is for what exists and is deployed but has
+ * never done its job on a real run — a different claim from "shipped", and one
+ * a reader should be able to tell apart.
+ */
+type Status = 'shipped' | 'unproven' | 'planned';
 
 const STAGES: {
   status: Status;
@@ -26,31 +42,35 @@ const STAGES: {
       },
       {
         title: 'CLI: extract, translate, open a pull request',
-        body: 'Framework detection, AST extraction, per-language failure isolation, a merge that never overwrites hand-edited translations, and pull request creation through a GitHub App. Validated end to end against a real repository.',
+        body: 'On npm as @localize-infra/cli. Framework detection, AST extraction, per-language failure isolation, a merge that never overwrites hand-edited translations, and pull request creation through a GitHub App. A run that would change nothing opens no pull request. It translates through an API you run yourself.',
+      },
+      {
+        title: 'Hosted app',
+        body: 'Accounts, workspaces with roles, projects, a GitHub connection per workspace, and runs started from the browser that end in a pull request. Early access: public repositories are self-serve, private ones are not yet.',
       },
     ],
   },
   {
-    status: 'building',
-    label: 'Being built',
+    status: 'unproven',
+    label: 'Built, not yet used on a real run',
     items: [
       {
-        title: 'Placeholder-aware extraction',
-        body: 'A sentence containing an expression — “You have {count} messages” — is currently extracted as separate fragments. Translating fragments independently breaks word order in German, Japanese and Arabic, so this is being fixed before any broader quality claim is made.',
-      },
-      {
-        title: 'Typed SDK',
-        body: 'Generated types from your key catalogue, so a missing key fails the build rather than reaching a user as a blank space.',
+        title: 'Answering unresolved strings',
+        body: 'When the model raises a question, the hosted app holds the run, lists the question with the alternatives the model gave, and opens the pull request only once every question is answered — committing the reviewed translations, not a fresh sample. It is deployed, and no real run has raised a question yet, so it has not been exercised outside tests.',
       },
     ],
   },
   {
     status: 'planned',
-    label: 'Planned',
+    label: 'Planned, not started',
     items: [
       {
-        title: 'Ambiguity review queue',
-        body: 'Strings the model could not confidently resolve, presented one at a time with the component screenshot and surrounding code, resolvable with a single keystroke. A decision, once made, is never asked again.',
+        title: 'Placeholder-aware extraction',
+        body: 'A sentence containing an expression — “You have {count} messages” — is currently extracted as separate fragments. Translating fragments independently breaks word order in German, Japanese and Arabic. It is first on this list, and no broader quality claim will be made until it is fixed.',
+      },
+      {
+        title: 'Typed SDK',
+        body: 'Generated types from your key catalogue, so a missing key fails the build rather than reaching a user as a blank space.',
       },
       {
         title: 'Visual context capture',
@@ -61,8 +81,8 @@ const STAGES: {
         body: 'A way for the person who notices the German call-to-action reads like a legal notice to fix it, without seeing a key, a file path, or a merge conflict.',
       },
       {
-        title: 'Hosted accounts and billing',
-        body: 'Projects, members and plans. Deliberately last: the pull request is the product, and a dashboard that arrives before it is needed is how localization tools became heavy in the first place.',
+        title: 'Billing',
+        body: 'Plans and payment. No price is published until the cost of running the service is modelled, and that model does not exist yet.',
       },
     ],
   },
@@ -75,10 +95,11 @@ const STAGES: {
  * required — and a roadmap item requires nothing of the reader. Spending the
  * ambiguity colour on maturity state is the same leak that was already removed
  * from the landing page's status board, and it had spread to four more pages.
+ * `unproven` is neutral for the same reason: it is a maturity state.
  */
 const TONE: Record<Status, 'confident' | 'neutral'> = {
   shipped: 'confident',
-  building: 'neutral',
+  unproven: 'neutral',
   planned: 'neutral',
 };
 
