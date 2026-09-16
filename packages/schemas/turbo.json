@@ -1,0 +1,23 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "//": "Two tests here read outside this package. cli-config.test.ts compares apps/web's Settings values with the defaults in packages/cli and packages/core; licensing.test.ts reads the root LICENSE and every package's manifest and LICENSE. Turbo's default key covers packages/schemas alone, so a change to the CLI's default API URL did not move it: `npm run test` replayed a cached pass locally while CI, with no cache, failed. The same trap packages/ui/turbo.json documents, found again on 2026-09-16. Naming what the tests read keeps the caching and fixes the key.",
+  "tasks": {
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/cli/src/**",
+        "$TURBO_ROOT$/packages/core/src/**",
+        "$TURBO_ROOT$/apps/web/src/lib/cli-config.ts",
+        "$TURBO_ROOT$/LICENSE",
+        "$TURBO_ROOT$/packages/*/package.json",
+        "$TURBO_ROOT$/packages/*/LICENSE",
+        "$TURBO_ROOT$/apps/*/package.json",
+        "$TURBO_ROOT$/apps/*/LICENSE",
+        "$TURBO_ROOT$/services/*/package.json",
+        "$TURBO_ROOT$/services/*/LICENSE"
+      ]
+    }
+  }
+}

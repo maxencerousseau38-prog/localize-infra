@@ -22,6 +22,12 @@ const cliSource = readFileSync(
   join(REPO_ROOT, 'packages/cli/src/commands/init.ts'),
   'utf8',
 );
+// The API URL default moved here from init.ts on 2026-09-16, so that `init`
+// and the usage text read one constant.
+const cliConfigSource = readFileSync(
+  join(REPO_ROOT, 'packages/cli/src/config.ts'),
+  'utf8',
+);
 const coreSource = readFileSync(
   join(REPO_ROOT, 'packages/core/src/detect/index.ts'),
   'utf8',
@@ -53,9 +59,15 @@ describe('settings reports the CLI it describes', () => {
   });
 
   it('reports the API URL the CLI actually defaults to', () => {
-    const url = cliSource.match(/const DEFAULT_API_URL = '([^']+)'/)?.[1];
+    const url = cliConfigSource.match(
+      /export const DEFAULT_API_URL = '([^']+)'/,
+    )?.[1];
     expect(url).toBeTruthy();
-    expect(settingsSource).toContain(url as string);
+    expect(settingsSource).toContain(`'${url}'`);
+    // init must use that constant rather than a literal of its own, or the
+    // comparison above would pin a value nothing reads.
+    expect(cliSource).toContain('resolveApiUrl(options?.apiUrl)');
+    expect(cliSource).not.toMatch(/https?:\/\/[^'"\s]+:\d+/);
   });
 
   it('reports the base branch the CLI actually defaults to', () => {
