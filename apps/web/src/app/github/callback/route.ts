@@ -6,6 +6,7 @@ import {
   verifyInstallationOwnership,
   verifyState,
 } from '@/lib/github/install';
+import { createAdminClient, readServiceRoleKey } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -109,7 +110,19 @@ export async function GET(request: NextRequest) {
   return link(request, organizationId, only);
 }
 
-/** Writes the link and sends the customer back to their workspace. */
+/**
+ * Writes the link and sends the customer back to their workspace.
+ *
+ * The write goes through the service role. The database refuses
+ * `link_github_installation` from any signed-in user, because a direct RPC
+ * call would reach it without the GitHub ownership check above — and its old
+ * role guard also let non-members through (migration 20260916000200). So the
+ * server makes the call, naming the user it verified, and the function checks
+ * that user's role in the workspace itself.
+ *
+ * The user comes from `getUser()`, which verifies the session against the
+ * auth server, not from anything in the request.
+ */
 async function link(
   request: NextRequest,
   organizationId: string,
@@ -122,30 +135,44 @@ async function link(
   const { origin } = request.nextUrl;
   const supabase = await createClient();
 
-  const { error } = await supabase.rpc('link_github_installation', {
-    p_organization_id: organizationId,
-    p_installation_id: verified.installationId,
-    p_account_login: verified.accountLogin,
-    p_account_type: verified.accountType,
-  });
-
-  if (error) {
-    return NextResponse.redirect(`${origin}/?github=link-failed`);
-  }
-
-  // Redirect by slug rather than id: the id is not a URL the customer has ever
-  // seen, and looking it up confirms they can still read the workspace.
+  /*
+   * The slug first, read as the user.
+   *
+   * Every outcome below is reported on the workspace's projects page, which is
+   * the only place GitHubResult is rendered. The failures here used to redirect
+   * to `/?github=link-failed`, where nothing renders it — so a refused link
+   * looked exactly like nothing having happened. Reading the slug under RLS also
+   * confirms the user can see this workspace before anything is written.
+   */
   const { data: organization } = await supabase
     .from('organizations')
     .select('slug')
     .eq('id', organizationId)
     .maybeSingle();
-
-  if (!organization)
+  if (!organization) {
     return NextResponse.redirect(`${origin}/?github=link-failed`);
-  return NextResponse.redirect(
-    `${origin}/${organization.slug}/projects?github=connected`,
-  );
+  }
+  const back = (reason: string) =>
+    NextResponse.redirect(
+      `${origin}/${organization.slug}/projects?github=${reason}`,
+    );
+
+  if (!readServiceRoleKey()) return back('link-not-configured');
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return back('link-failed');
+
+  const { error } = await createAdminClient().rpc('link_github_installation', {
+    p_organization_id: organizationId,
+    p_installation_id: verified.installationId,
+    p_account_login: verified.accountLogin,
+    p_account_type: verified.accountType,
+    p_user_id: user.id,
+  });
+
+  return back(error ? 'link-failed' : 'connected');
 }
 
 export const dynamic = 'force-dynamic';

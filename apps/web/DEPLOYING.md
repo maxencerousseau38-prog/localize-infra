@@ -78,6 +78,7 @@ from reading the toggle.
 | `GITHUB_APP_SLUG` | yes | Builds the App installation URL |
 | `GITHUB_OAUTH_CLIENT_ID` | yes | Proves the caller owns the installation they name. Read from `GET /app` — see below |
 | `GITHUB_OAUTH_CLIENT_SECRET` | yes | Completes the pair the callback needs. Set by hand on 2026-08-28 — see below |
+| `SUPABASE_SERVICE_ROLE_KEY` | **to set** | Writes the GitHub link after the callback verifies it — the only use of this key. Bypasses RLS: server-only, never `NEXT_PUBLIC_`. See below |
 
 **Two rows left this table on 2026-08-23**, removed from the project rather
 than merely undocumented: `GITHUB_APP_INSTALLATION_ID` and
@@ -258,3 +259,32 @@ step removed; read at runtime it comes from the deployment actually serving.
 Protection is an allow-list in `lib/supabase/session.ts`, so this route had to be
 opened deliberately — and `e2e/auth.spec.ts` asserts it answers signed out, with
 `maxRedirects: 0` so that a redirect to `/login` cannot pass as a 200.
+
+## The service-role key, and the one thing it does
+
+`SUPABASE_SERVICE_ROLE_KEY` is the production project's secret key (Supabase
+dashboard → Project Settings → API keys → secret). It bypasses row-level
+security, so it has exactly one caller: `lib/supabase/admin.ts`, used by
+`/github/callback` to write the workspace's GitHub link.
+
+It exists because the database stopped accepting that write from signed-in
+users (migration `20260916000200`), for two reasons found on 2026-09-16:
+
+- the old guard, `org_role(org) not in ('owner','admin')`, is NULL for a
+  non-member, so a non-member could write — and delete — another workspace's
+  link; reproduced on the development database;
+- even a correct role check never proved the caller controls the installation
+  id, which only the OAuth callback asks GitHub. A direct RPC call skipped it.
+
+The callback now verifies ownership with the user's GitHub token, reads the
+user with `getUser()`, and writes as the service role, passing that user; the
+function checks the user's role itself.
+
+**Without the key, connecting a new GitHub account fails closed**: the panel
+hides the button and names `SUPABASE_SERVICE_ROLE_KEY` as missing, and a stale
+callback reports `link-not-configured` on the projects page. Existing links are
+read under RLS and keep working.
+
+Set it for **Production** only. Preview deployments do not need to connect
+GitHub, and a key that bypasses RLS should not be spread wider than its use.
+Like every variable here, it applies on the next deployment — the next merge.

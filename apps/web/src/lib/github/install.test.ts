@@ -20,6 +20,7 @@ beforeEach(() => {
   process.env.GITHUB_APP_PRIVATE_KEY = PRIVATE_KEY;
   process.env.GITHUB_OAUTH_CLIENT_ID = 'client-id';
   process.env.GITHUB_OAUTH_CLIENT_SECRET = 'client-secret';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'sb_secret_test';
 });
 
 afterEach(() => {
@@ -222,6 +223,20 @@ describe('installBlockers', () => {
    * somebody would actually have to set — rather than as a separate name for
    * something that does not exist.
    */
+  /*
+   * The link is written with the service role since the database stopped
+   * accepting it from signed-in users. A deployment with every GitHub variable
+   * and no key would offer a button whose last step always fails.
+   */
+  it('names the service-role key, without which the link cannot be written', async () => {
+    process.env.GITHUB_APP_SLUG = 'localize-infra';
+    process.env.GITHUB_OAUTH_CLIENT_SECRET = 'secret';
+    // biome-ignore lint/performance/noDelete: the code reads absence, not ''
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const { installBlockers } = await import('./install');
+    expect(installBlockers()).toEqual(['SUPABASE_SERVICE_ROLE_KEY']);
+  });
+
   it('reports the private key when the app itself is unconfigured', async () => {
     process.env.GITHUB_APP_SLUG = 'localize-infra';
     process.env.GITHUB_OAUTH_CLIENT_SECRET = 'secret';

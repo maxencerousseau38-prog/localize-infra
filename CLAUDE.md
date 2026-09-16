@@ -768,8 +768,8 @@ deux bases hébergées ont été construites migration par migration et n'avaien
 jamais été reconstruites ; c'est la première preuve continue que la séquence
 est rejouable.
 
-**68 assertions de base de données tournent** — 47 dans
-`closer-suppression.sql`, 15 dans `tenant-isolation.sql`, 6 dans
+**76 assertions de base de données tournent** — 47 dans
+`closer-suppression.sql`, 23 dans `tenant-isolation.sql`, 6 dans
 `role-permissions.sql`. Elles ne sont pas du pgTAP : chacune finit par un
 `raise` délibéré qui annule la transaction, donc **elles sortent en échec quand
 elles réussissent**. `supabase/tests/run.sh` lit le verdict et compare chaque
@@ -834,9 +834,32 @@ Deux ne la portaient pas.
   **Non exploitable de l'extérieur aujourd'hui** : la clé publishable
   n'atteint pas le navigateur (vérifié sur les bundles servis). Mais Supabase
   la documente comme publique, et une garde qui repose sur sa non-diffusion
-  n'en est pas une. **Non corrigé** : fermer ce chemin demande une écriture que
-  seul le serveur peut faire (clé `service_role` ou attestation signée), donc
-  un nouveau secret, et ce choix revient au propriétaire.
+  n'en est pas une.
+
+  **Et la garde elle-même laissait passer les non-membres.** Elle s'écrivait
+  `org_role(org) not in ('owner','admin')` ; `org_role` rend `NULL` pour
+  un non-membre, `NULL not in (…)` vaut `NULL`, et un `IF` PL/pgSQL ne
+  prend pas une branche `NULL`. Reproduit sur dev : un utilisateur extérieur
+  à A a **écrit** le lien GitHub de A (`rows-written-into-A=1`) et
+  `unlink_github_installation` l'a supprimé de même. `role-permissions.sql`
+  ne l'a jamais vu parce qu'il testait un *membre*, dont le rôle n'est pas nul.
+  La production ne portait qu'un lien, posé par l'owner via OAuth.
+
+  **Corrigé par l'option retenue par le propriétaire, la clé `service_role`**
+  (`20260916000200`). Les deux fonctions ne sont plus exécutables que par
+  `service_role`, prennent l'utilisateur en paramètre et vérifient son rôle en
+  traitant `NULL` comme un refus. Le callback vérifie la propriété auprès de
+  GitHub, lit l'utilisateur par `getUser()`, puis écrit avec
+  `SUPABASE_SERVICE_ROLE_KEY` (`lib/supabase/admin.ts`, seul usage de cette
+  clé). 8 contrôles de plus dans `tenant-isolation.sql`.
+
+  **La leçon qui dépasse ce cas : une garde `not in` sur une valeur qui peut
+  être `NULL` laisse passer exactement ceux qu'elle vise.** Écrire
+  `is null or … not in`, et tester un non-membre, pas seulement un membre.
+
+  **Sans la clé sur Vercel, connecter un *nouveau* compte GitHub échoue fermé** :
+  le bouton disparaît et `SUPABASE_SERVICE_ROLE_KEY` est nommée dans la liste
+  des manques. Les liens existants sont lus sous RLS et ne sont pas touchés.
 
 **`package-lock.json` doit être généré sous Linux.** C'est la seule contrainte
 non évidente de ce dépôt côté dépendances, et elle a coûté cinq jours de CI
