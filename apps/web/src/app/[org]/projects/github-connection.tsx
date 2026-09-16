@@ -5,6 +5,7 @@ import {
   readOAuthConfig,
   signState,
 } from '@/lib/github/install';
+import { readServiceRoleKey } from '@/lib/supabase/admin';
 import { Badge } from '@localize-infra/ui';
 
 /**
@@ -16,11 +17,13 @@ import { Badge } from '@localize-infra/ui';
  *  - **connected** — the workspace installed the App itself. Its token reaches
  *    its own repositories and nothing else. This is the real thing.
  *  - **available** — nothing connected yet, and a customer can do it now.
- *  - **unavailable** — the App has no OAuth client secret, so the callback
- *    cannot prove that whoever completes it actually owns the installation it
- *    names. The button is absent rather than disabled, and the reason is
- *    stated, because a flow that stores an unverified installation id is an
- *    account takeover wearing a feature's clothes.
+ *  - **unavailable** — something the callback needs is missing: the OAuth
+ *    client secret, without which it cannot prove that whoever completes it
+ *    owns the installation it names, or the service-role key, without which it
+ *    cannot record the link it verified. The button is absent rather than
+ *    disabled, and what is missing is named, because a flow that stores an
+ *    unverified installation id is an account takeover wearing a feature's
+ *    clothes.
  */
 export function GitHubConnection({
   organizationId,
@@ -40,7 +43,7 @@ export function GitHubConnection({
 }) {
   const oauth = readOAuthConfig();
   const state = signState(organizationId);
-  const canInstall = Boolean(oauth && appSlug && state);
+  const canInstall = Boolean(oauth && appSlug && state && readServiceRoleKey());
 
   /*
    * The button authorizes; it does not install.
@@ -122,8 +125,8 @@ export function GitHubConnection({
       ) : (
         <p className="mt-3 max-w-[64ch] text-small leading-6 text-secondary">
           Connecting your own GitHub account is not available on this
-          deployment: the callback cannot prove that whoever completes an
-          install actually owns it, so rather than store an installation id it
+          deployment: it is missing what the callback needs to verify an
+          installation and record it, so rather than store an installation id it
           cannot verify, the flow is switched off.
           {/*
             The variables, named. This used to end with "The CLI still works

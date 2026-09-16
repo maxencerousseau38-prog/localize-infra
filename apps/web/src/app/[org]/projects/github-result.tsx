@@ -57,6 +57,11 @@ const OUTCOMES: Record<string, { tone: Tone; title: string; body: string }> = {
     title: 'Connecting your own account is switched off here',
     body: 'This deployment has no OAuth client secret, so the callback cannot prove that whoever completes an install actually owns it. Rather than store an installation id it cannot verify, the flow is disabled.',
   },
+  'link-not-configured': {
+    tone: 'failed',
+    title: 'This deployment cannot record the connection',
+    body: 'GitHub confirmed the installation is yours, but this deployment has no service-role key, which is the only way it may write the link. Nothing was recorded.',
+  },
   'not-your-installation': {
     tone: 'failed',
     title: 'That installation is not yours to connect',

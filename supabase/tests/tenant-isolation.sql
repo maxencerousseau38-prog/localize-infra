@@ -88,5 +88,47 @@ begin
   r := r || format('anon-can-call-is-suppressed=%s(want f); ',
     has_function_privilege('anon', 'public.closer_is_suppressed(uuid,text,text)', 'EXECUTE'));
 
+  -- Binding a GitHub installation. The old guard was
+  -- `org_role(org) not in ('owner','admin')`, which is NULL for a non-member,
+  -- and an IF does not take a NULL branch: B could write A's link. Now no
+  -- signed-in user can call the function at all — not even for their own
+  -- workspace, because a direct call skips the GitHub ownership check the
+  -- server makes — and the server-side call checks the user it is given.
+  ok := false;
+  begin perform public.link_github_installation(ob.id, 999999999, 'b', 'User', ub);
+  exception when others then ok := true; end;
+  r := r || format('B-direct-link-own-org-blocked=%s(want t); ', ok);
+
+  r := r || format('authenticated-can-call-link=%s(want f); ',
+    has_function_privilege('authenticated', 'public.link_github_installation(uuid,bigint,text,text,uuid)', 'EXECUTE'));
+  r := r || format('authenticated-can-call-unlink=%s(want f); ',
+    has_function_privilege('authenticated', 'public.unlink_github_installation(uuid,uuid)', 'EXECUTE'));
+
+  -- The server path, as the owner role the service key maps to.
+  perform set_config('role','postgres',true);
+
+  ok := false;
+  begin perform public.link_github_installation(org_a, 999999999, 'b', 'User', ub);
+  exception when others then ok := true; end;
+  r := r || format('server-link-for-non-member-refused=%s(want t); ', ok);
+
+  ok := false;
+  begin perform public.link_github_installation(org_a, 999999999, 'b', 'User', null);
+  exception when others then ok := true; end;
+  r := r || format('server-link-without-user-refused=%s(want t); ', ok);
+
+  select count(*) into n from public.organization_github_installations where organization_id = org_a;
+  r := r || format('A-links-after-refusals=%s(want 0); ', n);
+
+  perform public.link_github_installation(org_a, 999999999, 'a', 'User', ua);
+  select count(*) into n from public.organization_github_installations
+   where organization_id = org_a and connected_by = ua;
+  r := r || format('server-link-for-owner-written=%s(want 1); ', n);
+
+  ok := false;
+  begin perform public.unlink_github_installation(org_a, ub);
+  exception when others then ok := true; end;
+  r := r || format('server-unlink-for-non-member-refused=%s(want t); ', ok);
+
   raise exception 'ISOLATION >> %', r;
 end $$;

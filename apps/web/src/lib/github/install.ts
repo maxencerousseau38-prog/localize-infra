@@ -1,5 +1,6 @@
 import 'server-only';
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { readServiceRoleKey } from '@/lib/supabase/admin';
 import { readGitHubApp } from './config';
 
 /**
@@ -260,5 +261,12 @@ export function installBlockers(): string[] {
    * somebody would have to set.
    */
   if (!readGitHubApp()) missing.push('GITHUB_APP_PRIVATE_KEY');
+  /*
+   * The link is written with the service role, because the database no longer
+   * accepts it from a signed-in user (a direct RPC call would skip the GitHub
+   * ownership check). Without the key the flow cannot finish, so it is not
+   * offered.
+   */
+  if (!readServiceRoleKey()) missing.push('SUPABASE_SERVICE_ROLE_KEY');
   return missing;
 }
