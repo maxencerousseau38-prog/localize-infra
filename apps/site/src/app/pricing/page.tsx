@@ -107,8 +107,14 @@ export default function PricingPage() {
 
             <div className="mt-8">
               <CopyCommand command={INSTALL_COMMAND} />
+              {/* "Extraction runs locally and costs nothing" was true of the
+                  half that never bills anyone. Translation runs through the
+                  reader's own API and provider key, so the model calls are a
+                  cost — theirs, not ours. A pricing page is where that line
+                  matters most. */}
               <p className="mt-3 text-small leading-5 text-tertiary">
-                Extraction runs locally and costs nothing.
+                The CLI is free. Translation runs on an API you host with your
+                own provider key, so the model bill is yours, not ours.
               </p>
             </div>
           </aside>

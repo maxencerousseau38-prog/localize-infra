@@ -75,5 +75,18 @@ begin
   exception when others then ok := true; end;
   r := r || format('B-delete-A-org-blocked=%s(want t); ', ok);
 
+  -- A definer function reads past RLS, so isolation there is whatever the
+  -- function checks. closer_is_suppressed checked nothing: B could ask whether
+  -- an address had opted out of A's outreach and get an answer. The fix raises
+  -- rather than answering false, so "blocked" here means an exception — a
+  -- returned boolean of either value is the leak.
+  ok := false;
+  begin perform public.closer_is_suppressed(org_a, 'probe.test.invalid', 'x@probe.test.invalid');
+  exception when others then ok := true; end;
+  r := r || format('B-probe-A-suppressions-blocked=%s(want t); ', ok);
+
+  r := r || format('anon-can-call-is-suppressed=%s(want f); ',
+    has_function_privilege('anon', 'public.closer_is_suppressed(uuid,text,text)', 'EXECUTE'));
+
   raise exception 'ISOLATION >> %', r;
 end $$;

@@ -478,6 +478,14 @@ Vérifié, puis re-vérifié après la bascule : le même appel renvoie désorma
 Ce n'est plus vrai :** la base contient un compte, créé le 2026-08-18, qui a
 créé l'organisation `layersky`. Ce n'est pas le compte semé, qui reste refusé.
 
+**Ce décompte disait « un compte » ; il y en a deux au 2026-09-16.** Le second
+a été créé le 2026-08-28, son adresse est confirmée, il **ne s'est jamais
+connecté** et n'appartient à aucune organisation. Il n'est pas identifié, et
+l'épisode plus bas — un compte déduit « tiers » à partir de son domaine — est la
+raison de ne rien en conclure : ni un utilisateur, ni un doublon du
+propriétaire, tant que le propriétaire ne l'a pas dit. L'adresse n'a pas été
+lue pour cet audit.
+
 **Ce paragraphe a affirmé qu'il s'agissait d'un « compte tiers réel » et que
 c'était « la donnée la plus utile que ce dépôt possède ». C'était faux.** Le
 compte appartient au propriétaire — confirmé par lui le 2026-08-23, et
@@ -744,7 +752,7 @@ du long. C'est exactement ainsi que le trou a survécu : le job passait en ne
 prouvant rien d'eux.
 
 La pile Supabase est désormais lancée **dans le job** par `npm run db:local`,
-reçoit les 33 migrations puis le seed, et meurt avec lui. Ce n'est pas un pis-
+reçoit les 34 migrations puis le seed, et meurt avec lui. Ce n'est pas un pis-
 aller faute de projet hébergé disponible — c'est **plus** isolé : aucun secret
 n'est ajouté, les clés locales étant publiques par conception, et deux PR
 simultanées ne partagent aucune ligne. Un projet dédié aurait rejoué, à
@@ -760,8 +768,8 @@ deux bases hébergées ont été construites migration par migration et n'avaien
 jamais été reconstruites ; c'est la première preuve continue que la séquence
 est rejouable.
 
-**66 assertions de base de données tournent** — 47 dans
-`closer-suppression.sql`, 13 dans `tenant-isolation.sql`, 6 dans
+**68 assertions de base de données tournent** — 47 dans
+`closer-suppression.sql`, 15 dans `tenant-isolation.sql`, 6 dans
 `role-permissions.sql`. Elles ne sont pas du pgTAP : chacune finit par un
 `raise` délibéré qui annule la transaction, donc **elles sortent en échec quand
 elles réussissent**. `supabase/tests/run.sh` lit le verdict et compare chaque
@@ -799,6 +807,36 @@ GitHub **fabriqués**, ce qui fait prendre à la page la bonne branche sans
 qu'aucun appel réel soit possible — aucune organisation semée n'a
 d'installation, donc Octokit n'est jamais construit. Un run réel, une PR réelle
 et une traduction réelle restent des vérifications manuelles.
+
+**Les fonctions `SECURITY DEFINER` ont été relues une par une le 2026-09-16.**
+Le conseiller Supabase en signale 32 appelables par `authenticated`, et il le
+signalera toujours : l'app les appelle avec la session de l'utilisateur, donc
+les révoquer casserait le produit. Ce qui les protège est leur garde interne —
+relire la ligne visée, puis vérifier l'appartenance de l'appelant à
+l'organisation **de cette ligne**. Trente la portent, ou ne lisent que les
+droits de l'appelant lui-même (`is_org_member`, `org_role`,
+`create_organization`).
+
+Deux ne la portaient pas.
+
+- **`closer_is_suppressed`** répondait à tout utilisateur connecté, pour
+  n'importe quelle organisation : un oracle sur la liste d'opposition d'un
+  autre tenant. Fuite constatée sur la base de dev avant correction
+  (`B-probe-A-suppressions-blocked=f`), fermée par
+  `20260916000100`, prouvée dans `tenant-isolation.sql`. La garde **lève**
+  au lieu de répondre `false` : ses appelants décident d'écrire ou non à
+  quelqu'un, et « non supprimé » est la valeur dangereuse.
+- **`link_github_installation`** vérifie que l'appelant est owner ou admin
+  de *son* organisation, **pas qu'il contrôle l'installation qu'il nomme**.
+  Cette preuve n'existe que dans le callback OAuth d'`apps/web`. Un appel
+  direct à `rpc/link_github_installation` pourrait donc rattacher
+  l'installation d'un autre client — et notre App y a `contents: write`.
+  **Non exploitable de l'extérieur aujourd'hui** : la clé publishable
+  n'atteint pas le navigateur (vérifié sur les bundles servis). Mais Supabase
+  la documente comme publique, et une garde qui repose sur sa non-diffusion
+  n'en est pas une. **Non corrigé** : fermer ce chemin demande une écriture que
+  seul le serveur peut faire (clé `service_role` ou attestation signée), donc
+  un nouveau secret, et ce choix revient au propriétaire.
 
 **`package-lock.json` doit être généré sous Linux.** C'est la seule contrainte
 non évidente de ce dépôt côté dépendances, et elle a coûté cinq jours de CI
