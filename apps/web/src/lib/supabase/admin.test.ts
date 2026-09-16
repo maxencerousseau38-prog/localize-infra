@@ -1,5 +1,23 @@
+import { createRequire } from 'node:module';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createAdminClient, readServiceRoleKey } from './admin';
+
+/*
+ * The runtime this client is built in has a WebSocket; plain Node 20 does not.
+ *
+ * supabase-js constructs its realtime client eagerly and throws "Node.js
+ * detected but native WebSocket not found" below Node 22. CI runs Node 20, and
+ * this test failed there while passing locally on a newer Node. The app itself
+ * is unaffected: Next installs `next/dist/compiled/ws` as the global WebSocket
+ * when Node lacks one (next/dist/server/node-environment-baseline.js), which is
+ * why `@supabase/ssr` — the same createClient underneath — already works under
+ * Node 20 in the e2e job. So the test installs the same thing Next does, rather
+ * than the production code growing a transport option only a test needs.
+ */
+if (typeof globalThis.WebSocket !== 'function') {
+  const require = createRequire(import.meta.url);
+  globalThis.WebSocket = require('next/dist/compiled/ws').WebSocket;
+}
 
 /**
  * The service-role key is the one credential in this app that bypasses RLS,
