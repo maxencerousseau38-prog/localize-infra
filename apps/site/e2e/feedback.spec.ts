@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { EXAMPLE_PR_URL } from '../src/lib/constants';
 
 /**
  * Interaction feedback: the press, the pointer it is meant for, and the chrome
@@ -98,13 +99,29 @@ async function hoverAndPressRules(
  * highlight, and giving them a bespoke pressed treatment would be new visual
  * language rather than the step Button already defines.
  */
+/*
+ * Which surfaces are pressable depends on whether a visitor can open the pull
+ * request. While `EXAMPLE_PR_URL` is null the artifact's pull request row is
+ * plain text, not a target, and the hero's filled action is the docs — the
+ * first `/docs#install` link in document order, ahead of the inline "Install
+ * guide" text link in the terminal panel.
+ */
 const PRESSABLE: { name: string; selector: string }[] = [
   { name: 'copy command', selector: 'button[aria-label^="Copy command"]' },
-  {
-    name: 'hero artifact pull request row',
-    selector: 'figure a[href*="/pull/"]',
-  },
-  { name: 'primary call to action', selector: 'main a[href*="/pull/"]' },
+  ...(EXAMPLE_PR_URL
+    ? [
+        {
+          name: 'hero artifact pull request row',
+          selector: 'figure a[href*="/pull/"]',
+        },
+        { name: 'primary call to action', selector: 'main a[href*="/pull/"]' },
+      ]
+    : [
+        {
+          name: 'primary call to action',
+          selector: 'main a[href="/docs#install"]',
+        },
+      ]),
 ];
 
 /** Asserts a surface declares a pressed state that differs from, and beats, hover. */

@@ -7,7 +7,8 @@ import {
   readViewer,
 } from '@/lib/account';
 import {
-  EXAMPLE_PR_URL,
+  APP_URL,
+  CLI_PUBLISHED_TO_NPM,
   GITHUB_REPO_URL,
   INSTALL_COMMAND,
 } from '@/lib/constants';
@@ -23,7 +24,7 @@ import {
   DialogTitle,
   StateRule,
 } from '@localize-infra/ui';
-import { ArrowRight, GitPullRequest, Terminal } from 'lucide-react';
+import { ArrowUpRight, Globe, Terminal } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 
@@ -31,9 +32,8 @@ import * as React from 'react';
  * The conversion point.
  *
  * Placed on the primary action rather than at the top of the page: a visitor
- * should understand what the product does, see the pull request it actually
- * produced, and read the honest status board before anything asks them for
- * something. By the time this opens they have a reason to want it.
+ * should understand what the product does, see the run it actually produced,
+ * and read the honest status board before anything asks them for something. By the time this opens they have a reason to want it.
  *
  * Three branches, chosen from the viewer rather than from a prop, so the same
  * button is correct for everyone:
@@ -76,14 +76,21 @@ export function ConversionDialog({
 }
 
 /**
- * No account yet.
+ * No account on this site.
  *
- * There is no auth backend, so this shows no email field and no password field.
- * A sign-up form that cannot sign anyone up is the simulation this project
- * forbids, and it is worse than saying so: it costs the reader their address to
- * discover the same fact. Instead it says plainly what exists today and hands
- * over the two things that genuinely work — the CLI, and the pull request it
- * produced on a real repository.
+ * Two paths work today, and this names both. The CLI runs from a terminal; the
+ * hosted app runs the same pipeline from a browser. This said the second did
+ * not exist — "Hosted accounts are not built yet … no accounts, no projects, no
+ * billing" — for as long as it did exist, with sign-up open.
+ *
+ * Still no email field and no password field here. Accounts live on the app's
+ * own origin, which this static site does not talk to (`ACCOUNT_BACKEND`), so a
+ * form here could only forward the reader somewhere else. The link does that
+ * honestly.
+ *
+ * The pull request button is gone: the only pull request the site could point
+ * at is in a private repository, and a 404 is not a thing that "genuinely
+ * works".
  */
 function AnonymousBranch() {
   return (
@@ -91,8 +98,7 @@ function AnonymousBranch() {
       <DialogHeader>
         <DialogTitle>Run it on your repository</DialogTitle>
         <DialogDescription>
-          Localize Infra runs from your terminal and opens a pull request. That
-          path works today and needs no account.
+          Two ways work today. Both end in a pull request on your repository.
         </DialogDescription>
       </DialogHeader>
 
@@ -109,14 +115,19 @@ function AnonymousBranch() {
                 Start from the command line
               </p>
               <p className="mt-1 text-small leading-5 text-secondary">
-                Detection and extraction run locally. Nothing leaves your
-                machine until you ask for a translation.
+                Detection and extraction run on your machine. Translation goes
+                through an API you run yourself.
               </p>
               <div className="mt-3">
                 <CopyCommand command={INSTALL_COMMAND} />
               </div>
+              {/* The same flag the hero and /docs read. This sentence was
+                  hard-coded and kept saying "not published" after the package
+                  reached npm. */}
               <p className="mt-2 text-caption leading-5 text-secondary">
-                Not published to npm yet — today it runs from a clone.{' '}
+                {CLI_PUBLISHED_TO_NPM
+                  ? 'On npm. It needs an API you run yourself.'
+                  : 'Not published to npm yet — today it runs from a clone.'}{' '}
                 <Link
                   href="/docs#install"
                   className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
@@ -130,37 +141,49 @@ function AnonymousBranch() {
         </div>
 
         {/*
-         * The honest part. Hosted accounts are the thing a visitor would expect
-         * to sign up for here, and they do not exist — so this says that in the
-         * same words the status board on the landing page uses, rather than
-         * collecting an address against a product that cannot yet be sold.
+         * The hosted path, with its limits stated where it is offered.
+         *
+         * Neutral, not jade: it works, but it is early access with a narrow
+         * scope, and the limits below are the part a visitor needs before
+         * clicking rather than after.
          */}
         <StateRule tone="neutral" className="ps-3">
-          <p className="text-body font-medium text-primary">
-            Hosted accounts are not built yet
-          </p>
-          <p className="mt-1 text-small leading-5 text-secondary">
-            There is no sign-up because there is nothing to sign in to: no
-            accounts, no projects, no billing. When that exists it will be a
-            flat subscription, never metered by words, keys or seats.
-          </p>
-          <p className="mt-2 text-caption leading-5 text-secondary">
-            Follow the repository to know when it ships.
-          </p>
+          <div className="flex items-start gap-3">
+            <Globe
+              className="mt-0.5 size-4 shrink-0 text-tertiary"
+              aria-hidden="true"
+              strokeWidth={1.5}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="text-body font-medium text-primary">
+                Or run it from the hosted app
+              </p>
+              <p className="mt-1 text-small leading-5 text-secondary">
+                Early access. Create an account, connect a GitHub repository,
+                choose languages and run the pipeline from your browser — no API
+                to run. Public repositories are self-serve; private ones are not
+                yet.
+              </p>
+              <p className="mt-2 text-caption leading-5 text-secondary">
+                There is no billing and nothing is charged. When there is, it
+                will be a flat subscription, never metered by words, keys or
+                seats.
+              </p>
+            </div>
+          </div>
         </StateRule>
       </DialogBody>
 
       <DialogFooter>
         <Button asChild variant="secondary" className="w-full sm:w-auto">
-          <a href={EXAMPLE_PR_URL} target="_blank" rel="noreferrer noopener">
-            <GitPullRequest aria-hidden="true" />
-            See the pull request
+          <a href={GITHUB_REPO_URL} target="_blank" rel="noreferrer noopener">
+            Follow on GitHub
           </a>
         </Button>
         <Button asChild variant="primary" className="w-full sm:w-auto">
-          <a href={GITHUB_REPO_URL} target="_blank" rel="noreferrer noopener">
-            Follow on GitHub
-            <ArrowRight aria-hidden="true" />
+          <a href={APP_URL} target="_blank" rel="noreferrer noopener">
+            Open the hosted app
+            <ArrowUpRight aria-hidden="true" />
           </a>
         </Button>
       </DialogFooter>
@@ -171,10 +194,10 @@ function AnonymousBranch() {
 /**
  * Signed in, not entitled.
  *
- * Unreachable today — `ACCOUNT_BACKEND` is `'absent'` and `readViewer` returns
- * anonymous — and implemented anyway, because the branch is where the decision
- * lives and retrofitting it later is how paywalls end up shown to paying
- * customers. Tests drive it directly by injecting a viewer.
+ * Unreachable from this site — `ACCOUNT_BACKEND` is `'absent'` and
+ * `readViewer` returns anonymous — and implemented anyway, because the branch
+ * is where the decision lives and retrofitting it later is how paywalls end up
+ * shown to paying customers. Tests drive it directly by injecting a viewer.
  *
  * It quotes no price. Pricing is not modelled (see /pricing, which says so),
  * and a number invented here would be the first false claim on the site.
@@ -223,9 +246,8 @@ function UpgradeBranch({ email }: { email: string }) {
  *
  * `variant` exists because the weight this deserves depends on whether it can
  * do what it says. For a viewer with access it is a working action and can be
- * filled; for everyone else it opens a dialog explaining that hosted accounts
- * are not built, which DESIGN.md §4.5.3 calls a gated beta and demotes to
- * secondary. The caller decides, because the caller knows what else is on the
+ * filled; for everyone else it opens a dialog laying out the two ways to run
+ * it, which DESIGN.md §4.5.3 calls a gated beta and demotes to secondary. The caller decides, because the caller knows what else is on the
  * page competing for the one primary slot §10 allows.
  */
 export function GatedAction({

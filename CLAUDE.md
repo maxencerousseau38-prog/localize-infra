@@ -63,6 +63,30 @@
   l'endroit où une mise en page change, donc la largeur la plus susceptible
   d'être fausse et la moins susceptible d'être mesurée.**
 
+  **La preuve centrale de la landing était un 404 pour tout visiteur.** « See
+  the pull request it opened » pointait, à quatre endroits, vers la PR #1 du
+  dépôt fixture — **privé**. Personne ne l'a vu parce que tous ceux qui
+  vérifiaient étaient connectés à GitHub en tant que propriétaire. La PR était
+  en outre fermée sans merge, et l'artefact affichait « #1 open » et « 22s »,
+  une durée qu'aucune source ne rattachait à #1. L'artefact montre désormais le
+  run `b6fbbf11` (PR #9, fusionnée, 21,1 s entre `runs.created_at` et
+  l'ouverture de la PR — les « 22 s » écrits plus haut tronquent le départ), et
+  `EXAMPLE_PR_URL` vaut `null` : les composants rendent les faits sans lien. Un
+  test e2e interdit tout lien vers le fixture tant qu'il est `null`, vérifié
+  non vacant. **Rendre le fixture public est le correctif en une ligne** —
+  à contrôler déconnecté.
+
+  Le même audit (2026-09-16) a trouvé le site en retard sur le produit dans
+  l'autre sens : comptes, workspaces et projets déclarés « In development » ou
+  inexistants alors que l'inscription est ouverte ; `/security` affirmant
+  qu'aucune base hébergée n'existe et qu'elle ne stockerait « never your
+  translations », alors que `run_translations` garde chaque proposition ;
+  Supabase et Vercel absents des sous-traitants ; deux permissions de la GitHub
+  App (`artifact_metadata: write`, `codespaces_metadata: read`) non déclarées et
+  inutilisées. **`/security` les liste désormais telles quelles ; les retirer se
+  fait dans les réglages de l'App, à la main.** `ACCOUNT_BACKEND` reste
+  `'absent'` : il décrit le site, qui ne lit aucune session, pas le produit.
+
   `/benchmarks` et `/quality` ne contiennent **aucun chiffre écrit à la main** :
   tout provient de `packages/eval/src/report/benchmarks.json`, généré depuis le
   corpus par `npm run benchmarks:build -w @localize-infra/eval`, et un test

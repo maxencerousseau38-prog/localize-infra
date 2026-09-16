@@ -3,11 +3,16 @@
  *
  * READ THIS BEFORE WIRING A BUTTON TO IT.
  *
- * There are no accounts. There is no session store, no database, no billing
- * (CLAUDE.md: "N'existe pas encore … comptes … facturation"). The standing rule
- * is that the interface must never simulate those, so this module does not
- * pretend to authenticate anyone: `readViewer()` returns `anonymous`, always,
- * because that is the only true answer today.
+ * **This said "There are no accounts. There is no session store, no database".
+ * That stopped being true when `apps/web` shipped them** — accounts, workspaces
+ * and projects on Postgres, with sign-up open. What is still true is narrower
+ * and is the reason nothing below changed: *this site* has no session. It is a
+ * static build on another origin and reads nobody's cookie, so for the site the
+ * only true viewer is `anonymous`, and `readViewer()` returns exactly that.
+ * Billing still does not exist anywhere.
+ *
+ * The standing rule is unchanged — the interface must never simulate what is
+ * not there — so nothing here pretends to authenticate anyone.
  *
  * What it does provide is the shape of the decision, so the conversion flow is
  * written once and correctly rather than retrofitted later:
@@ -40,11 +45,13 @@ export type Viewer =
 export const ANONYMOUS: Viewer = { status: 'anonymous' };
 
 /**
- * Whether an account system exists to talk to.
+ * Whether **this site** has an account system to talk to.
  *
  * `'absent'` is not a placeholder to be flipped optimistically — it is the
  * assertion that no code path below may collect credentials, imply a session,
- * or report a plan. Flip it only when there is something real behind it.
+ * or report a plan. The accounts in `apps/web` do not change it: flipping it
+ * means this site reading a session, which it does not do. Flip it only when
+ * that is real.
  */
 export const ACCOUNT_BACKEND: 'absent' | 'connected' = 'absent';
 

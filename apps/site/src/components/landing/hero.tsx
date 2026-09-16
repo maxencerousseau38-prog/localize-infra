@@ -93,42 +93,64 @@ export function Hero() {
               leaving everything else in your stack exactly where it was.
             </p>
 
+            {/*
+             * The filled action is the pull request only while a visitor can
+             * open it.
+             *
+             * It linked to a pull request in a private repository, which is a
+             * 404 for everyone but its owner — the page's strongest action was
+             * its one broken one. §4.5.3 already settles what replaces an
+             * action that does not work: the strongest one that does, promoted.
+             * With no public pull request that is the docs.
+             */}
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button
-                asChild
-                variant="primary"
-                size="lg"
-                className="w-full sm:w-auto"
-              >
-                <a
-                  href={EXAMPLE_PR_URL}
-                  target="_blank"
-                  rel="noreferrer noopener"
+              {EXAMPLE_PR_URL ? (
+                <>
+                  <Button
+                    asChild
+                    variant="primary"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    <a
+                      href={EXAMPLE_PR_URL}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      <GitPullRequest aria-hidden="true" />
+                      See the pull request it opened
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="secondary"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    <Link href="/docs#install">Read the docs</Link>
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  asChild
+                  variant="primary"
+                  size="lg"
+                  className="w-full sm:w-auto"
                 >
-                  <GitPullRequest aria-hidden="true" />
-                  See the pull request it opened
-                </a>
-              </Button>
-              <Button
-                asChild
-                variant="secondary"
-                size="lg"
-                className="w-full sm:w-auto"
-              >
-                <Link href="/docs#install">Read the docs</Link>
-              </Button>
+                  <Link href="/docs#install">Read the docs</Link>
+                </Button>
+              )}
             </div>
           </div>
 
           {/*
            * The terminal path, demoted on purpose.
            *
-           * `npx @localize-infra/cli init` is the action this product is
-           * heading for, and it does not work today — the package is not
-           * published. DESIGN.md §4.5.3 is explicit that an unavailable
-           * nominal primary action is demoted and the strongest *working*
-           * action promoted, which is why the pull request keeps the filled
-           * button and this sits in a quiet panel saying what it is.
+           * `npx @localize-infra/cli init` installs and runs, but it does not
+           * translate anything until it is pointed at an API the reader runs
+           * themselves. DESIGN.md §4.5.3 demotes an action that cannot finish
+           * on its own, which is why this sits in a quiet panel saying what it
+           * needs rather than taking the filled button.
            */}
           {/*
            * Two arrangements, because the tiers are genuinely different
@@ -170,7 +192,7 @@ export function Hero() {
                   external fact, which is one place that gets forgotten. */}
               <p className="text-small leading-6 text-tertiary">
                 {CLI_PUBLISHED_TO_NPM
-                  ? 'It needs an API you run yourself — the hosted one is not open. '
+                  ? 'It needs an API you run yourself — ours is not open to the CLI. '
                   : 'Not published to npm yet — today it runs from a clone. '}
                 <Link
                   href="/docs#install"
@@ -194,9 +216,20 @@ export function Hero() {
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
           <RunArtifact />
 
+          {/*
+           * Where the run came from, said exactly.
+           *
+           * This read "A real run against a real repository, linked above.
+           * Nothing on this page is a mockup." The link was a 404 for every
+           * visitor, and the second sentence was broader than anything on the
+           * page can prove — the "Close" example further down is illustrative.
+           */}
           <p className="mt-4 text-small text-inverse/60">
-            A real run against a real repository, linked above. Nothing on this
-            page is a mockup.
+            Run b6fbbf11, started from the hosted app on 29 August 2026 against
+            our fixture repository. Its pull request was merged.
+            {EXAMPLE_PR_URL
+              ? ' The pull request is linked above.'
+              : ' That repository is private, so the pull request cannot be linked; every value above is copied from it.'}
           </p>
         </div>
       </section>

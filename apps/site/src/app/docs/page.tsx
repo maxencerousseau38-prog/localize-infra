@@ -2,6 +2,7 @@ import { Code, CodeBlock } from '@/components/docs/code-block';
 import { DocsToc, type TocEntry } from '@/components/docs/toc';
 import { PageHeader } from '@/components/page-header';
 import {
+  APP_URL,
   CLI_PUBLISHED_TO_NPM,
   GITHUB_REPO_URL,
   INSTALL_COMMAND,
@@ -88,8 +89,8 @@ const FLAGS: Array<{ flag: string; value?: string; detail: React.ReactNode }> =
       detail: (
         <>
           Base URL of the API instance to translate against. Defaults to{' '}
-          <Code>http://localhost:8787</Code>. There is no environment-variable
-          equivalent today.
+          <Code>http://localhost:8787</Code>. <Code>LOCALIZE_API_URL</Code> is
+          read when the flag is absent; if both are set, the flag wins.
         </>
       ),
     },
@@ -235,20 +236,35 @@ export default function DocsPage() {
                     <p className="mt-3">
                       The hosted API is not open to the public — every route on
                       it needs a bearer token only we hold — so the one you
-                      point at is your own. Run the CLI without a token and the
-                      command stops on a{' '}
+                      point at is your own. Run the CLI without a token and it
+                      stops on a{' '}
                       <Link
                         href="#errors"
                         className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                       >
                         missing-token refusal
                       </Link>{' '}
-                      before it looks at your code at all.
+                      before it writes anything. It has detected the framework
+                      and extracted the strings by then, in memory, on your
+                      machine.
                     </p>
                     <p className="mt-3">
                       So you still need this repository — not for the CLI any
-                      more, but for the API. There are no accounts, no projects
-                      and no dashboard behind any of this.
+                      more, but for the API.
+                    </p>
+                    <p className="mt-3">
+                      The{' '}
+                      <a
+                        href={APP_URL}
+                        className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      >
+                        hosted app
+                      </a>{' '}
+                      is the other way in: it runs the same pipeline from a
+                      browser against a repository you connect, with no API to
+                      run. It is early access — public repositories are
+                      self-serve, private ones are not yet, and there is no
+                      billing. This page documents the CLI.
                     </p>
                   </>
                 ) : (
@@ -264,8 +280,7 @@ export default function DocsPage() {
                     <p className="mt-3">
                       It also needs a running API instance to translate against.
                       The hosted one is not open to the public, so you run it
-                      yourself, with your own provider key. There are no
-                      accounts, no projects and no dashboard behind any of this.
+                      yourself, with your own provider key.
                     </p>
                   </>
                 )}
@@ -369,6 +384,16 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                 reports its own outcome, and a partial run still produces a pull
                 request containing the languages that succeeded.
               </p>
+              <p>
+                A run that would change nothing opens nothing. If every file it
+                produced is already on the base branch, the API answers{' '}
+                <Code>409</Code>, no branch is created, and the CLI prints{' '}
+                <Code>
+                  No PR opened: every translation is already on the base branch.
+                </Code>{' '}
+                and exits successfully — an up-to-date repository is the outcome
+                you ran it for.
+              </p>
             </Section>
 
             <Section id="reference" title="Command reference">
@@ -376,11 +401,15 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                 {`localize-infra init [directory] [--force] [--api-url <url>]
                    [--api-token <token>] [--locales <list>]
                    [--open-pr] [--owner <owner>] [--repo <repo>]
-                   [--base-branch <branch>]`}
+                   [--base-branch <branch>]
+localize-infra --help | --version`}
               </CodeBlock>
               <p>
-                <Code>init</Code> is the only command. Anything else prints
-                usage and exits non-zero.
+                <Code>init</Code> is the only command. <Code>--help</Code> or{' '}
+                <Code>-h</Code>, and <Code>--version</Code> or <Code>-v</Code>,
+                print and exit successfully — anywhere on the line, so{' '}
+                <Code>init --help</Code> prints help instead of starting a run.
+                Anything else prints usage and exits non-zero.
               </p>
               <div className="mt-6 overflow-x-auto">
                 <table className="w-full border-collapse">
@@ -456,9 +485,14 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                   <tbody>
                     {[
                       [
+                        'LOCALIZE_API_URL',
+                        'CLI',
+                        'API base URL when --api-url is absent. An empty value counts as unset.',
+                      ],
+                      [
                         'LOCALIZE_API_TOKEN',
                         'CLI',
-                        'Bearer token sent to the API. Preferred over --api-token.',
+                        'Bearer token sent to the API. Preferred over --api-token. An empty value counts as unset.',
                       ],
                       [
                         'API_AUTH_TOKEN',
@@ -468,7 +502,12 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                       [
                         'ANTHROPIC_API_KEY',
                         'API',
-                        'Provider key used for translation.',
+                        'Provider key used for translation. At least one provider key is required.',
+                      ],
+                      [
+                        'OPENAI_API_KEY',
+                        'API',
+                        'Optional second provider. With both keys set, locales are split between them.',
                       ],
                       [
                         'PORT',
@@ -484,6 +523,11 @@ npm exec -w @localize-infra/cli -- tsx src/index.ts init ../my-app`}
                         'GITHUB_APP_INSTALLATION_ID',
                         'API',
                         'Installation the App acts through. --open-pr only.',
+                      ],
+                      [
+                        'GITHUB_APP_PRIVATE_KEY',
+                        'API',
+                        'The App private key, inline. Wins over the path form. --open-pr only.',
                       ],
                       [
                         'GITHUB_APP_PRIVATE_KEY_PATH',

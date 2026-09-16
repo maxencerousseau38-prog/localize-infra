@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
  * state (§6.3). That rule was already enforced once, on the landing page's
  * status board — and by the time this test was written the same leak had
  * reappeared on five pages, spending the ambiguity colour on "Not yet
- * measured", "Not measured", "Pre-alpha", "In development" and every roadmap
+ * measured", "Not measured", "Pre-alpha", "Not started" and every roadmap
  * item under construction.
  *
  * The marketing site never asks the reader to resolve an ambiguity, so nothing
@@ -272,9 +272,9 @@ test('/docs does mark the real refusals in crimson', async ({ page }) => {
  *
  * Unlike crimson this is not absent site-wide, and the three places it appears
  * are load-bearing admissions rather than decoration: "Partly working" on the
- * commitment whose resolution queue is not built, the extraction gap on /docs,
- * and the data-residency gap on /security. Each names something that is
- * genuinely incomplete today.
+ * commitment whose resolution queue no real run has used, the extraction gap
+ * on /docs, and the data-residency gap on /security. Each names something
+ * that is genuinely incomplete today.
  *
  * The four pages below carry none, and the rule that keeps them clean is §6.3:
  * colour is forbidden on roadmap and maturity state. /roadmap is the whole

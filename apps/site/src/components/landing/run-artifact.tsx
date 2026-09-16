@@ -17,7 +17,23 @@ import { ArrowUpRight, GitPullRequest } from 'lucide-react';
  * that a system reads as *running* when its chrome reports state and its flow
  * is drawn rather than implied by column order. What it does for effect, we do
  * not: no dots travelling the connectors forever, no invented counters, no
- * accent colour spent on decoration. Every value here is from the linked run.
+ * accent colour spent on decoration. Every value here is copied from one run.
+ *
+ * **Which run, and why it changed.** This showed pull request #1, with a
+ * duration of 22s and a footer reading "#1 open". #1 was closed unmerged on
+ * 2026-09-02; 22s was written on 2026-08-13 and no record ties it to #1; and #1
+ * sits in a private repository, so the link under it was a 404 for every
+ * visitor. It now shows run `b6fbbf11`, which is the product's own path rather
+ * than a CLI validation:
+ *
+ *   runs.created_at        2026-08-29 21:32:30.902 UTC
+ *   pull request #9 opened 2026-08-29 21:32:52 UTC   → 21s, not 22s
+ *   merged                 2026-08-29 21:39:38 UTC
+ *   framework Vite + React · 3 keys extracted · 12 translated · 4 locales
+ *   succeeded · 0 failed · 0 ambiguities recorded
+ *
+ * CLAUDE.md says 22s for this run; that figure truncates the start to the whole
+ * second. The file contents below are #9's patch, verbatim.
  *
  * Colour follows DESIGN.md §6.3: it reports the state of something that
  * exists. Jade marks a stage that completed, and all five did — Escalate
@@ -34,18 +50,21 @@ import { ArrowUpRight, GitPullRequest } from 'lucide-react';
  * stages either side of it.
  */
 
-/** What the linked run actually did at each stage. */
+/** What run `b6fbbf11` actually did at each stage. */
 const STAGE_STATE: Record<PipelineStageId, { done: boolean; note: string }> = {
   detect: { done: true, note: 'Vite + React' },
   extract: { done: true, note: '3 strings' },
-  translate: { done: true, note: 'es' },
+  translate: { done: true, note: 'fr de ja es' },
   escalate: { done: true, note: '0 raised' },
-  'pull-request': { done: true, note: '#1 open' },
+  'pull-request': { done: true, note: '#9 merged' },
 };
 
 type Segment = { text: string; mark?: true };
 
-/** `src/App.tsx` in the fixture repository, whole file, verbatim. */
+/**
+ * `src/App.tsx` in the fixture repository at #9's base commit, whole file. Line
+ * 5 is shortened at the ellipsis so it fits the column; nothing else is edited.
+ */
 const SOURCE: { line: number; segments: Segment[] }[] = [
   { line: 1, segments: [{ text: 'export function App() {' }] },
   { line: 2, segments: [{ text: '  return (' }] },
@@ -82,26 +101,34 @@ const SOURCE: { line: number; segments: Segment[] }[] = [
 /**
  * What the run touched, as the repository sees it.
  *
- * `en.json` is marked local: extraction writes it into the working tree, and it
- * is not part of the pull request. Saying so is the difference between showing
- * a run and implying a bigger one than happened.
+ * All five locale files are in the pull request, `en.json` included: the hosted
+ * run commits the source catalogue it extracted, where a CLI run leaves it in
+ * the working tree. Listing exactly what the diff holds is the difference
+ * between showing a run and implying a different one.
  */
 const FILES: {
   path: string;
   meta: string;
-  state: 'unchanged' | 'added' | 'local';
+  state: 'unchanged' | 'added';
 }[] = [
   { path: 'src/App.tsx', meta: 'read', state: 'unchanged' },
-  { path: 'locales/en.json', meta: '+3 local', state: 'local' },
+  { path: 'locales/de.json', meta: '+5', state: 'added' },
+  { path: 'locales/en.json', meta: '+5', state: 'added' },
   { path: 'locales/es.json', meta: '+5', state: 'added' },
+  { path: 'locales/fr.json', meta: '+5', state: 'added' },
+  { path: 'locales/ja.json', meta: '+5', state: 'added' },
 ];
 
-/** `locales/es.json` exactly as the pull request adds it: a new file, +5. */
+/**
+ * `locales/es.json` as #9 adds it: a new file, +5, keys in the order the run
+ * wrote them. The middle key and value are shortened at the ellipsis, as in the
+ * source pane.
+ */
 const OUTPUT: string[] = [
   '{',
-  '  "src.App.get_started": "Comenzar",',
-  '  "src.App.this_is_a_throwaway_project…": "Este es un proyecto…",',
-  '  "src.App.welcome_to_the_fixture_app": "Bienvenido a la aplicación de prueba"',
+  '  "src.App.welcome_to_the_fixture_app": "Bienvenido a la aplicación de prueba",',
+  '  "src.App.this_is_a_throwaway_project…": "Este es un proyecto desechable…",',
+  '  "src.App.get_started": "Comenzar"',
   '}',
 ];
 
@@ -173,10 +200,10 @@ export function RunArtifact() {
           /
         </span>
         <span className="truncate font-mono text-caption text-primary">
-          localize-infra/add-translations
+          localize-infra/add-translations-1788039162226
         </span>
         <span className="ms-auto font-mono text-micro uppercase tracking-wide text-tertiary">
-          22s
+          21s
         </span>
       </figcaption>
 
@@ -314,35 +341,58 @@ export function RunArtifact() {
         </div>
       </div>
 
-      {/* Where it ended. Open, not merged — nobody has reviewed it. */}
-      <a
-        href={EXAMPLE_PR_URL}
-        target="_blank"
-        rel="noreferrer noopener"
-        className={cn(
-          'group flex items-center gap-3 border-t border-subtle px-4 py-3.5 sm:px-5',
-          'transition-colors hover:bg-surface active:bg-raised',
-          'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
-        )}
-      >
-        <GitPullRequest
-          className="size-4 shrink-0 text-confident"
-          aria-hidden="true"
-        />
-        <span className="min-w-0 flex-1 truncate text-body text-primary">
-          <span className="font-medium">
-            Add translations (de, ja, es, ar, pt-BR)
+      {/*
+       * Where it ended: merged.
+       *
+       * A link only when a visitor can open it. The repository is private, and
+       * a link that answers 404 to everyone who is not its owner is worse than
+       * no link — it reads as evidence and proves the opposite.
+       */}
+      {EXAMPLE_PR_URL ? (
+        <a
+          href={EXAMPLE_PR_URL}
+          target="_blank"
+          rel="noreferrer noopener"
+          className={cn(
+            'group flex items-center gap-3 border-t border-subtle px-4 py-3.5 sm:px-5',
+            'transition-colors hover:bg-surface active:bg-raised',
+            'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus',
+          )}
+        >
+          <PullRequestSummary />
+          <span className="hidden shrink-0 font-mono text-micro uppercase tracking-wide text-tertiary sm:inline">
+            review it like any other change
           </span>
-        </span>
-        <span className="hidden shrink-0 font-mono text-micro uppercase tracking-wide text-tertiary sm:inline">
-          review it like any other change
-        </span>
-        <ArrowUpRight
-          className="size-3.5 shrink-0 text-tertiary transition-transform duration-(--duration-micro) group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
-          aria-hidden="true"
-        />
-      </a>
+          <ArrowUpRight
+            className="size-3.5 shrink-0 text-tertiary transition-transform duration-(--duration-micro) group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
+            aria-hidden="true"
+          />
+        </a>
+      ) : (
+        <div className="flex items-center gap-3 border-t border-subtle px-4 py-3.5 sm:px-5">
+          <PullRequestSummary />
+          <span className="hidden shrink-0 font-mono text-micro uppercase tracking-wide text-tertiary sm:inline">
+            merged · private repository
+          </span>
+        </div>
+      )}
     </figure>
+  );
+}
+
+function PullRequestSummary() {
+  return (
+    <>
+      <GitPullRequest
+        className="size-4 shrink-0 text-confident"
+        aria-hidden="true"
+      />
+      <span className="min-w-0 flex-1 truncate text-body text-primary">
+        <span className="font-medium">
+          #9 Add translations (fr, de, ja, es)
+        </span>
+      </span>
+    </>
   );
 }
 
