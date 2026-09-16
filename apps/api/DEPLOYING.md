@@ -189,6 +189,34 @@ with a claim, which is the one thing this route must never do. If the answer is
 `null` and the commit still needs to be known, the fix is upstream: connect the
 project to Git, or set the variable explicitly at deploy time.
 
+**Observed on the first deploy that carried the route (2026-09-16): the
+metadata arrives.** `vercel deploy --prod --archive=tgz`, run from the
+repository root at `b606c1a`, produced a deployment whose `/api/version`
+answered
+
+```
+{"commit":"b606c1ab433d424989ffcfb136e9bbe8ea02f70c","environment":"production"}
+```
+
+with `X-Vercel-Id: cdg1::cdg1`, the function in `cdg1` on `nodejs24.x`, and both
+`/v1/*` routes still 401 with no token and with a wrong one. So the `null` case
+above remains possible for a deploy that carries no Git metadata, but it is not
+what this procedure produces.
+
+**That creates the trap to know about.** The CLI reads the SHA from the
+**local** checkout. It is the commit the working tree is *on*, not a
+fingerprint of what was uploaded: deploy from a tree with uncommitted changes,
+or from a branch nobody pushed, and the endpoint names a commit that does not
+describe the running code — and says so with full confidence. The SHA is only
+worth something if the deploy is made from a clean tree equal to
+`origin/master`. Check before deploying:
+
+```sh
+git fetch && git status -sb     # "## master...origin/master", nothing else
+```
+
+The 2026-09-16 deploy was made that way.
+
 Note also that **this endpoint only updates when you deploy.** Unlike the web
 app, where a merge is the deploy, here the endpoint keeps reporting the previous
 commit until `vercel deploy --prod` is run again — which is precisely the
