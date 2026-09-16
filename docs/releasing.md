@@ -30,6 +30,35 @@ endpoint that told the truth first was `/-/org/localize-infra/package`, which
 listed all three names while two of them still 404'd. Check that before
 concluding a publish failed, and before re-running one.
 
+## Unreleased in `cli`: the production API is the default
+
+**On `master`, not on npm.** Since 2026-09-16 the CLI's default API is
+`https://localize-infra-api.vercel.app` instead of `http://localhost:8787`
+(`DEFAULT_API_URL` in `packages/cli/src/config.ts`); `--api-url` and
+`LOCALIZE_API_URL` still override it, and a trailing slash is dropped. The
+published 0.2.0 still defaults to localhost, and **the site describes 0.2.0**,
+so the site was deliberately left alone.
+
+That makes the next `cli` publish more than a version bump. In the same
+change as the publish:
+
+1. **Bump to 0.3.0.** What an unconfigured install talks to changes.
+2. **`apps/site/src/app/docs/page.tsx`** — the `--api-url` row names
+   `http://localhost:8787` as the default, and the "Running it today" block
+   tells the reader to run the API themselves and pass `--api-url`. Both
+   become: the default is the production API, which needs an operator-issued
+   token; self-hosting is the alternative.
+3. **The "needs an API you run yourself" sentences** — the hero, the closing
+   band and the conversion dialog on the landing page, gated by
+   `CLI_PUBLISHED_TO_NPM`. They stop being true as written.
+4. **`/security`** — "What the model receives" is unchanged, but an
+   unconfigured CLI now sends it through *our* API rather than the reader's.
+5. **`CLAUDE.md`** — the `apps/site` paragraph that says the CLI points at
+   localhost by default.
+
+Verify the packed tarball as below, and additionally that
+`localize-infra --help` prints the production URL as the default.
+
 ## Before anything
 
 1. **Authenticate.** `npm login`. Publishing fails with `ENEEDAUTH` otherwise.
@@ -162,8 +191,9 @@ on 2026-08-28.
 The conclusion survives, which is exactly why the wrong reason went unnoticed —
 nothing downstream changed, so nothing failed. Two facts now carry it instead:
 
-- `--api-url` still defaults to `http://localhost:8787`, so an unmodified
-  `npx` reaches nothing;
+- `--api-url` defaults to `http://localhost:8787` in the published 0.2.0, so
+  an unmodified `npx` reaches nothing (on `master` the default is the
+  production API — see "Unreleased" above);
 - every `/v1/*` route requires `API_AUTH_TOKEN`, and no npm user has it.
   Verified in production the same day: 401 with no token, 401 with a wrong
   one.

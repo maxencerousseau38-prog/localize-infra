@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_API_URL } from './config.js';
 import { USAGE, parseTopLevel, readVersion } from './meta.js';
 
 describe('parseTopLevel', () => {
@@ -106,6 +107,26 @@ describe('USAGE', () => {
    * shell history and into `ps` output, and the usage text is where somebody
    * decides which of the two to use.
    */
+  /*
+   * The usage text reads the same constant `init` uses. It said
+   * `http://localhost:8787`, and a copy of a default in prose is the kind of
+   * sentence that goes on being printed after the default moves.
+   */
+  it('names the default API that init actually uses', () => {
+    expect(USAGE).toContain(DEFAULT_API_URL);
+    expect(USAGE).not.toContain('localhost:8787');
+  });
+
+  /*
+   * The closing paragraph said "There is no hosted API open to the public, so
+   * --api-url must point at one you run yourself", which contradicted the
+   * default printed a few lines above it. Found by reading the packed tarball.
+   */
+  it('does not tell people the default is unusable', () => {
+    expect(USAGE).not.toMatch(/must point at one you run yourself/);
+    expect(USAGE).toMatch(/operator-issued token/);
+  });
+
   it('keeps steering people away from --api-token', () => {
     expect(USAGE).toContain('LOCALIZE_API_TOKEN');
     expect(USAGE).toMatch(/shell history/);

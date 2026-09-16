@@ -65,9 +65,10 @@ async function main(): Promise<void> {
    * Flag over environment for both, and an empty value counts as neither.
    *
    * `--api-url` had no environment equivalent while `--api-token` did, so the
-   * one setting a user cannot avoid — the default points at localhost, and
-   * there is no hosted API open to the public — was the one they had to retype
-   * on every invocation.
+   * one setting a user could not avoid — the default pointed at localhost — was
+   * the one they had to retype on every invocation. The default is now the
+   * production API (`DEFAULT_API_URL`); the flag and the variable still
+   * override it, for a self-hosted instance or a local one.
    *
    * `fromFlagOrEnv` rather than `??` because `LOCALIZE_API_URL=` sets the
    * variable to the empty string, which `??` keeps: every request would then

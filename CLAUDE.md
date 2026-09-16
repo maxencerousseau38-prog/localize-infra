@@ -102,8 +102,11 @@
   les deux pages le lisent.
 
   Ce que `/docs` continue de dire, parce que c'est vrai : installer n'est pas
-  pouvoir s'en servir. Le CLI pointe par défaut sur `http://localhost:8787` et
-  l'API déployée n'est **pas ouverte** — toutes ses routes `/v1/*` exigent un
+  pouvoir s'en servir. Le CLI **publié (0.2.0)** pointe par défaut sur
+  `http://localhost:8787` — sur `master`, depuis le 2026-09-16, il pointe sur
+  l'API de production, non publié, et le site ne doit changer qu'avec la
+  publication (liste dans `docs/releasing.md`) — et l'API déployée n'est **pas
+  ouverte** — toutes ses routes `/v1/*` exigent un
   bearer que seul l'opérateur détient. Trois phrases du site affirmaient à la
   place qu'il n'existait aucune API hébergée ; elles vivaient dans les branches
   « publié » du drapeau, donc personne ne les avait jamais vues à l'écran.

@@ -8,6 +8,7 @@ import {
   writeLocaleFile,
 } from '@localize-infra/core';
 import { OpenPrApiRequestSchema } from '@localize-infra/schemas';
+import { resolveApiUrl } from '../config.js';
 import { requestPr } from '../open-pr-client.js';
 import { translateBatch } from '../translate-client.js';
 
@@ -23,7 +24,6 @@ const OwnerRepoSchema = OpenPrApiRequestSchema.pick({
 });
 
 const DEFAULT_LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'];
-const DEFAULT_API_URL = 'http://localhost:8787';
 
 export type InitResult =
   | {
@@ -106,7 +106,7 @@ export async function runInit(
   const merged = mergeLocaleFile(localesDir, 'en', fresh);
   writeLocaleFile(localesDir, 'en', merged);
 
-  const apiUrl = options?.apiUrl ?? DEFAULT_API_URL;
+  const apiUrl = resolveApiUrl(options?.apiUrl);
   const targetLocales = options?.locales ?? DEFAULT_LOCALES;
   const translatableStrings = extracted.map((e) => ({
     key: e.key,

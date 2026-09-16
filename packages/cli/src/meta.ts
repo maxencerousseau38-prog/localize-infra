@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DEFAULT_API_URL } from './config.js';
 
 export type TopLevel =
   | { kind: 'help' }
@@ -39,7 +40,7 @@ translates into each target locale, and optionally opens a pull request.
 Options:
   --force                     Overwrite existing locale files
   --api-url <url>             apps/api base URL, or LOCALIZE_API_URL
-                              (default: http://localhost:8787)
+                              (default: ${DEFAULT_API_URL})
   --api-token <token>         Bearer token for apps/api — prefer the environment
                               variable, see below
   --locales <a,b,c>           Target locales (default: de,ja,es,ar,pt-BR)
@@ -58,8 +59,9 @@ API token: set the LOCALIZE_API_TOKEN environment variable (recommended). The
 process listings (e.g. \`ps\`); prefer the environment variable. If both are set,
 --api-token takes precedence.
 
-Steps 4 and 5 talk to a running apps/api instance. There is no hosted API open
-to the public, so --api-url must point at one you run yourself.`;
+Translation and pull requests go through apps/api. The default is the hosted
+production API, which requires an operator-issued token; without one, point
+--api-url or LOCALIZE_API_URL at an instance you run yourself.`;
 
 /**
  * The version this build carries, read from the manifest rather than baked in.

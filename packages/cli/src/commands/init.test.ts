@@ -142,6 +142,8 @@ describe('runInit', () => {
 
   it('fails clearly when no API token is configured', async () => {
     writeViteReactProject();
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
     const result = await runInit(dir);
     expect(result).toEqual({
       ok: false,
@@ -149,9 +151,78 @@ describe('runInit', () => {
         'No API token configured. Pass --api-token or set the LOCALIZE_API_TOKEN environment variable.',
     });
     // No locale files should have been written, and no network call made.
+    //
+    // The second half was stated here and never checked. It matters more now
+    // that the default API is the production deployment: a run without a
+    // token must not send source-derived context anywhere, not even to be
+    // refused.
     expect(() =>
       readFileSync(join(dir, 'locales', 'en.json'), 'utf-8'),
     ).toThrow();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('runInit API address', () => {
+  function stubOkFetch() {
+    const fetchMock = vi.fn(async (_url: string) => ({
+      ok: true,
+      json: async () => ({ translations: [], missingKeys: [] }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    return fetchMock;
+  }
+
+  it('sends translation requests to the production API by default', async () => {
+    writeViteReactProject();
+    const fetchMock = stubOkFetch();
+
+    const result = await runInit(dir, {
+      apiToken: 'test-token',
+      locales: ['de'],
+    });
+
+    expect(result.ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalled();
+    for (const [url] of fetchMock.mock.calls) {
+      expect(url).toBe('https://localize-infra-api.vercel.app/v1/translate');
+    }
+    vi.unstubAllGlobals();
+  });
+
+  it('sends them to an override instead, without doubling the slash', async () => {
+    writeViteReactProject();
+    const fetchMock = stubOkFetch();
+
+    await runInit(dir, {
+      apiUrl: 'http://localhost:8787/',
+      apiToken: 'test-token',
+      locales: ['de'],
+    });
+
+    expect(fetchMock).toHaveBeenCalled();
+    for (const [url] of fetchMock.mock.calls) {
+      expect(url).toBe('http://localhost:8787/v1/translate');
+    }
+    vi.unstubAllGlobals();
+  });
+
+  it('sends the token only as a bearer header, never in the URL', async () => {
+    writeViteReactProject();
+    const fetchMock = vi.fn(
+      async (_url: string, _init: { headers: Record<string, string> }) => ({
+        ok: true,
+        json: async () => ({ translations: [], missingKeys: [] }),
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await runInit(dir, { apiToken: 'secret-token', locales: ['de'] });
+
+    const [url, init] = fetchMock.mock.calls[0] ?? [];
+    expect(url).not.toContain('secret-token');
+    expect(init?.headers.authorization).toBe('Bearer secret-token');
+    vi.unstubAllGlobals();
   });
 });
 
