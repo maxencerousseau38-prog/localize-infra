@@ -78,7 +78,7 @@ from reading the toggle.
 | `GITHUB_APP_SLUG` | yes | Builds the App installation URL |
 | `GITHUB_OAUTH_CLIENT_ID` | yes | Proves the caller owns the installation they name. Read from `GET /app` — see below |
 | `GITHUB_OAUTH_CLIENT_SECRET` | yes | Completes the pair the callback needs. Set by hand on 2026-08-28 — see below |
-| `SUPABASE_SERVICE_ROLE_KEY` | **to set** | Writes the GitHub link after the callback verifies it — the only use of this key. Bypasses RLS: server-only, never `NEXT_PUBLIC_`. See below |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes, Production only | Writes the GitHub link after the callback verifies it — the only use of this key. Bypasses RLS: server-only, never `NEXT_PUBLIC_`. Set by the owner on 2026-09-16 — see below |
 
 **Two rows left this table on 2026-08-23**, removed from the project rather
 than merely undocumented: `GITHUB_APP_INSTALLATION_ID` and
@@ -288,3 +288,15 @@ read under RLS and keep working.
 Set it for **Production** only. Preview deployments do not need to connect
 GitHub, and a key that bypasses RLS should not be spread wider than its use.
 Like every variable here, it applies on the next deployment — the next merge.
+
+**Set on 2026-09-16, and what that does and does not prove.** The owner added
+the key to Production before PR #92 was merged, so the deployment of `4d7b675`
+was built with it. Two things were checked from outside afterwards: no served
+HTML or JS on `/login` and `/` contains `sb_secret_`, `service_role`, the
+variable name or the Supabase URL; and migration `20260916000200` is live, with
+`link_github_installation` executable by `service_role` only.
+
+What cannot be seen signed out is whether the running deployment reads the
+key. The panel only shows it on a workspace with no GitHub link: *Connect
+GitHub* means the key is there, `Missing: SUPABASE_SERVICE_ROLE_KEY` means it is
+not. A workspace that is already connected shows neither.
