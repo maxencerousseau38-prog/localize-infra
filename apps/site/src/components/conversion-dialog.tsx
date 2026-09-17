@@ -8,6 +8,7 @@ import {
 } from '@/lib/account';
 import {
   APP_URL,
+  CLI_PERSONAL_TOKENS_LIVE,
   CLI_PUBLISHED_TO_NPM,
   GITHUB_REPO_URL,
   INSTALL_COMMAND,
@@ -115,8 +116,10 @@ function AnonymousBranch() {
                 Start from the command line
               </p>
               <p className="mt-1 text-small leading-5 text-secondary">
-                Detection and extraction run on your machine. Translation goes
-                through an API you run yourself.
+                Detection and extraction run on your machine.{' '}
+                {CLI_PERSONAL_TOKENS_LIVE
+                  ? 'Translation goes through our hosted API, with a personal token from your workspace.'
+                  : 'Translation goes through an API you run yourself.'}
               </p>
               <div className="mt-3">
                 <CopyCommand command={INSTALL_COMMAND} />
@@ -125,9 +128,11 @@ function AnonymousBranch() {
                   hard-coded and kept saying "not published" after the package
                   reached npm. */}
               <p className="mt-2 text-caption leading-5 text-secondary">
-                {CLI_PUBLISHED_TO_NPM
-                  ? 'On npm. It needs an API you run yourself.'
-                  : 'Not published to npm yet — today it runs from a clone.'}{' '}
+                {!CLI_PUBLISHED_TO_NPM
+                  ? 'Not published to npm yet — today it runs from a clone.'
+                  : CLI_PERSONAL_TOKENS_LIVE
+                    ? 'On npm. Create a token in the hosted app first.'
+                    : 'On npm. It needs an API you run yourself.'}{' '}
                 <Link
                   href="/docs#install"
                   className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"

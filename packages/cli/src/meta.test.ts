@@ -124,7 +124,8 @@ describe('USAGE', () => {
    */
   it('does not tell people the default is unusable', () => {
     expect(USAGE).not.toMatch(/must point at one you run yourself/);
-    expect(USAGE).toMatch(/operator-issued token/);
+    expect(USAGE).toMatch(/personal CLI token/);
+    expect(USAGE).not.toMatch(/operator/);
   });
 
   it('keeps steering people away from --api-token', () => {

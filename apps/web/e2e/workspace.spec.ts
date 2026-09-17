@@ -419,4 +419,50 @@ test.describe('workspace', () => {
     );
     expect(theirsAndReal?.status()).toBe(404);
   });
+
+  /*
+   * A personal CLI token is shown once, listed by prefix only, and can be
+   * revoked on its own. The test issues and revokes its own token under a
+   * unique name, so it touches no seeded row and never approaches the limit of
+   * ten active tokens.
+   */
+  test('a CLI token is shown once, listed by prefix, and revoked on its own', async ({
+    page,
+  }) => {
+    await signIn(page, '/acceptance/tokens');
+    await expect(
+      page.getByRole('heading', { name: 'CLI tokens', level: 1 }),
+    ).toBeVisible({ timeout: 20_000 });
+
+    const name = `e2e-${Date.now()}`;
+    await page.getByLabel('Name').fill(name);
+    await page.getByRole('button', { name: 'Create token' }).click();
+
+    const issued = page.getByTestId('issued-token');
+    await expect(issued).toBeVisible();
+    const text = (await issued.textContent()) ?? '';
+    const token = text.match(/lit_[A-Za-z0-9_-]{43}/)?.[0] ?? '';
+    expect(token, 'the plaintext token is shown').not.toBe('');
+
+    const row = page.getByTestId('cli-token-row').filter({ hasText: name });
+    await expect(row).toHaveCount(1);
+    await expect(row).toContainText(`${token.slice(0, 10)}…`);
+    // The list never carries the rest of the token.
+    await expect(row).not.toContainText(token.slice(10));
+    await expect(row).toContainText('Active');
+
+    // Gone on reload: the plaintext lived only in the action's response.
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.getByTestId('issued-token')).toHaveCount(0);
+    expect(await page.content()).not.toContain(token);
+
+    const reloadedRow = page
+      .getByTestId('cli-token-row')
+      .filter({ hasText: name });
+    await reloadedRow.getByRole('button', { name: `Revoke ${name}` }).click();
+    await expect(reloadedRow).toContainText('Revoked', { timeout: 15_000 });
+    await expect(
+      reloadedRow.getByRole('button', { name: `Revoke ${name}` }),
+    ).toHaveCount(0);
+  });
 });

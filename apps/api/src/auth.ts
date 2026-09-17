@@ -1,5 +1,12 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { isCliToken } from '@localize-infra/schemas';
 import type { Context, Next } from 'hono';
+import {
+  OPERATOR,
+  type TokenResolver,
+  type WorkspaceCaller,
+  hashCliToken,
+} from './callers.js';
 
 const BEARER_PREFIX = 'Bearer ';
 
@@ -48,6 +55,94 @@ export function createAuthMiddleware(expectedToken: string) {
         401,
       );
     }
+    await next();
+  };
+}
+
+/**
+ * The bearer token, if the header carries one.
+ */
+function bearerTokenOf(authHeader: string | null | undefined): string | null {
+  if (!authHeader) return null;
+  const scheme = authHeader.slice(0, BEARER_PREFIX.length).toLowerCase();
+  if (scheme !== BEARER_PREFIX.toLowerCase()) return null;
+  const token = authHeader.slice(BEARER_PREFIX.length);
+  return token.length > 0 ? token : null;
+}
+
+export interface CallerAuthOptions {
+  /** The server-to-server token. Always accepted. */
+  operatorToken: string;
+  /**
+   * Resolves personal `lit_…` tokens. Null when this deployment has no
+   * database configured, in which case personal tokens are refused with a
+   * reason rather than as if they were wrong.
+   */
+  resolver: TokenResolver | null;
+}
+
+/**
+ * Establishes who is calling and stores it on the context as `caller`.
+ *
+ * Every refusal is a sentence a person can act on, because the CLI prints it
+ * as-is. None of them echoes the token.
+ */
+export function createCallerMiddleware(options: CallerAuthOptions) {
+  return async (c: Context, next: Next) => {
+    const token = bearerTokenOf(c.req.header('Authorization'));
+    if (!token) {
+      return c.json(
+        { error: 'Unauthorized: missing or invalid bearer token' },
+        401,
+      );
+    }
+
+    if (isValidBearerToken(`Bearer ${token}`, options.operatorToken)) {
+      c.set('caller', OPERATOR);
+      await next();
+      return;
+    }
+
+    if (!isCliToken(token)) {
+      return c.json(
+        { error: 'Unauthorized: missing or invalid bearer token' },
+        401,
+      );
+    }
+
+    if (!options.resolver) {
+      return c.json(
+        {
+          error:
+            'Personal CLI tokens are not enabled on this API deployment. Use the token issued for it, or point --api-url at an instance that accepts yours.',
+        },
+        401,
+      );
+    }
+
+    let caller: WorkspaceCaller | null;
+    try {
+      caller = await options.resolver.resolve(hashCliToken(token));
+    } catch {
+      return c.json(
+        {
+          error: 'Could not verify the CLI token right now. Try again shortly.',
+        },
+        503,
+      );
+    }
+
+    if (!caller) {
+      return c.json(
+        {
+          error:
+            'This CLI token is invalid, expired or revoked. Create a new one in the Localize Infra web app, under your workspace’s CLI tokens.',
+        },
+        401,
+      );
+    }
+
+    c.set('caller', caller);
     await next();
   };
 }

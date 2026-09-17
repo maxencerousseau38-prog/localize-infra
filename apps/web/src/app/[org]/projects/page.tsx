@@ -98,6 +98,17 @@ export default async function ProjectsPage({
         connected={installation}
       />
 
+      <p className="mt-3 text-small text-secondary">
+        Working from the command line?{' '}
+        <Link
+          href={`/${org}/tokens`}
+          className="text-link underline underline-offset-2 hover:text-link-hover"
+        >
+          Create a personal CLI token
+        </Link>
+        .
+      </p>
+
       <Activation funnel={funnel} />
 
       {projects.length === 0 ? (

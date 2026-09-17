@@ -58,9 +58,19 @@ export async function translateRouteHandler(
     const result = await handleTranslateBatch(parsed.data, provider, modelId);
     return { status: 200, body: TranslateBatchResponseSchema.parse(result) };
   } catch (err) {
+    /*
+     * Logged, not returned. This echoed the provider's own error to the caller
+     * — which, for a rejected OpenAI key, is a JSON body quoting the start and
+     * end of that key. Harmless to an operator reading their own logs; not
+     * something to hand to every holder of a CLI token.
+     */
+    console.error(`translate failed (${providerName}):`, err);
     return {
       status: 502,
-      body: { error: err instanceof Error ? err.message : String(err) },
+      body: {
+        error:
+          'The translation provider failed for this request. Try again; if it keeps failing, the operator has the details.',
+      },
     };
   }
 }

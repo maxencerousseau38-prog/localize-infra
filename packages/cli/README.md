@@ -19,11 +19,27 @@ deployment at `https://localize-infra-api.vercel.app`, or one you run yourself
 (see `apps/api/README.md`). `init` does not call any LLM or GitHub API
 directly itself.
 
-**The production API is not open.** Every `/v1/*` route requires a bearer
-token issued by the operator. Without one, `init` stops before writing or
-sending anything; with a wrong one, each locale fails with
-`Translation API request failed (401)`. If you do not have a token, point
-`--api-url` or `LOCALIZE_API_URL` at your own instance.
+**Authenticate with a personal CLI token.** Create one in the Localize Infra
+web app, under your workspace's *CLI tokens*, and set it in
+`LOCALIZE_API_TOKEN`. It is shown once, expires, and can be revoked on its
+own. A token acts for that workspace only: pull requests are opened through
+the workspace's own GitHub connection, and nowhere else.
+
+Before writing or translating anything, `init` checks the token — and, with
+`--open-pr`, that the repository and base branch are reachable. A revoked
+token, a workspace with no GitHub connection, an unreachable repository or a
+missing branch is reported in one sentence and costs nothing. To use your own
+`apps/api` instead, point `--api-url` or `LOCALIZE_API_URL` at it.
+
+### Exit codes
+
+| Code | When |
+|---|---|
+| `0` | At least one locale was translated, and the pull request (if asked for) was opened or had nothing to open |
+| `1` | `init` refused to start, no locale could be translated, or the pull request could not be opened |
+
+A pull request that fails after translation keeps the per-locale summary: the
+files are written to `locales/`, and the reason is printed after them.
 
 ## Data sent to `apps/api` during translation — please read
 

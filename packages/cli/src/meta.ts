@@ -54,14 +54,16 @@ Options:
 Environment: LOCALIZE_API_URL and LOCALIZE_API_TOKEN are read when the matching
 flag is absent. An empty value counts as absent, not as an override.
 
-API token: set the LOCALIZE_API_TOKEN environment variable (recommended). The
+API token: a personal CLI token, created in the Localize Infra web app under
+your workspace's CLI tokens. Set it in LOCALIZE_API_TOKEN (recommended). The
 --api-token flag is also available but leaks the token into shell history and
 process listings (e.g. \`ps\`); prefer the environment variable. If both are set,
 --api-token takes precedence.
 
 Translation and pull requests go through apps/api. The default is the hosted
-production API, which requires an operator-issued token; without one, point
---api-url or LOCALIZE_API_URL at an instance you run yourself.`;
+API, which accepts personal CLI tokens and opens pull requests only through
+your workspace's own GitHub connection. To use your own instance instead, set
+--api-url or LOCALIZE_API_URL.`;
 
 /**
  * The version this build carries, read from the manifest rather than baked in.

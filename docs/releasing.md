@@ -30,34 +30,74 @@ endpoint that told the truth first was `/-/org/localize-infra/package`, which
 listed all three names while two of them still 404'd. Check that before
 concluding a publish failed, and before re-running one.
 
-## Unreleased in `cli`: the production API is the default
+## `cli` 0.3.0 — ready on `master`, not published
 
-**On `master`, not on npm.** Since 2026-09-16 the CLI's default API is
-`https://localize-infra-api.vercel.app` instead of `http://localhost:8787`
-(`DEFAULT_API_URL` in `packages/cli/src/config.ts`); `--api-url` and
-`LOCALIZE_API_URL` still override it, and a trailing slash is dropped. The
-published 0.2.0 still defaults to localhost, and **the site describes 0.2.0**,
-so the site was deliberately left alone.
+**What changes for a user.** The default API is the hosted one
+(`https://localize-infra-api.vercel.app`, `DEFAULT_API_URL`), and it is used
+with a **personal CLI token** created in the hosted app — not the operator's
+shared `API_AUTH_TOKEN`, which is now for server-to-server use only.
 
-That makes the next `cli` publish more than a version bump. In the same
-change as the publish:
+- A token (`lit_…`) acts for one workspace. The API resolves it with
+  `resolve_cli_token` (service role only) and opens pull requests **only**
+  through that workspace's GitHub installation — never the deployment's
+  default one — and refuses private repositories the workspace is not
+  entitled to.
+- Only a SHA-256 hash is stored. Tokens expire (30, 90 or 365 days), are
+  revocable one by one, stop working when their creator leaves the workspace,
+  and record their last use. At most ten active per person per workspace.
+- `init` asks `/v1/whoami` and, with `--open-pr`, `/v1/open-pr/preflight`
+  **before** writing or translating anything: a revoked token, a workspace
+  without GitHub, an unreachable repository, a missing base branch or a
+  private repository without entitlement costs nothing and prints one
+  sentence.
+- A pull request that fails after translation keeps the per-locale summary,
+  says the files are on disk, and exits 1.
+- Exit code 1 when `init` refuses, when no locale was translated, or when the
+  pull request failed. A partial run still exits 0.
+- Against a self-hosted API older than 0.3.0 (no `whoami`, no preflight),
+  the CLI behaves as 0.2.0 did.
 
-1. **Bump to 0.3.0.** What an unconfigured install talks to changes.
-2. **`apps/site/src/app/docs/page.tsx`** — the `--api-url` row names
-   `http://localhost:8787` as the default, and the "Running it today" block
-   tells the reader to run the API themselves and pass `--api-url`. Both
-   become: the default is the production API, which needs an operator-issued
-   token; self-hosting is the alternative.
-3. **The "needs an API you run yourself" sentences** — the hero, the closing
-   band and the conversion dialog on the landing page, gated by
-   `CLI_PUBLISHED_TO_NPM`. They stop being true as written.
-4. **`/security`** — "What the model receives" is unchanged, but an
-   unconfigured CLI now sends it through *our* API rather than the reader's.
-5. **`CLAUDE.md`** — the `apps/site` paragraph that says the CLI points at
-   localhost by default.
+**One package, not three.** The CLI validates the `whoami` and preflight
+responses itself and imports nothing new from `@localize-infra/schemas`, so
+it still resolves `core` and `schemas` at `^0.1.0` from npm. Verify that on
+the packed tarball before publishing — a new import would install and then
+fail at runtime.
 
-Verify the packed tarball as below, and additionally that
-`localize-infra --help` prints the production URL as the default.
+### Publish sequence, in this order
+
+1. **Apply migration `20260916000300_cli_tokens` to production**, from the
+   file, and check the function definitions against development by md5.
+   First, because the next step deploys a page that reads `cli_tokens`.
+2. **Merge** the PR carrying 0.3.0. This deploys the web app, where tokens
+   can be created, and the site, which still describes 0.2.0
+   (`CLI_PERSONAL_TOKENS_LIVE = false`).
+3. **Configure the API** (`localize-infra-api`, Production):
+   `SUPABASE_URL` (the production project URL) and
+   `SUPABASE_SERVICE_ROLE_KEY` (its secret key). Without both, the API
+   refuses every personal token with "not enabled on this API deployment".
+4. **Deploy the API** from a clean tree equal to `origin/master`
+   (`apps/api/DEPLOYING.md`), and check `/api/version`.
+5. **Prove it end to end** from the packed tarball in a project outside the
+   repository, with a token created in the production app: `whoami`,
+   translation, `--open-pr` on a repository the workspace's installation
+   reaches, a revoked token (exit 1), an unreachable repository (exit 1, no
+   translation spent).
+6. **Publish** `npm publish -w @localize-infra/cli --access public`.
+7. **In the same commit as the publish:** set
+   `CLI_PERSONAL_TOKENS_LIVE = true` in `apps/site/src/lib/constants.ts` —
+   the landing page, `/docs` and `/security` switch to the hosted-API copy,
+   and `apps/site/e2e/interaction.spec.ts` holds them to it — and update the
+   `CLAUDE.md` paragraph that describes the published CLI.
+
+### Worth doing right after
+
+- **Remove `GITHUB_APP_INSTALLATION_ID` from the production API.** Only the
+  operator path falls back to it; `apps/web` always names its installation.
+  Removed, the operator token can no longer open pull requests through the
+  installation that reaches this product's own repository.
+- **Rotate `API_AUTH_TOKEN`** (API) together with `LOCALIZE_API_TOKEN` (web).
+  It was used as the CLI's token during testing and has lived in a local
+  `.env`.
 
 ## Before anything
 
@@ -153,12 +193,12 @@ mkdir -p /tmp/pack
 for p in schemas core cli; do (cd packages/$p && npm pack --pack-destination /tmp/pack); done
 
 mkdir -p /tmp/consumer && cd /tmp/consumer && npm init -y
-# Version per package, not one number: cli moved to 0.2.0 and the other two
+# Version per package, not one number: cli is at 0.3.0 and the other two
 # did not. A glob here would silently install whichever tarballs happen to be
 # in the directory, including stale ones from an earlier run.
 npm install /tmp/pack/localize-infra-schemas-0.1.0.tgz \
             /tmp/pack/localize-infra-core-0.1.0.tgz \
-            /tmp/pack/localize-infra-cli-0.2.0.tgz
+            /tmp/pack/localize-infra-cli-0.3.0.tgz
 npx localize-infra            # prints usage
 ```
 
@@ -192,8 +232,8 @@ The conclusion survives, which is exactly why the wrong reason went unnoticed �
 nothing downstream changed, so nothing failed. Two facts now carry it instead:
 
 - `--api-url` defaults to `http://localhost:8787` in the published 0.2.0, so
-  an unmodified `npx` reaches nothing (on `master` the default is the
-  production API — see "Unreleased" above);
+  an unmodified `npx` reaches nothing (from 0.3.0 the default is the hosted
+  API, used with a personal token — see above);
 - every `/v1/*` route requires `API_AUTH_TOKEN`, and no npm user has it.
   Verified in production the same day: 401 with no token, 401 with a wrong
   one.

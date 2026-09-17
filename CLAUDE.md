@@ -101,6 +101,34 @@
   de s'en excuser. `CLI_PUBLISHED_TO_NPM` porte ce fait à un seul endroit et
   les deux pages le lisent.
 
+  **Jetons CLI personnels (2026-09-17, CLI 0.3.0 prêt, non publié).** Le CLI
+  ne dépend plus du jeton opérateur partagé. Un jeton `lit_…` est créé par
+  chaque membre dans `/[org]/tokens` ; seul son SHA-256 est stocké
+  (`cli_tokens`, colonne illisible pour `authenticated`), il expire, se
+  révoque seul et meurt quand son auteur quitte le workspace. L'API le résout
+  par `resolve_cli_token` (service role seulement) et n'agit **que** par
+  l'installation GitHub du workspace — plus de repli sur
+  `GITHUB_APP_INSTALLATION_ID` pour ces appelants. `init` vérifie jeton,
+  dépôt, branche et droit aux dépôts privés **avant** de dépenser, garde le
+  récapitulatif si la PR échoue ensuite, et sort en 1 quand rien n'a été
+  traduit ou que la PR a échoué. `API_AUTH_TOKEN` devient strictement
+  serveur-à-serveur. Le site ne décrit ce chemin qu'une fois
+  `CLI_PERSONAL_TOKENS_LIVE` basculé, avec la publication ; la séquence est
+  dans `docs/releasing.md`. **Tant que l'API de production n'a pas
+  `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`, elle refuse tout jeton
+  personnel.**
+
+  Le tarball, installé dans un projet externe contre une API locale, a trouvé
+  deux défauts que les tests unitaires laissaient passer. **Le preflight
+  acceptait un dépôt public hors de l'installation** : un jeton d'installation
+  lit tout dépôt public, donc `repos.get` répondait 200 et le refus n'arrivait
+  qu'à la première écriture, traductions payées. L'appartenance se lit
+  désormais dans la liste de l'installation. **Et `/v1/translate` renvoyait
+  l'erreur du fournisseur**, qui cite le début et la fin d'une clé OpenAI
+  refusée ; elle est journalisée, plus renvoyée. Piège rencontré au passage :
+  l'API lancée par `tsx` charge `services/github-app` depuis `dist/`, donc un
+  correctif non recompilé semble ne pas marcher.
+
   Ce que `/docs` continue de dire, parce que c'est vrai : installer n'est pas
   pouvoir s'en servir. Le CLI **publié (0.2.0)** pointe par défaut sur
   `http://localhost:8787` — sur `master`, depuis le 2026-09-16, il pointe sur
@@ -755,7 +783,7 @@ du long. C'est exactement ainsi que le trou a survécu : le job passait en ne
 prouvant rien d'eux.
 
 La pile Supabase est désormais lancée **dans le job** par `npm run db:local`,
-reçoit les 34 migrations puis le seed, et meurt avec lui. Ce n'est pas un pis-
+reçoit les 36 migrations puis le seed, et meurt avec lui. Ce n'est pas un pis-
 aller faute de projet hébergé disponible — c'est **plus** isolé : aucun secret
 n'est ajouté, les clés locales étant publiques par conception, et deux PR
 simultanées ne partagent aucune ligne. Un projet dédié aurait rejoué, à
@@ -771,9 +799,9 @@ deux bases hébergées ont été construites migration par migration et n'avaien
 jamais été reconstruites ; c'est la première preuve continue que la séquence
 est rejouable.
 
-**76 assertions de base de données tournent** — 47 dans
-`closer-suppression.sql`, 23 dans `tenant-isolation.sql`, 6 dans
-`role-permissions.sql`. Elles ne sont pas du pgTAP : chacune finit par un
+**96 assertions de base de données tournent** — 47 dans
+`closer-suppression.sql`, 23 dans `tenant-isolation.sql`, 20 dans
+`cli-tokens.sql`, 6 dans `role-permissions.sql`. Elles ne sont pas du pgTAP : chacune finit par un
 `raise` délibéré qui annule la transaction, donc **elles sortent en échec quand
 elles réussissent**. `supabase/tests/run.sh` lit le verdict et compare chaque
 paire à ce qu'elle attendait ; ni le code de sortie ni la présence du marqueur
