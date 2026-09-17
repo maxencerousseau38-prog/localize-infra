@@ -128,11 +128,22 @@ fail at runtime.
   installation. Checked in production without creating anything: the
   operator naming no installation gets 501, the operator naming `layersky`'s
   installation with content identical to `main` gets 409 (GitHub reached,
-  nothing opened), an unknown `lit_` token gets 401. It is still set on the
-  Preview and Development environments.
-- **Rotate `API_AUTH_TOKEN`** (API) together with `LOCALIZE_API_TOKEN` (web).
-  It was used as the CLI's token during testing and has lived in a local
-  `.env`.
+  nothing opened), an unknown `lit_` token gets 401. Removed from the
+  Preview and Development environments too, later the same day — it is set
+  nowhere on the API project now.
+- **Done 2026-09-17: `API_AUTH_TOKEN` (API) and `LOCALIZE_API_TOKEN` (web)
+  rotated together**, both Production only, then the API and the web app
+  redeployed from `master` (`49c15ca`). The old value had been used as the
+  CLI's token during testing. Checked: the new value answers `whoami` as the
+  operator, the old one gets 401 on every `/v1/*` route, and the old
+  deployments' own URLs sit behind Vercel SSO (302), so a value baked into
+  them cannot be used from outside. The rotation was done **twice**: the first
+  run deleted its only local copy, and a `sensitive` variable cannot be read
+  back — not by the CLI, the API or the dashboard. The second wrote the value
+  to the local `.env` first, then to Vercel. **The web → API call with the new
+  value is not exercised by these checks**; only a run started from the app
+  does. `API_AUTH_TOKEN` was then removed from the API's Preview and
+  Development environments: it exists in Production only.
 
 ## Before anything
 

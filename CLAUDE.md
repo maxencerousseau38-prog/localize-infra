@@ -446,7 +446,17 @@ celle du workspace (le type l'exige), et un jeton CLI personnel n'a jamais
 de repli. Vérifié en production après le retrait, sans rien créer sur le
 fixture : opérateur sans installation → 501 ; opérateur nommant `151289538`
 avec un contenu identique à `main` → 409, donc GitHub est atteint ; jeton
-`lit_` inconnu → 401.
+`lit_` inconnu → 401. Retirée ensuite de Preview et Development : elle
+n'existe plus nulle part sur le projet API.
+
+**Le jeton opérateur a été changé le même jour**, `API_AUTH_TOKEN` (API) et
+`LOCALIZE_API_TOKEN` (web) ensemble, en Production seulement, et
+`API_AUTH_TOKEN` n'existe plus qu'en Production — un déploiement Preview de
+l'API refuserait donc de démarrer. **La valeur en service est dans le `.env`
+local, et nulle part ailleurs de lisible** : les variables `sensitive` ne se
+relisent pas. La première rotation l'a appris à ses dépens — sa seule copie
+locale supprimée, il a fallu tout refaire. Écrire la valeur là où on la garde
+**avant** de la poser sur Vercel.
 
 La suppression ne prend effet qu'au déploiement suivant — et comme le projet est
 relié à Git (voir plus haut), c'est la fusion de la PR #31 qui l'a produit.
