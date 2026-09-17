@@ -101,7 +101,7 @@
   de s'en excuser. `CLI_PUBLISHED_TO_NPM` porte ce fait à un seul endroit et
   les deux pages le lisent.
 
-  **Jetons CLI personnels (2026-09-17, CLI 0.3.0 prêt, non publié).** Le CLI
+  **Jetons CLI personnels (CLI 0.3.0, publié le 2026-09-17).** Le CLI
   ne dépend plus du jeton opérateur partagé. Un jeton `lit_…` est créé par
   chaque membre dans `/[org]/tokens` ; seul son SHA-256 est stocké
   (`cli_tokens`, colonne illisible pour `authenticated`), il expire, se
@@ -112,11 +112,20 @@
   dépôt, branche et droit aux dépôts privés **avant** de dépenser, garde le
   récapitulatif si la PR échoue ensuite, et sort en 1 quand rien n'a été
   traduit ou que la PR a échoué. `API_AUTH_TOKEN` devient strictement
-  serveur-à-serveur. Le site ne décrit ce chemin qu'une fois
-  `CLI_PERSONAL_TOKENS_LIVE` basculé, avec la publication ; la séquence est
-  dans `docs/releasing.md`. **Tant que l'API de production n'a pas
-  `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`, elle refuse tout jeton
-  personnel.**
+  serveur-à-serveur. `CLI_PERSONAL_TOKENS_LIVE` est à `true` depuis la
+  publication, et le site décrit ce chemin.
+
+  **Vérifié en production avant de basculer**, avec un jeton émis par l'app de
+  prod et le tarball installé hors du dépôt : `whoami` → `layersky`,
+  traduction réelle, PR réelle (fixture #18, fermée), dépôt hors installation
+  refusé avant toute traduction, jeton révoqué refusé — codes de sortie 1.
+  **L'API refuse tout jeton personnel si `SUPABASE_URL` ou
+  `SUPABASE_SERVICE_ROLE_KEY` est vide**, et c'est arrivé : `vercel env add`
+  lancé dans un shell non interactif a enregistré des valeurs vides, que
+  `vercel env ls` liste comme présentes. Le seul contrôle qui les distingue
+  est la réponse de l'API à un `lit_` inconnu — « invalid, expired or
+  revoked » quand la résolution marche, « not enabled » quand une variable est
+  vide.
 
   Le tarball, installé dans un projet externe contre une API locale, a trouvé
   deux défauts que les tests unitaires laissaient passer. **Le preflight
@@ -129,15 +138,14 @@
   l'API lancée par `tsx` charge `services/github-app` depuis `dist/`, donc un
   correctif non recompilé semble ne pas marcher.
 
-  Ce que `/docs` continue de dire, parce que c'est vrai : installer n'est pas
-  pouvoir s'en servir. Le CLI **publié (0.2.0)** pointe par défaut sur
-  `http://localhost:8787` — sur `master`, depuis le 2026-09-16, il pointe sur
-  l'API de production, non publié, et le site ne doit changer qu'avec la
-  publication (liste dans `docs/releasing.md`) — et l'API déployée n'est **pas
-  ouverte** — toutes ses routes `/v1/*` exigent un
-  bearer que seul l'opérateur détient. Trois phrases du site affirmaient à la
-  place qu'il n'existait aucune API hébergée ; elles vivaient dans les branches
-  « publié » du drapeau, donc personne ne les avait jamais vues à l'écran.
+  **Ce paragraphe disait qu'installer n'était pas pouvoir s'en servir** : le
+  CLI 0.2.0 pointait sur `http://localhost:8787` et l'API n'acceptait que le
+  bearer de l'opérateur. C'est périmé depuis la 0.3.0 — voir plus haut. Il
+  ajoutait que trois phrases du site affirmaient à tort qu'il n'existait aucune
+  API hébergée, dans les branches « publié » du drapeau que personne n'avait vues
+  à l'écran ; la leçon reste : **une branche de texte jamais rendue n'a jamais
+  été relue**, d'où les tests e2e lancés avec les deux valeurs de
+  `CLI_PERSONAL_TOKENS_LIVE`.
 
 - `apps/web` (propriétaire) — coquille applicative : barre latérale 240 px
   (feuille latérale sous 1024 px), barre supérieure 48 px, palette de commandes
