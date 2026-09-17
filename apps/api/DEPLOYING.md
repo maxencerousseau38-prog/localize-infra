@@ -29,15 +29,28 @@ not 502: nothing upstream failed, this deployment has nothing to ask.
 ## Environment
 
 The first four are required. The service refuses to start without the first
-one. `GITHUB_APP_INSTALLATION_ID` is optional and **not set in production**;
+one. `GITHUB_APP_INSTALLATION_ID` is optional and **set in no environment**;
 the last two enable personal CLI tokens.
+
+**`API_AUTH_TOKEN` exists in Production only** (since 2026-09-17), and so do
+the two `SUPABASE_*` variables. A Preview deployment of this project would
+therefore refuse to start — fail-closed, by design — and `vercel env pull`
+for Development does not provide it; local development reads the repository's
+`.env`. Add it to Preview before deploying one, with a value different from
+Production's.
+
+Rotating it means changing `LOCALIZE_API_TOKEN` on `localize-infra-web` to
+the same value, then redeploying this API and the web app. Both are stored as
+`sensitive`, which Vercel never returns: **write the new value somewhere you
+keep (the local `.env`) before setting it**, or it is lost the moment the
+command ends.
 
 | Variable | Purpose |
 |---|---|
 | `API_AUTH_TOKEN` | The **operator** bearer: server-to-server, held by `apps/web`. Never handed to users. `src/index.ts` throws at import without it |
 | `ANTHROPIC_API_KEY` | Translation. At least one provider key must be present |
 | `GITHUB_APP_ID` | Pull-request creation |
-| `GITHUB_APP_INSTALLATION_ID` | Optional **default** installation, used only by an operator request that names none. Removed from Production on 2026-09-17; without it such a request gets 501 |
+| `GITHUB_APP_INSTALLATION_ID` | Optional **default** installation, used only by an operator request that names none. Removed from every environment on 2026-09-17; without it such a request gets 501 |
 | `GITHUB_APP_PRIVATE_KEY` | The PEM **inline** — `GITHUB_APP_PRIVATE_KEY_PATH` is a local-only convenience with no file to point at on Vercel |
 | `SUPABASE_URL` | The production database, to resolve personal CLI tokens. Optional |
 | `SUPABASE_SERVICE_ROLE_KEY` | Its secret key. `resolve_cli_token` is executable by the service role only. Optional; with either missing, personal tokens are refused with that reason |
