@@ -436,6 +436,18 @@ chaque démarrage, et `/v1/open-pr` ouvre toutes ses PR à travers elle. Elles
 Retirer `GITHUB_APP_INSTALLATION_ID` du projet **API** couperait l'ouverture de
 PR — `readGitHubAppConfig` renvoie `null` sans elle et la route répond 501.
 
+**Et elle en a été retirée le 2026-09-17**, ce qui rend la phrase ci-dessus
+périmée à son tour. Elle était vraie quand l'installation était une seule
+configuration ; depuis que `GitHubAppConfig` est scindé (plus bas), la
+variable n'est plus qu'un défaut facultatif — `readDefaultInstallationId`
+rend `null` sans elle, et seule une requête **qui ne nomme aucune
+installation** reçoit 501. Les deux appelants d'`apps/web` nomment toujours
+celle du workspace (le type l'exige), et un jeton CLI personnel n'a jamais
+de repli. Vérifié en production après le retrait, sans rien créer sur le
+fixture : opérateur sans installation → 501 ; opérateur nommant `151289538`
+avec un contenu identique à `main` → 409, donc GitHub est atteint ; jeton
+`lit_` inconnu → 401.
+
 La suppression ne prend effet qu'au déploiement suivant — et comme le projet est
 relié à Git (voir plus haut), c'est la fusion de la PR #31 qui l'a produit.
 Vérifié sur le déploiement qui en résulte : `/login` répond 200 et le CSS servi
@@ -676,7 +688,9 @@ Corrigé : `/v1/open-pr` accepte un `installationId` optionnel et agit comme lui
 les deux appelants d'`apps/web` résolvent l'installation du workspace et
 l'envoient. `GITHUB_APP_INSTALLATION_ID` cesse d'être *l'*installation pour
 devenir un **défaut**, ce qui garde `packages/cli` fonctionnel contre un
-`apps/api` auto-hébergé. `GitHubAppConfig` a été scindé en identifiants et
+`apps/api` auto-hébergé. **La production n'a plus ce défaut depuis le
+2026-09-17** : le jeton opérateur ne peut plus ouvrir de PR sans nommer une
+installation. `GitHubAppConfig` a été scindé en identifiants et
 installation — le même découpage qu'`apps/web` a fait en #24, pour la même
 raison : fusionner « ce qu'est l'App » et « quelle installation » est ce qui ne
 laissait aucune place au choix.

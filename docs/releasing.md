@@ -56,11 +56,12 @@ below was followed in order, and each step was checked rather than assumed:
   (exit 1), and the same token refused once revoked (exit 1), with
   `last_used_at` untouched by the refusals.
 
-What that run could not show: production still has
-`GITHUB_APP_INSTALLATION_ID`, very likely the same installation as
-`layersky`'s, so it cannot tell "the workspace's installation" from "the
-default". The local run did, with the default deliberately invalid. Removing
-the variable (below) makes it visible in production too.
+What that run could not show: production still had
+`GITHUB_APP_INSTALLATION_ID` at the time, very likely the same installation
+as `layersky`'s, so it could not tell "the workspace's installation" from
+"the default". The local run did, with the default deliberately invalid. The
+variable was removed right after (below), so production has no default left
+to fall back to.
 
 **What changes for a user.** The default API is the hosted one
 (`https://localize-infra-api.vercel.app`, `DEFAULT_API_URL`), and it is used
@@ -121,10 +122,14 @@ fail at runtime.
 
 ### Worth doing right after
 
-- **Remove `GITHUB_APP_INSTALLATION_ID` from the production API.** Only the
-  operator path falls back to it; `apps/web` always names its installation.
-  Removed, the operator token can no longer open pull requests through the
-  installation that reaches this product's own repository.
+- **Done 2026-09-17: `GITHUB_APP_INSTALLATION_ID` removed from the
+  production API**, which was then redeployed from `master` (`e37c67c`).
+  Only the operator path fell back to it; `apps/web` always names its
+  installation. Checked in production without creating anything: the
+  operator naming no installation gets 501, the operator naming `layersky`'s
+  installation with content identical to `main` gets 409 (GitHub reached,
+  nothing opened), an unknown `lit_` token gets 401. It is still set on the
+  Preview and Development environments.
 - **Rotate `API_AUTH_TOKEN`** (API) together with `LOCALIZE_API_TOKEN` (web).
   It was used as the CLI's token during testing and has lived in a local
   `.env`.

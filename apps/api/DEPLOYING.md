@@ -28,15 +28,16 @@ not 502: nothing upstream failed, this deployment has nothing to ask.
 
 ## Environment
 
-The first five are required. The service refuses to start without the first
-one. The last two enable personal CLI tokens.
+The first four are required. The service refuses to start without the first
+one. `GITHUB_APP_INSTALLATION_ID` is optional and **not set in production**;
+the last two enable personal CLI tokens.
 
 | Variable | Purpose |
 |---|---|
 | `API_AUTH_TOKEN` | The **operator** bearer: server-to-server, held by `apps/web`. Never handed to users. `src/index.ts` throws at import without it |
 | `ANTHROPIC_API_KEY` | Translation. At least one provider key must be present |
 | `GITHUB_APP_ID` | Pull-request creation |
-| `GITHUB_APP_INSTALLATION_ID` | Pull-request creation |
+| `GITHUB_APP_INSTALLATION_ID` | Optional **default** installation, used only by an operator request that names none. Removed from Production on 2026-09-17; without it such a request gets 501 |
 | `GITHUB_APP_PRIVATE_KEY` | The PEM **inline** — `GITHUB_APP_PRIVATE_KEY_PATH` is a local-only convenience with no file to point at on Vercel |
 | `SUPABASE_URL` | The production database, to resolve personal CLI tokens. Optional |
 | `SUPABASE_SERVICE_ROLE_KEY` | Its secret key. `resolve_cli_token` is executable by the service role only. Optional; with either missing, personal tokens are refused with that reason |
@@ -47,8 +48,9 @@ Every `/v1/*` request carries one of two bearers (`src/callers.ts`):
 
 - **The operator token** (`API_AUTH_TOKEN`). A request may name the GitHub
   installation to act through, and falls back to
-  `GITHUB_APP_INSTALLATION_ID` when it does not. `apps/web` always names
-  its workspace's installation.
+  `GITHUB_APP_INSTALLATION_ID` when it does not — which, in production, is
+  never set, so it must name one. `apps/web` always names its workspace's
+  installation.
 - **A personal CLI token** (`lit_` + 43 base64url characters), issued in the
   web app. The API hashes it, resolves the hash to one workspace, and acts
   **only** through that workspace's installation: a request naming another
