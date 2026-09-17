@@ -4,7 +4,10 @@ import { Commitments } from '@/components/landing/commitments';
 import { Ecosystem } from '@/components/landing/ecosystem';
 import { Hero } from '@/components/landing/hero';
 import { HowItWorks } from '@/components/landing/how-it-works';
-import { CLI_PUBLISHED_TO_NPM } from '@/lib/constants';
+import {
+  CLI_PERSONAL_TOKENS_LIVE,
+  CLI_PUBLISHED_TO_NPM,
+} from '@/lib/constants';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -109,9 +112,11 @@ export default function HomePage() {
                 {/* "The CLI runs from a clone today" stood here for two weeks
                     after the package reached npm, because it was prose rather
                     than a read of the flag the hero and /docs already use. */}
-                {CLI_PUBLISHED_TO_NPM
-                  ? 'The CLI is on npm and translates through an API you run yourself. Read '
-                  : 'The CLI runs from a clone today. Read '}
+                {!CLI_PUBLISHED_TO_NPM
+                  ? 'The CLI runs from a clone today. Read '
+                  : CLI_PERSONAL_TOKENS_LIVE
+                    ? 'The CLI is on npm and runs against our hosted API with a personal token. Read '
+                    : 'The CLI is on npm and translates through an API you run yourself. Read '}
                 <Link
                   href="/docs#install"
                   className="rounded-sm text-inverse underline underline-offset-2 decoration-inverse/40 hover:decoration-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"

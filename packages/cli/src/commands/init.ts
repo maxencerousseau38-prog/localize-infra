@@ -8,6 +8,12 @@ import {
   writeLocaleFile,
 } from '@localize-infra/core';
 import { OpenPrApiRequestSchema } from '@localize-infra/schemas';
+import {
+  ApiUnreachableError,
+  preflightPullRequest,
+  whoami,
+} from '../api-client.js';
+import { resolveApiUrl } from '../config.js';
 import { requestPr } from '../open-pr-client.js';
 import { translateBatch } from '../translate-client.js';
 
@@ -23,7 +29,6 @@ const OwnerRepoSchema = OpenPrApiRequestSchema.pick({
 });
 
 const DEFAULT_LOCALES = ['de', 'ja', 'es', 'ar', 'pt-BR'];
-const DEFAULT_API_URL = 'http://localhost:8787';
 
 export type InitResult =
   | {
@@ -37,6 +42,13 @@ export type InitResult =
         error: string | null;
       }[];
       pr?: { prUrl: string; prNumber: number };
+      /** The workspace a personal token acts for, when the API says so. */
+      workspace?: string;
+      /**
+       * Why no pull request was opened, when one was asked for and the API
+       * refused or failed. The translations above are still on disk.
+       */
+      prError?: string;
     }
   | { ok: false; reason: string };
 
@@ -103,10 +115,51 @@ export async function runInit(
     }
   }
 
+  const apiUrl = resolveApiUrl(options?.apiUrl);
+
+  /*
+   * Ask before writing or spending anything.
+   *
+   * A revoked token used to surface once per locale, after locales/en.json had
+   * been rewritten; a repository the GitHub installation could not reach
+   * surfaced only after every locale had been translated and paid for. Both are
+   * now one refusal, up front, with nothing written.
+   */
+  let workspace: string | undefined;
+  try {
+    const caller = await whoami(apiUrl, apiToken);
+    if (caller.kind === 'workspace') {
+      workspace = caller.workspace;
+      if (options?.openPr && !caller.githubConnected) {
+        return {
+          ok: false,
+          reason: `Workspace "${caller.workspace}" has no GitHub connection, so --open-pr cannot open a pull request. Connect GitHub in the Localize Infra web app, or run without --open-pr.`,
+        };
+      }
+    }
+    if (options?.openPr) {
+      await preflightPullRequest(apiUrl, apiToken, {
+        owner: options.owner ?? '',
+        repo: options.repo ?? '',
+        baseBranch: options.baseBranch ?? 'main',
+      });
+    }
+  } catch (error) {
+    if (error instanceof ApiUnreachableError) {
+      return {
+        ok: false,
+        reason: `Could not reach the API at ${apiUrl} (${error.message}). Check your network, or the URL given by --api-url or LOCALIZE_API_URL.`,
+      };
+    }
+    return {
+      ok: false,
+      reason: `Refused by ${apiUrl}: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+
   const merged = mergeLocaleFile(localesDir, 'en', fresh);
   writeLocaleFile(localesDir, 'en', merged);
 
-  const apiUrl = options?.apiUrl ?? DEFAULT_API_URL;
   const targetLocales = options?.locales ?? DEFAULT_LOCALES;
   const translatableStrings = extracted.map((e) => ({
     key: e.key,
@@ -172,18 +225,35 @@ export async function runInit(
     // is even sent. Skip the call and return normally instead: the per-locale `error`
     // fields in localeResults already explain what failed and why.
     if (prFiles.length > 0) {
-      const prResult = await requestPr(
-        apiUrl,
-        {
-          owner: options.owner ?? '',
-          repo: options.repo ?? '',
-          baseBranch: options.baseBranch ?? 'main',
-          title: `Add translations (${targetLocales.join(', ')})`,
-          body: `Automated by \`localize-infra init\`. ${localeResults.map((r) => `${r.locale}: ${r.keysWritten} key(s)${r.missingKeys.length > 0 ? ` (${r.missingKeys.length} untranslated)` : ''}`).join('; ')}`,
-          files: prFiles,
-        },
-        apiToken,
-      );
+      let prResult: Awaited<ReturnType<typeof requestPr>>;
+      try {
+        prResult = await requestPr(
+          apiUrl,
+          {
+            owner: options.owner ?? '',
+            repo: options.repo ?? '',
+            baseBranch: options.baseBranch ?? 'main',
+            title: `Add translations (${targetLocales.join(', ')})`,
+            body: `Automated by \`localize-infra init\`. ${localeResults.map((r) => `${r.locale}: ${r.keysWritten} key(s)${r.missingKeys.length > 0 ? ` (${r.missingKeys.length} untranslated)` : ''}`).join('; ')}`,
+            files: prFiles,
+          },
+          apiToken,
+        );
+      } catch (error) {
+        /*
+         * The translations are done and on disk. Throwing here used to replace
+         * the per-locale summary with one line about the pull request, so a
+         * person could not tell what had been translated — and paid for.
+         */
+        return {
+          ok: true,
+          framework: framework.name,
+          keysWritten,
+          locales: localeResults,
+          ...(workspace ? { workspace } : {}),
+          prError: error instanceof Error ? error.message : String(error),
+        };
+      }
       /*
        * A run that changed nothing returns without a `pr`, and that is not a
        * failure. The API answers 409 when every file in the request already
@@ -199,6 +269,7 @@ export async function runInit(
         framework: framework.name,
         keysWritten,
         locales: localeResults,
+        ...(workspace ? { workspace } : {}),
         ...(prResult.opened ? { pr: prResult.pr } : {}),
       };
     }
@@ -209,5 +280,6 @@ export async function runInit(
     framework: framework.name,
     keysWritten,
     locales: localeResults,
+    ...(workspace ? { workspace } : {}),
   };
 }

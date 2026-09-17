@@ -4,6 +4,7 @@ import {
   type OpenPrApiResponse,
   OpenPrApiResponseSchema,
 } from '@localize-infra/schemas';
+import { apiErrorMessage } from './api-client.js';
 
 /**
  * What asking for a pull request produced.
@@ -44,9 +45,7 @@ export async function requestPr(
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(
-      `Open-PR API request failed (${response.status}): ${errorBody}`,
-    );
+    throw new Error(apiErrorMessage(response.status, errorBody));
   }
   const json: unknown = await response.json();
   return { opened: true, pr: OpenPrApiResponseSchema.parse(json) };

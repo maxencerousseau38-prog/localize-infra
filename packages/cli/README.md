@@ -14,9 +14,32 @@ which runs the full pipeline end-to-end:
    turn uses `services/github-app` to create the PR via a GitHub App
    installation.
 
-Steps 4 and 5 talk to a running `apps/api` instance (see
-`apps/api/README.md` for how to run it) — `init` does not call any LLM or
-GitHub API directly itself.
+Steps 4 and 5 talk to an `apps/api` instance — by default the production
+deployment at `https://localize-infra-api.vercel.app`, or one you run yourself
+(see `apps/api/README.md`). `init` does not call any LLM or GitHub API
+directly itself.
+
+**Authenticate with a personal CLI token.** Create one in the Localize Infra
+web app, under your workspace's *CLI tokens*, and set it in
+`LOCALIZE_API_TOKEN`. It is shown once, expires, and can be revoked on its
+own. A token acts for that workspace only: pull requests are opened through
+the workspace's own GitHub connection, and nowhere else.
+
+Before writing or translating anything, `init` checks the token — and, with
+`--open-pr`, that the repository and base branch are reachable. A revoked
+token, a workspace with no GitHub connection, an unreachable repository or a
+missing branch is reported in one sentence and costs nothing. To use your own
+`apps/api` instead, point `--api-url` or `LOCALIZE_API_URL` at it.
+
+### Exit codes
+
+| Code | When |
+|---|---|
+| `0` | At least one locale was translated, and the pull request (if asked for) was opened or had nothing to open |
+| `1` | `init` refused to start, no locale could be translated, or the pull request could not be opened |
+
+A pull request that fails after translation keeps the per-locale summary: the
+files are written to `locales/`, and the reason is printed after them.
 
 ## Data sent to `apps/api` during translation — please read
 
@@ -28,7 +51,9 @@ OpenAI — to produce the translation**. This is deliberate: the surrounding
 code and file/component context measurably improve translation quality
 (e.g. disambiguating a short string like "Close" as a button vs. a modal
 title). It also means that context leaves your machine and is sent to a
-non-EU-hosted third party. This is a known, deliberate limitation of this
+non-EU-hosted third party. **With the default settings, the `apps/api`
+instance that receives it is the hosted production deployment** (functions in
+Paris, model provider in the United States) — not a server you run. This is a known, deliberate limitation of this
 pre-alpha milestone (see `CLAUDE.md`'s "État actuel" section) — full EU data
 residency is not yet implemented. Do not run `init` with `--open-pr` or
 without `--api-url` pointed at a trusted `apps/api` instance on source trees
@@ -52,8 +77,9 @@ dev script and its tests will fail. CI doesn't hit this because
 `cli` automatically — but it isn't automatic when running things locally
 package-by-package.
 
-You'll also need a running `apps/api` instance to translate against (see
-`apps/api/README.md`). Extraction-only usage is not a supported mode of
+To translate, you need an `apps/api` to talk to: the production one with an
+operator-issued token, or your own (see `apps/api/README.md`) with
+`--api-url`. Extraction-only usage is not a supported mode of
 `init` — an API token is required even just to write `locales/en.json`,
 since `init` always attempts the translation step afterward.
 
@@ -73,10 +99,10 @@ localize-infra --version
   let those keys be removed.
 - `--api-url <url>` — base URL of the `apps/api` instance to translate
   against and (if `--open-pr` is set) open a PR through. Defaults to
-  `http://localhost:8787`. Also readable from `LOCALIZE_API_URL` when the flag
-  is absent — the flag wins when both are set; it
-  must be passed explicitly if `apps/api` isn't running on the default
-  local port.
+  `https://localize-infra-api.vercel.app`, the production deployment. Also
+  readable from `LOCALIZE_API_URL` when the flag is absent — the flag wins when
+  both are set. A trailing slash is ignored. For a local instance, pass
+  `--api-url http://localhost:8787`.
 - `--api-token <token>` — bearer token sent as `Authorization: Bearer
   <token>` to `apps/api`. **Prefer the `LOCALIZE_API_TOKEN` environment
   variable instead**: passing the token on the command line leaks it into
@@ -139,11 +165,9 @@ or a CI secret that resolved to nothing, would otherwise replace the default
 with an empty string and send every request to `/v1/translate` with no origin
 — a fetch error naming a URL nobody typed.
 
-`LOCALIZE_API_URL` matters more than it looks: the default points at
-`localhost`, and **there is no hosted API open to the public**. The instance
-this command talks to is one you run yourself, so its address is the setting
-you cannot avoid — and until now it was the one you had to retype on every
-invocation.
+The default was `http://localhost:8787` up to 0.2.0, so an unmodified install
+reached nothing. It is now the production API. `LOCALIZE_API_URL` remains the
+way to use your own instance without retyping `--api-url` on every run.
 
 ## Supported frameworks
 

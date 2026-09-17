@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DEFAULT_API_URL } from './config.js';
 
 export type TopLevel =
   | { kind: 'help' }
@@ -39,7 +40,7 @@ translates into each target locale, and optionally opens a pull request.
 Options:
   --force                     Overwrite existing locale files
   --api-url <url>             apps/api base URL, or LOCALIZE_API_URL
-                              (default: http://localhost:8787)
+                              (default: ${DEFAULT_API_URL})
   --api-token <token>         Bearer token for apps/api — prefer the environment
                               variable, see below
   --locales <a,b,c>           Target locales (default: de,ja,es,ar,pt-BR)
@@ -53,13 +54,16 @@ Options:
 Environment: LOCALIZE_API_URL and LOCALIZE_API_TOKEN are read when the matching
 flag is absent. An empty value counts as absent, not as an override.
 
-API token: set the LOCALIZE_API_TOKEN environment variable (recommended). The
+API token: a personal CLI token, created in the Localize Infra web app under
+your workspace's CLI tokens. Set it in LOCALIZE_API_TOKEN (recommended). The
 --api-token flag is also available but leaks the token into shell history and
 process listings (e.g. \`ps\`); prefer the environment variable. If both are set,
 --api-token takes precedence.
 
-Steps 4 and 5 talk to a running apps/api instance. There is no hosted API open
-to the public, so --api-url must point at one you run yourself.`;
+Translation and pull requests go through apps/api. The default is the hosted
+API, which accepts personal CLI tokens and opens pull requests only through
+your workspace's own GitHub connection. To use your own instance instead, set
+--api-url or LOCALIZE_API_URL.`;
 
 /**
  * The version this build carries, read from the manifest rather than baked in.

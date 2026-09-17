@@ -1,5 +1,6 @@
 import { RunArtifact } from '@/components/landing/run-artifact';
 import {
+  CLI_PERSONAL_TOKENS_LIVE,
   CLI_PUBLISHED_TO_NPM,
   EXAMPLE_PR_URL,
   INSTALL_COMMAND,
@@ -191,9 +192,11 @@ export function Hero() {
                   which /docs also reads. It was prose in two places about one
                   external fact, which is one place that gets forgotten. */}
               <p className="text-small leading-6 text-tertiary">
-                {CLI_PUBLISHED_TO_NPM
-                  ? 'It needs an API you run yourself — ours is not open to the CLI. '
-                  : 'Not published to npm yet — today it runs from a clone. '}
+                {!CLI_PUBLISHED_TO_NPM
+                  ? 'Not published to npm yet — today it runs from a clone. '
+                  : CLI_PERSONAL_TOKENS_LIVE
+                    ? 'It runs against our hosted API with a personal token from your workspace. '
+                    : 'It needs an API you run yourself — ours is not open to the CLI. '}
                 <Link
                   href="/docs#install"
                   className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"

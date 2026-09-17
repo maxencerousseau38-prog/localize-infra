@@ -2,6 +2,7 @@
 import { runInit } from './commands/init.js';
 import { fromFlagOrEnv } from './config.js';
 import { USAGE, parseTopLevel, readVersion } from './meta.js';
+import { exitCodeFor } from './outcome.js';
 
 function readFlagValue(args: string[], flag: string): string | undefined {
   const index = args.indexOf(flag);
@@ -65,9 +66,10 @@ async function main(): Promise<void> {
    * Flag over environment for both, and an empty value counts as neither.
    *
    * `--api-url` had no environment equivalent while `--api-token` did, so the
-   * one setting a user cannot avoid — the default points at localhost, and
-   * there is no hosted API open to the public — was the one they had to retype
-   * on every invocation.
+   * one setting a user could not avoid — the default pointed at localhost — was
+   * the one they had to retype on every invocation. The default is now the
+   * production API (`DEFAULT_API_URL`); the flag and the variable still
+   * override it, for a self-hosted instance or a local one.
    *
    * `fromFlagOrEnv` rather than `??` because `LOCALIZE_API_URL=` sets the
    * variable to the empty string, which `??` keeps: every request would then
@@ -112,10 +114,11 @@ async function main(): Promise<void> {
   });
   if (!result.ok) {
     console.error(result.reason);
-    process.exitCode = 1;
+    process.exitCode = exitCodeFor(result);
     return;
   }
 
+  if (result.workspace) console.log(`Workspace: ${result.workspace}`);
   console.log(`Detected framework: ${result.framework}`);
   console.log(`Wrote ${result.keysWritten} key(s) to locales/en.json`);
   for (const localeResult of result.locales) {
@@ -131,7 +134,11 @@ async function main(): Promise<void> {
       `  ${localeResult.locale}: ${localeResult.keysWritten} key(s)${missingNote}`,
     );
   }
-  if (result.pr) {
+  if (result.prError) {
+    console.error(
+      `No PR opened: ${result.prError}\nThe translations above were written to locales/ and are still there.`,
+    );
+  } else if (result.pr) {
     console.log(`Opened PR: ${result.pr.prUrl}`);
   } else if (openPr && result.locales.every((l) => l.error !== null)) {
     console.log(
@@ -145,6 +152,8 @@ async function main(): Promise<void> {
       'No PR opened: every translation is already on the base branch.',
     );
   }
+
+  process.exitCode = exitCodeFor(result);
 }
 
 main().catch((error: unknown) => {

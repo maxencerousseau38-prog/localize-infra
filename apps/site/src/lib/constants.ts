@@ -44,6 +44,9 @@ export const EXAMPLE_PR_URL: string | null = null;
  */
 export const APP_URL = 'https://localize-infra-web.vercel.app';
 
+/** The hosted API, which the CLI uses by default from 0.3.0. */
+export const API_URL = 'https://localize-infra-api.vercel.app';
+
 /**
  * The evaluation harness, which is MIT-licensed.
  *
@@ -98,3 +101,21 @@ export const INSTALL_COMMAND = 'npx @localize-infra/cli init';
  * `docs/releasing.md` carries the corrected check.
  */
 export const CLI_PUBLISHED_TO_NPM = true;
+
+/**
+ * Whether the **published** CLI talks to the hosted API with a personal token.
+ *
+ * Two things have to be true together before this flips, and both happen
+ * outside a merge: `@localize-infra/cli@0.3.0` is on npm (0.2.0 still defaults
+ * to localhost), and the production API has `SUPABASE_URL` and
+ * `SUPABASE_SERVICE_ROLE_KEY`, without which it refuses every personal token.
+ * Until then the pages keep describing the CLI that people actually install.
+ *
+ * Tokens can be *created* in the hosted app before this flips; the pages do
+ * not advertise that, because a token the API refuses is not a feature.
+ *
+ * Flipped in the same change as the 0.3.0 publish — `docs/releasing.md`.
+ * `apps/site/e2e/interaction.spec.ts` reads this and asserts the copy follows
+ * it in both directions.
+ */
+export const CLI_PERSONAL_TOKENS_LIVE = false;

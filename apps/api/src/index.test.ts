@@ -24,6 +24,8 @@ const ENV_KEYS = [
   'GITHUB_APP_PRIVATE_KEY',
   'GITHUB_APP_PRIVATE_KEY_PATH',
   'GITHUB_APP_INSTALLATION_ID',
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
 ] as const;
 
 function clearEnv(): void {
@@ -130,6 +132,39 @@ describe('app (real index.ts route wiring)', () => {
       });
       expect(res.status, `${path} must still require a bearer`).toBe(401);
     }
+  });
+
+  it('answers /v1/whoami for the operator token', async () => {
+    const app = await loadApp();
+    const res = await app.request('/v1/whoami', {
+      headers: { Authorization: 'Bearer test-auth-token' },
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ kind: 'operator' });
+  });
+
+  it('protects /v1/whoami and /v1/open-pr/preflight like every /v1 route', async () => {
+    const app = await loadApp();
+    expect((await app.request('/v1/whoami')).status).toBe(401);
+    const preflight = await app.request('/v1/open-pr/preflight', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ owner: 'o', repo: 'r', baseBranch: 'main' }),
+    });
+    expect(preflight.status).toBe(401);
+  });
+
+  /*
+   * The tests run without SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY, which is
+   * also the state of a deployment that has not enabled personal tokens.
+   */
+  it('refuses a personal token with a reason when the database is not configured', async () => {
+    const app = await loadApp();
+    const res = await app.request('/v1/whoami', {
+      headers: { Authorization: `Bearer lit_${'A'.repeat(43)}` },
+    });
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toMatch(/not enabled/);
   });
 
   it('still returns 401 for /v1/translate with a wrong bearer token', async () => {

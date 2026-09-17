@@ -4,6 +4,7 @@ import {
   type TranslateBatchResponse,
   TranslateBatchResponseSchema,
 } from '@localize-infra/schemas';
+import { apiErrorMessage } from './api-client.js';
 
 export async function translateBatch(
   apiUrl: string,
@@ -23,7 +24,7 @@ export async function translateBatch(
   if (!response.ok) {
     const errorBody = await response.text();
     throw new Error(
-      `Translation API request failed (${response.status}): ${errorBody}`,
+      `Translation API request failed: ${apiErrorMessage(response.status, errorBody)}`,
     );
   }
   const json: unknown = await response.json();

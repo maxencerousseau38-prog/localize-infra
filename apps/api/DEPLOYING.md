@@ -28,15 +28,60 @@ not 502: nothing upstream failed, this deployment has nothing to ask.
 
 ## Environment
 
-All five are required. The service refuses to start without the first one.
+The first five are required. The service refuses to start without the first
+one. The last two enable personal CLI tokens.
 
 | Variable | Purpose |
 |---|---|
-| `API_AUTH_TOKEN` | Bearer for every `/v1/*` route. `src/index.ts` throws at import without it |
+| `API_AUTH_TOKEN` | The **operator** bearer: server-to-server, held by `apps/web`. Never handed to users. `src/index.ts` throws at import without it |
 | `ANTHROPIC_API_KEY` | Translation. At least one provider key must be present |
 | `GITHUB_APP_ID` | Pull-request creation |
 | `GITHUB_APP_INSTALLATION_ID` | Pull-request creation |
 | `GITHUB_APP_PRIVATE_KEY` | The PEM **inline** — `GITHUB_APP_PRIVATE_KEY_PATH` is a local-only convenience with no file to point at on Vercel |
+| `SUPABASE_URL` | The production database, to resolve personal CLI tokens. Optional |
+| `SUPABASE_SERVICE_ROLE_KEY` | Its secret key. `resolve_cli_token` is executable by the service role only. Optional; with either missing, personal tokens are refused with that reason |
+
+## Who is calling
+
+Every `/v1/*` request carries one of two bearers (`src/callers.ts`):
+
+- **The operator token** (`API_AUTH_TOKEN`). A request may name the GitHub
+  installation to act through, and falls back to
+  `GITHUB_APP_INSTALLATION_ID` when it does not. `apps/web` always names
+  its workspace's installation.
+- **A personal CLI token** (`lit_` + 43 base64url characters), issued in the
+  web app. The API hashes it, resolves the hash to one workspace, and acts
+  **only** through that workspace's installation: a request naming another
+  is refused (403), a workspace with no GitHub connection is refused with the
+  link to connect it (412), and there is no fallback to the default
+  installation. Private repositories need the workspace's entitlement (403).
+
+Routes added with this:
+
+| Route | Purpose |
+|---|---|
+| `GET /v1/whoami` | Which kind of caller, and which workspace. The CLI asks before writing anything |
+| `POST /v1/open-pr/preflight` | Can a pull request be opened on `owner/repo` at `baseBranch` — reads only: the installation's repository list, then the branch. Asked before any translation is paid for |
+
+Refusals from GitHub are reported by status with a sentence a user can act on
+(404 unreachable repository or branch, 403 permissions, 422 rejected); the
+GitHub response body is logged, never returned.
+
+**Membership comes from the installation's list, not from `repos.get`.** An
+installation token can read any public repository, so `repos.get` answered
+200 for `octocat/Hello-World` and the refusal came only at the first write,
+after every locale had been translated. Found by running the packed CLI
+against it.
+
+**A provider failure on `/v1/translate` returns a fixed sentence (502).** It
+used to return the provider's own error, which for a rejected OpenAI key is a
+JSON body quoting the key's first and last characters. The error is logged.
+
+**Running this API locally with `tsx` loads `services/github-app` from its
+`dist/`**, not its source. Rebuild it (`npm run build -w
+@localize-infra/github-app`) after changing it, or the local API runs the old
+code — which is how the membership fix above first looked like it had not
+worked.
 
 `OPENAI_API_KEY` is deliberately unset. Adding it re-enables the two-provider
 split with no other change.

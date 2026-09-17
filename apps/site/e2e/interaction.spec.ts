@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { CLI_PUBLISHED_TO_NPM, EXAMPLE_PR_URL } from '../src/lib/constants';
+import {
+  CLI_PERSONAL_TOKENS_LIVE,
+  CLI_PUBLISHED_TO_NPM,
+  EXAMPLE_PR_URL,
+} from '../src/lib/constants';
 import { SITE_URL } from '../src/lib/routes';
 
 const ROUTES = [
@@ -235,7 +239,14 @@ test.describe('the install claim matches whether the package exists', () => {
   }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
 
-    if (CLI_PUBLISHED_TO_NPM) {
+    if (CLI_PUBLISHED_TO_NPM && CLI_PERSONAL_TOKENS_LIVE) {
+      // Published and served by the hosted API: the sentence names the token
+      // the reader needs, not an API they must run.
+      await expect(
+        page.getByText(/with a personal token from your workspace/i),
+      ).toBeVisible();
+      await expect(page.getByText(/not published to npm/i)).toHaveCount(0);
+    } else if (CLI_PUBLISHED_TO_NPM) {
       // Published, and still not self-sufficient: the translation step needs an
       // API the reader runs themselves. Saying only "it's on npm" would be true
       // and misleading.
@@ -260,7 +271,9 @@ test.describe('the install claim matches whether the package exists', () => {
     if (CLI_PUBLISHED_TO_NPM) {
       await expect(
         page.getByText(
-          /installing it is not the same as being able to use it/i,
+          CLI_PERSONAL_TOKENS_LIVE
+            ? /runs against the hosted API with a personal token/i
+            : /installing it is not the same as being able to use it/i,
         ),
       ).toBeVisible();
       // The status block must send the reader to the refusal rather than
@@ -552,4 +565,55 @@ test.describe('no page links to evidence a visitor cannot open', () => {
       ).toEqual([]);
     });
   }
+});
+
+/*
+ * Which API the published CLI talks to is one fact, `CLI_PERSONAL_TOKENS_LIVE`,
+ * and it decides who receives the code context. Every page that describes the
+ * CLI's path follows it, in both directions: a page promising personal tokens
+ * the API refuses is as false as one telling people to run their own API after
+ * the hosted one opened.
+ */
+test.describe('the CLI copy follows whether personal tokens are live', () => {
+  test('the landing page', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const text = (await page.locator('main').textContent()) ?? '';
+    if (CLI_PERSONAL_TOKENS_LIVE) {
+      expect(text).toMatch(/personal token/);
+      expect(text).not.toMatch(/needs an API you run yourself/);
+    } else {
+      expect(text).not.toMatch(/personal token/);
+      if (CLI_PUBLISHED_TO_NPM) {
+        expect(text).toMatch(/needs an API you run yourself/);
+      }
+    }
+  });
+
+  test('/docs', async ({ page }) => {
+    await page.goto('/docs', { waitUntil: 'networkidle' });
+    const text = (await page.locator('main').textContent()) ?? '';
+    if (CLI_PERSONAL_TOKENS_LIVE) {
+      expect(text).toMatch(/runs against the hosted API with a personal token/);
+      expect(text).toContain('https://localize-infra-api.vercel.app');
+      expect(text).toMatch(/Or run your own API/);
+    } else {
+      expect(text).not.toMatch(/personal token/);
+      expect(text).toContain('http://localhost:8787');
+    }
+  });
+
+  test('/security', async ({ page }) => {
+    await page.goto('/security', { waitUntil: 'networkidle' });
+    const block = page.getByTestId('cli-api-disclosure');
+    await expect(block).toBeVisible();
+    const text = (await block.textContent()) ?? '';
+    if (CLI_PERSONAL_TOKENS_LIVE) {
+      expect(text).toMatch(/SHA-256 hash/);
+      expect(text).toMatch(/United States/);
+      expect(text).toMatch(/own GitHub connection/);
+    } else {
+      expect(text).toMatch(/an API you run yourself/);
+      expect(text).not.toMatch(/personal CLI token/);
+    }
+  });
 });

@@ -1,14 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { serve } from '@hono/node-server';
 import {
+  checkRepositoryAccess,
   createGitHubAppClient,
   openTranslationPr,
 } from '@localize-infra/github-app';
 import { Hono } from 'hono';
-import { createAuthMiddleware } from './auth.js';
+import { createCallerMiddleware } from './auth.js';
+import {
+  type Caller,
+  createPostgrestResolver,
+  readTokenResolverConfig,
+} from './callers.js';
 import {
   type GitHubAppOperations,
   openPrRouteHandler,
+  preflightRouteHandler,
 } from './open-pr/route.js';
 import { getConfiguredProviders } from './router/index.js';
 import { translateRouteHandler } from './translate/route.js';
@@ -90,13 +97,40 @@ export function readDefaultInstallationId(): number | null {
 const githubAppOperations: GitHubAppOperations = {
   createClient: createGitHubAppClient,
   openPr: openTranslationPr,
+  checkAccess: checkRepositoryAccess,
 };
 
-export const app = new Hono();
+// Personal CLI tokens need the database; without it, only the operator token
+// is accepted and personal ones are refused with that reason.
+const tokenResolverConfig = readTokenResolverConfig();
 
-// Applies to /v1/translate and /v1/open-pr but not /health: health checks
-// are conventionally public and carry no sensitive capability.
-app.use('/v1/*', createAuthMiddleware(API_AUTH_TOKEN));
+export const app = new Hono<{ Variables: { caller: Caller } }>();
+
+// Applies to every /v1/* route but not /health or /api/version: those are
+// public and carry no capability.
+app.use(
+  '/v1/*',
+  createCallerMiddleware({
+    operatorToken: API_AUTH_TOKEN,
+    resolver: tokenResolverConfig
+      ? createPostgrestResolver(tokenResolverConfig)
+      : null,
+  }),
+);
+
+/**
+ * Who the API thinks is calling. The CLI asks before writing or spending
+ * anything, so a bad token costs one sentence and nothing else.
+ */
+app.get('/v1/whoami', (c) => {
+  const caller = c.get('caller');
+  if (caller.kind === 'operator') return c.json({ kind: 'operator' });
+  return c.json({
+    kind: 'workspace',
+    workspace: caller.organizationSlug,
+    githubConnected: caller.installationId !== null,
+  });
+});
 
 app.post('/v1/translate', async (c) => {
   const body = await c.req.json().catch(() => null);
@@ -115,6 +149,23 @@ app.post('/v1/translate', async (c) => {
   );
 });
 
+app.post('/v1/open-pr/preflight', async (c) => {
+  const body = await c.req.json().catch(() => null);
+  const { status, body: responseBody } = await preflightRouteHandler(
+    body,
+    {
+      app: readGitHubAppCredentials(),
+      defaultInstallationId: readDefaultInstallationId(),
+    },
+    githubAppOperations,
+    c.get('caller'),
+  );
+  return c.json(
+    responseBody as Record<string, unknown>,
+    status as 200 | 400 | 403 | 404 | 412 | 422 | 501 | 502,
+  );
+});
+
 app.post('/v1/open-pr', async (c) => {
   const body = await c.req.json().catch(() => null);
   const { status, body: responseBody } = await openPrRouteHandler(
@@ -124,10 +175,11 @@ app.post('/v1/open-pr', async (c) => {
       defaultInstallationId: readDefaultInstallationId(),
     },
     githubAppOperations,
+    c.get('caller'),
   );
   return c.json(
     responseBody as Record<string, unknown>,
-    status as 200 | 400 | 501 | 502,
+    status as 200 | 400 | 403 | 404 | 409 | 412 | 422 | 501 | 502,
   );
 });
 

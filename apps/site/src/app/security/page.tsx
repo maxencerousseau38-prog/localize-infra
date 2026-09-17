@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/page-header';
+import { CLI_PERSONAL_TOKENS_LIVE } from '@/lib/constants';
 import { Badge, StateRule } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 
@@ -210,6 +211,53 @@ export default function SecurityPage() {
                 ))}
               </ul>
             </div>
+          </div>
+
+          {/*
+           * The command-line path. Gated on CLI_PERSONAL_TOKENS_LIVE, because
+           * which API the published CLI talks to — and so who receives the
+           * code context — changes the day 0.3.0 ships, not the day this page
+           * is merged.
+           */}
+          <div
+            className="mt-12 max-w-[70ch] border-t border-subtle pt-10"
+            data-testid="cli-api-disclosure"
+          >
+            <h2 id="cli-api" className="text-title font-semibold text-primary">
+              The command-line tool and our API
+            </h2>
+            {CLI_PERSONAL_TOKENS_LIVE ? (
+              <>
+                <p className="mt-3 text-body leading-6 text-secondary">
+                  By default the CLI sends the context above to our hosted API,
+                  which runs in Paris and forwards it to the translation model
+                  in the United States — the residency gap below applies to it.
+                  Point <code className="font-mono text-small">--api-url</code>{' '}
+                  at an instance you run to keep it off our infrastructure.
+                </p>
+                <p className="mt-3 text-body leading-6 text-secondary">
+                  It authenticates with a personal CLI token created in the
+                  hosted app. We store a SHA-256 hash of it, never the token. A
+                  token belongs to one person in one workspace, expires (30 days
+                  to a year), can be revoked on its own, and stops working when
+                  its owner leaves the workspace. Its last use is recorded.
+                </p>
+                <p className="mt-3 text-body leading-6 text-secondary">
+                  Pull requests requested with a token are opened only through
+                  that workspace’s own GitHub connection; the API refuses to act
+                  through any other, and refuses private repositories the
+                  workspace is not entitled to.
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-body leading-6 text-secondary">
+                The CLI talks to an API you run yourself; our hosted API only
+                serves the hosted app, and every route on it needs a token held
+                by our server. It stores no request: what it keeps is
+                operational logs, which name the repository of a pull request
+                that failed and never contain a token.
+              </p>
+            )}
           </div>
         </div>
       </section>

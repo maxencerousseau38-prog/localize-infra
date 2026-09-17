@@ -53,10 +53,10 @@ export const TRANSLATION_CONFIG: ConfigEntry[] = [
 export const CONNECTION_CONFIG: ConfigEntry[] = [
   {
     name: 'API URL',
-    value: 'http://localhost:8787',
-    setWith: '--api-url <url>',
+    value: 'https://localize-infra-api.vercel.app',
+    setWith: '--api-url <url> or LOCALIZE_API_URL',
     description:
-      'The API instance that performs translation. There is no hosted one — you run it yourself. No environment variable exists for this today.',
+      'The API instance that performs translation. The default is the hosted production API, which requires an operator-issued token; point this at your own instance otherwise. The flag wins over the variable.',
   },
   {
     name: 'API token',

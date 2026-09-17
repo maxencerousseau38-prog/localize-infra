@@ -1,6 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Provider } from '../router/types.js';
 import { translateRouteHandler } from './route.js';
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 function fakeProvider(
   name: 'anthropic' | 'openai',
@@ -91,7 +94,54 @@ describe('translateRouteHandler', () => {
         }),
       },
     };
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     const result = await translateRouteHandler(body, bothFail, modelIds);
     expect(result.status).toBe(502);
+  });
+
+  /*
+   * Found by running the packed CLI against a local API whose shell carried an
+   * invalid OPENAI_API_KEY: the CLI printed OpenAI's own 401 body, which quotes
+   * the key's first and last characters.
+   */
+  it('never returns the provider error to the caller', async () => {
+    const providerBody =
+      'OpenAI API error 401: {"error":{"message":"Incorrect API key provided: sk-abcd***wxyz"}}';
+    const leaking = {
+      anthropic: {
+        name: 'anthropic' as const,
+        translate: vi.fn(async () => {
+          throw new Error(providerBody);
+        }),
+      },
+      openai: {
+        name: 'openai' as const,
+        translate: vi.fn(async () => {
+          throw new Error(providerBody);
+        }),
+      },
+    };
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const result = await translateRouteHandler(
+      {
+        targetLocale: 'de',
+        strings: [
+          {
+            key: 'a',
+            text: 'Welcome',
+            filePath: 'x.tsx',
+            componentName: null,
+            surroundingCode: '',
+          },
+        ],
+      },
+      leaking,
+      modelIds,
+    );
+    expect(result.status).toBe(502);
+    const returned = JSON.stringify(result.body);
+    expect(returned).not.toContain('sk-');
+    expect(returned).not.toContain('OpenAI API error');
+    expect(logged).toHaveBeenCalled();
   });
 });

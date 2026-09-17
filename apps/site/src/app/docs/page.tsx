@@ -2,7 +2,9 @@ import { Code, CodeBlock } from '@/components/docs/code-block';
 import { DocsToc, type TocEntry } from '@/components/docs/toc';
 import { PageHeader } from '@/components/page-header';
 import {
+  API_URL,
   APP_URL,
+  CLI_PERSONAL_TOKENS_LIVE,
   CLI_PUBLISHED_TO_NPM,
   GITHUB_REPO_URL,
   INSTALL_COMMAND,
@@ -89,8 +91,11 @@ const FLAGS: Array<{ flag: string; value?: string; detail: React.ReactNode }> =
       detail: (
         <>
           Base URL of the API instance to translate against. Defaults to{' '}
-          <Code>http://localhost:8787</Code>. <Code>LOCALIZE_API_URL</Code> is
-          read when the flag is absent; if both are set, the flag wins.
+          <Code>
+            {CLI_PERSONAL_TOKENS_LIVE ? API_URL : 'http://localhost:8787'}
+          </Code>
+          . <Code>LOCALIZE_API_URL</Code> is read when the flag is absent; if
+          both are set, the flag wins.
         </>
       ),
     },
@@ -222,7 +227,43 @@ export default function DocsPage() {
               badge={<Badge tone="neutral">Pre-alpha</Badge>}
             >
               <StateRule tone="neutral">
-                {CLI_PUBLISHED_TO_NPM ? (
+                {CLI_PUBLISHED_TO_NPM && CLI_PERSONAL_TOKENS_LIVE ? (
+                  <>
+                    <p>
+                      <strong className="font-medium text-primary">
+                        The CLI runs against the hosted API with a personal
+                        token.
+                      </strong>{' '}
+                      Create one in the{' '}
+                      <a
+                        href={APP_URL}
+                        className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      >
+                        hosted app
+                      </a>
+                      , under your workspace’s <em>CLI tokens</em>. It is shown
+                      once, expires, and can be revoked on its own.
+                    </p>
+                    <p className="mt-3">
+                      A token acts for one workspace. Pull requests are opened
+                      only through that workspace’s own GitHub connection, and
+                      private repositories only if the workspace is entitled to
+                      them. Without a token the command stops on a{' '}
+                      <Link
+                        href="#errors"
+                        className="rounded-sm text-link underline underline-offset-2 hover:text-link-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                      >
+                        missing-token refusal
+                      </Link>{' '}
+                      before it writes anything.
+                    </p>
+                    <p className="mt-3">
+                      Early access: public repositories are self-serve, private
+                      ones are not yet, and there is no billing. You can still
+                      run your own API instead — see below.
+                    </p>
+                  </>
+                ) : CLI_PUBLISHED_TO_NPM ? (
                   <>
                     <p>
                       <strong className="font-medium text-primary">
@@ -293,6 +334,30 @@ export default function DocsPage() {
             </Section>
 
             <Section id="install" title="Running it today">
+              {CLI_PERSONAL_TOKENS_LIVE ? (
+                <>
+                  <p>
+                    Create a personal token in the hosted app, then run the CLI
+                    in your project. No API to run, no repository to clone.
+                  </p>
+                  <CodeBlock label="With the hosted API">
+                    {`export LOCALIZE_API_TOKEN="lit_…"   # from your workspace's CLI tokens
+npx @localize-infra/cli init ./my-app
+npx @localize-infra/cli init ./my-app --open-pr --owner <owner> --repo <repo>`}
+                  </CodeBlock>
+                  <p>
+                    <Code>init</Code> checks the token — and, with{' '}
+                    <Code>--open-pr</Code>, that your workspace’s GitHub
+                    connection can reach the repository and its base branch —
+                    before it writes or translates anything. It exits non-zero
+                    when no language could be translated or the pull request
+                    could not be opened.
+                  </p>
+                  <h3 className="text-body font-medium text-primary">
+                    Or run your own API
+                  </h3>
+                </>
+              ) : null}
               {CLI_PUBLISHED_TO_NPM ? (
                 <>
                   <p>
@@ -492,7 +557,9 @@ localize-infra --help | --version`}
                       [
                         'LOCALIZE_API_TOKEN',
                         'CLI',
-                        'Bearer token sent to the API. Preferred over --api-token. An empty value counts as unset.',
+                        CLI_PERSONAL_TOKENS_LIVE
+                          ? 'Your personal CLI token for the hosted API, or the token your own API accepts. Preferred over --api-token. An empty value counts as unset.'
+                          : 'Bearer token sent to the API. Preferred over --api-token. An empty value counts as unset.',
                       ],
                       [
                         'API_AUTH_TOKEN',

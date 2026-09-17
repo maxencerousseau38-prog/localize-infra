@@ -108,7 +108,7 @@ describe('translateBatch', () => {
     await expect(
       translateBatch('http://localhost:8787', 'de', strings, 'test-token'),
     ).rejects.toThrow(
-      'Translation API request failed (502): upstream provider failed',
+      'Translation API request failed: upstream provider failed (HTTP 502)',
     );
   });
 });
