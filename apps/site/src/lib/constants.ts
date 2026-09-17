@@ -125,3 +125,24 @@ export const CLI_PUBLISHED_TO_NPM = true;
  * refused with exit 1 once revoked.
  */
 export const CLI_PERSONAL_TOKENS_LIVE = true;
+
+/**
+ * What the hosted API allows one workspace, per day, and one token, per minute.
+ *
+ * Read from here by /pricing and /docs so the published numbers cannot drift
+ * from each other. They can still drift from the API, which holds its own copy
+ * in `api_limits()` — one SQL function, one constant here, and a test that
+ * asserts the pages say what this says. Keeping the two in step is a release
+ * step, not something the type system can do: the site is deployed from Git
+ * and the function from a migration.
+ *
+ * They are **abuse ceilings, not meters**. Invariant 3 forbids billing by
+ * volume, nothing here is charged for, and a real project does not reach them:
+ * 5000 strings a day is a 400-string application translated into five
+ * languages, twice over, every day.
+ */
+export const HOSTED_API_LIMITS = {
+  stringsPerDay: 5000,
+  pullRequestsPerDay: 50,
+  translateRequestsPerMinute: 30,
+} as const;

@@ -293,3 +293,224 @@ describe('readGitHubAppCredentials and readDefaultInstallationId', () => {
     expect(res.status).toBe(501);
   });
 });
+
+/*
+ * Cost protection, through the real route tree.
+ *
+ * quota.test.ts proves the decisions in isolation and
+ * supabase/tests/api-limits.sql proves the counting in the database. What is
+ * left, and what these cover, is the wiring: that the charge happens on the
+ * two routes that spend money, with the right number of units, before the
+ * work, and never for the operator.
+ */
+describe('usage guards on the routes that spend money', () => {
+  const TOKEN = `lit_${'B'.repeat(43)}`;
+  const WORKSPACE_ROW = {
+    token_id: '11111111-1111-4111-8111-111111111111',
+    user_id: '22222222-2222-4222-8222-222222222222',
+    organization_id: '33333333-3333-4333-8333-333333333333',
+    organization_slug: 'acme',
+    installation_id: 4242,
+    private_repositories: false,
+  };
+
+  /** A stand-in Supabase answering the two RPCs the API makes. */
+  function stubDatabase(quota: unknown) {
+    const calls: { url: string; body: unknown }[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        const body = init.body ? JSON.parse(init.body as string) : null;
+        calls.push({ url, body });
+        const payload = url.endsWith('/rpc/resolve_cli_token')
+          ? [WORKSPACE_ROW]
+          : [quota];
+        return {
+          ok: true,
+          status: 200,
+          json: async () => payload,
+        } as unknown as Response;
+      }),
+    );
+    return calls;
+  }
+
+  const ALLOWED = {
+    allowed: true,
+    reason: null,
+    retry_after_seconds: 0,
+    used: 3,
+    limit_value: 5000,
+  };
+
+  async function loadConfiguredApp() {
+    process.env.API_AUTH_TOKEN = 'test-auth-token';
+    process.env.SUPABASE_URL = 'https://db.test';
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+    vi.resetModules();
+    const mod = await import('./index.js');
+    return mod.app;
+  }
+
+  function translateRequest(token: string, strings = 3) {
+    return {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        targetLocale: 'de',
+        strings: Array.from({ length: strings }, (_, i) => ({
+          key: `k${i}`,
+          text: 'Welcome',
+          filePath: 'src/App.tsx',
+          componentName: null,
+          surroundingCode: '',
+        })),
+      }),
+    };
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('charges /v1/translate for the strings the request carries', async () => {
+    const calls = stubDatabase(ALLOWED);
+    const app = await loadConfiguredApp();
+    /*
+     * Not a specific status: what happens after the guard depends on whether
+     * the machine running the tests has a provider key in its environment —
+     * 503 without one, 502 with one, since the stubbed fetch answers the model
+     * with an RPC payload. Either way the request got past the guard, which is
+     * the claim. Asserting 503 made this test fail on a developer machine and
+     * pass in CI.
+     */
+    const res = await app.request('/v1/translate', translateRequest(TOKEN, 7));
+    expect(res.status).not.toBe(429);
+    const charge = calls.find((c) => c.url.endsWith('/rpc/consume_api_quota'));
+    expect(charge?.body).toMatchObject({
+      p_route: 'translate',
+      p_units: 7,
+      p_organization_id: WORKSPACE_ROW.organization_id,
+      p_token_id: WORKSPACE_ROW.token_id,
+    });
+  });
+
+  it('answers 429 with Retry-After, and does not run the work', async () => {
+    const calls = stubDatabase({
+      allowed: false,
+      reason: 'rate',
+      retry_after_seconds: 17,
+      used: 31,
+      limit_value: 30,
+    });
+    const app = await loadConfiguredApp();
+    const res = await app.request('/v1/translate', translateRequest(TOKEN));
+    expect(res.status).toBe(429);
+    expect(res.headers.get('retry-after')).toBe('17');
+    expect((await res.json()).error).toMatch(/Too many translation requests/);
+    // The provider is never reached: the only calls are the two RPCs.
+    expect(calls.every((c) => c.url.startsWith('https://db.test'))).toBe(true);
+  });
+
+  it('answers 429 when the daily ceiling is reached', async () => {
+    stubDatabase({
+      allowed: false,
+      reason: 'quota',
+      retry_after_seconds: 3600,
+      used: 5000,
+      limit_value: 5000,
+    });
+    const app = await loadConfiguredApp();
+    const res = await app.request('/v1/translate', translateRequest(TOKEN));
+    expect(res.status).toBe(429);
+    expect((await res.json()).error).toMatch(/ceiling of 5000 strings/);
+  });
+
+  it('charges /v1/open-pr one unit per request', async () => {
+    const calls = stubDatabase(ALLOWED);
+    const app = await loadConfiguredApp();
+    const res = await app.request('/v1/open-pr', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({
+        owner: 'acme',
+        repo: 'widgets',
+        baseBranch: 'main',
+        title: 'Add translations',
+        body: 'Automated',
+        installationId: 4242,
+        files: [{ path: 'locales/de.json', content: '{}' }],
+      }),
+    });
+    // 501: no GitHub App credentials on this deployment — again, after the
+    // guard.
+    expect(res.status).toBe(501);
+    expect(
+      calls.find((c) => c.url.endsWith('/rpc/consume_api_quota'))?.body,
+    ).toMatchObject({ p_route: 'open_pr', p_units: 1 });
+  });
+
+  it('does not charge the preflight route, which exists to avoid spending', async () => {
+    const calls = stubDatabase(ALLOWED);
+    const app = await loadConfiguredApp();
+    await app.request('/v1/open-pr/preflight', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({
+        owner: 'acme',
+        repo: 'widgets',
+        baseBranch: 'main',
+      }),
+    });
+    expect(calls.some((c) => c.url.endsWith('/rpc/consume_api_quota'))).toBe(
+      false,
+    );
+  });
+
+  it('never charges the operator token', async () => {
+    const calls = stubDatabase(ALLOWED);
+    const app = await loadConfiguredApp();
+    const res = await app.request(
+      '/v1/translate',
+      translateRequest('test-auth-token'),
+    );
+    expect(res.status).not.toBe(429);
+    expect(calls.some((c) => c.url.endsWith('/rpc/consume_api_quota'))).toBe(
+      false,
+    );
+  });
+
+  it('refuses with 503 when the usage check cannot run', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.endsWith('/rpc/resolve_cli_token')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => [WORKSPACE_ROW],
+          } as unknown as Response;
+        }
+        return {
+          ok: false,
+          status: 500,
+          json: async () => ({}),
+        } as unknown as Response;
+      }),
+    );
+    const app = await loadConfiguredApp();
+    const res = await app.request('/v1/translate', translateRequest(TOKEN));
+    expect(res.status).toBe(503);
+    expect((await res.json()).error).toMatch(/Could not check/);
+  });
+});

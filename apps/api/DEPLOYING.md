@@ -55,6 +55,42 @@ command ends.
 | `SUPABASE_URL` | The production database, to resolve personal CLI tokens. Optional |
 | `SUPABASE_SERVICE_ROLE_KEY` | Its secret key. `resolve_cli_token` is executable by the service role only. Optional; with either missing, personal tokens are refused with that reason |
 
+## What a token may spend
+
+Two guards, both enforced in the database (`consume_api_quota`), both applied
+**before** the work, and neither applied to the operator token:
+
+| Guard | Limit | Scope |
+|---|---|---|
+| Rate window, `/v1/translate` | 30 requests a minute | one CLI token |
+| Rate window, `/v1/open-pr` | 10 requests a minute | one CLI token |
+| Daily ceiling, strings translated | 5000 a day (00:00 UTC) | one workspace |
+| Daily ceiling, pull requests | 50 a day (00:00 UTC) | one workspace |
+
+A refusal is **429** with a `Retry-After` header and a sentence naming the
+limit and the wait. A usage check that cannot run is **503**, and the work does
+not happen: a check that failed is not evidence that there is budget left.
+
+The counters live in `api_usage_daily` (per workspace, per UTC day: strings,
+translate requests, pull requests) and `api_rate_windows` (one row per token
+and route, rewritten in place). In memory would be wrong here — this runs on
+Vercel, horizontally scaled, so a counter in one instance agrees with no other.
+
+`/v1/open-pr/preflight` is deliberately **not** charged: it exists so a run
+that cannot succeed is refused before any translation is paid for, and charging
+the check would discourage the call that saves the money.
+
+**The numbers exist twice**, and keeping them in step is a release step rather
+than something a type can enforce: `api_limits()` in the migration is what the
+API enforces, and `HOSTED_API_LIMITS` in `apps/site/src/lib/constants.ts` is
+what `/pricing` and `/docs` publish. Change one, change the other in the same
+pull request — a site that understates the ceiling is the kind of claim this
+repository does not leave standing.
+
+Without `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` there are no personal
+tokens at all, so there is nothing to limit: a self-hosted deployment using the
+operator token has no ceiling.
+
 ## Who is calling
 
 Every `/v1/*` request carries one of two bearers (`src/callers.ts`):

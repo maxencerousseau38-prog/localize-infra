@@ -1,5 +1,9 @@
 import { PageHeader } from '@/components/page-header';
-import { INSTALL_COMMAND } from '@/lib/constants';
+import {
+  CLI_PERSONAL_TOKENS_LIVE,
+  HOSTED_API_LIMITS,
+  INSTALL_COMMAND,
+} from '@/lib/constants';
 import { Badge, CopyCommand, StateRule } from '@localize-infra/ui';
 import { Check, X } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -100,8 +104,23 @@ export default function PricingPage() {
                 Free
               </p>
               <p className="mt-2 text-body leading-6 text-secondary">
-                Unlimited, permanently. No language cap, no string cap, no seat
-                cap, no trial clock.
+                Unlimited, permanently. No language cap, no seat cap, no trial
+                clock.
+              </p>
+              {/*
+                This said "no string cap" until the hosted API grew one. It is
+                not a meter and nothing here is billed by volume — invariant 3
+                forbids that — but a ceiling a user can hit is a ceiling the
+                page has to name, whatever it is called internally.
+              */}
+              <p className="mt-2 text-body leading-6 text-secondary">
+                One limit, and it is there to stop runaway scripts rather than
+                to charge you:{' '}
+                {HOSTED_API_LIMITS.stringsPerDay.toLocaleString('en-US')}{' '}
+                strings and {HOSTED_API_LIMITS.pullRequestsPerDay} pull requests
+                a day per workspace on our hosted API, resetting at 00:00 UTC.
+                Ask us if you need more. Self-host the API and there is no
+                ceiling at all.
               </p>
             </StateRule>
 
@@ -112,9 +131,16 @@ export default function PricingPage() {
                   reader's own API and provider key, so the model calls are a
                   cost — theirs, not ours. A pricing page is where that line
                   matters most. */}
+              {/*
+                Both halves of this changed with CLI 0.3.0: the default is our
+                hosted API, used with a personal token, so the model bill is
+                ours until someone points --api-url elsewhere. The flag is the
+                same one the landing page and /docs read.
+              */}
               <p className="mt-3 text-small leading-5 text-tertiary">
-                The CLI is free. Translation runs on an API you host with your
-                own provider key, so the model bill is yours, not ours.
+                {CLI_PERSONAL_TOKENS_LIVE
+                  ? 'The CLI is free. By default it translates through our hosted API with a personal token from your workspace; point --api-url at your own instance to use your own provider key instead.'
+                  : 'The CLI is free. Translation runs on an API you host with your own provider key, so the model bill is yours, not ours.'}
               </p>
             </div>
           </aside>
