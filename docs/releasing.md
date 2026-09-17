@@ -4,8 +4,11 @@ Three packages are publishable: `@localize-infra/schemas`, `@localize-infra/core
 and `@localize-infra/cli`. **All three were published at 0.1.0 on 2026-08-28**;
 this document said they "have not been published" and is corrected here.
 
-**`cli` 0.2.0 is on npm**, published 2026-09-12 at 07:43 UTC, with `latest`
-resolving to it and its dependencies still `^0.1.0` on `core` and `schemas`.
+**`cli` 0.3.0 is `latest`** since 2026-09-17 — see its section below.
+
+**`cli` 0.2.0 was published** 2026-09-12 at 07:43 UTC, with `latest`
+resolving to it until 0.3.0, and its dependencies still `^0.1.0` on `core` and
+`schemas`.
 This line said "still 0.1.0 on npm" until that publish landed, and nothing in
 the repository moved when it did — the publish happens outside Git, so the only
 thing that can carry the fact back is a commit like this one.
@@ -30,7 +33,34 @@ endpoint that told the truth first was `/-/org/localize-infra/package`, which
 listed all three names while two of them still 404'd. Check that before
 concluding a publish failed, and before re-running one.
 
-## `cli` 0.3.0 — ready on `master`, not published
+## `cli` 0.3.0 — published 2026-09-17
+
+**On npm, and `latest`.** `core` and `schemas` stayed at 0.1.0. The sequence
+below was followed in order, and each step was checked rather than assumed:
+
+- the migration is in production, with function definitions and grants equal
+  to development (md5);
+- the API carries `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` — the first
+  attempt stored **empty** values, because `vercel env add` run through a
+  non-interactive shell reads an empty stdin. The variables were listed, the
+  deployment was Ready, and every personal token was still refused as "not
+  enabled". Only the API's own answer told the two apart: set them in the
+  dashboard, and read what the API says to an unknown `lit_` token
+  ("invalid, expired or revoked" means resolution works; "not enabled" means a
+  variable is empty; 503 means a wrong URL or key);
+- the API was deployed from a clean `master` (`5e0a64d`);
+- the packed tarball, installed outside the repository, ran against
+  production with a token issued in the production app: `whoami` →
+  `layersky`, a real translation, a real pull request (fixture #18, closed),
+  a repository outside the installation refused before any translation
+  (exit 1), and the same token refused once revoked (exit 1), with
+  `last_used_at` untouched by the refusals.
+
+What that run could not show: production still has
+`GITHUB_APP_INSTALLATION_ID`, very likely the same installation as
+`layersky`'s, so it cannot tell "the workspace's installation" from "the
+default". The local run did, with the default deliberately invalid. Removing
+the variable (below) makes it visible in production too.
 
 **What changes for a user.** The default API is the hosted one
 (`https://localize-infra-api.vercel.app`, `DEFAULT_API_URL`), and it is used
@@ -231,22 +261,21 @@ on 2026-08-28.
 The conclusion survives, which is exactly why the wrong reason went unnoticed —
 nothing downstream changed, so nothing failed. Two facts now carry it instead:
 
-- `--api-url` defaults to `http://localhost:8787` in the published 0.2.0, so
-  an unmodified `npx` reaches nothing (from 0.3.0 the default is the hosted
-  API, used with a personal token — see above);
-- every `/v1/*` route requires `API_AUTH_TOKEN`, and no npm user has it.
+- `--api-url` defaulted to `http://localhost:8787` in 0.1.0 and 0.2.0, so
+  an unmodified `npx` reached nothing;
+- every `/v1/*` route required `API_AUTH_TOKEN`, and no npm user had it.
   Verified in production the same day: 401 with no token, 401 with a wrong
   one.
 
-So each user must still run `apps/api` themselves with their own provider key,
-and publishing makes the package *installable*, not the command *useful*.
+So each user had to run `apps/api` themselves with their own provider key,
+and publishing made the package *installable*, not the command *useful*.
 
-The blocker is no longer hosting. It is that a one-line `npx` which actually
-translates needs an API reachable **without a shared secret** — per-user
-credentials, or a free tier, or something else that is not "hand every
-installer the operator's bearer token". Until that exists, the landing page and
-`/docs` must keep saying so; publishing changes the wording, not the
-disclosure.
+**That blocker is gone with 0.3.0.** The default is the hosted API, and it
+accepts a personal token each person creates in the hosted app — per-user
+credentials, not the operator's bearer. `npx @localize-infra/cli init` with
+such a token translates and opens pull requests. What the pages disclose
+changed with it: `/security` now says the CLI sends code context to our API in
+Paris, which forwards it to the model in the United States.
 
 ## Licensing
 

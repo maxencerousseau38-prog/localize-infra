@@ -117,5 +117,11 @@ export const CLI_PUBLISHED_TO_NPM = true;
  * Flipped in the same change as the 0.3.0 publish — `docs/releasing.md`.
  * `apps/site/e2e/interaction.spec.ts` reads this and asserts the copy follows
  * it in both directions.
+ *
+ * **True since 2026-09-17.** Both conditions were checked before flipping, not
+ * assumed: 0.3.0 is `latest` on npm, and the production API resolved a token
+ * issued in the production app — `whoami` answered `layersky`, a real
+ * translation and a real pull request went through, and the same token was
+ * refused with exit 1 once revoked.
  */
-export const CLI_PERSONAL_TOKENS_LIVE = false;
+export const CLI_PERSONAL_TOKENS_LIVE = true;
