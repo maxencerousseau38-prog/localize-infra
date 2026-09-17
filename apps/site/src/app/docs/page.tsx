@@ -207,6 +207,12 @@ const REFUSALS = [
     message: '--open-pr requires valid --owner and --repo values…',
     fix: 'Pass both. Checked before the translation step, so a typo does not cost a run.',
   },
+  {
+    when: 'Too many requests, or the daily ceiling',
+    message:
+      'Too many translation requests from this CLI token: the limit is 30 a minute… / This workspace has reached today’s translation ceiling of 5000 strings…',
+    fix: 'The hosted API answers 429 with a Retry-After header. The ceiling resets at 00:00 UTC; ask us if you need more, or point --api-url at your own instance, which has no ceiling.',
+  },
 ];
 
 export default function DocsPage() {

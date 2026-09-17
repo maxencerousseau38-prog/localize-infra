@@ -17,6 +17,12 @@ import {
   openPrRouteHandler,
   preflightRouteHandler,
 } from './open-pr/route.js';
+import {
+  type QuotaConsumer,
+  checkQuota,
+  createPostgrestQuotaConsumer,
+  translationUnits,
+} from './quota.js';
 import { getConfiguredProviders } from './router/index.js';
 import { translateRouteHandler } from './translate/route.js';
 import { readVersion } from './version.js';
@@ -104,6 +110,31 @@ const githubAppOperations: GitHubAppOperations = {
 // is accepted and personal ones are refused with that reason.
 const tokenResolverConfig = readTokenResolverConfig();
 
+// Same credentials, same reason: the counters that stop a runaway live in the
+// database, because this process is scaled horizontally and a counter held in
+// one instance's memory agrees with no other instance.
+const quotaConsumer: QuotaConsumer | null = tokenResolverConfig
+  ? createPostgrestQuotaConsumer(tokenResolverConfig)
+  : null;
+
+/** A refusal from the usage guards, answered with Retry-After when we know it. */
+function refuse(
+  c: {
+    json: (body: unknown, status: 429 | 503) => Response;
+    header: (k: string, v: string) => void;
+  },
+  outcome: {
+    status: 429 | 503;
+    body: { error: string };
+    retryAfterSeconds?: number;
+  },
+) {
+  if (outcome.retryAfterSeconds !== undefined) {
+    c.header('retry-after', String(outcome.retryAfterSeconds));
+  }
+  return c.json(outcome.body, outcome.status);
+}
+
 export const app = new Hono<{ Variables: { caller: Caller } }>();
 
 // Applies to every /v1/* route but not /health or /api/version: those are
@@ -134,6 +165,18 @@ app.get('/v1/whoami', (c) => {
 
 app.post('/v1/translate', async (c) => {
   const body = await c.req.json().catch(() => null);
+
+  // Charged before the model is called, counting the strings this request
+  // carries. After would be too late: the money is spent by then, and a
+  // refusal that arrives after the spend protects nothing.
+  const usage = await checkQuota(
+    quotaConsumer,
+    c.get('caller'),
+    'translate',
+    translationUnits(body),
+  );
+  if (!usage.ok) return refuse(c, usage);
+
   const { status, body: responseBody } = await translateRouteHandler(
     body,
     // Built per request, and only for the providers this process holds a key
@@ -168,6 +211,14 @@ app.post('/v1/open-pr/preflight', async (c) => {
 
 app.post('/v1/open-pr', async (c) => {
   const body = await c.req.json().catch(() => null);
+
+  // One unit per request: a pull request is one act, whatever it contains.
+  // The preflight route is deliberately not charged — it exists so a run
+  // that cannot succeed is refused before anything is spent, and charging the
+  // check would discourage the very call that saves the money.
+  const usage = await checkQuota(quotaConsumer, c.get('caller'), 'open_pr', 1);
+  if (!usage.ok) return refuse(c, usage);
+
   const { status, body: responseBody } = await openPrRouteHandler(
     body,
     {

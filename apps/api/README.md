@@ -68,6 +68,19 @@ If `GITHUB_APP_ID` is missing, or neither `GITHUB_APP_PRIVATE_KEY_PATH` nor
 either way. The same `501` answers a well-formed request that names no
 `installationId` when no default is configured: there is nothing to act as.
 
+### Usage limits
+
+With `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set, requests carrying a
+**personal CLI token** are charged against two guards before the work happens:
+30 translate calls and 10 pull-request calls a minute per token, and 5000
+translated strings and 50 pull requests a day per workspace (UTC). Over either,
+the route answers `429` with `Retry-After`.
+
+The **operator token is never limited**, and a deployment without those two
+variables has no limits at all, because it has no personal tokens to attribute
+usage to. See `supabase/migrations/20260917000100_api_usage_limits.sql` for
+the numbers and `apps/api/DEPLOYING.md` for where the counters live.
+
 ### Which installation opens the pull request
 
 `/v1/open-pr` accepts an optional `installationId`. When present it is used;

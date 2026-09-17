@@ -3,6 +3,7 @@ import {
   CLI_PERSONAL_TOKENS_LIVE,
   CLI_PUBLISHED_TO_NPM,
   EXAMPLE_PR_URL,
+  HOSTED_API_LIMITS,
 } from '../src/lib/constants';
 import { SITE_URL } from '../src/lib/routes';
 
@@ -574,6 +575,43 @@ test.describe('no page links to evidence a visitor cannot open', () => {
  * the API refuses is as false as one telling people to run their own API after
  * the hosted one opened.
  */
+/*
+ * The hosted API enforces a daily ceiling. /pricing used to say "no string
+ * cap", which was true until it was not, and nothing would have caught the
+ * drift: the limit lives in a SQL function, the page in a constant, and the
+ * two can only be kept in step deliberately.
+ *
+ * This holds the page to the constant. The constant against the database is a
+ * release step, written down in apps/api/DEPLOYING.md.
+ */
+test.describe('the published limits', () => {
+  test('/pricing names the ceiling, and no longer promises no string cap', async ({
+    page,
+  }) => {
+    await page.goto('/pricing', { waitUntil: 'networkidle' });
+    const text = (await page.locator('main').textContent()) ?? '';
+    expect(text).not.toMatch(/no string cap/i);
+    expect(text).toContain(
+      HOSTED_API_LIMITS.stringsPerDay.toLocaleString('en-US'),
+    );
+    expect(text).toContain(String(HOSTED_API_LIMITS.pullRequestsPerDay));
+    expect(text).toMatch(/resetting at 00:00 UTC/);
+    // The escape hatch has to be on the page too: a ceiling with no way around
+    // it reads as a paywall, and self-hosting has none.
+    expect(text).toMatch(/Self-host the API and there is no ceiling/);
+  });
+
+  test('/docs tells a reader what a 429 means', async ({ page }) => {
+    await page.goto('/docs', { waitUntil: 'networkidle' });
+    const text = (await page.locator('main').textContent()) ?? '';
+    expect(text).toMatch(/429/);
+    expect(text).toContain(
+      String(HOSTED_API_LIMITS.translateRequestsPerMinute),
+    );
+    expect(text).toMatch(/Retry-After/);
+  });
+});
+
 test.describe('the CLI copy follows whether personal tokens are live', () => {
   test('the landing page', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });

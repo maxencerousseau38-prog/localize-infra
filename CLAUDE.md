@@ -138,6 +138,28 @@
   l'API lancée par `tsx` charge `services/github-app` depuis `dist/`, donc un
   correctif non recompilé semble ne pas marcher.
 
+  **Protection des coûts (2026-09-17).** Un jeton `lit_` valide pouvait
+  appeler `/v1/translate` en boucle, et chaque appel atteint un modèle payant
+  sur le compte de l'opérateur. Deux garde-fous, tous deux appliqués **avant**
+  le travail et **jamais** au jeton opérateur : une fenêtre de débit par jeton
+  (30 traductions/min, 10 PR/min) et un plafond journalier par workspace
+  (5000 chaînes, 50 PR, remise à zéro à 00:00 UTC). Refus en **429** avec
+  `Retry-After` et une phrase qui nomme la limite ; un contrôle d'usage
+  impossible répond **503** et n'exécute rien — un contrôle qui échoue ne
+  prouve pas qu'il reste du budget.
+
+  Les compteurs vivent en base (`api_usage_daily`, `api_rate_windows`,
+  fonction `consume_api_quota` réservée au `service_role`), pas en mémoire :
+  l'API est scalée horizontalement, donc un compteur d'instance ne compte que
+  lui-même. 29 assertions dans `supabase/tests/api-limits.sql`.
+
+  **Ce n'est pas de la facturation à l'usage** — l'invariant 3 l'interdit — mais
+  `/pricing` promettait « No string cap », ce qui n'était plus vrai : la page
+  nomme désormais le plafond, dit qu'il se lève sur demande et qu'auto-héberger
+  n'en a aucun. Les nombres existent à deux endroits, `api_limits()` et
+  `HOSTED_API_LIMITS`, et les tenir alignés est une étape de release, pas une
+  garantie du typage ; un test e2e tient la page à la constante.
+
   **Ce paragraphe disait qu'installer n'était pas pouvoir s'en servir** : le
   CLI 0.2.0 pointait sur `http://localhost:8787` et l'API n'acceptait que le
   bearer de l'opérateur. C'est périmé depuis la 0.3.0 — voir plus haut. Il
