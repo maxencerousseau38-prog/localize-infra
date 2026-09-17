@@ -86,10 +86,14 @@ than merely undocumented: `GITHUB_APP_INSTALLATION_ID` and
 The seven that remain were each checked individually, which is what makes this
 list current rather than merely shorter.
 
-`GITHUB_APP_INSTALLATION_ID` must **stay** on the `localize-infra-api` project.
-It is dead here, not there: `apps/api/src/index.ts` reads it at every boot and
-`/v1/open-pr` opens every pull request through it. Removing it there returns
-501 on the route.
+**This said `GITHUB_APP_INSTALLATION_ID` had to stay on the
+`localize-infra-api` project, and that removing it there returns 501 on the
+route.** True when it was written; outdated once the API split credentials from
+installation. It is now only a default for a request that names no
+installation, and both callers here always name the workspace's. It was
+removed from the API's Production environment on 2026-09-17, and a request
+naming the installation still reaches GitHub (checked: 409 on identical
+content). Only a request naming **none** gets 501.
 
 This table used to say the opposite, and the reasoning it gave was sound at the
 time: the pipeline would have pointed at `127.0.0.1:8787`, the App private key
