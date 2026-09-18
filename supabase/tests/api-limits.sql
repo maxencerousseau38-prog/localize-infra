@@ -143,6 +143,105 @@ begin
   exception when others then ok := true; end;
   r := r || format('absurd-units-refused=%s(want t); ', ok);
 
+  -- ---- the browser path: a workspace as the subject -------------------------
+  -- `apps/web` holds the operator bearer, which this function is never asked
+  -- about, so the one path that writes a `runs` row had no ceiling at all. It
+  -- now charges the same function with no token and the workspace as subject.
+
+  update public.api_usage_daily set strings_translated = 0, prs_opened = 0
+   where organization_id = ob.id and usage_date = today;
+  delete from public.api_rate_windows where organization_id = ob.id;
+
+  select * into d from public.consume_api_quota(null, ob.id, 'translate', 7);
+  r := r || format('web-call-allowed=%s(want t); ', d.allowed);
+
+  -- The same daily row, not a parallel one: one workspace, one ceiling,
+  -- whichever way it spends. This is the whole reason no second system exists.
+  select strings_translated into n from public.api_usage_daily
+   where organization_id = ob.id and usage_date = today;
+  r := r || format('web-shares-daily-row=%s(want 7); ', n);
+  select count(*) into n from public.api_usage_daily
+   where organization_id = ob.id and usage_date = today;
+  r := r || format('web-creates-no-second-row=%s(want 1); ', n);
+
+  -- Its window is keyed by the workspace and carries no token.
+  select count(*) into n from public.api_rate_windows
+   where organization_id = ob.id and route = 'translate' and token_id is null;
+  r := r || format('web-window-is-workspace-keyed=%s(want 1); ', n);
+
+  -- A CLI token of the same workspace keeps its own window: the two subjects
+  -- share the ceiling and do not share the window.
+  --
+  -- Reset first. Without it this asserted 1 and got 3, because tok_b already
+  -- spent two translate calls earlier in this file — the assertion was reading
+  -- the file's history rather than the separation it claims to prove.
+  update public.api_rate_windows set request_count = 0, window_started_at = now()
+   where token_id = tok_b and route = 'translate';
+  select * into d from public.consume_api_quota(tok_b, ob.id, 'translate', 1);
+  r := r || format('token-window-separate-allowed=%s(want t); ', d.allowed);
+  select request_count into n from public.api_rate_windows
+   where organization_id = ob.id and route = 'translate';
+  r := r || format('web-window-untouched-by-token=%s(want 1); ', n);
+  select request_count into n from public.api_rate_windows
+   where token_id = tok_b and route = 'translate';
+  r := r || format('token-window-counts-its-own=%s(want 1); ', n);
+
+  select strings_translated into n from public.api_usage_daily
+   where organization_id = ob.id and usage_date = today;
+  r := r || format('ceiling-shared-across-subjects=%s(want 8); ', n);
+
+  -- The browser is rate-limited too, on its own window.
+  update public.api_rate_windows set request_count = 0, window_started_at = now()
+   where organization_id = ob.id and route = 'translate';
+  for n in 1..lim.translate_per_minute loop
+    select * into d from public.consume_api_quota(null, ob.id, 'translate', 1);
+  end loop;
+  select * into d from public.consume_api_quota(null, ob.id, 'translate', 1);
+  r := r || format('web-over-rate-refused=%s(want f); ', d.allowed);
+  r := r || format('web-rate-reason=%s(want rate); ', d.reason);
+
+  -- And stopped by the ceiling, which is what protects the model bill.
+  update public.api_rate_windows set request_count = 0, window_started_at = now()
+   where organization_id = ob.id and route = 'translate';
+  update public.api_usage_daily set strings_translated = lim.strings_per_day
+   where organization_id = ob.id and usage_date = today;
+  select * into d from public.consume_api_quota(null, ob.id, 'translate', 1);
+  r := r || format('web-over-ceiling-refused=%s(want f); ', d.allowed);
+  r := r || format('web-over-ceiling-reason=%s(want quota); ', d.reason);
+  r := r || format('web-over-ceiling-limit=%s(want %s); ', d.limit_value, lim.strings_per_day);
+
+  -- Pull requests from the browser are charged the same way.
+  update public.api_usage_daily set prs_opened = lim.prs_per_day
+   where organization_id = ob.id and usage_date = today;
+  select * into d from public.consume_api_quota(null, ob.id, 'open_pr', 1);
+  r := r || format('web-over-pr-ceiling-refused=%s(want f); ', d.allowed);
+
+  -- A call naming no subject at all has nowhere to charge.
+  ok := false;
+  begin perform public.consume_api_quota(null, null, 'translate', 1);
+  exception when others then ok := true; end;
+  r := r || format('no-subject-refused=%s(want t); ', ok);
+
+  -- The table refuses a row that names neither subject...
+  ok := false;
+  begin
+    insert into public.api_rate_windows
+      (token_id, organization_id, route, window_started_at, request_count)
+    values (null, null, 'translate', now(), 1);
+  exception when others then ok := true; end;
+  r := r || format('neither-subject-refused=%s(want t); ', ok);
+
+  -- ...and one that names both. The row is deleted first so the refusal can
+  -- only come from the check, not from a unique index it would also hit.
+  delete from public.api_rate_windows where token_id = tok_b and route = 'open_pr';
+  ok := false;
+  begin
+    insert into public.api_rate_windows
+      (token_id, organization_id, route, window_started_at, request_count)
+    values (tok_b, ob.id, 'open_pr', now(), 1);
+  exception when others then ok := true; end;
+  r := r || format('both-subjects-refused=%s(want t); ', ok);
+
   -- ---- who may call it -----------------------------------------------------
   -- A signed-in user must not be able to charge, refund, or read the windows.
   perform set_config('request.jwt.claims', json_build_object('sub',owner_a,'role','authenticated')::text, true);

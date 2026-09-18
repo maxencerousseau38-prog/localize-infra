@@ -18,9 +18,20 @@ import type {
  * agrees with no other instance. Postgres is the only place where "how many
  * this minute" has a single answer.
  *
- * **The operator token is never charged.** It is server-to-server, held by
- * `apps/web`, which has its own guards; `checkQuota` returns immediately for
- * it and never touches the database.
+ * **The operator token is never charged here.** It is server-to-server, held
+ * by `apps/web`; `checkQuota` returns immediately for it and never touches the
+ * database.
+ *
+ * This used to read "which has its own guards". It had none, and that sentence
+ * is why nobody looked: every "Run pipeline" click reached a paid model with no
+ * rate window and no daily ceiling, which made the browser the cheapest way to
+ * spend the operator's money. `apps/web` now charges `consume_api_quota`
+ * itself, with the workspace as the subject instead of a token, against the
+ * same counters and the same numbers — see `apps/web/src/lib/quota/charge.ts`
+ * and migration `20260918000100`.
+ *
+ * The exemption stays, and stays correct: this process authenticates a token,
+ * not a workspace, and the operator bearer names no organization to charge.
  */
 export type QuotaRoute = 'translate' | 'open_pr';
 
