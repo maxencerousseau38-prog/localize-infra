@@ -224,14 +224,81 @@
   formule n'existe plus — il a été retiré avec les surfaces qu'il décrivait, au
   fil des PR #19 à #22, sans que ce paragraphe suive.
 
-  `/runs`, `/runs/[id]`, `/locales`, `/ambiguity`, `/review`, `/[org]/projects`
-  et `/[org]/projects/[project]` lisent Postgres sous RLS. Ce qu'ils affichent
-  sans base configurée n'est pas un écran « non construit » mais un `NotConnected`
-  qui dit qu'il n'y a pas de base à lire — délibérément pas un repli sur des
-  données d'exemple, indiscernable d'un produit qui marche.
+  `/runs`, `/runs/[id]`, `/locales`, `/ambiguity`, `/review`, `/[org]/projects`,
+  `/[org]/projects/[project]`, `/[org]/tokens` et `/[org]/start` lisent Postgres
+  sous RLS. Ce qu'ils affichent sans base configurée n'est pas un écran « non
+  construit » mais un `NotConnected` qui dit qu'il n'y a pas de base à lire —
+  délibérément pas un repli sur des données d'exemple, indiscernable d'un
+  produit qui marche.
 
   La contrainte, elle, ne bouge pas : ne jamais remplacer un écran vide par des
   données inventées.
+
+  **Le parcours self-serve est guidé depuis #102**, sur `/[org]/start` : six
+  étapes — workspace, GitHub, dépôt, jeton, run, pull request — dont **une seule
+  est ouverte à la fois**, celle qui reste à faire. Un workspace créé y atterrit
+  au lieu de `/[org]/projects`, parce qu'une liste vide et un panneau de
+  connexion n'énoncent aucun ordre entre eux, et que l'ordre n'est pas
+  devinable : un jeton ne sert à rien avant GitHub, et `--open-pr` est refusé
+  avant un dépôt.
+
+  **Rien n'est mémorisé.** Pas de table d'onboarding, pas de colonne
+  `completed_steps` : chaque état se dérive des lignes que le produit écrit
+  déjà. Un état stocké serait un second récit des mêmes faits, libre de les
+  contredire, et son premier symptôme serait de réclamer un dépôt connecté une
+  heure plus tôt. C'est la raison qui vaut déjà pour `lib/metrics/funnel.ts` ;
+  les deux modules lisent les mêmes lignes et répondent à deux questions
+  distinctes — « combien » et « quoi maintenant ».
+
+  **Trois défauts trouvés en le construisant, chacun cassant le parcours qu'il
+  servait.** Le panneau de jeton donnait `export LOCALIZE_API_TOKEN=…` puis
+  `npx @localize-infra/cli init`. **`export` est une erreur de syntaxe sous
+  PowerShell**, le shell par défaut de Windows, et `init` sans `--open-pr`
+  traduit sans rien ouvrir : l'écran dont c'est tout l'objet distribuait la
+  seule commande qui ne peut pas produire de pull request, contre l'invariant 2.
+  Les deux dialectes sont proposés, et un test épingle les drapeaux à ceux que
+  `packages/cli` parse vraiment.
+
+  **« Connecté » n'était qu'une ligne en base.** Un propriétaire peut
+  désinstaller l'App côté GitHub sans que rien ici ne l'apprenne ; on le
+  découvrait par un run qui échoue *après* avoir payé toutes les locales. Un
+  bouton **Verify** interroge GitHub à la demande, pas au rendu : la réponse
+  change rarement, la page se recharge souvent, et un contrôle que personne n'a
+  demandé et qui échoue en silence est pire que pas de contrôle. Troisième
+  défaut, `lib/cli-config.ts` affirmait encore « API token — Not set » et un
+  jeton opérateur obligatoire — périmé depuis la 0.3.0, sur la seule surface qui
+  prétend rapporter la configuration réelle.
+
+  **Le piège à retenir, parce qu'il passe le build :** un fichier `'use server'`
+  n'exporte **que des fonctions asynchrones**. La constante d'état initial vivait
+  à côté de l'action ; `next build` et `tsc` passaient tous les deux, et Next
+  refusait le module à l'exécution — `A "use server" file can only export async
+  functions, found object`. Le symptôme était un bouton qui ne faisait rien.
+  Exporter un *type* reste acceptable, les types étant effacés ; une constante
+  non.
+
+  **La couleur suit §6.3 sans exception** : une étape non atteinte n'a aucun
+  état, donc aucune teinte — l'ambre affirmerait un comportement dégradé.
+  L'Iris n'apparaît que pour un run arrêté sur une question, le seul sens que
+  §1.4 lui réserve, et un test parcourt tous les statuts de run pour prouver
+  qu'il n'apparaît nulle part ailleurs.
+
+  **Le test e2e du nouvel utilisateur a appris deux choses sur l'inscription.**
+  Elle refuse `@localize-infra.dev` : ce domaine n'a jamais été enregistré, donc
+  il n'a pas de MX, et le seed ne fonctionne que parce qu'il insère en SQL en
+  contournant l'API d'auth — le spec utilise `example.com`, réservé par la
+  RFC 2606. Et il a d'abord échoué en CI en cliquant « Sign in » juste après
+  l'envoi d'inscription : **deux choses couraient dans la même page**, le cookie
+  que l'action venait de poser — qui fait re-rendre Next — et un second envoi du
+  même formulaire. Demander à `/` où en est le visiteur tranche sans ambiguïté.
+  La règle qui en sort : **ne pas enchaîner deux soumissions sur un formulaire
+  dont la première a modifié la session.**
+
+  **Non vérifiable sur la machine du propriétaire, et vérifié en CI** : la jambe
+  inscription. Le projet Supabase de dev a la confirmation e-mail active et sa
+  limite de deux envois par heure, donc l'inscription y répond « email rate
+  limit exceeded » ; la pile locale que lance le job `e2e` a
+  `enable_confirmations = false` et n'en a aucune. Les huit tests y tournent.
 
   **`no_changes` n'a jamais rien cassé. Les clics partaient sur le mauvais
   projet.** Ce paragraphe l'a affirmé coupable deux fois — d'abord « établi par
@@ -640,7 +707,10 @@ installation depuis l'interface au lieu de lire qu'il ne peut pas.
 
 **Ce qui reste sur le chemin du « vendable » n'est donc plus technique.** Le
 parcours complet — inscription, connexion GitHub, projet, langues, run, pull
-request — est franchissable depuis l'interface pour un dépôt **public**.
+request — est franchissable depuis l'interface pour un dépôt **public**, et
+**guidé** depuis #102 plutôt que seulement possible : `/[org]/start` nomme
+l'étape suivante et ce que chaque refus veut dire (voir `apps/web` plus haut).
+Ce qu'il fallait deviner de l'ordre ne se devine plus.
 
 Deux réserves, et ce sont des faits, pas des nuances. Un dépôt **privé** exige
 encore `organization_entitlements.private_repositories`, qui n'a aucun chemin
