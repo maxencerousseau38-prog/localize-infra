@@ -14,6 +14,7 @@ import {
   canReachRepository,
   installationIdFor,
 } from '@/lib/github/repositories';
+import { QuotaRefusal, chargeWorkspace } from '@/lib/quota/charge';
 import { isNextControlFlowError } from '@/lib/runs/control-flow';
 import {
   checkTranslations,
@@ -396,6 +397,21 @@ export async function startRun(
         let translated: Record<string, string> = {};
 
         if (pendingStrings.length > 0) {
+          /*
+           * Charged before the model is called, for the strings this request
+           * carries — the same route, the same units and the same counters the
+           * API charges a CLI token. After would be too late: the money is
+           * spent by then and a refusal protects nothing.
+           *
+           * A refusal throws `QuotaRefusal`, which the catch below re-raises
+           * rather than recording as one locale's failure.
+           */
+          await chargeWorkspace({
+            organizationId: organization.id,
+            route: 'translate',
+            units: pendingStrings.length,
+          });
+
           const response = await fetch(`${apiUrl}/v1/translate`, {
             method: 'POST',
             headers: {
@@ -489,6 +505,14 @@ export async function startRun(
 
         localesSucceeded += 1;
       } catch (error) {
+        /*
+         * A usage refusal is not a locale failing, and must not be isolated
+         * like one. It applies to the whole workspace, so every remaining
+         * locale would be refused too — turning one honest refusal into four
+         * identical ones and reporting the run as `partial`. Re-raised to the
+         * outer catch, which ends the run with this sentence.
+         */
+        if (error instanceof QuotaRefusal) throw error;
         // One locale failing must not abort the rest: that is the
         // per-language failure isolation the status board already claims.
         localesFailed += 1;
@@ -692,6 +716,14 @@ ${describeFindings(quality)}`,
         'This workspace has no GitHub installation, so no pull request can be opened.',
       );
     }
+
+    // One unit: a pull request is one act, whatever it contains. Same route
+    // and same daily ceiling the API charges a CLI token for.
+    await chargeWorkspace({
+      organizationId: organization.id,
+      route: 'open_pr',
+      units: 1,
+    });
 
     const prResponse = await fetch(`${apiUrl}/v1/open-pr`, {
       method: 'POST',

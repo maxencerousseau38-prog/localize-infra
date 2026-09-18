@@ -6,6 +6,7 @@ import {
   requireSession,
 } from '@/lib/data/workspace';
 import { installationIdFor } from '@/lib/github/repositories';
+import { QuotaRefusal, chargeWorkspace } from '@/lib/quota/charge';
 import { checkTranslations, describeFindings } from '@/lib/runs/quality';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -289,6 +290,26 @@ ${describeFindings(quality)}`,
       error:
         'This workspace has no GitHub installation, so no pull request can be opened.',
     };
+  }
+
+  /*
+   * Charged like the unattended run, and for the same reason: this path also
+   * opens a pull request through the operator's bearer, which `apps/api`
+   * exempts. Both callers had to change together — the comment above says the
+   * approval path is the easier of the two to forget, and it was.
+   *
+   * Before the request, so a workspace at its ceiling is refused rather than
+   * refused after GitHub has been written to.
+   */
+  try {
+    await chargeWorkspace({
+      organizationId: organization.id,
+      route: 'open_pr',
+      units: 1,
+    });
+  } catch (error) {
+    if (error instanceof QuotaRefusal) return { error: error.message };
+    throw error;
   }
 
   let prUrl: string;
