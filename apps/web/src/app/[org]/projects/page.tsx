@@ -98,16 +98,34 @@ export default async function ProjectsPage({
         connected={installation}
       />
 
-      <p className="mt-3 text-small text-secondary">
-        Working from the command line?{' '}
-        <Link
-          href={`/${org}/tokens`}
-          className="text-link underline underline-offset-2 hover:text-link-hover"
-        >
-          Create a personal CLI token
-        </Link>
-        .
-      </p>
+      {/*
+        Offered only until the workspace has opened a pull request. A guided
+        path that keeps advertising itself after it is finished is chrome, and
+        DESIGN.md §9 charges rent for chrome on every screen forever.
+      */}
+      {funnel.activated ? (
+        <p className="mt-3 text-small text-secondary">
+          Working from the command line?{' '}
+          <Link
+            href={`/${org}/tokens`}
+            className="text-link underline underline-offset-2 hover:text-link-hover"
+          >
+            Create a personal CLI token
+          </Link>
+          .
+        </p>
+      ) : (
+        <p className="mt-3 text-small text-secondary" data-testid="start-here">
+          New here?{' '}
+          <Link
+            href={`/${org}/start`}
+            className="text-link underline underline-offset-2 hover:text-link-hover"
+          >
+            Follow the guided path to your first pull request
+          </Link>{' '}
+          — it says which step is next and what each refusal means.
+        </p>
+      )}
 
       <Activation funnel={funnel} />
 

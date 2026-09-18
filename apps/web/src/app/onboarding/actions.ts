@@ -48,5 +48,14 @@ export async function createWorkspace(
   }
 
   revalidatePath('/', 'layout');
-  redirect(`/${data.slug}/projects`);
+  /*
+   * The guided path, not the projects list.
+   *
+   * A workspace one second old has no projects, no GitHub connection and no
+   * token, so `/projects` opens on an empty state and a connection panel with
+   * no stated order between them — and the order is not guessable: a token is
+   * useless before GitHub is connected, and `--open-pr` is refused before a
+   * repository is. `/start` is the same data with the next step named.
+   */
+  redirect(`/${data.slug}/start`);
 }

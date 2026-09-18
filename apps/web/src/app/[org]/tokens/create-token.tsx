@@ -1,11 +1,8 @@
 'use client';
 
-import {
-  Button,
-  CopyCommand,
-  Field,
-  useFieldControl,
-} from '@localize-infra/ui';
+import { ShellInstructions } from '@/components/shell-instructions';
+import type { CommandTarget } from '@/lib/onboarding/commands';
+import { Button, Field, useFieldControl } from '@localize-infra/ui';
 import type { ComponentProps } from 'react';
 import { useActionState } from 'react';
 import { type CreateTokenState, createCliToken } from './actions';
@@ -31,7 +28,17 @@ const CONTROL =
  * not in the URL, not in the database; reloading loses it, and the panel says
  * so, because a token a person cannot get back is the point.
  */
-export function CreateToken({ orgSlug }: { orgSlug: string }) {
+export function CreateToken({
+  orgSlug,
+  target = null,
+}: {
+  orgSlug: string;
+  /**
+   * The repository the run command should target, when one is usable. Null
+   * produces the translate-only command instead of a broken `--owner null`.
+   */
+  target?: CommandTarget | null;
+}) {
   const [state, action, pending] = useActionState(
     createCliToken.bind(null, orgSlug),
     EMPTY,
@@ -58,12 +65,10 @@ export function CreateToken({ orgSlug }: { orgSlug: string }) {
             “{state.name}” — copy it now. It is not shown again, and it is not
             stored anywhere you can read it back.
           </p>
-          <CopyCommand command={`export LOCALIZE_API_TOKEN="${state.token}"`} />
+          <ShellInstructions token={state.token} target={target} />
           <p className="max-w-[64ch] text-caption leading-5 text-tertiary">
-            Then run{' '}
-            <span className="font-mono">npx @localize-infra/cli init</span> in
-            your project. Treat it like a password: anyone holding it can
-            translate on this workspace’s behalf until it is revoked or expires.
+            Treat it like a password: anyone holding it can translate on this
+            workspace’s behalf until it is revoked or expires.
           </p>
         </div>
       ) : null}

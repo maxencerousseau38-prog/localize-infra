@@ -4,6 +4,7 @@ import {
   currentRole,
   findGitHubInstallation,
   findOrganization,
+  listProjects,
   requireSession,
 } from '@/lib/data/workspace';
 import { Badge, type Tone } from '@localize-infra/ui';
@@ -54,13 +55,36 @@ export default async function TokensPage({
   const organization = await findOrganization(org);
   if (!organization) notFound();
 
-  const [tokens, role, installation] = await Promise.all([
+  const [tokens, role, installation, projects] = await Promise.all([
     listCliTokens(organization.id),
     currentRole(organization.id),
     findGitHubInstallation(organization.id),
+    listProjects(organization.id),
   ]);
   const canManageAll = role === 'owner' || role === 'admin';
   const active = tokens.filter((t) => tokenState(t) === 'active').length;
+
+  /*
+   * The repository the issued token's run command should target.
+   *
+   * The first project that has both a repository and a target language, because
+   * those are the two things a run refuses without — a command built for a
+   * project missing either is one that cannot succeed. Null hands the panel the
+   * translate-only command instead, which is honest rather than broken.
+   */
+  const usable = projects.find(
+    (project) =>
+      project.repository_owner &&
+      project.repository_name &&
+      (project.target_locales ?? []).length > 0,
+  );
+  const target = usable
+    ? {
+        owner: usable.repository_owner as string,
+        repo: usable.repository_name as string,
+        baseBranch: usable.repository_branch ?? 'main',
+      }
+    : null;
 
   return (
     <Page>
@@ -89,7 +113,7 @@ export default async function TokensPage({
         </p>
       )}
 
-      <CreateToken orgSlug={org} />
+      <CreateToken orgSlug={org} target={target} />
 
       <section aria-labelledby="issued" className="mt-8">
         <h2 id="issued" className="text-subtitle font-semibold text-primary">
