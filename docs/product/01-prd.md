@@ -272,7 +272,27 @@ Anchored to the existing build-prompt milestones, re-sequenced by the §0 findin
 
 ## 18. Monetization
 
-**Principle (invariant #3, non-negotiable): we never meter words, characters, keys, or reviewers.** Not even as a displayed statistic.
+**Principle (invariant #3, non-negotiable): we never meter words, characters,
+keys, or reviewers.** Nothing a customer does changes what they pay, and no
+figure in the product is an input to a bill.
+
+**Amended 2026-09-18.** This clause read "Not even as a displayed statistic".
+It changed because the product grew something it did not anticipate: an *abuse
+ceiling*. The hosted API refuses a workspace past 5000 strings a day to stop a
+runaway script, `/pricing` names that ceiling in public, and `/[org]/usage`
+shows a member where they stand against it.
+
+The line is now **billing, not display**: a figure that is an input to a bill is
+still forbidden outright; a figure a customer can be *refused* on is shown with
+its denominator, because a limit somebody can hit and cannot see is worse than
+one they can.
+
+The original fear stands and is recorded in `07-milestones.md`: "a displayed
+counter becomes a billed counter under the first revenue pressure". What guards
+against it is not hiding the number — it is that the plan is flat, the ceiling
+lifts on request at no cost, and self-hosting has no ceiling at all. **If any of
+those three stops being true, this amendment stops being safe and the clause
+comes back.**
 
 | Tier | Price | Includes | Gate |
 |---|---|---|---|
