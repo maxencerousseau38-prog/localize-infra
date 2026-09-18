@@ -56,6 +56,9 @@ export async function createCliToken(
   if (error) return { error: error.message };
 
   revalidatePath(`/${orgSlug}/tokens`);
+  // The guided path counts active tokens, so its "Create a CLI token" step is
+  // stale the moment one is issued from either surface.
+  revalidatePath(`/${orgSlug}/start`);
   return { token: issued.token, name };
 }
 
@@ -80,5 +83,6 @@ export async function revokeCliToken(
   });
   if (error) return { error: error.message };
   revalidatePath(`/${orgSlug}/tokens`);
+  revalidatePath(`/${orgSlug}/start`);
   return {};
 }

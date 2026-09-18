@@ -56,14 +56,21 @@ export const CONNECTION_CONFIG: ConfigEntry[] = [
     value: 'https://localize-infra-api.vercel.app',
     setWith: '--api-url <url> or LOCALIZE_API_URL',
     description:
-      'The API instance that performs translation. The default is the hosted production API, which requires an operator-issued token; point this at your own instance otherwise. The flag wins over the variable.',
+      'The API instance that performs translation. The default is the hosted production API, which accepts a personal token issued in your workspace; point this at your own instance otherwise. The flag wins over the variable.',
   },
   {
     name: 'API token',
-    value: 'Not set',
+    /*
+     * "Not set" was written when the only credential was the operator's shared
+     * bearer, which a customer could not obtain — so the honest value was that
+     * they had none. Personal tokens shipped in CLI 0.3.0 and this line did not
+     * follow, leaving the one surface that claims to report real configuration
+     * telling every reader they had no way to authenticate.
+     */
+    value: 'A personal token you create in your workspace',
     setWith: 'LOCALIZE_API_TOKEN',
     description:
-      'Bearer token sent to that API. Prefer the environment variable: --api-token puts the secret in your shell history and in ps output.',
+      'Bearer token sent to that API. Create one under CLI tokens; it acts for that workspace only, expires, and can be revoked on its own. Prefer the environment variable: --api-token puts the secret in your shell history and in ps output.',
   },
 ];
 
