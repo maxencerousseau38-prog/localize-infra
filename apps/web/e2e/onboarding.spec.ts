@@ -81,10 +81,10 @@ async function signUpAndIn(page: Page, email: string) {
   await page.getByRole('button', { name: 'Create account' }).click();
 
   /*
-   * Both rejections are swallowed deliberately. `Promise.race` settles on the
-   * first *settlement*, rejection included, so racing two 20s timeouts made a
-   * slow-but-fine notice look like a hard failure — and left the losing promise
-   * to reject unobserved afterwards.
+   * Wait for whichever answer arrives, and swallow both rejections:
+   * `Promise.race` settles on the first *settlement*, rejection included, so
+   * racing two timeouts made a slow-but-fine notice look like a hard failure
+   * and left the loser to reject unobserved.
    */
   await Promise.race([
     page
@@ -98,21 +98,52 @@ async function signUpAndIn(page: Page, email: string) {
       .catch(() => undefined),
   ]);
 
-  if (new URL(page.url()).pathname.startsWith('/login')) {
-    /*
-     * Still on the form. Before signing in, fail loudly if sign-up was refused
-     * — otherwise a rejected password surfaces later as a confusing timeout on
-     * a completely different assertion.
-     */
-    await expect(
-      page.getByText(/confirmation link/i),
-      'sign-up did not succeed',
-    ).toBeVisible();
+  /*
+   * Then ask the application where this visitor stands, instead of inferring
+   * it from the form.
+   *
+   * The first version clicked "Sign in" on the same form straight after the
+   * sign-up submission and waited for a navigation that never came. Two things
+   * were racing in that one page: the cookie the sign-up action had just set,
+   * which makes Next re-render, and a second submission of the same form.
+   * Navigating to `/` collapses both — it is one request whose answer is
+   * unambiguous, because `/` redirects a signed-in visitor with no workspace to
+   * `/onboarding` and an anonymous one to `/login`.
+   */
+  await page.goto(`${AUTH_URL}/`, { waitUntil: 'networkidle' });
 
+  if (new URL(page.url()).pathname.startsWith('/login')) {
+    // Not signed in, so the project requires email confirmation. Sign in
+    // explicitly on a form that is not mid-action.
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await page.waitForURL((url) => !url.pathname.startsWith('/login'), {
-      timeout: 20_000,
-    });
+    await page
+      .waitForURL((url) => !url.pathname.startsWith('/login'), {
+        timeout: 20_000,
+      })
+      .catch(() => undefined);
+  }
+
+  /*
+   * One assertion for both paths, carrying whatever the page says.
+   *
+   * A bare timeout on a navigation reports that nothing happened and not why —
+   * which is exactly what the first CI run produced. The status region holds
+   * the action's own sentence ("email rate limit exceeded", "Email address … is
+   * invalid"), and putting it in the failure message turns a dead end into a
+   * diagnosis.
+   */
+  const stillOut = new URL(page.url()).pathname.startsWith('/login');
+  if (stillOut) {
+    const said = await page
+      .locator('[role="status"], [role="alert"]')
+      .first()
+      .textContent()
+      .catch(() => null);
+    throw new Error(
+      `Could not sign up and sign in as ${email}. The page said: ${said ?? '(nothing)'}`,
+    );
   }
 
   await page.waitForLoadState('networkidle');
@@ -148,8 +179,10 @@ test.describe('a brand-new user with nothing configured', () => {
 
   test('an account with no workspace is sent to the gate', async () => {
     /*
-     * Not to an empty dashboard. This is the assertion that fails if `/` ever
-     * starts rendering the sample home to a signed-in user who has nothing.
+     * The helper left this page on whatever `/` decided, so this asserts that
+     * decision: a signed-in visitor with no workspace reaches the gate, not the
+     * sample dashboard. It is the assertion that fails if `/` ever starts
+     * rendering the sample home to somebody who has nothing.
      */
     await expect(page).toHaveURL(/\/onboarding$/, { timeout: 20_000 });
   });
