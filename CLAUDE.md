@@ -153,6 +153,52 @@
   l'API est scalée horizontalement, donc un compteur d'instance ne compte que
   lui-même. 29 assertions dans `supabase/tests/api-limits.sql`.
 
+  **Et c'est en service en production, vérifié le 2026-09-18.** Ce paragraphe
+  décrivait deux garde-fous sans jamais dire s'ils gardaient quoi que ce soit
+  en ligne, et une session entière est repartie de l'hypothèse inverse — « le
+  code existe, la production ne l'a pas ». Les deux moitiés étaient fausses :
+  `20260917205635_api_usage_limits` est la 37ᵉ des 37 migrations appliquées à
+  `localize-infra-prod`, et `/api/version` répond `55b3e2c`, le commit de
+  fusion de #100 — un SHA qui n'existe qu'une fois la PR fusionnée, donc le
+  déploiement a bien suivi. **Pour un service qui ne suit pas Git, « fusionné »
+  ne dit rien de « appliqué » — mais « pas encore déployé » n'est pas plus
+  gratuit à supposer.** Deux commandes tranchent, et aucune ne demande de
+  réfléchir : la liste des migrations, et `/api/version`.
+
+  **Le garde-fou a été exercé contre la production, et il tient.** 32 appels
+  `/v1/translate` avec un jeton `lit_` : les 30 premiers franchissent le quota,
+  le 31ᵉ répond **429**, `Retry-After: 40`, « the limit is 30 a minute ».
+  Puis une requête annonçant 9000 chaînes — 30 déjà consommées, plafond à
+  5000 — répond **429**, `Retry-After: 32512`, soit à la seconde près le temps
+  restant jusqu'à 00:00 UTC. Le jeton opérateur, lui, a encaissé 35 appels
+  d'affilée sans un seul 429 et **sans écrire une ligne** dans les deux tables :
+  il ne traverse pas `checkQuota`, et l'absence de ligne le prouve mieux que
+  l'absence de 429.
+
+  **Tout cela sans dépenser un centime, et c'est la partie reproductible.** Le
+  quota est débité *avant* la validation du corps, donc un corps invalide
+  consomme la fenêtre puis s'arrête en 400 sans atteindre le modèle ; et
+  `translationUnits` lit `strings.length` sur le corps brut, donc une requête
+  qui *annonce* plus de chaînes qu'il n'en reste au plafond est refusée avant
+  tout appel payant. **Tester un garde-fou qui protège de l'argent ne devrait
+  pas coûter d'argent** : la question « est-ce que ça refuse ? » se pose ici
+  sans jamais déclencher ce qu'on cherche à éviter.
+
+  **Un fait que la migration promettait sans que personne l'ait vu** : après
+  les 32 appels, `strings_translated` valait 30 et `request_count` 32. Un refus
+  compte dans la fenêtre de débit et **n'est pas facturé** au plafond
+  journalier ; le 429 de quota n'a pas entamé le compteur non plus. Le plafond
+  a par ailleurs été poussé à sa borne exacte — refus à 5000, **passage à
+  4999** — sur la fonction de production, dans une transaction terminée par un
+  `raise` délibéré, le motif de `supabase/tests/*.sql` ; les compteurs relus
+  après n'avaient pas bougé.
+
+  **Non prouvé en ligne, et il faut le dire** : le chemin **503**. Le
+  déclencher exigerait de vider `SUPABASE_URL` ou `SUPABASE_SERVICE_ROLE_KEY`
+  sur le projet Vercel, c'est-à-dire de casser la production pour observer
+  qu'elle échoue bien. Il reste couvert par les tests unitaires d'`apps/api`,
+  pas par une preuve en ligne.
+
   **Ce n'est pas de la facturation à l'usage** — l'invariant 3 l'interdit — mais
   `/pricing` promettait « No string cap », ce qui n'était plus vrai : la page
   nomme désormais le plafond, dit qu'il se lève sur demande et qu'auto-héberger
