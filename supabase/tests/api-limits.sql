@@ -171,6 +171,12 @@ begin
 
   -- A CLI token of the same workspace keeps its own window: the two subjects
   -- share the ceiling and do not share the window.
+  --
+  -- Reset first. Without it this asserted 1 and got 3, because tok_b already
+  -- spent two translate calls earlier in this file — the assertion was reading
+  -- the file's history rather than the separation it claims to prove.
+  update public.api_rate_windows set request_count = 0, window_started_at = now()
+   where token_id = tok_b and route = 'translate';
   select * into d from public.consume_api_quota(tok_b, ob.id, 'translate', 1);
   r := r || format('token-window-separate-allowed=%s(want t); ', d.allowed);
   select request_count into n from public.api_rate_windows
