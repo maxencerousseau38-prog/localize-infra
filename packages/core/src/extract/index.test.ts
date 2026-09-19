@@ -29,6 +29,56 @@ describe('extractFromProject', () => {
     expect(results.some((r) => r.text === 'Welcome back')).toBe(true);
   });
 
+  /*
+   * The extension gap, from the outside.
+   *
+   * Every case in this file used `.tsx`, so nothing here could see that a
+   * JavaScript project extracted nothing at all — the files simply fell
+   * outside the glob and `addSourceFilesAtPaths` opened none of them. Reported
+   * from a real `npm create vite -- --template react` project, whose
+   * components are `src/App.jsx`.
+   *
+   * Driven through `detectFramework`'s own globs rather than a literal, so the
+   * test fails if the two ever disagree again.
+   */
+  it.each(['jsx', 'js', 'tsx'])(
+    'reads a .%s source file, not only TypeScript',
+    (extension) => {
+      writeSource(
+        `src/Widget.${extension}`,
+        'export function Widget() {\n  return <p>Welcome to your dashboard</p>\n}\n',
+      );
+      const results = extractFromProject(dir, ['src/**/*.{ts,tsx,js,jsx}']);
+      expect(
+        results.some((r) => r.text === 'Welcome to your dashboard'),
+        `.${extension} produced nothing`,
+      ).toBe(true);
+    },
+  );
+
+  it('finds nothing in a .ts file, because .ts cannot hold JSX at all', () => {
+    /*
+     * Not an omission: in a `.ts` file TypeScript reads `<p>` as a type
+     * assertion, not as an element, so there is no JsxText node to find. `.ts`
+     * stays in the glob because it always has and costs nothing — but it can
+     * never contribute a string, and a test asserting otherwise would be
+     * asserting a bug.
+     */
+    writeSource(
+      'src/NotJsx.ts',
+      'export function NotJsx() {\\n  return <p>Welcome to your dashboard</p>\\n}\\n',
+    );
+    expect(extractFromProject(dir, ['src/**/*.{ts,tsx,js,jsx}'])).toEqual([]);
+  });
+
+  it('still finds nothing in a plain module with no JSX, so the wider glob costs no false positives', () => {
+    writeSource(
+      'src/helpers.js',
+      'export const slug = "not-ui-text";\nexport const count = 42;\n',
+    );
+    expect(extractFromProject(dir, ['src/**/*.{ts,tsx,js,jsx}'])).toEqual([]);
+  });
+
   it('extracts string literals from a whitelisted UI-text JSX attribute', () => {
     writeSource(
       'src/Search.tsx',

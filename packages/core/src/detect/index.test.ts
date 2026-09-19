@@ -33,7 +33,7 @@ describe('detectFramework', () => {
     writePackageJson({ next: '^14.0.0', react: '^18.0.0' });
     const framework = detectFramework(dir);
     expect(framework?.id).toBe('nextjs');
-    expect(framework?.sourceGlobs).toContain('app/**/*.{ts,tsx}');
+    expect(framework?.sourceGlobs).toContain('app/**/*.{ts,tsx,js,jsx}');
   });
 
   it('detects Next.js from a next.config.js file even without the dependency listed under a different key', () => {
@@ -46,7 +46,33 @@ describe('detectFramework', () => {
     writePackageJson({ react: '^18.0.0' }, { vite: '^5.0.0' });
     const framework = detectFramework(dir);
     expect(framework?.id).toBe('vite-react');
-    expect(framework?.sourceGlobs).toContain('src/**/*.{ts,tsx}');
+    expect(framework?.sourceGlobs).toContain('src/**/*.{ts,tsx,js,jsx}');
+  });
+
+  /*
+   * Every framework, not only the one that was reported.
+   *
+   * A JavaScript Vite project was detected correctly and then extracted zero
+   * strings, because the globs covered `.ts` and `.tsx` alone and
+   * `npm create vite -- --template react` writes `src/App.jsx`. Nothing said
+   * so: detection succeeded and extraction reported a plausible number.
+   *
+   * Asserted per framework rather than once, because the gap was in all three
+   * and fixing the reported one would have left the same silence in the others.
+   */
+  it.each([
+    ['nextjs', { next: '^14.0.0', react: '^18.0.0' }, {}],
+    ['vite-react', { react: '^18.0.0' }, { vite: '^5.0.0' }],
+    ['react-native', { react: '^18.0.0', 'react-native': '^0.74.0' }, {}],
+  ])('%s covers .js and .jsx, not only TypeScript', (id, deps, devDeps) => {
+    writePackageJson(deps, devDeps);
+    const framework = detectFramework(dir);
+    expect(framework?.id).toBe(id);
+    for (const glob of framework?.sourceGlobs ?? []) {
+      expect(glob, glob).toContain('js');
+      expect(glob, glob).toContain('jsx');
+      expect(glob, glob).toContain('tsx');
+    }
   });
 
   it('does not detect Vite + React from vite alone without react', () => {
