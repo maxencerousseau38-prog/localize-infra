@@ -22,6 +22,28 @@ function hasDependency(pkg: PackageJson, name: string): boolean {
   return Boolean(pkg.dependencies?.[name] || pkg.devDependencies?.[name]);
 }
 
+/**
+ * The extensions the extractor can actually read.
+ *
+ * `.jsx` and `.js` were missing, and the omission was **silent**:
+ * `detectFramework` only reads `package.json` and a config file, so a
+ * JavaScript Vite project was detected correctly and then extracted **zero**
+ * strings — every source file fell outside the glob and
+ * `addSourceFilesAtPaths` opened nothing. Reported from a real
+ * `npm create vite -- --template react` project, whose components are
+ * `src/App.jsx`.
+ *
+ * That failure mode is the worst kind this repository keeps meeting: the step
+ * that could have said something (detection) succeeded, and the step that
+ * failed reported a plausible number rather than an error.
+ *
+ * Verified before widening, against the real extractor: ts-morph parses JSX in
+ * both `.jsx` and `.js` under the settings `extractFromProject` already uses,
+ * with no compiler option added — and a plain `.js` module with no JSX yields
+ * nothing, so the wider glob costs no false positives.
+ */
+const SOURCE_EXTENSIONS = '{ts,tsx,js,jsx}';
+
 const NEXT_CONFIG_FILES = [
   'next.config.js',
   'next.config.mjs',
@@ -45,10 +67,10 @@ export function detectFramework(rootDir: string): Framework | null {
       id: 'nextjs',
       name: 'Next.js',
       sourceGlobs: [
-        'app/**/*.{ts,tsx}',
-        'pages/**/*.{ts,tsx}',
-        'components/**/*.{ts,tsx}',
-        'src/**/*.{ts,tsx}',
+        `app/**/*.${SOURCE_EXTENSIONS}`,
+        `pages/**/*.${SOURCE_EXTENSIONS}`,
+        `components/**/*.${SOURCE_EXTENSIONS}`,
+        `src/**/*.${SOURCE_EXTENSIONS}`,
       ],
       localesDir: 'locales',
     };
@@ -64,7 +86,7 @@ export function detectFramework(rootDir: string): Framework | null {
     return {
       id: 'vite-react',
       name: 'Vite + React',
-      sourceGlobs: ['src/**/*.{ts,tsx}'],
+      sourceGlobs: [`src/**/*.${SOURCE_EXTENSIONS}`],
       localesDir: 'locales',
     };
   }
@@ -73,7 +95,10 @@ export function detectFramework(rootDir: string): Framework | null {
     return {
       id: 'react-native',
       name: 'React Native',
-      sourceGlobs: ['App.tsx', 'App.ts', 'src/**/*.{ts,tsx}'],
+      sourceGlobs: [
+        `App.${SOURCE_EXTENSIONS}`,
+        `src/**/*.${SOURCE_EXTENSIONS}`,
+      ],
       localesDir: 'locales',
     };
   }
