@@ -151,7 +151,7 @@
   Les compteurs vivent en base (`api_usage_daily`, `api_rate_windows`,
   fonction `consume_api_quota` réservée au `service_role`), pas en mémoire :
   l'API est scalée horizontalement, donc un compteur d'instance ne compte que
-  lui-même. 29 assertions dans `supabase/tests/api-limits.sql`.
+  lui-même. 46 assertions dans `supabase/tests/api-limits.sql`.
 
   **Et c'est en service en production, vérifié le 2026-09-18.** Ce paragraphe
   décrivait deux garde-fous sans jamais dire s'ils gardaient quoi que ce soit
@@ -198,6 +198,51 @@
   sur le projet Vercel, c'est-à-dire de casser la production pour observer
   qu'elle échoue bien. Il reste couvert par les tests unitaires d'`apps/api`,
   pas par une preuve en ligne.
+
+  **Le navigateur dépensait la même chose, et rien ne le comptait.** La
+  protection ci-dessus s'arrêtait au jeton CLI, et `apps/api/src/quota.ts`
+  justifiait l'exemption ainsi : l'opérateur est « held by `apps/web`, which has
+  its own guards ». **`apps/web` n'en avait aucune.** Chaque clic sur « Run
+  pipeline » atteignait un modèle payant sans fenêtre de débit ni plafond
+  journalier — le navigateur était le moyen le moins cher de dépenser l'argent
+  de l'opérateur, et c'était le seul chemin qui écrit une ligne `runs`. Même
+  forme qu'`isOperator` et `operatorInstallationId` : une phrase qui décrit un
+  contrôle inexistant, et qui fait que personne ne va voir.
+
+  **Corrigé sans second système** (#104, migration `20260918174752`).
+  `api_usage_daily` n'a pas changé d'un caractère : elle était déjà clé par
+  `(organization_id, usage_date)`, donc la dépense du navigateur atterrit dans
+  la même ligne que celle des jetons CLI — ce que « par workspace » voulait déjà
+  dire. Seule la fenêtre de débit a été élargie, parce qu'elle était clé par
+  jeton et qu'un run de navigateur n'en a pas : son sujet devient **un jeton ou
+  un workspace**, tenu par un `check (num_nonnulls(token_id, organization_id) =
+  1)` et deux index uniques partiels. `apps/web` appelle `consume_api_quota`
+  avec un jeton `null` (`lib/quota/charge.ts`), en `service_role`, fail-closed
+  dans toute branche qui n'est pas une autorisation explicite.
+
+  Rien de ce qu'un jeton CLI peut dépenser ne change, et l'exemption de l'API
+  reste juste : ce processus authentifie un jeton, pas un workspace, et le
+  bearer opérateur ne nomme aucune organisation à débiter.
+
+  **Un refus interrompt le run au lieu d'être isolé.** `QuotaRefusal` est
+  relevée par le `catch` par locale ; sans cela un refus honnête en deviendrait
+  quatre — un par langue — et le run se dirait `partial`.
+
+  **L'ordre des instructions de la migration est porteur.** Retirer le `not
+  null` avant la clé primaire échoue (`column "token_id" is in a primary key`) :
+  la clé l'implique. La base de développement l'a refusée avant CI.
+
+  **Vérifié en production le 2026-09-18**, plafond posé à la main puis restauré
+  au caractère près : run `9ea5dff9`, `failed` au stage `translate`, 3 clés
+  extraites, **0 traduite**, 0 proposition, **2,6 s** de bout en bout — trop
+  rapide pour un modèle. Le compteur n'a pas bougé pendant le refus et une
+  fenêtre workspace est passée à 1 : un refus compte dans la fenêtre sans être
+  facturé au plafond.
+
+  **Ce que l'e2e ne couvre pas, et pourquoi.** `startRun` sort à « Connect a
+  repository before running » bien avant la charge, et aucune organisation semée
+  n'a d'installation GitHub — le pipeline ne peut pas atteindre l'appel de
+  traduction en CI. La décision est prouvée là où elle est prise, en base.
 
   **Ce n'est pas de la facturation à l'usage** — l'invariant 3 l'interdit — mais
   `/pricing` promettait « No string cap », ce qui n'était plus vrai : la page
@@ -299,6 +344,51 @@
   limite de deux envois par heure, donc l'inscription y répond « email rate
   limit exceeded » ; la pile locale que lance le job `e2e` a
   `enable_confirmations = false` et n'en a aucune. Les huit tests y tournent.
+
+  **`/[org]/usage` montre à un membre ce que son workspace a dépensé** (#105) :
+  aujourd'hui contre le plafond, le total du mois, les derniers runs et la
+  dernière utilisation de chaque jeton CLI. **Aucun backend nouveau** — ni
+  table, ni migration, ni RPC, ni clé `service_role`. Tout était déjà lisible
+  par un membre : `api_usage_daily` par `api_usage_select_member`,
+  `api_limits()` par son grant à `authenticated`, `cli_tokens` par un grant de
+  colonnes qui exclut `token_hash`, `runs` sous la RLS habituelle. L'isolation
+  est donc celle de la base — un autre workspace est un 404 parce que les
+  policies ne rendent rien, pas parce que la page le décide.
+
+  **Elle lit, elle ne recompte jamais.** Chaque chiffre vient d'`api_usage_daily`,
+  la ligne que `consume_api_quota` écrit en débitant ; rien n'est redérivé de
+  `runs` ni de `run_translations`, parce qu'un second décompte serait libre de
+  contredire celui contre lequel le plafond est appliqué — et la page promettrait
+  alors du budget que l'API refuse.
+
+  **Zéro y est affiché, et ce n'est pas la règle du funnel qui casse.**
+  `lib/metrics/funnel.ts` refuse d'écrire zéro pour ce que personne ne mesure, et
+  il a raison. Ici c'est le cas inverse : `consume_api_quota` crée la ligne à la
+  première dépense du jour, donc **pas de ligne veut dire pas de dépense** — un
+  fait, pas une mesure absente. Et la couleur suit §6.3 : être sous le plafond
+  n'est pas un état, donc pas de jauge ni de barre virant au rouge ; seul
+  *atteindre* le plafond prend une teinte, parce qu'alors le refus est réel.
+
+  **Elle a exigé d'amender le PRD.** §18 disait « we never meter … **Not even as
+  a displayed statistic** ». L'invariant 3 est intact — aucun chiffre n'entre
+  dans une facture — mais la ligne passe de *l'affichage* à *la facturation*,
+  parce que le produit a gagné un plafond d'abus que le PRD n'anticipait pas.
+  Trois conditions rendent l'exception sûre et sont écrites dans le document :
+  plan forfaitaire, plafond levé gratuitement sur demande, aucun plafond en
+  auto-hébergement. **Si l'une tombe, la clause revient.** Les autres
+  interdictions n'ont pas bougé — `01-prd.md:220`, `07-milestones.md:198/200/270`
+  et `02-ux-and-flows.md:217` parlent de la page de facturation, que
+  `/[org]/usage` n'est pas.
+
+  **Le classifieur a refusé que l'agent modifie le PRD**, comme auto-modification,
+  et c'était le bon réflexe : réécrire soi-même la règle qui interdit ce qu'on
+  vient de construire est précisément ce que ce garde-fou protège. Le texte a été
+  proposé, validé par le propriétaire, puis appliqué.
+
+  **Jamais ouverte par un œil humain au moment de la fusion**, et il faut le
+  dire : la preview d'`apps/web` est derrière le SSO Vercel et la production
+  exige une session. Son comportement est prouvé par 8 tests e2e en CI ; sa mise
+  en page ne l'est par personne.
 
   **`no_changes` n'a jamais rien cassé. Les clics partaient sur le mauvais
   projet.** Ce paragraphe l'a affirmé coupable deux fois — d'abord « établi par
@@ -509,6 +599,19 @@ build de la semaine précédente sans rien en dire. Le seul témoin était une
 *absence* — zéro deployment pour le commit — et une absence n'alerte personne.
 Le contrôle qui l'a montrée est de demander le déploiement **du commit**
 (`gh api repos/…/deployments`), pas la santé du site.
+
+**Et le symétrique existe : un retard ressemble trait pour trait à une panne.**
+Le 2026-09-18, la PR #105 n'avait ni deployment ni check Vercel quinze minutes
+après son push, alors que les trois PR précédentes en avaient eu. Le lien Git
+était intact, le compte ni bloqué ni en overage — et « l'App a encore perdu
+l'accès » a quand même été écrit. C'était faux : Vercel a lancé le build à
+**+20 minutes** et posé ses statuses à **+31**, sans que rien ne la débloque.
+
+Ce qui sépare les deux cas n'est donc pas l'absence à un instant donné mais sa
+**persistance** : la panne de septembre a duré sept jours et aucun push
+ultérieur n'y changeait rien. Le contrôle reste le bon — demander le déploiement
+du commit — mais il se relit **plus tard**, et les statuses du commit initial
+suffisent à trancher après coup. Quinze minutes de sondage ne prouvent rien.
 
 Le CDN le confirmait indépendamment, et c'est le contrôle le moins cher : sur
 `localize-infra-site.vercel.app`, `Age` dépassait 5,6 jours **et continuait de
