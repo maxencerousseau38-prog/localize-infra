@@ -1,6 +1,6 @@
 {
   "name": "@localize-infra/cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Extract hardcoded UI strings from a React codebase, translate them, and open a pull request with the locale files.",
   "keywords": [
     "i18n",
@@ -25,7 +25,7 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
-    "@localize-infra/core": "^0.1.0",
+    "@localize-infra/core": "^0.2.0",
     "@localize-infra/schemas": "^0.1.0"
   },
   "devDependencies": {
