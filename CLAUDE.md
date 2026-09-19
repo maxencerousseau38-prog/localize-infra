@@ -1234,29 +1234,31 @@ avant fusion. Sur un dépôt à un seul auteur, l'exiger ne force que des rebase
 
 ## Frontend defaults
 
-For every website, landing page, dashboard, marketing page, or React/Next.js frontend:
+**`DESIGN.md` décide. Une dépendance UI ou d'animation s'ajoute uniquement
+lorsqu'elle résout un besoin réel du produit et qu'elle respecte ce contrat.
+Jamais pour obtenir un effet décoratif.**
 
-- Always use Lenis as the default smooth scrolling library unless I explicitly request another solution.
-- Use the official Lenis React integration.
-- Respect `prefers-reduced-motion`.
-- Ensure compatibility with Framer Motion.
-- Prioritize smoothness, accessibility, and performance.
-- Never implement custom smooth scrolling when Lenis can solve it.
-- Centralize Lenis configuration in a reusable provider/component.
-- Optimize Lenis usage for performance, 120Hz+ displays, and mobile devices.
-- Integrate Lenis carefully with Framer Motion and scroll-based animations.
-- Disable or reduce non-essential smooth scrolling effects when `prefers-reduced-motion` is enabled.
+Avant d'en ajouter une : la primitive existe-t-elle déjà dans `packages/ui` ?
+Le besoin est-il exprimable avec les tokens et les variantes déjà là ? Si oui,
+la réponse est non.
 
-- Use GSAP for complex, timeline-based, or high-performance animations when CSS animations or Framer Motion are not sufficient.
-- Use the official GSAP package and recommended integration patterns.
-- Ensure compatibility with React/Next.js projects.
-- Prefer GSAP timelines for complex sequences and coordinated animations.
-- Use performant transforms and opacity animations whenever possible.
-- Avoid unnecessary animations that impact performance or usability.
-- Respect `prefers-reduced-motion` for non-essential animations.
+**Ce point imposait Lenis, GSAP et React Bits « pour tout site, landing page,
+dashboard ou frontend React/Next.js ».** Remplacé le 2026-09-19, pour deux
+raisons vérifiées plutôt que supposées.
 
-- Use React Bits components and patterns when a premium React UI effect, animation, interaction, or visual component already exists.
-- Prefer React Bits over creating custom animated components from scratch when appropriate.
-- Adapt React Bits components to the project's design system instead of copying styles blindly.
-- Ensure React Bits components remain performant, accessible, and compatible with Next.js App Router.
-- Combine React Bits with Lenis, GSAP, and Framer Motion when creating premium interactive experiences.
+Aucune des trois n'était installée ni importée nulle part — zéro manifeste,
+zéro import — donc la règle prescrivait depuis le début un outillage que le
+dépôt n'a jamais eu. Et elle contredisait `DESIGN.md` §7.2, qui interdit les
+reveals au scroll, le parallax, les entrées échelonnées et « anything
+decorative » : le défilement fluide et les timelines existent essentiellement
+pour ce que cette section bannit.
+
+Une règle qui impose l'inverse du contrat ne départage rien — elle donne à
+chaque camp une phrase à citer. `DESIGN.md` §15 fixe déjà l'ordre d'autorité,
+et §17 enregistre l'arbitrage qui a produit ce remplacement.
+
+Ce qui reste vrai et n'a pas bougé : respecter `prefers-reduced-motion`,
+préférer `transform` et `opacity`, et ne pas écrire un défilement fluide maison
+là où le navigateur suffit. **Ne jamais retirer une dépendance réellement
+utilisée sans audit préalable** — celles-ci ne l'étaient pas, ce qui est
+précisément ce qui rendait le retrait sûr.

@@ -12,26 +12,42 @@
  * host app allows it by nonce (apps/web) or by a blanket `'unsafe-inline'`
  * (apps/site, which documents that trade in its next.config.ts).
  *
- * Three-state preference (light / dark / system), never system-only: a user
- * whose OS is dark may still want this product light.
+ * Four-state preference (light / dark / oled / system), never system-only: a
+ * user whose OS is dark may still want this product light.
+ *
+ * `oled` sets **both** classes. It is a refinement of `dark`, not a rival to
+ * it (DESIGN.md §6.4), so `.oled` only overrides the ground and every `dark:`
+ * utility keeps working underneath. Setting `.oled` alone would strip the
+ * state colours, which is the one thing the two schemes must share.
  */
 export const THEME_SCRIPT =
-  "(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}})();";
+  "(function(){try{var t=localStorage.getItem('theme');var o=t==='oled';var d=o||t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.toggle('dark',d);c.toggle('oled',o);document.documentElement.style.colorScheme=d?'dark':'light';}catch(e){}})();";
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark' | 'oled' | 'system';
 
 /** The single place the class and `color-scheme` are derived from a preference. */
 export function applyTheme(theme: Theme) {
+  const oled = theme === 'oled';
   const dark =
+    oled ||
     theme === 'dark' ||
     (theme === 'system' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.classList.toggle('dark', dark);
+  const classes = document.documentElement.classList;
+  classes.toggle('dark', dark);
+  classes.toggle('oled', oled);
+  // Still 'dark': `color-scheme` tells the browser how to paint scrollbars and
+  // form controls, and it has two values. OLED is a dark scheme.
   document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
 }
 
 export function isTheme(value: unknown): value is Theme {
-  return value === 'light' || value === 'dark' || value === 'system';
+  return (
+    value === 'light' ||
+    value === 'dark' ||
+    value === 'oled' ||
+    value === 'system'
+  );
 }
 
 /**
