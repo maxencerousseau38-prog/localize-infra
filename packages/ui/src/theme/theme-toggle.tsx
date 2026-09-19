@@ -1,6 +1,6 @@
 'use client';
 
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Contrast, Monitor, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '../lib/cn';
 import {
@@ -26,11 +26,15 @@ const SYSTEM: Option = { value: 'system', label: 'System', Icon: Monitor };
 const OPTIONS: Option[] = [
   { value: 'light', label: 'Light', Icon: Sun },
   { value: 'dark', label: 'Dark', Icon: Moon },
+  // A fourth state, not a second dark switch. OLED is a distinct scheme
+  // (DESIGN.md §6.4) and a reader who wants it wants it on purpose, so it is
+  // offered by name rather than hidden behind a setting on `dark`.
+  { value: 'oled', label: 'OLED', Icon: Contrast },
   SYSTEM,
 ];
 
 /**
- * Three explicit states rather than a light/dark switch: a user whose OS is
+ * Four explicit states rather than a light/dark switch: a user whose OS is
  * dark may still want this product light, and a binary toggle silently removes
  * that choice. That has not changed — what changed is how much room the three
  * states are allowed to take.
@@ -43,7 +47,8 @@ const OPTIONS: Option[] = [
  * most people touch once outranked the work on every screen forever.
  *
  * It is now one 28px control that shows the current choice and opens the same
- * three options. All three survive; the cost falls from three segments to one.
+ * options. All of them survive; the cost falls from three segments to one, and
+ * adding OLED cost nothing further — which is the argument for the menu.
  * Radix's radio group supplies `menuitemradio`, roving tabindex and type-ahead
  * — the same reasoning that put the old version on native radio inputs rather
  * than hand-rolled buttons, applied to a menu.

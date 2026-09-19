@@ -154,7 +154,11 @@ export function SheetContent({
         className={cn(
           'fixed inset-y-0 z-50 flex w-full flex-col',
           leading ? 'start-0 border-e' : 'end-0 border-s',
-          'border-line bg-canvas shadow-e3',
+          // Glass (DESIGN.md §5.6): a sheet slides over the page it came
+          // from, and seeing that page behind it is the point.
+          'border-glass-border bg-glass backdrop-blur-glass shadow-e3',
+          'reduced-transparency:border-line reduced-transparency:bg-canvas',
+          'reduced-transparency:backdrop-blur-none',
           size === 'sm' ? 'sm:max-w-[25rem]' : 'sm:max-w-[35rem]',
           leading
             ? 'data-[state=open]:animate-sheet-in-start data-[state=closed]:animate-sheet-out-start'
