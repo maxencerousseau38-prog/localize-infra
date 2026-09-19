@@ -127,6 +127,16 @@ export default async function ProjectsPage({
         </p>
       )}
 
+      <p className="mt-3 text-small text-secondary">
+        <Link
+          href={`/${org}/usage`}
+          className="text-link underline underline-offset-2 hover:text-link-hover"
+        >
+          Usage
+        </Link>{' '}
+        — what this workspace has spent against the hosted API's daily ceiling.
+      </p>
+
       <Activation funnel={funnel} />
 
       {projects.length === 0 ? (

@@ -2,6 +2,7 @@ import { NotConnected } from '@/components/not-connected';
 import { Page, PageHeader, PageMeta } from '@/components/page';
 import { type RunTableRow, RunsTable } from '@/components/runs-table';
 import { listRunsForViewer, requireSession } from '@/lib/data/workspace';
+import { toRunTableRow } from '@/lib/runs/table-row';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { EmptyState } from '@localize-infra/ui';
 import type { Metadata } from 'next';
@@ -44,27 +45,9 @@ export default async function RunsPage() {
   const succeeded = runs.filter((r) => r.status === 'succeeded').length;
   const newest = runs[0];
 
-  const rows: RunTableRow[] = runs.map((run) => ({
-    id: run.id,
-    status: run.status,
-    stage: run.stage,
-    framework: run.framework,
-    keysExtracted: run.keys_extracted,
-    localesSucceeded: run.locales_succeeded,
-    localesFailed: run.locales_failed,
-    // Real elapsed time, or null. The sample carried a duration for every row;
-    // a run still going has not taken any yet, and inventing one would be the
-    // same fiction in a new place.
-    durationMs:
-      run.started_at && run.finished_at
-        ? Date.parse(run.finished_at) - Date.parse(run.started_at)
-        : null,
-    prNumber: run.pr_number,
-    prUrl: run.pr_url,
-    error: run.error,
-    createdAt: run.created_at,
-    progressAt: run.progress_at,
-  }));
+  // Shared with /[org]/usage, which renders the same table. The mapping lived
+  // here until a second surface needed it (lib/runs/table-row.ts).
+  const rows: RunTableRow[] = runs.map(toRunTableRow);
 
   return (
     <Page>

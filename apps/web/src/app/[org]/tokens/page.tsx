@@ -113,6 +113,17 @@ export default async function TokensPage({
         </p>
       )}
 
+      <p className="mt-4 text-small text-secondary">
+        Tokens spend this workspace's daily ceiling on the hosted API.{' '}
+        <Link
+          href={`/${org}/usage`}
+          className="text-link underline underline-offset-2 hover:text-link-hover"
+        >
+          See what it has spent
+        </Link>
+        .
+      </p>
+
       <CreateToken orgSlug={org} target={target} />
 
       <section aria-labelledby="issued" className="mt-8">
