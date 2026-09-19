@@ -199,6 +199,39 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Layer 1 — raw palette, OLED
+   Applied *with* `.dark`, never instead of it: this block overrides
+   the neutral ground and nothing else, so every state hue is
+   inherited from the dark scale above. A `dark:` utility keeps
+   working, and the two schemes cannot drift because one is mostly
+   the other. See DESIGN.md §6.4.
+
+   Neutral rather than cool: on true black a cast reads as a colour
+   the reader did not ask for. Steps 4 and 6 are the brief's
+   rgba(255,255,255,0.08) and 0.12 borders resolved to opaque hex,
+   which keeps them inside the contrast gate — an rgba border is
+   invisible to a machine check.
+
+   Step 9 is #8a8a8a, not the #71717a that was proposed: that value
+   measures 4.35:1 on pure black and fails AA for body text. Every
+   pair here was measured before it was written.
+   ───────────────────────────────────────────────────────────── */
+.oled {
+  --graphite-1: #000000;
+  --graphite-2: #050505;
+  --graphite-3: #0a0a0a;
+  --graphite-4: #141414;
+  --graphite-5: #1a1a1a;
+  --graphite-6: #1f1f1f;
+  --graphite-7: #2a2a2a;
+  --graphite-8: #5f5f5f;
+  --graphite-9: #8a8a8a;
+  --graphite-10: #a1a1aa;
+  --graphite-11: #b4b4bd;
+  --graphite-12: #ffffff;
+}
+
+/* ─────────────────────────────────────────────────────────────
    Layer 2 — semantic aliases. The only layer components may use.
    ───────────────────────────────────────────────────────────── */
 :root {
@@ -253,6 +286,47 @@
   --elevation-3: 0 16px 48px rgb(0 0 0 / 0.6);
 }
 
+/* OLED overrides only the ground. No state colour appears here, and that
+   absence is the design: a badge must mean the same thing in both dark
+   schemes. DESIGN.md §6.4. */
+.oled {
+  --bg-overlay: color-mix(in srgb, #000000 72%, transparent);
+  --elevation-1: 0 1px 2px rgb(0 0 0 / 0.6);
+  --elevation-2: 0 4px 12px rgb(0 0 0 / 0.7);
+  --elevation-3: 0 16px 48px rgb(0 0 0 / 0.8);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Glass — a secondary material, three tokens, and no shadow.
+   DESIGN.md §5.6. Permitted over content (popovers, menus, the
+   command palette, sheets, toasts, floating controls); forbidden
+   on canvas, cards, tables and panels.
+
+   There is deliberately no `--glass-shadow`: §5.2 stands, borders
+   do the work, and a panel casting a shadow *and* blurring asks two
+   materials to do one job.
+
+   Derived from the neutral scale rather than written as literals, so
+   the material follows the scheme instead of assuming a dark one.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --glass-bg: color-mix(in srgb, var(--graphite-1) 72%, transparent);
+  --glass-border: color-mix(in srgb, var(--graphite-12) 10%, transparent);
+  --glass-blur: 16px;
+}
+
+.dark {
+  --glass-bg: color-mix(in srgb, var(--graphite-2) 64%, transparent);
+  --glass-border: color-mix(in srgb, var(--graphite-12) 12%, transparent);
+}
+
+/* Slightly more opaque and a fainter edge: over true black a 12% white
+   border is a visible line rather than an edge. */
+.oled {
+  --glass-bg: color-mix(in srgb, var(--graphite-3) 72%, transparent);
+  --glass-border: color-mix(in srgb, var(--graphite-12) 8%, transparent);
+}
+
 /* ─────────────────────────────────────────────────────────────
    Layer 3 — Tailwind theme. `inline` keeps the reference live so
    utilities respond to the colour scheme instead of freezing.
@@ -289,6 +363,12 @@
 
   --color-link: var(--link);
   --color-link-hover: var(--link-hover);
+
+  /* Glass. `--blur-glass` generates `backdrop-blur-glass`, so the radius is
+     a token rather than an arbitrary value in a class. */
+  --color-glass: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --blur-glass: var(--glass-blur);
 
   /* Type — Inter for interface, JetBrains Mono for keys/code/ICU.
      Noto stacks so translated strings render in their own script;

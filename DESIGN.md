@@ -335,6 +335,36 @@ When a third level feels necessary, the answer is almost always that the
 weight, a rule, or the leading edge instead. Borders are the most expensive way
 to group and the easiest to overuse.
 
+### 5.6 Glass
+
+A secondary material, not a surface style. Three tokens, and deliberately no
+fourth:
+
+| Token | Role |
+|---|---|
+| `--glass-bg` | the translucent ground |
+| `--glass-border` | its edge |
+| `--glass-blur` | the backdrop blur radius |
+
+**There is no `--glass-shadow`, and that omission is the rule.** §5.2 stands
+unchanged: borders do the work, and shadows stay for overlays. A glass panel
+that also casts a shadow is asking two materials to do one job, and the shadow
+is the one that reads as a template.
+
+**Permitted on:** popovers, menus, the command palette, sheets, toasts,
+floating navigation, and secondary floating controls. Every one of those is
+*over* content, which is what makes translucency mean something — you can see
+what it covers.
+
+**Forbidden on:** page canvas, cards, tables, panels, and any data surface. A
+dashboard where everything is translucent has no ground, and nothing can sit on
+top of anything. The main surfaces stay solid.
+
+**Never load-bearing for legibility.** Any surface using `backdrop-blur` states
+an opaque fallback under the `reduced-transparency` variant, which exists in
+`tokens.css` for exactly this. Unlike reduced motion there is no global escape
+hatch that can supply the right background, so each surface supplies its own.
+
 ---
 
 ## 6. Colour system
@@ -408,11 +438,40 @@ the marketing site, crimson only where the CLI's real refusals are quoted, and
 amber nowhere on `/roadmap`, `/benchmarks`, `/quality` or `/pricing` — the
 pages where a plan position would most tempt it.
 
-### 6.4 Dark mode
+### 6.4 Colour schemes — three
 
-A distinct scale, not an inversion. Elevation is expressed through surface
-lightness and border, not shadow. Every token pair must pass AA in both
-schemes; contrast is verified by unit test against the real token file.
+`light` · `dark` · `oled`. A distinct scale each time, never an inversion:
+inverted palettes produce muddy mid-tones and broken contrast. Elevation is
+expressed through surface lightness and border, not shadow. Every token pair
+passes AA in every scheme, verified by unit test against the real token file.
+
+**`oled` is a refinement of `dark`, not a fourth palette.** It is applied *with*
+`.dark`, and overrides only the ground: the neutral scale, the overlay scrim and
+the elevation shadows. Every state colour — ambiguous, confident, degraded,
+failed, link — is inherited unchanged, so the meaning of a colour never depends
+on which dark scheme a reader chose.
+
+That layering is what keeps it cheap. A `dark:` utility keeps working, a new
+state token is defined once, and the two schemes cannot drift apart because one
+of them is mostly the other.
+
+| | `dark` | `oled` |
+|---|---|---|
+| Canvas | `#0c0e12`, a near-black with a cool cast | `#000000`, true black |
+| Character | a low-light room | an unlit panel |
+| For | the default dark reader | a reader who wants the display off where the UI is dark |
+
+**No component writes `#000000`.** The black is `--bg-canvas` under the `oled`
+scheme, like every other ground in this system. A literal in a component is the
+same defect it has always been (§6.1), and it is worse here because it would
+render black in all three schemes.
+
+**Measured, not eyeballed.** The OLED neutrals were chosen against the contrast
+gate, and one proposal was rejected by it: a muted grey of `#71717A` measures
+**4.35:1** on pure black and fails AA for body text. The tertiary step is
+`#8a8a8a` (6.08:1) instead. Pure black raises contrast for everything inherited
+from `dark`, so no inherited pair got worse — the risk in an OLED scheme is
+never the foreground, it is a grey that looked fine on `#0c0e12`.
 
 ---
 
@@ -439,6 +498,24 @@ feedback), the ecosystem rail's drift, skeleton shimmer.
 
 Forbidden: scroll-triggered reveals, parallax, staggered entrance, number
 count-ups, hover lift, anything decorative.
+
+**Named effects, ruled on once so the question stops returning.** Spotlight,
+glowing borders, magnetic buttons, floating navbars, 3D cards and their
+relatives are **not available in the application**, at any density. They fail
+the purpose test above — there is nothing a reader would misunderstand without
+them — and a dashboard is used for hours a day, where a decorative effect stops
+being delightful on the second encounter and becomes a cost on the thousandth.
+
+On the marketing site one may be permitted, individually and exceptionally,
+where it carries something the page cannot say otherwise. That permission is
+per-use and argued in the pull request; it never becomes a convention, a
+default, or a component in `packages/ui`. An effect that appears on two
+surfaces has become a convention and needs a rule here instead.
+
+Modern here comes from contrast, monochrome ground, the border system,
+restrained glass, spacing, typography and interaction quality — not from
+effects. A product that needs a glow to look current will need a brighter one
+next year.
 
 ### 7.3 Reduced motion
 
@@ -702,3 +779,33 @@ is worse than no rule, because it looks like compliance.
 
 Not yet enforced and therefore requiring review discipline: radius and control
 height usage, motion budget, and the data-surface completeness rule in §8.
+
+---
+
+## 17. Design System V2 — what was arbitrated, 2026-09-19
+
+A visual brief proposed an OLED-first direction with a glass system and a set
+of premium effects. Eight of its points met a rule already in this document.
+Recorded here so the same proposal does not have to be re-argued from scratch,
+and so the reasoning survives the decision.
+
+**Four rules were challenged and kept.** Each is a place where the brief and
+this document disagreed and this document won:
+
+| Challenged | Outcome |
+|---|---|
+| Cards 12–16px, modals 16–20px | **Kept §5.1.** Nothing above 12px on a data surface. Larger radii read consumer-soft, and the product is used by people at work. |
+| Transitions up to 300ms | **Kept §7.1.** Nothing exceeds 200ms. Precision is faster than it is slow. |
+| A second, shorter type scale (`display/heading/body/small/caption/code`) | **Kept §3.2.** One scale, eleven steps, enforced by test. A parallel scale is two scales, and the second one always wins locally. |
+| An accent colour used decoratively | **Kept §1.4 and §6.3.** Iris means *your judgement is required*, and nothing else. Colour reports state; it does not decorate. |
+
+**Three were adopted, with limits written into the rule rather than left to
+taste:** the `oled` scheme (§6.4), the glass material (§5.6), and the ruling on
+named effects (§7.2).
+
+**One was rejected outright:** `--glass-shadow`. §5.2 already says borders do
+the work.
+
+The rule the whole arbitration turns on: a design system is not made modern by
+adding to it. Every point above was decided by asking which choice leaves fewer
+ways to build the same thing.
