@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@localize-infra/ui';
+import { Alert, Button } from '@localize-infra/ui';
 import { useActionState } from 'react';
 import { verifyInstallation } from './actions';
 import { IDLE } from './verify-state';
@@ -33,10 +33,7 @@ export function VerifyInstallation({ orgSlug }: { orgSlug: string }) {
 
       <output aria-live="polite" className="contents">
         {state.checked && state.ok ? (
-          <div
-            className="mt-3 max-w-[64ch] rounded-md border border-confident bg-confident-bg px-3 py-2"
-            data-testid="verify-result"
-          >
+          <Alert tone="confident" className="mt-3 max-w-[64ch]">
             <p className="text-small font-medium text-confident-text">
               Reachable — {state.repositories} repositor
               {state.repositories === 1 ? 'y' : 'ies'} granted to this
@@ -52,14 +49,11 @@ export function VerifyInstallation({ orgSlug }: { orgSlug: string }) {
                 </li>
               ))}
             </ul>
-          </div>
+          </Alert>
         ) : null}
 
         {state.checked && !state.ok ? (
-          <div
-            className="mt-3 max-w-[64ch] rounded-md border border-failed bg-failed-bg px-3 py-2"
-            data-testid="verify-result"
-          >
+          <Alert tone="failed" className="mt-3 max-w-[64ch]">
             <p className="text-small text-failed-text">{state.problem}</p>
             {/*
               DESIGN.md §8: an error state reproduces machine output verbatim.
@@ -71,7 +65,7 @@ export function VerifyInstallation({ orgSlug }: { orgSlug: string }) {
                 {state.detail}
               </p>
             ) : null}
-          </div>
+          </Alert>
         ) : null}
       </output>
     </form>

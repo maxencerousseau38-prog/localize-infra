@@ -2,7 +2,7 @@
 
 import { ShellInstructions } from '@/components/shell-instructions';
 import type { CommandTarget } from '@/lib/onboarding/commands';
-import { Button, Field, useFieldControl } from '@localize-infra/ui';
+import { Alert, Button, Field, useFieldControl } from '@localize-infra/ui';
 import type { ComponentProps } from 'react';
 import { useActionState } from 'react';
 import { type CreateTokenState, createCliToken } from './actions';
@@ -99,9 +99,9 @@ export function CreateToken({
 
         <output aria-live="polite" className="contents">
           {state.error ? (
-            <p className="max-w-[64ch] rounded-md border border-failed bg-failed-bg px-3 py-2 text-small text-failed-text">
+            <Alert tone="failed" className="max-w-[64ch]">
               {state.error}
-            </p>
+            </Alert>
           ) : null}
         </output>
 
