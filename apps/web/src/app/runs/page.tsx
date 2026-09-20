@@ -40,7 +40,7 @@ export default async function RunsPage() {
   }
 
   await requireSession();
-  const runs = await listRunsForViewer();
+  const { runs, truncated } = await listRunsForViewer();
 
   const succeeded = runs.filter((r) => r.status === 'succeeded').length;
   const newest = runs[0];
@@ -80,6 +80,20 @@ export default async function RunsPage() {
       ) : (
         <div className="mt-6">
           <RunsTable runs={rows} />
+          {/*
+            Said, rather than left to be inferred from a round number.
+            The toolbar's count is the rows on this page; past fifty that is not
+            the total, and a page that shows "50 runs" while holding more is
+            making the reader's fifty-first run invisible without telling them.
+            §8 asks for pagination at this point — see `listRunsForViewer` for
+            why the honest sentence comes first and the machinery waits for a
+            workspace that needs it.
+          */}
+          {truncated ? (
+            <p className="mt-4 text-caption text-tertiary">
+              Showing the 50 most recent runs. Older ones are not on this page.
+            </p>
+          ) : null}
         </div>
       )}
     </Page>

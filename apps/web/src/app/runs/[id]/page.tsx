@@ -249,7 +249,7 @@ export default async function RunDetailPage({ params }: Params) {
       {/* The next action, when there is one. A run waiting on a person is the
           one state where the page should say what to do about it. */}
       {run.status === 'awaiting_review' ? (
-        <div className="mt-6 rounded-lg border border-ambiguous-border bg-ambiguous-bg px-4 py-3">
+        <div className="mt-6 rounded-lg border border-ambiguous bg-ambiguous-bg px-4 py-3">
           <p className="text-body font-medium text-primary">
             {openQuestions.length === 0
               ? 'Every question is answered. This run is ready to approve.'
@@ -263,7 +263,7 @@ export default async function RunDetailPage({ params }: Params) {
       ) : null}
 
       {progress.kind === 'stalled' ? (
-        <div className="mt-6 rounded-lg border border-degraded-border bg-degraded-bg px-4 py-3">
+        <div className="mt-6 rounded-lg border border-degraded bg-degraded-bg px-4 py-3">
           <p className="text-body font-medium text-primary">
             This run stopped reporting{' '}
             {Math.round(progress.silentForMs / 60000)} minutes ago
@@ -279,7 +279,7 @@ export default async function RunDetailPage({ params }: Params) {
           says neither. Stated here because the pull request this run opened is
           missing these strings, and the reviewer is about to approve it. */}
       {shortfall > 0 ? (
-        <div className="mt-6 rounded-lg border border-degraded-border bg-degraded-bg px-4 py-3">
+        <div className="mt-6 rounded-lg border border-degraded bg-degraded-bg px-4 py-3">
           <p className="text-body font-medium text-primary">
             {shortfall} translation{shortfall === 1 ? '' : 's'} missing across
             the {run.locales_succeeded} language
@@ -400,7 +400,7 @@ export default async function RunDetailPage({ params }: Params) {
           title="What failed"
           description="Reported exactly as the provider returned it."
         >
-          <pre className="overflow-x-auto rounded-lg border border-failed-border bg-failed-bg px-4 py-3 font-mono text-caption leading-5 text-secondary">
+          <pre className="overflow-x-auto rounded-lg border border-failed bg-failed-bg px-4 py-3 font-mono text-caption leading-5 text-secondary">
             {run.error}
           </pre>
         </PageSection>
