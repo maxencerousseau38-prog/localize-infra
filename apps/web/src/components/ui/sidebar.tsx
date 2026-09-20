@@ -249,7 +249,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
+          className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border"
         >
           {children}
         </div>
@@ -321,8 +321,17 @@ function SidebarInset({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="sidebar-inset"
       className={cn(
+        /*
+          The `variant=inset` branch is gone. `<Sidebar>` is rendered here as
+          `collapsible="icon"` with no `variant`, so it defaults to `'sidebar'`
+          and none of these utilities could ever apply — they described a layout
+          this application does not use, in a file a reader goes to when they
+          want to know what it does use. Two of them were also off the contract:
+          `rounded-xl` is §5.1's dialog radius on a page region, and `shadow-sm`
+          is not on the `e1/e2/e3` scale, on a surface §5.2 gives no shadow to at
+          all.
+        */
         'relative flex w-full flex-1 flex-col bg-background',
-        'md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
         className,
       )}
       {...props}
@@ -338,7 +347,7 @@ function SidebarInput({
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
-      className={cn('h-8 w-full bg-background shadow-none', className)}
+      className={cn('h-8 w-full bg-background', className)}
       {...props}
     />
   );

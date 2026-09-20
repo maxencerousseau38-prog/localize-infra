@@ -76,7 +76,7 @@ export function SelectItem({
   return (
     <Select.Item
       className={cn(
-        'relative flex cursor-pointer select-none items-center gap-2 rounded-[4px]',
+        'relative flex cursor-pointer select-none items-center gap-2 rounded-sm',
         'py-1.5 pe-8 ps-2 text-body leading-5 text-primary outline-none',
         'data-[highlighted]:bg-surface',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',

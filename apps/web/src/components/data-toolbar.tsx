@@ -144,7 +144,7 @@ export function DataFilter<T extends string>({
             <label
               key={option.value}
               className={cn(
-                'cursor-pointer rounded-[4px] px-2.5 py-1 text-caption font-medium',
+                'cursor-pointer rounded-sm px-2.5 py-1 text-caption font-medium',
                 'transition-colors duration-(--duration-micro)',
                 // The ring lives on the label because the input itself is
                 // visually hidden; `:has()` keeps it tied to real focus.
