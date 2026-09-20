@@ -292,6 +292,27 @@ test.describe('workspace', () => {
     await page.getByRole('textbox', { name: /Project name/ }).fill(slug);
     await page.getByRole('button', { name: 'Delete project' }).click();
 
+    /*
+     * The toast, which is the only one this product raises.
+     *
+     * The deletion ends in a redirect, so the Danger Zone that could have said
+     * it inline no longer exists; what the reader is left with is a list one
+     * row shorter, and an absence is not evidently anyone's doing. Asserting it
+     * here rather than in a unit test is the point — `packages/ui` can only
+     * scan the source, and the chain that can actually break runs through the
+     * redirect, the query parameter, the provider mounted in the root layout
+     * and the Radix viewport.
+     */
+    await expect(
+      // `exact`, because the sentence appears twice: once as the title and once
+      // inside the hidden live region Radix mounts to announce it. That second
+      // copy is the component working, not a duplicate to be deduplicated away.
+      page.getByText(`Deleted ${slug}`, { exact: true }),
+    ).toBeVisible();
+
+    // And the parameter is dropped once it has been said, so a refresh does not
+    // re-announce a deletion that happened once. `toHaveURL` retries, so this
+    // asserts the strip rather than racing it.
     await expect(page).toHaveURL(`${AUTH_URL}/acceptance/projects`);
     await expect(
       page.getByRole('link', { name: new RegExp(name) }),

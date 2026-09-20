@@ -104,6 +104,12 @@ export {
 export { StateRule, type StateRuleProps } from './primitives/state-rule';
 export { StatusDot } from './primitives/status-dot';
 export {
+  ToastProvider,
+  useToast,
+  type ToastInput,
+  type ToastTone,
+} from './primitives/toast';
+export {
   SortableTH,
   TBody,
   Table,

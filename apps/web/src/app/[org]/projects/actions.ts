@@ -174,5 +174,7 @@ export async function deleteProject(
   }
 
   revalidatePath(`/${orgSlug}/projects`);
-  redirect(`/${orgSlug}/projects`);
+  // The slug rides along so the list can say which project went: the Danger
+  // Zone that could have said it inline is gone with this navigation.
+  redirect(`/${orgSlug}/projects?deleted=${encodeURIComponent(project.slug)}`);
 }

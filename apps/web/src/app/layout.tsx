@@ -1,7 +1,11 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppTopbar } from '@/components/app-topbar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { ThemeScript, TooltipProvider } from '@localize-infra/ui';
+import {
+  ThemeScript,
+  ToastProvider,
+  TooltipProvider,
+} from '@localize-infra/ui';
 import type { Metadata, Viewport } from 'next';
 import {
   Archivo,
@@ -128,17 +132,23 @@ export default async function RootLayout({
             flex row with a hand-rolled column and a second copy of the
             navigation living in the topbar; all of that is now one component
             tree with one source of truth. */}
-        <TooltipProvider delayDuration={400}>
-          <SidebarProvider className="h-dvh min-h-0">
-            <AppSidebar />
-            <SidebarInset className="min-w-0 overflow-hidden">
-              <AppTopbar />
-              <main id="main" className="flex-1 overflow-y-auto">
-                {children}
-              </main>
-            </SidebarInset>
-          </SidebarProvider>
-        </TooltipProvider>
+        {/* ToastProvider carries only the viewport and the queue; it renders
+            nothing until something is pushed. It sits outside the shell so a
+            message survives the surface that caused it being replaced — which
+            is the only case this product uses a toast for. */}
+        <ToastProvider>
+          <TooltipProvider delayDuration={400}>
+            <SidebarProvider className="h-dvh min-h-0">
+              <AppSidebar />
+              <SidebarInset className="min-w-0 overflow-hidden">
+                <AppTopbar />
+                <main id="main" className="flex-1 overflow-y-auto">
+                  {children}
+                </main>
+              </SidebarInset>
+            </SidebarProvider>
+          </TooltipProvider>
+        </ToastProvider>
       </body>
     </html>
   );
