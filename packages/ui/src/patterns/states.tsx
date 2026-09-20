@@ -72,7 +72,7 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        'flex flex-col items-start gap-3 rounded-lg border border-failed-border',
+        'flex flex-col items-start gap-3 rounded-lg border border-failed',
         'bg-failed-bg px-4 py-4',
         className,
       )}

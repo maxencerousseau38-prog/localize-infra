@@ -53,7 +53,7 @@ export function DiscoverForm() {
       {state.error ? (
         <p
           role="alert"
-          className="mt-3 rounded-lg border border-failed-border bg-failed-bg px-4 py-3 text-small text-primary"
+          className="mt-3 rounded-lg border border-failed bg-failed-bg px-4 py-3 text-small text-primary"
         >
           {state.error}
         </p>

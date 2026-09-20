@@ -454,16 +454,45 @@ export async function listRunTranslations(
  * drifts. The flat /runs route is a history across workspaces, not a
  * project-scoped list; `listRuns` remains for the project page.
  */
-export async function listRunsForViewer(limit = 50): Promise<RunRecord[]> {
+export interface ViewerRuns {
+  runs: RunRecord[];
+  /** True when the caller has runs this page is not showing. */
+  truncated: boolean;
+}
+
+/**
+ * The limit is reported rather than applied in silence.
+ *
+ * This returned at most fifty rows and said nothing about it, and `/runs`
+ * rendered "50 runs" — a count that reads as a total and, past fifty, is not
+ * one. A workspace's fifty-first run would simply not exist as far as the page
+ * was concerned, and the number under the toolbar would have agreed.
+ *
+ * One extra row is fetched to answer "is there more?" without a second query
+ * and without `count: 'exact'`, which makes Postgres walk the whole table
+ * under RLS to produce a number the page does not otherwise need. The extra row
+ * is dropped before returning: the caller gets the limit it asked for, plus the
+ * fact.
+ *
+ * Deliberately not pagination. `packages/ui` ships a `Pagination` primitive and
+ * no surface uses it, because no workspace has approached fifty runs — the
+ * busiest has eight. Building page-through machinery for a threshold nobody has
+ * reached would be inventing the requirement; saying plainly that the list is
+ * the most recent fifty costs one sentence and is true today. §8's pagination
+ * clause applies "once rows exceed one screen", and this is the honest
+ * placeholder until one does.
+ */
+export async function listRunsForViewer(limit = 50): Promise<ViewerRuns> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('runs')
     .select(RUN_SELECT)
     .order('created_at', { ascending: false })
-    .limit(limit);
+    .limit(limit + 1);
 
   if (error) throw new Error(`Could not load runs: ${error.message}`);
-  return (data ?? []) as RunRecord[];
+  const rows = (data ?? []) as RunRecord[];
+  return { runs: rows.slice(0, limit), truncated: rows.length > limit };
 }
 
 /**
