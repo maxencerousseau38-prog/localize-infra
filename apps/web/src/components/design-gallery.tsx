@@ -58,13 +58,59 @@ import {
   TabsRoot,
   TabsTrigger,
   Textarea,
+  type ToastTone,
   type Tone,
   TooltipContent,
   TooltipRoot,
   TooltipTrigger,
+  useToast,
 } from '@localize-infra/ui';
 import { Inbox, MoreHorizontal, Trash2 } from 'lucide-react';
 import * as React from 'react';
+
+/**
+ * The only way to look at a toast without deleting something.
+ *
+ * Its one product consumer is the project deletion redirect, so the component
+ * would otherwise ship unseen — the state this repository keeps arriving at,
+ * most recently with the OLED scheme and the glass material. `packages/ui`'s
+ * toast test lists this file separately from the product consumer for exactly
+ * that reason: a demo is not a second place the product speaks.
+ *
+ * The error toast has no timer, which is the behaviour worth looking at here:
+ * it stays until it is dismissed.
+ */
+function ToastRow() {
+  const toast = useToast();
+  const cases: { tone: ToastTone; title: string; description?: string }[] = [
+    { tone: 'success', title: 'Deleted acme-web' },
+    {
+      tone: 'error',
+      title: 'Could not open the pull request',
+      description: 'GitHub refused the push: the branch is protected.',
+    },
+    {
+      tone: 'warning',
+      title: 'Two locales were skipped',
+      description: 'Their files could not be parsed.',
+    },
+    { tone: 'info', title: 'The run is queued behind one other' },
+  ];
+  return (
+    <div className="flex flex-wrap gap-2">
+      {cases.map((example) => (
+        <Button
+          key={example.tone}
+          variant="secondary"
+          size="sm"
+          onClick={() => toast(example)}
+        >
+          {example.tone}
+        </Button>
+      ))}
+    </div>
+  );
+}
 
 function Section({
   id,
@@ -470,6 +516,8 @@ export function DesignGallery() {
           </div>
 
           <ProgressBar value={62} label="Locales complete" />
+
+          <ToastRow />
 
           <ErrorState
             title="Could not reach the repository"

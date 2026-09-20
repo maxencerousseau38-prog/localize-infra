@@ -41,6 +41,7 @@ const usesGlass = FILES.filter((f) => f.text.includes('backdrop-blur-glass'));
 const PERMITTED = [
   'primitives/menu.tsx',
   'primitives/dialog.tsx',
+  'primitives/toast.tsx',
   'patterns/command-palette.tsx',
 ];
 

@@ -14,6 +14,7 @@ import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Activation } from './activation';
+import { DeletedToast } from './deleted-toast';
 import { GitHubConnection } from './github-connection';
 import { GitHubResult } from './github-result';
 import { NewProject } from './new-project';
@@ -35,11 +36,13 @@ export default async function ProjectsPage({
   // The GitHub callback redirects back here with its outcome. Every refusal
   // was previously silent: a rejected install and one that did nothing looked
   // exactly alike.
-  searchParams: Promise<{ github?: string }>;
+  // `deleted` is set by `deleteProject`, which redirects here — see
+  // deleted-toast.tsx for why the result is announced rather than left implicit.
+  searchParams: Promise<{ github?: string; deleted?: string }>;
 }) {
   await requireSession();
   const { org } = await params;
-  const { github } = await searchParams;
+  const { github, deleted } = await searchParams;
 
   const organization = await findOrganization(org);
   // Not found rather than forbidden: a workspace that exists but is not yours
@@ -89,6 +92,7 @@ export default async function ProjectsPage({
         action={<NewProject orgSlug={org} />}
       />
 
+      <DeletedToast slug={deleted} />
       <GitHubResult reason={github} />
 
       <GitHubConnection

@@ -5,7 +5,7 @@ import type { Tone } from './badge';
 /**
  * A bordered message that reports the state of something.
  *
- * Extracted from twelve hand-written copies across eight files, all of which
+ * Extracted from fifteen hand-written copies across twelve files, all of which
  * had independently arrived at the same five utilities — `rounded-md border
  * border-X bg-X-bg px-3 py-2 text-small text-X-text`. They agreed, which is
  * what made the duplication survive: nothing looked wrong, so nothing prompted
@@ -13,16 +13,16 @@ import type { Tone } from './badge';
  *
  * ## It does not announce itself
  *
- * No `role="alert"`, and that is deliberate rather than an omission. Most of
- * these live inside a caller-owned `<output aria-live="polite">` — sixteen such
- * regions exist in the app — and a nested `role="alert"` would announce the
- * same sentence twice, the second time assertively. The caller owns the live
- * region because the caller knows whether the message is new. Pass `role` when
- * this one is standing alone.
+ * No `role="alert"`, and that is deliberate rather than an omission. Twelve of
+ * the fifteen live inside a caller-owned `<output aria-live="polite">` — nine
+ * such regions exist in `apps/web` — and a nested `role="alert"` would announce
+ * the same sentence twice, the second time assertively. The caller owns the
+ * live region because the caller knows whether the message is new. Pass `role`
+ * when this one is standing alone, as the remaining three are.
  *
  * ## No icon by default
  *
- * §8 requires an icon on a Badge, and says nothing about this. The twelve
+ * §8 requires an icon on a Badge, and says nothing about this. The fifteen
  * originals carry none, so neither does this: the extraction is a refactor, and
  * a refactor that changes what twelve screens look like is not one. An icon
  * belongs to the surface that needs it, passed as a child.

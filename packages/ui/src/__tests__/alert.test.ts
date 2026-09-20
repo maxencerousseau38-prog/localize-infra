@@ -6,8 +6,8 @@ import { describe, expect, it } from 'vitest';
 /**
  * That the alert box stays one component.
  *
- * It was fifteen hand-written copies across ten files before this, all of which
- * had independently arrived at the same utilities. They agreed, which is
+ * It was fifteen hand-written copies across twelve files before this, all of
+ * which had independently arrived at the same utilities. They agreed, which is
  * exactly why the duplication survived review fifteen times: nothing looked
  * wrong. A consolidation without this test is a consolidation that comes undone
  * the next time somebody needs a red box and does not know there is a
