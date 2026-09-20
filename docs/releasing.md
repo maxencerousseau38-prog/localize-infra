@@ -4,7 +4,10 @@ Three packages are publishable: `@localize-infra/schemas`, `@localize-infra/core
 and `@localize-infra/cli`. **All three were published at 0.1.0 on 2026-08-28**;
 this document said they "have not been published" and is corrected here.
 
-**`cli` 0.3.0 is `latest`** since 2026-09-17 — see its section below.
+**`cli` 0.4.0 and `core` 0.2.0 are `latest`** since 2026-09-19 — see their
+section below. This line still said 0.3.0 a day later, which is the shape every
+correction in this file has: the publish happens outside Git, so nothing in the
+repository moves when the registry does.
 
 **`cli` 0.2.0 was published** 2026-09-12 at 07:43 UTC, with `latest`
 resolving to it until 0.3.0, and its dependencies still `^0.1.0` on `core` and
@@ -88,11 +91,16 @@ shared `API_AUTH_TOKEN`, which is now for server-to-server use only.
 - Against a self-hosted API older than 0.3.0 (no `whoami`, no preflight),
   the CLI behaves as 0.2.0 did.
 
-**One package, not three.** The CLI validates the `whoami` and preflight
-responses itself and imports nothing new from `@localize-infra/schemas`, so
-it still resolves `core` and `schemas` at `^0.1.0` from npm. Verify that on
-the packed tarball before publishing — a new import would install and then
-fail at runtime.
+**One package, not three.** The CLI validated the `whoami` and preflight
+responses itself and imported nothing new from `@localize-infra/schemas`, so
+0.3.0 shipped resolving `core` and `schemas` at `^0.1.0` from npm. That range
+is no longer current — 0.4.0 moved `core` to `^0.2.0`; this paragraph describes
+0.3.0 and is left in the past tense rather than updated, because rewriting a
+release record to match today is how a history stops being one.
+
+The check it names still applies to every release: verify the ranges on the
+packed tarball before publishing, because a new import installs and then fails
+at runtime.
 
 ### Publish sequence, in this order
 
@@ -145,6 +153,62 @@ fail at runtime.
   does. `API_AUTH_TOKEN` was then removed from the API's Preview and
   Development environments: it exists in Production only.
 
+## `core` 0.2.0 and `cli` 0.4.0 — published 2026-09-19
+
+**Two packages, the first release where "Order matters" below was not theory —
+and it was done in the wrong order.** Every release before this one moved `cli`
+alone, so the rule had never been exercised against the registry. Here it was,
+and the registry records the sequence:
+
+| Package | Published |
+|---|---|
+| `@localize-infra/cli@0.4.0` | 2026-09-19 **10:23:15.639** UTC |
+| `@localize-infra/core@0.2.0` | 2026-09-19 **10:23:37.560** UTC |
+
+`cli@0.4.0` declares `@localize-infra/core@^0.2.0`, and `core@0.2.0` did not
+exist for another **21.9 seconds**. `core@0.1.0` does not satisfy that range,
+so for that window the published CLI was uninstallable — `E404` on its own
+dependency, which is precisely the failure the section below describes in
+advance.
+
+Whether anyone hit it is not knowable: npm's download counts have no
+per-second granularity, so "nobody installed in those 22 seconds" is a guess,
+not a fact, and it is not claimed here.
+
+It is recorded rather than quietly fixed, because the lesson is not "publish in
+order" — that was already written down, in this document, one section below. It
+is that **the rule was written, read, and still not followed**, and nothing in
+the process could have caught it: there is no check between the two
+`npm publish` commands, the second simply runs or does not. A rule whose only
+enforcement is remembering it at the right moment gets broken at the moment it
+matters.
+
+Read the timestamps from `npm view <pkg> time --json` rather than from memory
+or from a terminal's scrollback. Twenty-two seconds is not a gap anybody
+notices by feel, and the order is the entire point.
+
+`schemas` stayed at 0.1.0, and `cli` still resolves it at `^0.1.0`.
+
+**What `core` 0.2.0 carries.** Extraction reads `.js` and `.jsx`, not only
+TypeScript. `SOURCE_EXTENSIONS` is `{ts,tsx,js,jsx}` and the framework globs
+interpolate it.
+
+Before this, a Vite + React project written in plain JSX detected as
+"Vite + React" and then extracted zero keys, because the globs only ever
+matched `.ts` and `.tsx`. That pairing is worse than a clean failure: detection
+succeeding and extraction returning nothing reads as "this project has no
+hardcoded strings", which is a finding rather than a fault, and the reader has
+no reason to look further.
+
+**Verified in the published tarball, not inferred from the version.** The same
+standard as 0.2.0 above, and it matters more here because the change is a
+string inside `dist/`: `npm pack @localize-infra/core@0.2.0` from the registry,
+unpacked, carries `SOURCE_EXTENSIONS = '{ts,tsx,js,jsx}'`. A version number
+proves that somebody ran `npm version`.
+
+**A minor rather than a patch**, on the same reasoning as `cli` 0.2.0: what a
+user sees changes. A project that extracted nothing now extracts its strings.
+
 ## Before anything
 
 1. **Authenticate.** `npm login`. Publishing fails with `ENEEDAUTH` otherwise.
@@ -193,9 +257,15 @@ fail at runtime.
 
 ## Order matters
 
-`cli` depends on `core` and `schemas` at `^0.1.0`, resolved from the registry —
-not from this workspace. Publishing `cli` first produces a package that fails to
-install for everyone with `E404` on its dependencies.
+`cli` depends on `core` at `^0.2.0` and `schemas` at `^0.1.0`, resolved from
+the registry — not from this workspace. Publishing `cli` first produces a
+package that fails to install for everyone with `E404` on its dependencies.
+
+**This is not hypothetical.** It happened on 2026-09-19, by twenty-two seconds
+— see the `core` 0.2.0 section above. Read the ranges out of
+`packages/cli/package.json` before every release rather than from this
+paragraph: they changed once already, and a sentence naming versions goes stale
+the moment one of them moves.
 
 ```bash
 npm publish -w @localize-infra/schemas --access public
@@ -239,21 +309,41 @@ mkdir -p /tmp/pack
 for p in schemas core cli; do (cd packages/$p && npm pack --pack-destination /tmp/pack); done
 
 mkdir -p /tmp/consumer && cd /tmp/consumer && npm init -y
-# Version per package, not one number: cli is at 0.3.0 and the other two
-# did not. A glob here would silently install whichever tarballs happen to be
-# in the directory, including stale ones from an earlier run.
+# Version per package, not one number: the three move independently. A glob
+# here would silently install whichever tarballs happen to be in the directory,
+# including stale ones from an earlier run — and these filenames go stale on
+# their own, so read them off `ls /tmp/pack` rather than from this page.
 npm install /tmp/pack/localize-infra-schemas-0.1.0.tgz \
-            /tmp/pack/localize-infra-core-0.1.0.tgz \
-            /tmp/pack/localize-infra-cli-0.3.0.tgz
+            /tmp/pack/localize-infra-core-0.2.0.tgz \
+            /tmp/pack/localize-infra-cli-0.4.0.tgz
 npx localize-infra            # prints usage
 ```
 
-This has been run, most recently on 2026-08-28 — dated because `packages/core`
-changes, and an undated "this has been run" quietly comes to mean "against some
-earlier artefact". The tarballs contain `dist/`, `README.md` and `LICENSE` and
-nothing else — no `src/`, no compiled tests, no `.tsbuildinfo`. The binary links,
-the shebang survives, and framework detection and string extraction work from
-the installed package.
+**Two of these three filenames were wrong until 2026-09-20** — `core-0.1.0` and
+`cli-0.3.0`, left behind by two releases — so the block as written exited on
+`ENOENT` for files `npm pack` no longer produces. Hardcoding them is still the
+right call over a glob, for the reason in the comment; the cost is that this
+block has to be re-run, not re-read, whenever a version moves.
+
+This has been run, most recently on **2026-09-20** — dated because the packages
+change, and an undated "this has been run" quietly comes to mean "against some
+earlier artefact". Observed on that run: the three tarballs contain `dist/`,
+`README.md`, `LICENSE` and `package.json` and nothing else — no `src/`, no
+compiled tests, no `.tsbuildinfo`; the binary links; and the shebang survives
+(`#!/usr/bin/env node` is the first line of the installed `dist/index.js`).
+
+**What this no longer proves, and used to.** The sentence here claimed
+"framework detection and string extraction work from the installed package".
+That has not been demonstrable by this procedure since 0.3.0: the preflight
+runs before anything touches the directory, so `init` on a Vite + React fixture
+exits without detecting or extracting — `No API token configured` with no
+token, and exit 1 on `Could not reach the API` with a syntactically valid token
+and an unreachable URL. Neither writes `locales/`. Both were run on 2026-09-20.
+Proving extraction from the installed package now needs a real token and a
+reachable API, which is the end-to-end check in the `cli` 0.3.0 section, not
+this one. That is also why the date on this block sat unchanged for twenty-three
+days: the procedure that produced it had stopped being runnable as written, and
+a step that cannot be run is not reported as failing.
 
 ## What publishing does not achieve
 
