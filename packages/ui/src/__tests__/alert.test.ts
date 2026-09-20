@@ -124,3 +124,96 @@ describe('Alert', () => {
     expect(danger?.text).toContain('rounded-lg border border-failed');
   });
 });
+
+/**
+ * The `section` size, which had appeared three times before it was a component.
+ *
+ * All three were on `/runs/[id]`, identical character for character down to the
+ * two inner `<p>` class strings — verified by extracting them rather than by
+ * reading, because three near-identical blocks in one file are exactly what the
+ * eye stops seeing.
+ */
+describe('Alert size="section"', () => {
+  /**
+   * The container, and the closing quote is load-bearing.
+   *
+   * Without it this matched two things that are not notices and must not be
+   * migrated: the `<pre>` on `/runs/[id]` that reproduces the provider's error
+   * verbatim (`… px-4 py-3 font-mono text-caption …`) and the single-line
+   * `role="alert"` paragraph in `discover-form` (`… px-4 py-3 text-small
+   * text-primary`). Both open with the same six utilities and are different
+   * components.
+   *
+   * That is the same failure the Danger Zone carve-out above already names — a
+   * regex matching on looks — and it caught this one on its first run rather
+   * than after a migration that changed two surfaces by accident.
+   */
+  const NOTICE =
+    /rounded-lg border border-(ambiguous|confident|degraded|failed) bg-\1-bg px-4 py-3"/;
+
+  it('is the only way that shape is drawn', () => {
+    const offenders = FILES.filter((f) => NOTICE.test(f.text)).map(
+      (f) => f.path,
+    );
+    expect(
+      offenders,
+      'these paint the section notice by hand instead of <Alert size="section">',
+    ).toEqual([]);
+  });
+
+  it('owns the heading and body classes, so they stop being copied', () => {
+    // The duplication that actually cost something: the container was one line
+    // per site, this pair was two.
+    expect(ALERT_CODE).toContain('text-body font-medium text-primary');
+    expect(ALERT_CODE).toContain(
+      'mt-1 max-w-[68ch] text-small leading-6 text-secondary',
+    );
+  });
+
+  it('leaves the one carrier whose container is a State Rule', () => {
+    /*
+     * `github-result.tsx` writes the same heading/body pair, and it is NOT
+     * migrated. Its container is a `StateRule` — §1.4's signature element, a
+     * 3px leading edge on `bg-surface/60` — not a bordered tinted box. Passing
+     * it through `<Alert size="section">` would repaint that surface, and this
+     * slice was asked to change no appearance.
+     *
+     * Named here rather than left implicit, so the exception is a decision with
+     * a reason attached instead of a file somebody forgot. Sharing the pair
+     * across both containers is a real follow-up; neutering the component with
+     * `className="border-0 bg-transparent p-0"` to reach it is not.
+     */
+    const carriers = FILES.filter((f) =>
+      f.text.includes('mt-1 max-w-[68ch] text-small leading-6 text-secondary'),
+    ).map((f) => f.path);
+    expect(carriers).toEqual([
+      'apps/web/src/app/[org]/projects/github-result.tsx',
+    ]);
+  });
+
+  it('does not tint its text the way the inline size does', () => {
+    /*
+     * The one place the two sizes genuinely disagree, and the reason they could
+     * not be one class string. `inline` paints the whole message in the state's
+     * text colour; at two lines and page width that reads as shouting, and the
+     * three originals did not do it. So the tone map carries border and
+     * background only, and the text colour is applied at `inline` alone.
+     */
+    const tone = ALERT_CODE.match(
+      /const TONE: Record<Tone, string> = \{[^}]*\}/,
+    );
+    expect(tone?.[0]).toBeTruthy();
+    expect(tone?.[0], 'TONE must not carry a text colour').not.toMatch(
+      /text-(ambiguous|confident|degraded|failed)-text|text-secondary/,
+    );
+    expect(ALERT_CODE).toMatch(/size === 'inline' && INLINE_TEXT\[tone\]/);
+  });
+
+  it('gives the section shape only when a heading asks for it', () => {
+    // `inline` is the default, so the fifteen existing callers are untouched by
+    // this change — which is the whole reason it is a size rather than a second
+    // component.
+    expect(ALERT_CODE).toMatch(/size: AlertSize = 'inline'|size = 'inline'/);
+    expect(ALERT_CODE).toMatch(/heading === undefined/);
+  });
+});

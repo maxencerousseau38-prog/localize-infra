@@ -14,6 +14,7 @@ import {
 } from '@/lib/runs/progress';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
+  Alert,
   Badge,
   Button,
   PIPELINE_STAGES,
@@ -249,49 +250,59 @@ export default async function RunDetailPage({ params }: Params) {
       {/* The next action, when there is one. A run waiting on a person is the
           one state where the page should say what to do about it. */}
       {run.status === 'awaiting_review' ? (
-        <div className="mt-6 rounded-lg border border-ambiguous bg-ambiguous-bg px-4 py-3">
-          <p className="text-body font-medium text-primary">
-            {openQuestions.length === 0
+        <Alert
+          tone="ambiguous"
+          size="section"
+          className="mt-6"
+          heading={
+            openQuestions.length === 0
               ? 'Every question is answered. This run is ready to approve.'
-              : `${openQuestions.length} question${openQuestions.length === 1 ? '' : 's'} waiting on you.`}
-          </p>
-          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
-            Answering and approving happen on the run’s project page, where the
-            proposal it will commit is shown alongside the questions.
-          </p>
-        </div>
+              : `${openQuestions.length} question${openQuestions.length === 1 ? '' : 's'} waiting on you.`
+          }
+        >
+          Answering and approving happen on the run’s project page, where the
+          proposal it will commit is shown alongside the questions.
+        </Alert>
       ) : null}
 
       {progress.kind === 'stalled' ? (
-        <div className="mt-6 rounded-lg border border-degraded bg-degraded-bg px-4 py-3">
-          <p className="text-body font-medium text-primary">
-            This run stopped reporting{' '}
-            {Math.round(progress.silentForMs / 60000)} minutes ago
-          </p>
-          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
-            The request that was carrying it probably ended. Nothing was
-            committed. Start another run.
-          </p>
-        </div>
+        <Alert
+          tone="degraded"
+          size="section"
+          className="mt-6"
+          heading={
+            <>
+              This run stopped reporting{' '}
+              {Math.round(progress.silentForMs / 60000)} minutes ago
+            </>
+          }
+        >
+          The request that was carrying it probably ended. Nothing was
+          committed. Start another run.
+        </Alert>
       ) : null}
 
       {/* A shortfall is not a failure and is not a success, and the status word
           says neither. Stated here because the pull request this run opened is
           missing these strings, and the reviewer is about to approve it. */}
       {shortfall > 0 ? (
-        <div className="mt-6 rounded-lg border border-degraded bg-degraded-bg px-4 py-3">
-          <p className="text-body font-medium text-primary">
-            {shortfall} translation{shortfall === 1 ? '' : 's'} missing across
-            the {run.locales_succeeded} language
-            {run.locales_succeeded === 1 ? '' : 's'} that answered
-          </p>
-          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
-            {owed} were expected — {run.keys_extracted} string
-            {run.keys_extracted === 1 ? '' : 's'} in each. The missing ones are
-            absent from the files this run proposed, not translated badly.
-            Running again attempts only what is still missing.
-          </p>
-        </div>
+        <Alert
+          tone="degraded"
+          size="section"
+          className="mt-6"
+          heading={
+            <>
+              {shortfall} translation{shortfall === 1 ? '' : 's'} missing across
+              the {run.locales_succeeded} language
+              {run.locales_succeeded === 1 ? '' : 's'} that answered
+            </>
+          }
+        >
+          {owed} were expected — {run.keys_extracted} string
+          {run.keys_extracted === 1 ? '' : 's'} in each. The missing ones are
+          absent from the files this run proposed, not translated badly. Running
+          again attempts only what is still missing.
+        </Alert>
       ) : null}
 
       <PageSection
