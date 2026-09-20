@@ -14,6 +14,7 @@ export {
 } from './lib/locale';
 
 /* ── Primitives ──────────────────────────────────────────────── */
+export { Alert, type AlertProps } from './primitives/alert';
 export {
   Badge,
   CountBadge,

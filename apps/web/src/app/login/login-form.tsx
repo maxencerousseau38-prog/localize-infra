@@ -1,7 +1,7 @@
 'use client';
 
 import { MINIMUM_PASSWORD_LENGTH } from '@localize-infra/schemas';
-import { Button, Field, Input } from '@localize-infra/ui';
+import { Alert, Button, Field, Input } from '@localize-infra/ui';
 import { useActionState } from 'react';
 import { type AuthState, signIn, signUp } from './actions';
 
@@ -75,16 +75,8 @@ export function LoginForm({
       {/* Live region: the result of a submit must reach a screen reader
           without it having to hunt for what changed. */}
       <output aria-live="polite" className="contents">
-        {error ? (
-          <p className="rounded-md border border-failed bg-failed-bg px-3 py-2 text-small text-failed-text">
-            {error}
-          </p>
-        ) : null}
-        {notice ? (
-          <p className="rounded-md border border-line bg-surface px-3 py-2 text-small text-secondary">
-            {notice}
-          </p>
-        ) : null}
+        {error ? <Alert tone="failed">{error}</Alert> : null}
+        {notice ? <Alert tone="neutral">{notice}</Alert> : null}
       </output>
 
       <div className="flex flex-col gap-3 sm:flex-row">

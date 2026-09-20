@@ -4,7 +4,7 @@ import { findOrganization, requireSession } from '@/lib/data/workspace';
 import { toRunTableRow } from '@/lib/runs/table-row';
 import { loadUsage } from '@/lib/usage/load';
 import { describeLastUsed } from '@/lib/usage/summary';
-import { Badge } from '@localize-infra/ui';
+import { Alert, Badge } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -95,14 +95,14 @@ export default async function UsagePage({
            * fabricated ceiling, and inventing 5000 here would be a number this
            * page believes rather than one the database enforces.
            */
-          <p
-            className="mt-4 max-w-[64ch] rounded-md border border-line bg-surface/40 px-4 py-3 text-small leading-6 text-secondary"
-            data-testid="limits-unavailable"
+          <Alert
+            tone="neutral"
+            className="mt-4 max-w-[64ch] bg-surface/40 px-4 py-3 leading-6"
           >
             The hosted API's limits could not be read, so this page will not
             claim what they are. The figures below are still this workspace's
             real spending.
-          </p>
+          </Alert>
         ) : null}
 
         <dl

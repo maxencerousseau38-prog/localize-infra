@@ -7,7 +7,7 @@ import {
   listProjects,
   requireSession,
 } from '@/lib/data/workspace';
-import { Badge, type Tone } from '@localize-infra/ui';
+import { Alert, Badge, type Tone } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -100,7 +100,10 @@ export default async function TokensPage({
       />
 
       {installation ? null : (
-        <p className="mt-6 max-w-[64ch] rounded-md border border-line bg-surface/40 px-4 py-3 text-small leading-6 text-secondary">
+        <Alert
+          tone="neutral"
+          className="mt-6 max-w-[64ch] bg-surface/40 px-4 py-3 leading-6"
+        >
           This workspace has no GitHub connection yet. A token will translate,
           but <span className="font-mono">--open-pr</span> is refused until you{' '}
           <Link
@@ -110,7 +113,7 @@ export default async function TokensPage({
             connect GitHub
           </Link>
           .
-        </p>
+        </Alert>
       )}
 
       <p className="mt-4 text-small text-secondary">

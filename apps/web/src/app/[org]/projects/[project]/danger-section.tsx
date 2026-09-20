@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Field, useFieldControl } from '@localize-infra/ui';
+import { Alert, Button, Field, useFieldControl } from '@localize-infra/ui';
 import type { ComponentProps } from 'react';
 import { useActionState } from 'react';
 import { type DeleteProjectState, deleteProject } from '../actions';
@@ -113,9 +113,9 @@ export function DangerSection({
 
         <output aria-live="polite" className="contents">
           {state.error ? (
-            <p className="max-w-[64ch] rounded-md border border-failed bg-failed-bg px-3 py-2 text-small text-failed-text">
+            <Alert tone="failed" className="max-w-[64ch]">
               {state.error}
-            </p>
+            </Alert>
           ) : null}
         </output>
 

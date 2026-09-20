@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Field, Input } from '@localize-infra/ui';
+import { Alert, Button, Field, Input } from '@localize-infra/ui';
 import { useActionState } from 'react';
 import { type WorkspaceState, createWorkspace } from './actions';
 
@@ -20,11 +20,7 @@ export function WorkspaceForm() {
       </Field>
 
       <output aria-live="polite" className="contents">
-        {state.error ? (
-          <p className="rounded-md border border-failed bg-failed-bg px-3 py-2 text-small text-failed-text">
-            {state.error}
-          </p>
-        ) : null}
+        {state.error ? <Alert tone="failed">{state.error}</Alert> : null}
       </output>
 
       <Button type="submit" variant="primary" size="lg" disabled={pending}>

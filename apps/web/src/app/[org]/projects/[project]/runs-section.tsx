@@ -1,7 +1,11 @@
 'use client';
 
 import { runProgress, shouldPoll } from '@/lib/runs/progress';
-import { PIPELINE_STAGE_NAMES, type PipelineStageId } from '@localize-infra/ui';
+import {
+  Alert,
+  PIPELINE_STAGE_NAMES,
+  type PipelineStageId,
+} from '@localize-infra/ui';
 import { Badge, Button, type Tone } from '@localize-infra/ui';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect } from 'react';
@@ -162,9 +166,9 @@ export function RunsSection({
 
       <output aria-live="polite" className="contents">
         {state.error ? (
-          <p className="mt-4 rounded-md border border-failed bg-failed-bg px-3 py-2 text-small text-failed-text">
+          <Alert tone="failed" className="mt-4">
             {state.error}
-          </p>
+          </Alert>
         ) : null}
       </output>
 

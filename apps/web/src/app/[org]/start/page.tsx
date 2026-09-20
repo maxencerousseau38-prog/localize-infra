@@ -4,7 +4,7 @@ import { runCommand, translateOnlyCommand } from '@/lib/onboarding/commands';
 import { loadOnboarding } from '@/lib/onboarding/load';
 import type { OnboardingStep, StepId } from '@/lib/onboarding/steps';
 import { REFUSALS } from '@/lib/onboarding/troubleshooting';
-import { Badge, CopyCommand, type Tone } from '@localize-infra/ui';
+import { Alert, Badge, CopyCommand, type Tone } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -180,13 +180,13 @@ export default async function StartPage({
       />
 
       {onboarding.activated ? (
-        <p
-          className="mt-6 max-w-[64ch] rounded-md border border-confident bg-confident-bg px-4 py-3 text-small leading-6 text-confident-text"
-          data-testid="activated"
+        <Alert
+          tone="confident"
+          className="mt-6 max-w-[64ch] px-4 py-3 leading-6"
         >
           This workspace has opened a pull request. The path below is done —
           everything after this is the same command, run again.
-        </p>
+        </Alert>
       ) : null}
 
       <ol

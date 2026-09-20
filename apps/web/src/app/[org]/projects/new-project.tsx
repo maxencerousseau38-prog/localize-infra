@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Alert,
   Button,
   DialogBody,
   DialogContent,
@@ -82,11 +83,7 @@ export function NewProject({ orgSlug }: { orgSlug: string }) {
             </Field>
 
             <output aria-live="polite" className="contents">
-              {state.error ? (
-                <p className="rounded-md border border-failed bg-failed-bg px-3 py-2 text-small text-failed-text">
-                  {state.error}
-                </p>
-              ) : null}
+              {state.error ? <Alert tone="failed">{state.error}</Alert> : null}
             </output>
           </DialogBody>
 
