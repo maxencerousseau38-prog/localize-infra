@@ -310,20 +310,27 @@
    the material follows the scheme instead of assuming a dark one.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --glass-bg: color-mix(in srgb, var(--graphite-1) 72%, transparent);
+  /* 92%, not the 72% this shipped with for one commit.
+     At 72% the open command palette failed axe with `color-contrast: 2
+     nodes` — enough of the page beneath bled through to drop two text nodes
+     under AA. That is §5.6's own rule ("never load-bearing for legibility")
+     broken by the token meant to implement it.
+     The blur is what reads as glass; the opacity is what keeps the text
+     readable. Spending the opacity buys nothing and costs the contrast. */
+  --glass-bg: color-mix(in srgb, var(--graphite-1) 92%, transparent);
   --glass-border: color-mix(in srgb, var(--graphite-12) 10%, transparent);
   --glass-blur: 16px;
 }
 
 .dark {
-  --glass-bg: color-mix(in srgb, var(--graphite-2) 64%, transparent);
+  --glass-bg: color-mix(in srgb, var(--graphite-2) 92%, transparent);
   --glass-border: color-mix(in srgb, var(--graphite-12) 12%, transparent);
 }
 
-/* Slightly more opaque and a fainter edge: over true black a 12% white
-   border is a visible line rather than an edge. */
+/* A fainter edge: over true black a 12% white border is a visible line
+   rather than an edge. */
 .oled {
-  --glass-bg: color-mix(in srgb, var(--graphite-3) 72%, transparent);
+  --glass-bg: color-mix(in srgb, var(--graphite-3) 92%, transparent);
   --glass-border: color-mix(in srgb, var(--graphite-12) 8%, transparent);
 }
 

@@ -111,11 +111,22 @@ test('theme choice persists and applies before first paint', async ({
   await expect(page.locator('html')).toHaveClass(/dark/);
   await expect(trigger).toHaveAccessibleName('Colour theme: Dark');
 
-  // The choice is still a choice: all three states are reachable, and the
-  // selected one is the one reported.
+  /*
+   * The choice is still a choice: every state is reachable, and the selected
+   * one is the one reported.
+   *
+   * Asserted by name rather than by count. This read `toHaveCount(3)` and
+   * failed the day OLED was added — correctly, but uninformatively: an integer
+   * cannot say whether a state was gained or lost, and the fix for a bare
+   * count is always to edit the number. The names say which set is expected.
+   */
   await trigger.click();
-  const options = page.getByRole('menuitemradio');
-  await expect(options).toHaveCount(3);
+  await expect(page.getByRole('menuitemradio')).toHaveText([
+    'Light',
+    'Dark',
+    'OLED',
+    'System',
+  ]);
   await expect(page.getByRole('menuitemradio', { name: 'Dark' })).toBeChecked();
 });
 

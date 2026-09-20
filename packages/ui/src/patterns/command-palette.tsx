@@ -173,8 +173,12 @@ export function CommandPalette({
           aria-describedby={undefined}
           className={cn(
             'fixed left-1/2 top-[20vh] z-50 w-[calc(100vw-2rem)] max-w-[40rem]',
-            '-translate-x-1/2 overflow-hidden rounded-lg border border-line',
-            'bg-canvas shadow-e3',
+            '-translate-x-1/2 overflow-hidden rounded-lg',
+            // Glass (DESIGN.md §5.6). The palette is the clearest case for it:
+            // it appears over whatever you were doing and leaves as fast.
+            'border border-glass-border bg-glass backdrop-blur-glass shadow-e3',
+            'reduced-transparency:border-line reduced-transparency:bg-canvas',
+            'reduced-transparency:backdrop-blur-none',
             'data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out',
           )}
           onOpenAutoFocus={(event) => {

@@ -13,12 +13,31 @@ export const MenuRoot = DropdownMenu.Root;
 export const MenuTrigger = DropdownMenu.Trigger;
 export const MenuGroup = DropdownMenu.Group;
 
+/*
+ * Glass, because a menu sits *over* content — DESIGN.md §5.6. The material only
+ * means something when you can see what it covers, which is why it stops at
+ * overlays and never reaches a card or a table.
+ *
+ * The opaque fallback is not optional. `reduced-transparency` has no global
+ * escape hatch the way reduced-motion does: nothing can guess the right
+ * background for a surface, so each one states its own or becomes unreadable
+ * for the reader who asked.
+ */
 const surface = [
   'z-50 min-w-[10rem] overflow-hidden rounded-lg',
-  'border border-line bg-canvas p-1 shadow-e2',
+  'border border-glass-border bg-glass backdrop-blur-glass p-1 shadow-e2',
+  'reduced-transparency:border-line reduced-transparency:bg-canvas',
+  'reduced-transparency:backdrop-blur-none',
   'data-[state=open]:animate-pop-in',
   'data-[state=closed]:animate-pop-out',
 ];
+
+/*
+ * The tooltip stays solid, deliberately. §5.6 lists the surfaces glass is for
+ * and a tooltip is not among them: it is small, high-frequency and carries
+ * 13px text, so blurring it spends GPU on every hover to make a label harder
+ * to read. Restraint is what keeps the material worth something elsewhere.
+ */
 
 export function MenuContent({
   className,
