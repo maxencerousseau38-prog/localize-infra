@@ -22,7 +22,7 @@ export function LocaleChip({
     <span
       title={name}
       className={cn(
-        'inline-flex shrink-0 items-center rounded-[4px] border px-1.5',
+        'inline-flex shrink-0 items-center rounded-sm border px-1.5',
         'font-mono text-micro leading-[18px] uppercase',
         source
           ? 'border-line bg-surface text-tertiary'
