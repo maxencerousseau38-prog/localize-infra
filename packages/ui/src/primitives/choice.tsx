@@ -50,7 +50,7 @@ export function CheckboxField({
         aria-describedby={descriptionId}
         {...props}
         className={cn(
-          'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[4px]',
+          'mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm',
           'border border-strong bg-canvas',
           'transition-colors duration-(--duration-micro)',
           'data-[state=checked]:border-primary data-[state=checked]:bg-primary',

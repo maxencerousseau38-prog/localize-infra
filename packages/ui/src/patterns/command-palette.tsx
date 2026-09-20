@@ -275,7 +275,7 @@ export function CommandPalette({
                       onClick={() => select(index)}
                       onMouseMove={() => setActiveIndex(index)}
                       className={cn(
-                        'flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-2',
+                        'flex cursor-pointer items-center gap-2.5 rounded-sm px-2 py-2',
                         'text-body leading-5 text-primary',
                         active && 'bg-surface',
                       )}

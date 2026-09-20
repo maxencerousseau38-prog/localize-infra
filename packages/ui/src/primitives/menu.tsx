@@ -56,7 +56,7 @@ export function MenuContent({
 }
 
 const itemBase = [
-  'relative flex cursor-pointer select-none items-center gap-2 rounded-[4px]',
+  'relative flex cursor-pointer select-none items-center gap-2 rounded-sm',
   'px-2 py-1.5 text-body leading-5 text-primary outline-none',
   'data-[highlighted]:bg-surface',
   'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
