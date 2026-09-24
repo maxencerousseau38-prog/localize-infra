@@ -42,7 +42,21 @@ const STAGES: {
       },
       {
         title: 'CLI: extract, translate, open a pull request',
-        body: 'On npm as @localize-infra/cli. Framework detection, AST extraction, per-language failure isolation, a merge that never overwrites hand-edited translations, and pull request creation through a GitHub App. A run that would change nothing opens no pull request. It translates through an API you run yourself.',
+        /*
+         * Two claims here had gone stale, in opposite ways.
+         *
+         * "an API you run yourself" was true of 0.2.0 and has not been since
+         * 0.3.0: `DEFAULT_API_URL` is the hosted service and a personal token
+         * is created in the app. Self-hosting is still supported — it is now
+         * the option rather than the only path.
+         *
+         * "never overwrites hand-edited translations" is true of values and
+         * false of keys. The merge is rebuilt from the fresh extraction, so a
+         * key extraction does not produce is dropped; `init` guards that for
+         * `en.json` only. Probed against the published package — see the
+         * merging section in /docs, which now states it.
+         */
+        body: 'On npm as @localize-infra/cli. Framework detection, AST extraction, per-language failure isolation, a merge that keeps hand-edited translations for every key extraction still finds, and pull request creation through a GitHub App. A run that would change nothing opens no pull request. It translates through the hosted API with a personal token, or through one you run yourself.',
       },
       {
         title: 'Hosted app',
