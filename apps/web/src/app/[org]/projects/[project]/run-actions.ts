@@ -15,12 +15,22 @@ import {
   installationIdFor,
 } from '@/lib/github/repositories';
 import { QuotaRefusal, chargeWorkspace } from '@/lib/quota/charge';
+import {
+  describeRunShortfall,
+  readTranslationBudget,
+} from '@/lib/quota/preflight';
 import { isNextControlFlowError } from '@/lib/runs/control-flow';
 import {
   checkTranslations,
   describeFindings,
   qualityBlock,
 } from '@/lib/runs/quality';
+import {
+  clearResumeCache,
+  readResumeCache,
+  saveResumeCache,
+  splitPending,
+} from '@/lib/runs/resume';
 import { createClient } from '@/lib/supabase/server';
 import {
   buildKeyCatalog,
@@ -381,6 +391,66 @@ export async function startRun(
       surroundingCode: entry.surroundingCode,
     }));
 
+    /*
+     * Does this run fit in today's budget? Asked once, before any locale is
+     * charged.
+     *
+     * The loop below charges per locale and re-raises a refusal rather than
+     * isolating it, which is right — a workspace out of budget is out of budget
+     * for every remaining language. But it meant a run too large for the
+     * ceiling paid for the locales it could afford and then threw, and a run
+     * that throws opens no pull request: the customer was charged for six
+     * languages and received none of them.
+     *
+     * The count is deliberately a second pass over the same files rather than a
+     * hoist of the loop's own read. `readLocaleFile` throws on malformed JSON,
+     * and inside the loop that is one locale failing while the others carry on
+     * — the per-language isolation the status board claims. Hoisting it would
+     * quietly turn that into a whole run aborting. Reading each file twice is
+     * local I/O against a model call; the isolation is worth more.
+     */
+    /*
+     * What a previous run already bought. Read before the count, because a key
+     * already paid for is neither sent to the model nor charged again — so it
+     * must not appear in the planned total either, or a resumed run would be
+     * refused for a budget it is not about to spend.
+     */
+    const resumeCache = await readResumeCache(
+      supabase,
+      project.id,
+      project.target_locales,
+      fresh,
+    );
+
+    let plannedUnits = 0;
+    for (const locale of project.target_locales) {
+      try {
+        const stillPending = pendingKeys(
+          fresh,
+          readLocaleFile(localesDir, locale),
+        );
+        const cached = resumeCache.get(locale);
+        plannedUnits += cached
+          ? stillPending.filter((key) => !cached.has(key)).length
+          : stillPending.length;
+      } catch {
+        // Its worst case, not zero. A file this pass cannot read is one the
+        // loop cannot read either, so it will send every fresh key or fail
+        // outright — and a preflight must never under-count what a run will
+        // spend. The real error is reported below, where isolation applies.
+        plannedUnits += Object.keys(fresh).length;
+      }
+    }
+
+    const shortfall = describeRunShortfall(
+      plannedUnits,
+      await readTranslationBudget(organization.id),
+    );
+    // Thrown as a refusal so the outer catch ends the run with this sentence,
+    // exactly as a mid-run refusal does. The difference the customer sees is
+    // that nothing was spent to learn it.
+    if (shortfall) throw new QuotaRefusal(shortfall, 'quota');
+
     for (const locale of project.target_locales) {
       try {
         const existing = readLocaleFile(localesDir, locale);
@@ -394,9 +464,27 @@ export async function startRun(
           pending.has(entry.key),
         );
 
-        let translated: Record<string, string> = {};
+        /*
+         * Resumption, at the only point where it saves anything.
+         *
+         * `fromCache` is model output a previous run paid for and never
+         * delivered, still matching the source text extracted a moment ago.
+         * `toTranslate` is what is genuinely left. The quota below is charged
+         * for the second only — charging for a key this run does not send would
+         * bill the customer twice for one translation.
+         */
+        const { toTranslate, fromCache } = splitPending(
+          pendingStrings,
+          resumeCache.get(locale),
+        );
 
-        if (pendingStrings.length > 0) {
+        // Seeded, not assigned later: the merge below must see the recovered
+        // keys as well, or a resumed run would commit a file missing precisely
+        // the translations it resumed in order to keep.
+        let translated: Record<string, string> = { ...fromCache };
+        keysTranslated += Object.keys(fromCache).length;
+
+        if (toTranslate.length > 0) {
           /*
            * Charged before the model is called, for the strings this request
            * carries — the same route, the same units and the same counters the
@@ -409,7 +497,7 @@ export async function startRun(
           await chargeWorkspace({
             organizationId: organization.id,
             route: 'translate',
-            units: pendingStrings.length,
+            units: toTranslate.length,
           });
 
           const response = await fetch(`${apiUrl}/v1/translate`, {
@@ -420,7 +508,7 @@ export async function startRun(
             },
             body: JSON.stringify({
               targetLocale: locale,
-              strings: pendingStrings,
+              strings: toTranslate,
             }),
           });
 
@@ -438,10 +526,33 @@ export async function startRun(
           const body = TranslateBatchResponseSchema.parse(
             await response.json(),
           );
-          translated = Object.fromEntries(
-            body.translations.map((entry) => [entry.key, entry.text]),
-          );
+          translated = {
+            ...translated,
+            ...Object.fromEntries(
+              body.translations.map((entry) => [entry.key, entry.text]),
+            ),
+          };
           keysTranslated += body.translations.length;
+
+          /*
+           * Banked here, immediately, and not at the end of the run.
+           *
+           * This single line is what makes a run resumable. Everything below —
+           * the remaining locales, the merge, the quality gate, the pull
+           * request — can still be cut off by the platform timeout, and until
+           * now that cut threw this locale's paid-for output away. From here it
+           * survives, and the next click resumes instead of re-buying.
+           */
+          await saveResumeCache(
+            supabase,
+            project.id,
+            locale,
+            body.translations.map((entry) => ({
+              translation_key: entry.key,
+              source_text: fresh[entry.key] ?? '',
+              translated_text: entry.text,
+            })),
+          );
           keysMissing += body.missingKeys.length;
 
           /*
@@ -767,6 +878,22 @@ ${describeFindings(quality)}`,
     const pr = (await prResponse.json()) as { prUrl: string; prNumber: number };
     prUrl = pr.prUrl;
     prNumber = pr.prNumber;
+
+    /*
+     * Delivered, so no longer worth keeping.
+     *
+     * The cache exists to hold model output that was paid for and never
+     * reached the customer. A pull request is the moment it reaches them: from
+     * here the branch carries those keys, `pendingKeys` will never ask about
+     * them again, and the rows are dead weight that only grows.
+     *
+     * Placed after the pull request rather than after the merge, because the
+     * product never learns that a pull request merged. If it is closed unmerged
+     * the next run re-translates — the same outcome as before this cache
+     * existed, at the cost of one run, and the alternative is rows nothing ever
+     * removes.
+     */
+    await clearResumeCache(supabase, project.id, project.target_locales);
     // Deliberately not set. The API generates a timestamped branch name and
     // its response carries only the URL and number, so anything written here
     // would be a guess — and the first version guessed
