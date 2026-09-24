@@ -346,8 +346,33 @@ export default function DocsPage() {
                     Create a personal token in the hosted app, then run the CLI
                     in your project. No API to run, no repository to clone.
                   </p>
-                  <CodeBlock label="With the hosted API">
+                  {/*
+                    Both dialects, because one of them does not run.
+                    ───────────────────────────────────────────────
+                    This block offered `export` alone. `export` is not a
+                    PowerShell command — it reports `The term 'export' is not
+                    recognized` — and PowerShell is the default shell on
+                    Windows. So the first command on the page that a Windows
+                    reader copies is the one command that cannot work, on the
+                    page whose entire job is telling people how to run this.
+
+                    The product already fixed exactly this on /[org]/start
+                    (`lib/onboarding/commands.ts`, with a test pinning the
+                    PowerShell form). The docs page never followed — the same
+                    drift this repository keeps recording, where a fix lands on
+                    one surface and the other keeps shipping the defect.
+
+                    Labels match the product's: "PowerShell" and "macOS /
+                    Linux", so the two surfaces cannot be read as describing
+                    different things.
+                  */}
+                  <CodeBlock showLabel label="macOS / Linux">
                     {`export LOCALIZE_API_TOKEN="lit_…"   # from your workspace's CLI tokens
+npx @localize-infra/cli init ./my-app
+npx @localize-infra/cli init ./my-app --open-pr --owner <owner> --repo <repo>`}
+                  </CodeBlock>
+                  <CodeBlock showLabel label="PowerShell">
+                    {`$env:LOCALIZE_API_TOKEN = "lit_…"   # from your workspace's CLI tokens
 npx @localize-infra/cli init ./my-app
 npx @localize-infra/cli init ./my-app --open-pr --owner <owner> --repo <repo>`}
                   </CodeBlock>
@@ -359,7 +384,25 @@ npx @localize-infra/cli init ./my-app --open-pr --owner <owner> --repo <repo>`}
                     when no language could be translated or the pull request
                     could not be opened.
                   </p>
-                  <h3 className="text-body font-medium text-primary">
+                  {/*
+                    §3.5: a heading has to rank against its own body text.
+                    ─────────────────────────────────────────────────────
+                    The page carried three h3 treatments for one semantic
+                    level — 14/500 here, 14/600 in the refusal list, 16/600 in
+                    the detection and known-gap blocks — and the first two sat
+                    *below* the 17px prose they introduce.
+
+                    16/600 was the first attempt and it was still wrong for the
+                    two h3s that head prose rather than a list: 16 < 17. This
+                    page runs three body sizes (17px prose, 14px list items,
+                    12px refusal messages), so the only single step that
+                    outranks all of them is 20px. That also completes one
+                    ladder — 40 → 24 → 20 → 17 → 14 → 12 — and h2 stays
+                    distinct at four pixels' difference because it is set in
+                    Archivo against this one's Inter: the two registers §3.3
+                    defines, doing the separating that size alone would not.
+                  */}
+                  <h3 className="text-title font-semibold text-primary">
                     Or run your own API
                   </h3>
                 </>
@@ -405,6 +448,18 @@ npm run build -w @localize-infra/core`}
                 Start the API. It needs a bearer token of your choosing and a
                 provider key; it refuses to boot without{' '}
                 <Code>API_AUTH_TOKEN</Code>.
+              </p>
+              {/*
+                One rule rather than a second copy of every block. The hosted
+                path above is the one people copy, so it carries both dialects;
+                this path already assumes you can clone a repository and run a
+                dev server, and doubling three blocks to say one thing would
+                cost more than it explains.
+              */}
+              <p className="mt-3">
+                The remaining commands use the POSIX form. On PowerShell, write{' '}
+                <Code>{'$env:NAME = "value"'}</Code> wherever they say{' '}
+                <Code>{'export NAME="value"'}</Code>.
               </p>
               <CodeBlock label="Run the API">
                 {`export API_AUTH_TOKEN="a-token-you-choose"
@@ -639,7 +694,7 @@ localize-infra --help | --version`}
                     key={framework.name}
                     className="rounded-lg border border-line p-4"
                   >
-                    <h3 className="text-subtitle font-semibold text-primary">
+                    <h3 className="text-title font-semibold text-primary">
                       {framework.name}
                     </h3>
                     <p className="mt-1.5 text-body leading-6 text-secondary">
@@ -682,7 +737,7 @@ localize-infra --help | --version`}
               </ul>
 
               <StateRule tone="degraded" className="mt-6">
-                <h3 className="text-subtitle font-semibold text-primary">
+                <h3 className="text-title font-semibold text-primary">
                   Known gap: elements containing expressions
                 </h3>
                 <p className="mt-2">
@@ -714,6 +769,48 @@ localize-infra --help | --version`}
                 the freshly extracted text always wins, because the source text
                 is the source of truth.
               </p>
+              {/*
+                The half this section did not say, found by running the merge
+                rather than by reading it.
+
+                `mergeLocaleFile` builds its result from the freshly extracted
+                catalogue, so a key that extraction does not produce is not
+                carried over — it is dropped. `init` guards that, but only
+                against `en.json`: `droppedKeys` is computed from the English
+                file alone. A key you added by hand to `fr.json` that has no
+                English counterpart is outside the guard.
+
+                Probed against the published package, not inferred:
+                  fr.json  {"app.save":"Enregistrer","app.handAdded":"…"}
+                  merged   {"app.save":"Enregistrer"}
+
+                It matters here more than it would elsewhere, because the
+                section two above tells the reader that strings in template
+                literals and JSX expressions are never extracted — so the two
+                facts this page already states combine into a way to lose work,
+                and the page stated neither half of the combination.
+              */}
+              <StateRule tone="degraded" className="mt-6 py-1">
+                <p className="font-medium text-primary">
+                  A key the extractor does not find is removed, not kept
+                </p>
+                <p className="mt-1">
+                  The merge is rebuilt from what extraction produced, so a key
+                  missing from it disappears from every locale file.{' '}
+                  <Code>init</Code> refuses the run when that would drop keys
+                  from <Code>en.json</Code> — but it only checks{' '}
+                  <Code>en.json</Code>. A key you added by hand to{' '}
+                  <Code>fr.json</Code> with no English counterpart is dropped
+                  without a warning.
+                </p>
+                <p className="mt-2">
+                  In practice this bites where the section above already warns:
+                  a string inside a template literal is never extracted, so a
+                  translation written for it by hand has nothing to survive on.
+                  Keep hand-written entries in <Code>en.json</Code> too, where
+                  the guard can see them.
+                </p>
+              </StateRule>
               <p>
                 Keys are derived from the string and de-duplicated, so two
                 identical strings in different files collapse into one entry.
@@ -773,7 +870,7 @@ localize-infra --help | --version`}
                     key={refusal.when}
                     className="rounded-lg border border-line p-4"
                   >
-                    <h3 className="text-body font-semibold text-primary">
+                    <h3 className="text-title font-semibold text-primary">
                       {refusal.when}
                     </h3>
                     <p className="mt-2 overflow-x-auto font-mono text-caption leading-5 text-failed-text">

@@ -153,7 +153,20 @@ export default function PricingPage() {
             <h2 className="text-title font-semibold text-primary">
               Paid plans are not priced yet
             </h2>
-            <Badge tone="neutral">In development</Badge>
+            {/*
+              "In development" was the last one left on the site, and it was
+              false here for the same reason it was removed everywhere else.
+              `build-status.tsx` records the removal: three rows wore that badge
+              with no code and no commits behind them, and the phrase told a
+              reader work was under way. Billing is one of the three — there is
+              no Stripe anywhere in the repository, checked — so the landing
+              calls it "Not started" while this page, two clicks away, called it
+              in development.
+
+              A site whose argument is that it does not overstate cannot
+              disagree with itself about its own maturity.
+            */}
+            <Badge tone="neutral">Not started</Badge>
           </div>
           <p className="mt-3 text-prose text-secondary">
             There is no billing system, and nothing is charged today. We could

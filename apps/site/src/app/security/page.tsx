@@ -124,8 +124,30 @@ export default function SecurityPage() {
 
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+          {/*
+            The one page that disagreed with the rest of the site, and with
+            itself.
+            ──────────────────────────────────────────────────────────────
+            Seven of this page's eight section headings were `text-title`
+            — 20px in the body face — while "Sub-processors", directly among
+            them, used `font-display text-headline` like every section heading
+            on /docs, /pricing, /roadmap, /benchmarks, /quality and the
+            landing page. The site has a coherent two-tier system: the display
+            face for a section of the page, `text-title` for a heading inside
+            a boxed aside. /security was the only page applying the aside tier
+            to its top level, so its sections read as subordinate to nothing,
+            and one of the eight read differently from its neighbours for no
+            reason a reader could find.
+
+            It matters most here. This is the page arguing that the product
+            states things precisely, and it was the least typographically
+            settled page on the site.
+          */}
           <section aria-labelledby="sent">
-            <h2 id="sent" className="text-title font-semibold text-primary">
+            <h2
+              id="sent"
+              className="font-display text-headline font-semibold text-primary"
+            >
               What the model receives
             </h2>
             <p className="mt-3 text-body leading-6 text-secondary">
@@ -148,7 +170,10 @@ export default function SecurityPage() {
           </section>
 
           <section aria-labelledby="not-sent">
-            <h2 id="not-sent" className="text-title font-semibold text-primary">
+            <h2
+              id="not-sent"
+              className="font-display text-headline font-semibold text-primary"
+            >
               What the model never receives
             </h2>
             {/* "Files without extractable UI strings are never read for
@@ -179,7 +204,7 @@ export default function SecurityPage() {
             <div>
               <h2
                 id="hosted-copy"
-                className="text-title font-semibold text-primary"
+                className="font-display text-headline font-semibold text-primary"
               >
                 What the hosted app reads
               </h2>
@@ -197,7 +222,11 @@ export default function SecurityPage() {
               </p>
             </div>
             <div>
-              <h3 className="text-body font-medium text-primary">
+              {/* Same rank problem as the h3s on /docs: 14px/500 is the body
+                  text's own weight and size, so this sat level with the list it
+                  introduces. 16px/600 is the subheading step the rest of the
+                  site uses. */}
+              <h3 className="text-title font-semibold text-primary">
                 What is copied
               </h3>
               <ul className="mt-4 space-y-2.5">
@@ -223,7 +252,10 @@ export default function SecurityPage() {
             className="mt-12 max-w-[70ch] border-t border-subtle pt-10"
             data-testid="cli-api-disclosure"
           >
-            <h2 id="cli-api" className="text-title font-semibold text-primary">
+            <h2
+              id="cli-api"
+              className="font-display text-headline font-semibold text-primary"
+            >
               The command-line tool and our API
             </h2>
             {CLI_PERSONAL_TOKENS_LIVE ? (
@@ -327,7 +359,7 @@ export default function SecurityPage() {
             a far better outcome than finding it hidden. */}
         <StateRule tone="degraded" className="max-w-[70ch]">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-title font-semibold text-primary">
+            <h2 className="font-display text-headline font-semibold text-primary">
               Data residency: an honest gap
             </h2>
             <Badge tone="degraded">Not yet resolved</Badge>
@@ -353,7 +385,7 @@ export default function SecurityPage() {
           <section aria-labelledby="github-perms">
             <h2
               id="github-perms"
-              className="text-title font-semibold text-primary"
+              className="font-display text-headline font-semibold text-primary"
             >
               GitHub App permissions
             </h2>
@@ -382,7 +414,7 @@ export default function SecurityPage() {
           <section aria-labelledby="retention">
             <h2
               id="retention"
-              className="text-title font-semibold text-primary"
+              className="font-display text-headline font-semibold text-primary"
             >
               Storage and retention
             </h2>
