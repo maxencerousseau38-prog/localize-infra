@@ -281,9 +281,26 @@ test.describe('a brand-new user with nothing configured', () => {
     await page.goto(`${AUTH_URL}/${identity.slug}/projects`, {
       waitUntil: 'networkidle',
     });
+    /*
+     * The pointer *is* the link now, so it is clicked rather than searched
+     * inside.
+     *
+     * It used to be a paragraph — "New here? <link> — it says which step is
+     * next and what each refusal means" — and the test reached through it with
+     * `pointer.getByRole('link')`. The Phase 4 pass folded that sentence into
+     * the link's own label and put the two workspace pointers in one row, so
+     * `data-testid` moved onto the anchor. Looking for a link inside a link
+     * found nothing and the click sat until the timeout.
+     *
+     * Asserting the role rather than just clicking: the point of this test is
+     * that the guided path is *reachable* from the projects page, and a `div`
+     * with a click handler would satisfy a bare click while being unreachable
+     * by keyboard.
+     */
     const pointer = page.getByTestId('start-here');
     await expect(pointer).toBeVisible();
-    await pointer.getByRole('link').click();
+    await expect(pointer).toHaveRole('link');
+    await pointer.click();
     await expect(page).toHaveURL(new RegExp(`/${identity.slug}/start$`), {
       timeout: 20_000,
     });
