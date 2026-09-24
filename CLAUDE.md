@@ -292,6 +292,88 @@
   relevée par le `catch` par locale ; sans cela un refus honnête en deviendrait
   quatre — un par langue — et le run se dirait `partial`.
 
+  **Ce paragraphe restait vrai et taisait ce qu'il coûtait** (#122, 2026-09-24).
+  La relance est correcte — un workspace à court de budget l'est pour toutes les
+  langues restantes — mais rien, en amont, ne demandait jamais si le run tenait.
+  Un projet de 800 chaînes vers sept locales planifie 5 600 paires contre un
+  plafond de 5 000 : six locales débitées et traduites, la septième refusée, le
+  run `failed`. **Et un run qui lève n'ouvre aucune PR**, donc le client a payé
+  six langues et n'en reçoit aucune. Le plafond ne freinait pas le run, il le
+  détruisait, en commençant par la partie la plus chère.
+
+  `lib/quota/preflight.ts` pose la question une fois, avant la boucle. Deux
+  refus distincts, parce qu'ils ont deux remèdes : un run plus gros que le
+  plafond entier ne passera jamais, et lui dire de revenir à 00:00 UTC serait
+  faux. **La borne a été lue dans le SQL, pas devinée** — ligne 200 de
+  `20260917000100`, `strings_translated + p_units > strings_per_day`, donc le
+  plafond est inclusif et `plannedUnits <= remaining` en est l'équivalent exact :
+  le préflight ne peut ni refuser ce que la charge autoriserait, ni admettre ce
+  qu'elle tuerait.
+
+  **Il échoue ouvert, à l'inverse de `chargeWorkspace`, et ce n'est pas une
+  incohérence** : la charge garde toute l'autorité et échoue fermée, donc un
+  préflight muet ne coûte rien que le comportement actuel ne coûte déjà. Un
+  garde qui ne sait dire que « ça échouera à coup sûr » a le droit de se taire
+  quand il ne sait pas. Il lit en outre comme le **membre** — les deux grants
+  existent déjà pour lui — plutôt que d'élargir la surface `service_role`.
+
+  **Le comptage est une seconde passe sur les fichiers de locale, pas un hissage
+  de la lecture de la boucle.** `readLocaleFile` lève sur un JSON malformé, et
+  dans la boucle c'est une locale qui échoue pendant que les autres continuent ;
+  hisser cette lecture aurait silencieusement converti l'isolation par langue en
+  abandon du run entier. Un fichier illisible est compté à son pire cas.
+
+  **Le timeout, lui, ne se prédit pas — il se survit.** Un run est une seule
+  requête : `handleTranslateBatch` enchaîne ses chunks de 100 chaînes en
+  `await`, la boucle des locales aussi, donc la durée est la somme de tout,
+  strictement sérielle. Rien ne sait combien de temps prend un chunk, donc il n'y
+  a pas de préflight possible. `record_run_translations` n'écrivant qu'après la
+  boucle, la coupure jetait tout.
+
+  `translation_cache` (migration `20260924000100`) garde la sortie du modèle par
+  `(projet, locale, clé)`, **écrite dans la boucle** dès qu'une locale atterrit.
+  Ce placement *est* la fonctionnalité : un run coupé après trois locales sur dix
+  en laisse trois achetées, et le clic suivant reprend au lieu de racheter.
+
+  Trois propriétés, chacune testée et mutée : le quota est débité pour
+  `toTranslate` et non `pendingStrings`, sinon une reprise refacture ; `translated`
+  est **initialisé** avec les clés récupérées et non assigné après, sinon le run
+  committe un fichier amputé de ce qu'il a repris pour le garder ; et un hit
+  exige que `source_text` corresponde **à l'octet**, une clé dont l'anglais a
+  changé étant une autre chaîne.
+
+  **Table dédiée plutôt que `run_translations`** : celle-là est clé par `run_id`,
+  alimente l'écran de revue, et son écriture unique est délibérément placée après
+  la branche `no_changes`. Y écrire par locale entrerait en collision sur sa clé
+  unique et mettrait deux durées de vie dans une table — c'est ainsi qu'on
+  supprime la mauvaise.
+
+  **Tous les chemins d'échec y sont muets, par conception.** Un cache illisible
+  est un miss : le run fait ce qu'il faisait avant, il traduit et il paie. Aucun
+  chemin ne peut produire une mauvaise traduction ; le pire résultat est une
+  ligne perdue ou une traduction repayée.
+
+  **Un défaut de cette PR, trouvé par `get_advisors` et pas à la relecture** :
+  `anon` pouvait exécuter les deux nouvelles fonctions, alors qu'aucune fonction
+  existante du schéma ne l'est. **`revoke all … from public` ne retire pas
+  l'attribution par défaut de Supabase au rôle `anon`**, qui est directe et non
+  héritée de PUBLIC ; toutes les migrations existantes écrivent `from public,
+  anon`. Non exploitable — la garde d'appartenance refuse `anon` de toute façon —
+  mais une garde n'est pas une raison de laisser la porte ouverte.
+
+  **Appliquée aux deux bases, et vérifiée par les objets** : table, RLS, 1
+  policy, 2 fonctions, **0 grant `anon`**, 2 grants `authenticated`. La prod est
+  passée de 38 à 39 migrations, la dev en porte 40 — le correctif du `revoke` y
+  est arrivé en deux temps. C'est l'écart légitime que ce fichier décrit plus
+  bas : compter des deux côtés ne prouve rien, comparer les objets si.
+
+  **Ce qui n'est prouvé par personne, et il faut le dire** : la reprise n'a
+  jamais tourné contre un vrai run. Le code est déployé et le schéma appliqué,
+  mais la première preuve sera un run réellement coupé suivi d'un second clic qui
+  ne repaie pas. L'e2e ne peut pas l'atteindre, pour la raison donnée plus bas.
+  Et **le run meurt toujours au timeout** : il faut re-cliquer. Une reprise sans
+  intervention demanderait un worker, qui n'existe pas.
+
   **L'ordre des instructions de la migration est porteur.** Retirer le `not
   null` avant la clé primaire échoue (`column "token_id" is in a primary key`) :
   la clé l'implique. La base de développement l'a refusée avant CI.
@@ -1146,7 +1228,11 @@ du long. C'est exactement ainsi que le trou a survécu : le job passait en ne
 prouvant rien d'eux.
 
 La pile Supabase est désormais lancée **dans le job** par `npm run db:local`,
-reçoit les 36 migrations puis le seed, et meurt avec lui. Ce n'est pas un pis-
+reçoit **toutes** les migrations du répertoire puis le seed, et meurt avec lui.
+Ce nombre était écrit ici — « les 36 » — et il était faux dès la migration
+suivante ; il y en a 39 au 2026-09-24. Un compte figé dans une phrase que rien
+ne relit est périmé par le prochain commit qui en ajoute une, et il n'apprend
+rien de plus que « toutes ». Ce n'est pas un pis-
 aller faute de projet hébergé disponible — c'est **plus** isolé : aucun secret
 n'est ajouté, les clés locales étant publiques par conception, et deux PR
 simultanées ne partagent aucune ligne. Un projet dédié aurait rejoué, à
