@@ -63,6 +63,70 @@
   l'endroit où une mise en page change, donc la largeur la plus susceptible
   d'être fausse et la moins susceptible d'être mesurée.**
 
+  **`/docs` distribuait la seule commande qui ne peut pas marcher sous
+  Windows** (#120, 2026-09-24). La première commande à copier de la page était
+  `export LOCALIZE_API_TOKEN=…` ; `export` est une erreur de syntaxe sous
+  PowerShell, le shell par défaut de Windows. Les deux dialectes sont
+  désormais là, avec les libellés du produit, et une phrase donne la règle de
+  traduction pour les blocs auto-hébergés plus bas.
+
+  **Ce qui compte n'est pas le défaut mais qu'il avait déjà été corrigé.**
+  `/[org]/start` l'a réglé en #102 — voir `apps/web` plus bas, avec un test qui
+  épingle la forme `$env:`. Ce correctif, test compris, n'a jamais traversé
+  jusqu'au site. La règle : **un correctif testé sur une surface ne dit rien
+  d'une autre surface qui distribue la même instruction.** Le test de #102 lit
+  `lib/onboarding/commands.ts` ; rien dans le dépôt ne lisait les deux.
+  `grep -rn "export LOCALIZE" apps/` les montrait ensemble, en une commande.
+
+  **Et le correctif en a produit un second, visible seulement à l'écran.**
+  `CodeBlock.label` n'est qu'un `aria-label` : les deux blocs, qui ne diffèrent
+  que par `export` contre `$env:`, arrivaient identiques pour un lecteur
+  voyant, à charge pour lui de les comparer, pendant qu'un lecteur d'écran
+  s'entendait dire lequel était lequel. **Un nom accessible qui porte une
+  information que personne ne voit est un demi-libellé.** `showLabel` le rend,
+  en opt-in. Trouvé dans la capture, pas dans le diff — le diff était correct.
+
+  **Le rang des titres, mesuré et non jugé à l'œil.** `/docs` portait **trois**
+  traitements de `h3` pour un seul niveau sémantique — 14/500, 14/600, 16/600 —
+  dont deux sous la prose à 17px qu'ils introduisent, l'échec de §3.5 déjà
+  nommé plus haut pour la landing. **Le premier correctif, à 16px, était encore
+  faux** : 16 < 17. La page emploie trois tailles de corps (17 prose, 14 listes,
+  12 messages de refus), donc le seul palier qui les surclasse toutes est 20px.
+  La leçon n'est pas « 20 » : **le bon palier se déduit des tailles de corps que
+  la page emploie réellement, et une page de documentation en emploie
+  plusieurs.** Une sonde compare chaque `h3` à son propre corps de texte, sur
+  les deux pages — **11 sur 11 classent, contre 8 sur 11 avant** : les deux de
+  `/docs` déjà cités, plus celui de `/security`, qui était à égalité avec son
+  corps de texte et non en dessous, ce qui ne classe pas davantage.
+
+  **`/security` était la seule page du site à composer ses titres de section
+  dans la police de texte** — sept `h2` en 20px Inter — alors que son propre
+  bloc « Sub-processors », au milieu des autres, employait
+  `font-display text-headline` comme les six autres pages. Le site a bien un
+  système à deux étages, et `/security` appliquait l'étage « encadré » à son
+  niveau supérieur. La page qui argumente que ce produit énonce les choses
+  précisément était la moins établie typographiquement.
+
+  **Le tableau Status omettait deux capacités qu'il promet de nommer.** Il
+  affirme « The rest are named **here** rather than implied elsewhere » et
+  laissait à `/roadmap` seul *Placeholder-aware extraction* et *Visual context
+  capture*. Vérifié avant ajout plutôt que recopié : `packages/core/src/extract`
+  ne contient aucune gestion de placeholder, et `/docs` dit que les chaînes dans
+  les expressions JSX ne sont pas extraites. La première est celle que
+  `/roadmap` place devant tout le reste. Le libellé d'état est par ailleurs
+  `sr-only` sur les lignes livrées : huit « WORKING » identiques attiraient
+  l'œil sur les lignes qui en avaient le moins besoin, et la coche jade porte
+  déjà l'information par sa forme, donc §13 est satisfaite sans le mot.
+
+  **`/pricing` portait le dernier « In development » du site**, pour une
+  facturation dont le dépôt ne contient aucune ligne de Stripe — la landing
+  disait « Not started » et la page tarifaire disait l'inverse, à deux clics.
+
+  Vérifié en production après fusion : le déploiement **du commit** `9f0f702`
+  existe (créé 61 s après la fusion, servi ~40 s plus tard), et les cinq pages
+  portent leur modification dans le HTML réellement servi. `Age: 0` sur une
+  première requête est un cache miss, pas une preuve de redéploiement.
+
   **La preuve centrale de la landing était un 404 pour tout visiteur.** « See
   the pull request it opened » pointait, à quatre endroits, vers la PR #1 du
   dépôt fixture — **privé**. Personne ne l'a vu parce que tous ceux qui
