@@ -18,9 +18,19 @@ import type { LucideIcon } from 'lucide-react';
  *
  * `built` and `sample` were both written when there was no database, no
  * accounts and no organisations, and every route rendered either a not-built
- * screen or invented rows. That is no longer true of all of them, and this
- * comment claiming otherwise is how a stale flag survives: /ambiguity now
- * reads `run_ambiguities`, confined by RLS to the caller's workspaces.
+ * screen or invented rows.
+ *
+ * **One route still carries `sample`, and one still carries `built: false`.**
+ * `/` keeps both because its dashboard summarises runs, ambiguities and reviews
+ * that nothing records — and it is reached only by a signed-out preview build,
+ * since a signed-in reader is redirected to their workspace. `/settings` keeps
+ * `built: false` because its controls would not work.
+ *
+ * Every other entry lost them, and they were lost late: `/ambiguity` in the PR
+ * that made its surface real, `/review`, `/runs` and `/locales` on 2026-09-20,
+ * by reading the screens rather than the file. A flag describing a screen has
+ * no way to notice the screen changed, so it survives until somebody looks —
+ * which is why the audit that found them looked at pixels, not at code.
  *
  * The information architecture (docs/product/03-information-architecture.md
  * §2) scopes these under `/{org}/{project}`. They are still flat because they
@@ -39,8 +49,17 @@ export interface NavRoute {
    */
   sample?: boolean;
   /**
-   * Count shown in the sidebar. Only two routes ever carry one, and both mean
-   * a human is blocked — a badge on Runs would be engagement bait.
+   * Count shown in the sidebar.
+   *
+   * **No route carries one today, and the field is kept rather than deleted so
+   * the next one has a shape to fill.** Both routes that ever did — Ambiguity,
+   * then Review — carried a literal, which is a number about somebody else's
+   * workspace shown to everybody, and they were removed one at a time as each
+   * was noticed. A real count needs a query per render and the sidebar does
+   * none; whoever adds the query may have this back.
+   *
+   * The rule that outlives the field: a badge on Runs would be engagement bait.
+   * Only a route where a human is blocked has earned one.
    */
   count?: number;
   /** What must exist before this screen can show anything real. */
@@ -81,35 +100,46 @@ export const PRIMARY_NAV: NavRoute[] = [
     built: true,
     keywords: 'questions decisions blocked unclear',
   },
+  /*
+   * The three entries below were `sample: true, built: false` until the visual
+   * audit of 2026-09-20 read them off the screen.
+   *
+   * All three call `requireSession` and a query — `listReviewItemsForViewer`,
+   * `listRunsForViewer`, `listLocaleCoverage` — and none renders `NotBuiltYet`.
+   * `/runs` was wearing a SAMPLE chip over rows read from Postgres under RLS,
+   * and its `blockedBy` read "Runs happen in your terminal today and are not
+   * recorded anywhere a web page could read them" on a page that was reading
+   * them. The flags outlived the screens they described, by PRs #19 to #22.
+   *
+   * `/ambiguity`, one entry above, was corrected when its own surface became
+   * real and the other three were not. That is the shape of this defect: a
+   * record updated where somebody looked, and left everywhere else.
+   */
   {
     href: '/review',
-    sample: true,
-    count: 3,
+    // No `count`. It was a hardcoded 3, rendered as the sidebar badge on every
+    // account including one with nothing waiting — and until 2026-09-20 it was
+    // also rendered to visitors with no session at all, because the shell was
+    // drawn around the sign-in form. The comment on `/ambiguity` above rejected
+    // exactly this number for exactly this reason, and the entry below it kept
+    // it. A real count needs a query per render, which the sidebar does not do.
     label: 'Review',
     icon: FileText,
-    built: false,
-    blockedBy:
-      'It would let a non-developer approve or edit suggested copy, which requires accounts, roles, and somewhere to record the decision.',
+    built: true,
     keywords: 'approve suggestions copy editor',
   },
   {
     href: '/runs',
-    sample: true,
     label: 'Runs',
     icon: History,
-    built: false,
-    blockedBy:
-      'Runs happen in your terminal today and are not recorded anywhere a web page could read them.',
+    built: true,
     keywords: 'history jobs activity log',
   },
   {
     href: '/locales',
-    sample: true,
     label: 'Locales',
     icon: Languages,
-    built: false,
-    blockedBy:
-      'Your locales live in your repository. Listing them here requires a project connected to this app.',
+    built: true,
     keywords: 'languages translations targets',
   },
 ];
@@ -188,9 +218,13 @@ export function routeByHref(href: string): NavRoute | undefined {
  * Resolves any path, including a detail page, to the nav entry it belongs under.
  *
  * A detail route like `/runs/run-7c1b` is not in the nav list, so an exact
- * lookup returned nothing — which left run detail with no breadcrumb and, worse,
- * no `Sample` chip. Losing one of the three sample markers on a page full of
- * sample data is exactly what the contract exists to prevent.
+ * lookup returned nothing — which left run detail with no breadcrumb and, at the
+ * time, no `Sample` chip either, on a page that was then full of sample data.
+ *
+ * The chip is gone from that path now: `/runs` reads Postgres, so the run and
+ * its detail carry no marker. The breadcrumb reason stands on its own, and it
+ * is the durable one — a detail page with no way back is a dead end whatever
+ * its data is.
  *
  * Returns the deepest matching parent plus the trailing segment, so the
  * breadcrumb can read `Runs / 7c1b` and stay a way back rather than a label.

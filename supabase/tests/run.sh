@@ -43,7 +43,13 @@ for file in supabase/tests/*.sql; do
   echo "── ${file}"
   output="$(psql "$db" -X -q -f "$file" 2>&1 || true)"
 
-  verdict="$(printf '%s\n' "$output" | grep -oE '(ISOLATION|CLOSER-SUPPRESSION|ROLE-PERMISSIONS|CLI-TOKENS|API-LIMITS) >>.*' || true)"
+  # The prefixes are enumerated, not matched loosely, and adding a spec means
+  # adding its name here. That coupling is deliberate but it is also a trap: the
+  # loop above globs every *.sql in this directory, so a new file whose prefix
+  # is missing produces no verdict and is reported as "did not reach its raise"
+  # — a failure that looks like a broken script rather than an unregistered one.
+  # If you are reading this because of that message, check here first.
+  verdict="$(printf '%s\n' "$output" | grep -oE '(ISOLATION|CLOSER-SUPPRESSION|ROLE-PERMISSIONS|CLI-TOKENS|API-LIMITS|SEED-INTEGRITY) >>.*' || true)"
   if [ -z "$verdict" ]; then
     echo "   FAIL — no verdict line: the script did not reach its raise."
     printf '%s\n' "$output" | tail -20 | sed 's/^/   /'

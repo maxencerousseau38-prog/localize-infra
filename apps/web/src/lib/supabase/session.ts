@@ -12,11 +12,23 @@ import { isSupabaseConfigured, readSupabaseEnv } from './env';
  */
 const PUBLIC_PATHS = ['/login', '/auth/callback', '/api/version'];
 
-function isPublic(pathname: string): boolean {
+/**
+ * Exported because the root layout needs the same answer.
+ *
+ * A signed-out visitor was being served the whole application shell — sidebar,
+ * workspace navigation, a Review badge reading "3" — around the sign-in form.
+ * Deciding that in the layout meant a second copy of this list, and a second
+ * copy of an allow-list is the copy that drifts: a route opened here and
+ * forgotten there would be reachable and still wear the chrome of a product the
+ * visitor is not inside.
+ */
+export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 }
+
+const isPublic = isPublicPath;
 
 /**
  * Refreshes the session and enforces authentication, in that order.

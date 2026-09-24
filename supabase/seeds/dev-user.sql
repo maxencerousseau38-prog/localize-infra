@@ -121,8 +121,44 @@ begin
 
   org := public.create_organization('Acceptance', 'acceptance');
 
-  insert into public.projects (organization_id, name, slug, source_locale, target_locales)
-  values (org.id, 'Demo', 'demo', 'en', array['fr','de']);
+  /*
+   * Demo carries a repository, because Demo carries runs.
+   *
+   * It did not, and the two facts together were a state the product cannot
+   * produce: `startRun` returns 'Connect a repository before running.' before
+   * it reaches `start_run`, so a run against a project with no
+   * `repository_owner` has no path through the application. The seed reached
+   * `public.start_run` directly — the SQL function, which has no such guard,
+   * because the guard belongs to the action that calls it — and wrote three of
+   * them anyway.
+   *
+   * It showed. `/acceptance/projects` read "Repository connected 0" beside
+   * "Runs started 3" and "Pull requests opened 1", and the funnel was right
+   * every time: it reports what the rows say, and the rows said something
+   * impossible. A fixture that cannot happen teaches a reader to distrust the
+   * screen rather than the fixture, and it is the screen that was telling the
+   * truth.
+   *
+   * The values are not invented. `finish_run` below stamps this project's
+   * succeeded run with
+   * `https://github.com/maxencerousseau38-prog/localize-infra-fixture-vite/pull/1`
+   * — so the pull request already named a repository the project claimed not to
+   * have. This makes the pointer agree with the artefact it produced.
+   *
+   * Connected four hours ago, which is before the oldest run (three hours, see
+   * the offsets at the end of this file). A connection stamped after the run it
+   * enabled is the same class of impossibility, one field along.
+   */
+  insert into public.projects (
+    organization_id, name, slug, source_locale, target_locales,
+    repository_owner, repository_name, repository_branch,
+    repository_connected_at
+  )
+  values (
+    org.id, 'Demo', 'demo', 'en', array['fr','de'],
+    'maxencerousseau38-prog', 'localize-infra-fixture-vite', 'main',
+    now() - interval '4 hours'
+  );
 
   /*
    * A second project, existing only to be written to.
@@ -143,6 +179,14 @@ begin
    * now creates and removes its own project, and that is why it is re-runnable.
    * This row still exists because the languages test *mutates* rather than
    * creates, which no amount of deletion helps.
+   */
+  /*
+   * Languages keeps no repository, deliberately.
+   *
+   * A project with target locales and no repository is a state the product
+   * produces constantly — create a project, connect GitHub later — so the
+   * fixture should contain one. What it must not contain is that project with
+   * runs against it, and this one has none.
    */
   insert into public.projects (organization_id, name, slug, source_locale, target_locales)
   values (org.id, 'Languages', 'languages', 'en', array['fr','de']);

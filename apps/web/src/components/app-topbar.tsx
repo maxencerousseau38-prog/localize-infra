@@ -19,6 +19,9 @@ import {
 } from '@localize-infra/ui';
 import {
   BookOpen,
+  // The same icon `ThemeToggle` gives OLED, so the two controls that offer the
+  // scheme do not each invent a glyph for it.
+  Contrast,
   GitBranch,
   GitPullRequest,
   Monitor,
@@ -77,6 +80,28 @@ export function AppTopbar() {
         icon: Moon,
         keywords: 'appearance colour scheme night',
         onSelect: () => setTheme('dark'),
+      },
+      /*
+       * OLED, which this list had been missing since the scheme shipped.
+       *
+       * `ThemeToggle` — the control sitting a few pixels to the right of the
+       * button that opens this palette — has offered four schemes all along.
+       * The palette offered three, so the same surface disagreed with itself
+       * about how many themes the product has, and the one it omitted was the
+       * one added most recently. `docs/design/05-design-system.md` §4.6 calls
+       * this the primary navigation; a scheme reachable only from the toggle is
+       * a scheme half the readers never find.
+       *
+       * Placed after `dark` rather than at the end, because it is a refinement
+       * of it (§6.4) and the list reads as an ordering of grounds.
+       */
+      {
+        id: 'theme-oled',
+        label: 'Switch to OLED theme',
+        section: 'Actions',
+        icon: Contrast,
+        keywords: 'appearance colour scheme black amoled dark true',
+        onSelect: () => setTheme('oled'),
       },
       {
         id: 'theme-system',

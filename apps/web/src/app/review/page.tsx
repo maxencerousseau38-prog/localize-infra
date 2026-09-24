@@ -2,15 +2,9 @@ import { NotConnected } from '@/components/not-connected';
 import { Page, PageHeader, PageMeta } from '@/components/page';
 import { listReviewItemsForViewer, requireSession } from '@/lib/data/workspace';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
-import {
-  EmptyState,
-  StateRule,
-  cn,
-  localeDisplayName,
-  localeFontClass,
-  localeTextProps,
-} from '@localize-infra/ui';
+import { EmptyState } from '@localize-infra/ui';
 import type { Metadata } from 'next';
+import { ReviewList } from './review-list';
 
 export const metadata: Metadata = { title: 'Review' };
 
@@ -77,45 +71,14 @@ export default async function ReviewPage() {
           />
         </div>
       ) : (
-        <>
-          <p className="mt-6 max-w-[68ch] text-small leading-6 text-secondary">
-            These are proposals from runs that stopped for a person. Approving
-            happens on the run’s project page, where the questions it raised are
-            answered at the same time.
-          </p>
-
-          <ul className="mt-6 flex max-w-3xl flex-col gap-3">
-            {items.map((item) => (
-              <li key={`${item.run_id} ${item.locale} ${item.translation_key}`}>
-                <StateRule
-                  tone="confident"
-                  className="rounded-e-lg border border-s-0 border-subtle py-4 pe-4"
-                >
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                    <p className="text-body text-primary">{item.source_text}</p>
-                    <span className="font-mono text-micro uppercase tracking-wide text-tertiary">
-                      {localeDisplayName(item.locale)}
-                    </span>
-                  </div>
-
-                  <p
-                    {...localeTextProps(item.locale)}
-                    className={cn(
-                      'mt-2 text-body text-secondary',
-                      localeFontClass(item.locale),
-                    )}
-                  >
-                    {item.proposed_text}
-                  </p>
-
-                  <p className="mt-2 font-mono text-caption text-tertiary">
-                    {item.translation_key}
-                  </p>
-                </StateRule>
-              </li>
-            ))}
-          </ul>
-        </>
+        /*
+         * The explanatory paragraph that stood here is gone, and what it said
+         * is now reachable instead of merely stated. It read "Approving happens
+         * on the run's project page" — true, and a sentence a reader could only
+         * act on by navigating somewhere else themselves. Each run group now
+         * carries the link.
+         */
+        <ReviewList items={items} />
       )}
     </Page>
   );

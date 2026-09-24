@@ -61,6 +61,21 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
   requestHeaders.set('Content-Security-Policy', csp);
+  /*
+   * The path, for the root layout.
+   *
+   * A layout is not given the request's pathname — that is a deliberate gap in
+   * the App Router, because a layout that re-renders per path is not a layout.
+   * But the root layout has to know one thing about the path: whether it is
+   * inside the application at all, because `/login` was being served wrapped in
+   * the application's own sidebar and topbar.
+   *
+   * A nested layout cannot remove an ancestor, and moving fifteen route
+   * directories into an `(app)` group to get a second root is a large move for
+   * a small fact. This is the small fact, carried the same way the nonce
+   * already is.
+   */
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('Content-Security-Policy', csp);

@@ -217,3 +217,116 @@ describe('glass', () => {
     expect(TOKENS).toContain('--blur-glass: var(--glass-blur)');
   });
 });
+
+describe('borders on OLED', () => {
+  /**
+   * Which graphite step a semantic border token resolves to, per scheme.
+   *
+   * `scale()` above only captures hex declarations, and every border token is
+   * `var(--graphite-N)` — so this reads the reference instead. That is the
+   * point of the token layering (§6.1) and the reason this check exists at all:
+   * the value never appears in the semantic layer, so nothing that compares
+   * hexes can see a scheme weakening one.
+   */
+  function borderStep(
+    selector: ':root' | '.oled',
+    name: string,
+  ): string | null {
+    const blocks = TOKENS.split(/(?=^[.:][a-z]+\s*\{)/m).filter((b) =>
+      b.trimStart().startsWith(selector),
+    );
+    let step: string | null = null;
+    for (const block of blocks) {
+      // `String.raw`, because the escapes matter: written as a plain template
+      // literal, `\s` is the letter s and `\d` the letter d, and the pattern
+      // silently matches nothing at all rather than failing to compile.
+      const found = block.match(
+        new RegExp(String.raw`--${name}:\s*var\(--(graphite-\d+)\)`),
+      );
+      if (found) step = found[1] as string;
+    }
+    return step;
+  }
+
+  /** The contrast a border draws against its own scheme's canvas. */
+  function separatorRatio(tokens: Map<string, string>, step: string): number {
+    const canvas = tokens.get('graphite-1');
+    const border = tokens.get(step);
+    expect(canvas, 'canvas must resolve').toBeDefined();
+    expect(border, `${step} must resolve`).toBeDefined();
+    return contrast(border as string, canvas as string);
+  }
+
+  it('reads the reference, not a hex, so the check is possible at all', () => {
+    // Guards the regex: a renamed token would otherwise leave every assertion
+    // below comparing null to null and passing.
+    expect(borderStep(':root', 'border-subtle')).toMatch(/^graphite-\d+$/);
+    expect(borderStep('.oled', 'border-subtle')).toMatch(/^graphite-\d+$/);
+  });
+
+  /**
+   * How close OLED has to get to dark, and why the number is 0.92.
+   *
+   * It was chosen from the measurements, not picked and then justified — which
+   * matters, because a threshold set after seeing the answer is a threshold
+   * that proves nothing. The four readings, as ratios of dark's contrast:
+   *
+   * | token            | corrected | left inherited |
+   * |------------------|-----------|----------------|
+   * | `border-subtle`  | 0.961     | 0.907          |
+   * | `border-default` | 0.947     | 0.825          |
+   *
+   * So a bar has to sit above 0.907 — or reverting `border-subtle` would pass
+   * — and at or below 0.947, or the correction to `border-default` would fail.
+   * 0.92 is inside that window with room on both sides. The window exists at
+   * all because the neutral scale has twelve fixed steps and neither token
+   * lands on an exact match; 0.947 is the closest the scale offers, not a
+   * compromise someone accepted.
+   */
+  const PARITY = 0.92;
+
+  it.each([['border-subtle'], ['border-default']])(
+    '%s is as visible on OLED as it is in dark',
+    (token) => {
+      /*
+       * §6.4 gives elevation to surface lightness *and* border. OLED compresses
+       * the first — #000000, #050505, #0a0a0a — so the border carries more, on
+       * the ground where it has least to work with.
+       *
+       * A ratio against dark, not an absolute threshold: 3:1 is for a boundary
+       * that carries meaning, and these are a row separator and a component
+       * edge (§5.2). Holding them to the boundary rule would turn every table
+       * into a grid.
+       */
+      const base = borderStep(':root', token) as string;
+      const oledStep = borderStep('.oled', token) ?? base;
+      const inDark = separatorRatio(dark, base);
+      const inOled = separatorRatio(oled, oledStep);
+      expect(
+        inOled,
+        `${token} reads ${inOled.toFixed(2)} on OLED against ${inDark.toFixed(2)} in dark — ${(inOled / inDark).toFixed(3)} of it`,
+      ).toBeGreaterThanOrEqual(inDark * PARITY);
+    },
+  );
+
+  it('keeps the three border steps distinct on OLED', () => {
+    /*
+     * §5.2 has three border roles, and the cheap way to hit the parity bar
+     * above is to promote each token to the next role's step — which would
+     * leave OLED with subtle == default == strong and a scale that has lost its
+     * shape in one scheme only.
+     *
+     * `StateRule` makes that concrete: it paints neutral with `--border-default`
+     * and its own emphasis with `--border-strong`, so collapsing the two would
+     * erase the difference between "no claim" and "look here" on the signature
+     * element itself.
+     */
+    const steps = ['border-subtle', 'border-default', 'border-strong'].map(
+      (token) =>
+        borderStep('.oled', token) ?? (borderStep(':root', token) as string),
+    );
+    expect(new Set(steps).size, `OLED border steps: ${steps.join(' < ')}`).toBe(
+      3,
+    );
+  });
+});

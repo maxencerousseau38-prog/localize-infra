@@ -1,6 +1,8 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppTopbar } from '@/components/app-topbar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { isPublicPath } from '@/lib/supabase/session';
 import {
   ThemeScript,
   ToastProvider,
@@ -107,7 +109,27 @@ export default async function RootLayout({
   // Set per request in src/proxy.ts. Reading it here is what forces this
   // app to render dynamically — the deliberate cost of a strict CSP on a
   // surface that will render user data.
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
+  const headerList = await headers();
+  const nonce = headerList.get('x-nonce') ?? undefined;
+
+  /*
+   * Whether this request is inside the application.
+   *
+   * `/login` was being served wrapped in the full shell: the workspace
+   * navigation, a Review badge reading "3", and a footer explaining that the
+   * screens listed above show sample data — to a visitor with no session, for
+   * whom every one of those links redirects straight back to the form they are
+   * looking at. Chrome advertising surfaces the reader cannot reach, and a
+   * count of somebody else's work.
+   *
+   * The answer comes from `isPublicPath`, the same allow-list the proxy
+   * enforces with, so the set of routes that are outside the application is
+   * stated once. A missing header means the proxy did not run, which only
+   * happens for paths its matcher excludes — none of which render this layout —
+   * so the shell is the safe default.
+   */
+  const pathname = headerList.get('x-pathname');
+  const inApp = pathname === null || !isPublicPath(pathname);
 
   return (
     <html
@@ -138,15 +160,33 @@ export default async function RootLayout({
             is the only case this product uses a toast for. */}
         <ToastProvider>
           <TooltipProvider delayDuration={400}>
-            <SidebarProvider className="h-dvh min-h-0">
-              <AppSidebar />
-              <SidebarInset className="min-w-0 overflow-hidden">
-                <AppTopbar />
-                <main id="main" className="flex-1 overflow-y-auto">
-                  {children}
-                </main>
-              </SidebarInset>
-            </SidebarProvider>
+            {inApp ? (
+              <SidebarProvider className="h-dvh min-h-0">
+                <AppSidebar sampleData={!isSupabaseConfigured()} />
+                <SidebarInset className="min-w-0 overflow-hidden">
+                  <AppTopbar />
+                  <main id="main" className="flex-1 overflow-y-auto">
+                    {children}
+                  </main>
+                </SidebarInset>
+              </SidebarProvider>
+            ) : (
+              /*
+               * Outside the application: the page, and nothing around it.
+               *
+               * `main#main` stays, because the skip link above targets it and a
+               * page without it would make that link dead — an accessibility
+               * failure that looks like nothing. `h-dvh` stays too, so the
+               * sign-in form keeps the full-height column it was centring in.
+               *
+               * ThemeProvider-ish wrappers stay above: a signed-out visitor
+               * still gets their colour scheme, and a toast raised here would
+               * still have somewhere to land.
+               */
+              <main id="main" className="h-dvh overflow-y-auto">
+                {children}
+              </main>
+            )}
           </TooltipProvider>
         </ToastProvider>
       </body>

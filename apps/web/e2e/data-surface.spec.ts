@@ -382,11 +382,32 @@ test.describe('/locales', () => {
   }) => {
     await open(page, '/locales');
 
-    // German carries the seeded ambiguity. Iris, and DESIGN.md §1.4's rule that
-    // it means "your judgement is required" — a language waiting on a person
-    // must not read the same as one that is finished.
-    await expect(page.getByText('Needs a decision')).toBeVisible();
-    await expect(page.getByText(/1 question waiting/)).toBeVisible();
+    /*
+     * Scoped to German's own record, which is what this test is about.
+     *
+     * Both assertions used to match the page. The page now opens with a summary
+     * band — "1 question waiting on you", across the workspace — so the second
+     * selector resolved to two elements and Playwright refused in strict mode.
+     * Both statements are true and neither is redundant: one counts the
+     * workspace, the other belongs to a language and links to it.
+     *
+     * The test's subject is the *language*, so narrowing it to the row is not a
+     * workaround for the ambiguity, it is the assertion this test always meant
+     * to make. A page-level match would have passed even if German's own row
+     * said nothing at all.
+     */
+    const german = page.getByRole('listitem').filter({ hasText: 'German' });
+
+    // Iris, and DESIGN.md §1.4's rule that it means "your judgement is
+    // required" — a language waiting on a person must not read the same as one
+    // that is finished.
+    await expect(german.getByText('Needs a decision')).toBeVisible();
+
+    // And the count is reachable, not just stated: it links to Review filtered
+    // to this language.
+    const waiting = german.getByRole('link', { name: /1 question waiting/ });
+    await expect(waiting).toBeVisible();
+    await expect(waiting).toHaveAttribute('href', '/review?locale=de');
   });
 
   test('a language exposes its state and counts at 390 (DESIGN.md §3.4)', async ({
@@ -500,9 +521,28 @@ test.describe('a run detail', () => {
     // `PageHeader` carried `shrink-0` on the column holding the metadata, so
     // that column never narrowed and its `flex-wrap` never fired: the page
     // rendered 828px wide inside a 390px viewport.
-    for (const label of ['Status', 'Duration', 'Strings', 'When']) {
+    for (const label of ['Duration', 'Strings', 'When']) {
       await expect(page.getByText(label, { exact: true })).toBeVisible();
     }
+
+    /*
+     * The status, by its value rather than by a `Status` caption.
+     *
+     * This looped over four labels including "Status", which was one of five
+     * equally-weighted facts in the metadata row. It is the status band now —
+     * a State Rule, a title-weight label and a sentence, directly under the
+     * header — so the caption no longer exists and the state is the most
+     * prominent thing on the page rather than the fourth column of a row.
+     *
+     * The subject of this test is unchanged and is the assertion below: the
+     * page must not scroll sideways at 390. The labels are how it proves the
+     * facts survived the wrap, so the status is still checked — through what it
+     * says, which is what a reader actually reads.
+     */
+    await expect(
+      page.getByRole('heading', { name: 'Run', exact: false }),
+    ).toBeVisible();
+    await expect(page.getByText('Needs your call')).toBeVisible();
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth,

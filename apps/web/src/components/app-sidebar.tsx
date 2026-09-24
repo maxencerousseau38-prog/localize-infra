@@ -64,11 +64,12 @@ function NavItem({
         >
           <Icon aria-hidden="true" />
           <span className="truncate">{route.label}</span>
-          {/* Only ambiguity and review carry a count, and both mean a human is
-              blocked. Still dashed rather than a solid badge: the number is
-              sample data like the surface it points at, and the dashed chrome
-              is the third of this product's three sample markers. It is hidden
-              when the rail collapses, where the tooltip carries it instead. */}
+          {/* No route carries a count today — Ambiguity lost its literal when
+              its surface became real, Review lost the same literal on
+              2026-09-20 — so this branch renders for nobody. Kept because the
+              shape is right for the first real count: dashed rather than solid,
+              and hidden when the rail collapses, where the tooltip carries the
+              number instead. See the `count` field in lib/nav.ts. */}
           {route.count !== undefined ? (
             <span className="ms-auto rounded-sm border border-dashed border-strong px-1.5 font-mono text-micro tabular-nums text-tertiary group-data-[collapsible=icon]:hidden">
               {route.count}
@@ -80,13 +81,29 @@ function NavItem({
   );
 }
 
-export function AppSidebar() {
+export function AppSidebar({ sampleData }: { sampleData: boolean }) {
   return (
     <Sidebar collapsible="icon" className="border-e border-line">
       <SidebarHeader className="h-12 justify-center px-3">
         <Link
           href="/"
-          className="flex items-center gap-2.5 rounded-md text-body font-semibold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+          /*
+           * The display face, and one step up.
+           *
+           * Measured before it was changed: the wordmark was 14px/600 Inter and
+           * a navigation label is 14px/400 Inter — same size, same face, one
+           * weight apart. §3.5 is about hierarchy contrast and names that
+           * failure exactly; the product's own name ranked against a link by a
+           * single step.
+           *
+           * Archivo is the other half. It renders every page title in this
+           * application — `PageHeader` uses `font-display` — and appeared
+           * nowhere in the shell, so the frame and the pages inside it had no
+           * typographic voice in common. `subtitle` puts the mark one step
+           * above the navigation and two below an h1, which is the ranking it
+           * should have had.
+           */
+          className="flex items-center gap-2.5 rounded-md font-display text-subtitle font-semibold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           {/* The mark: three rules of descending width, echoing the State Rule
               the product uses to carry confidence. Graphite throughout — Iris
@@ -151,33 +168,47 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/*
-       * Scoped to the screens listed above, because it stopped being true of
-       * the application as a whole.
+       * This note has now been wrong twice, in opposite directions.
        *
-       * It read "No project connected. Everything shown is sample data." That
-       * was correct when nothing was real. It is now a false claim on four
-       * surfaces — the workspace, its projects, a project's runs and billing —
-       * which read from the database, are scoped to the caller and persist. A
-       * banner asserting that real data is invented is the same defect as
-       * presenting invented data as real, pointing the other way, and this
-       * product cannot afford either.
+       * It first read "No project connected. Everything shown is sample data."
+       * — correct when nothing was real, and false once the workspace, its
+       * projects and its runs began reading the database. It was narrowed to
+       * "The screens listed above show sample data. Your workspace, projects
+       * and runs are real", with a comment stating that the routes in the nav
+       * above "genuinely are still stubs".
        *
-       * The routes in the nav above genuinely are still stubs, so the sentence
-       * survives with its subject narrowed rather than being deleted.
+       * They are not. `/ambiguity`, `/review`, `/runs` and `/locales` all call
+       * `requireSession` and query Postgres; `nav.ts` carried `sample: true` on
+       * three of them until the flags were corrected against the screens. Only
+       * `/` renders a sample dashboard, and a signed-in reader never reaches it
+       * — `app/page.tsx` redirects them to their workspace. So for every reader
+       * with a session, the sentence claimed that five real surfaces were
+       * invented.
+       *
+       * The second half was no better: with no database there is nothing real
+       * to reassure anybody about, so "your workspace, projects and runs are
+       * real" was false in exactly the case the note was meant for.
+       *
+       * The note's own first comment says why this matters: a banner asserting
+       * that real data is invented is the same defect as presenting invented
+       * data as real, pointing the other way. It is now shown only where it is
+       * true — no database — and says what is actually on screen there.
        */}
-      <SidebarFooter className="group-data-[collapsible=icon]:hidden">
-        <div className="flex items-start gap-2 rounded-md border border-dashed border-strong px-2.5 py-2">
-          <FlaskConical
-            className="mt-0.5 size-3.5 shrink-0 text-tertiary"
-            aria-hidden="true"
-            strokeWidth={1.5}
-          />
-          <p className="text-micro leading-4 text-tertiary">
-            The screens listed above show sample data. Your workspace, projects
-            and runs are real.
-          </p>
-        </div>
-      </SidebarFooter>
+      {sampleData ? (
+        <SidebarFooter className="group-data-[collapsible=icon]:hidden">
+          <div className="flex items-start gap-2 rounded-md border border-dashed border-strong px-2.5 py-2">
+            <FlaskConical
+              className="mt-0.5 size-3.5 shrink-0 text-tertiary"
+              aria-hidden="true"
+              strokeWidth={1.5}
+            />
+            <p className="text-micro leading-4 text-tertiary">
+              No database is connected here. Home shows a sample dashboard;
+              every other screen says it has nothing to read.
+            </p>
+          </div>
+        </SidebarFooter>
+      ) : null}
 
       <SidebarRail />
     </Sidebar>
