@@ -294,6 +294,43 @@
   --elevation-1: 0 1px 2px rgb(0 0 0 / 0.6);
   --elevation-2: 0 4px 12px rgb(0 0 0 / 0.7);
   --elevation-3: 0 16px 48px rgb(0 0 0 / 0.8);
+
+  /* One step up for the faintest border, and only here.
+
+     §6.4 says elevation is expressed through surface lightness and border. On
+     OLED the first half is compressed almost flat — canvas #000000, surface
+     #050505, raised #0a0a0a — so the border carries a share it does not carry
+     in the other two schemes, on a ground where it has the least to work with.
+
+     Measured against the canvas rather than judged: `border-subtle` reads 1.24
+     in light and 1.26 in dark, and 1.14 in OLED. Stepping it from graphite-4 to
+     graphite-5 brings it to 1.21 — parity with the other schemes to within a
+     twentieth, which is the target, not 3:1. This is a separator inside a
+     component (§5.2); making it meet the boundary threshold would turn every
+     table row into a grid.
+
+     graphite-5 and not graphite-6: graphite-6 is `--border-default`, and using
+     it here would collapse two of the three border steps into one on OLED
+     alone. The scale has to keep its shape. */
+  --border-subtle: var(--graphite-5);
+
+  /* And the step above it, for the same reason and a worse consequence.
+
+     `--border-default` is what `StateRule` paints its *neutral* tone with, and
+     the State Rule is §1.4's signature — the one thing that document says no
+     future work may dilute. On OLED it measured 1.27 against the canvas where
+     dark reads 1.54. A 3px signature at that contrast is not understated, it
+     is absent, and a row indented by a rule nobody can see is a row with an
+     unexplained margin.
+
+     Seen, not calculated. The project list shipped with the rule on every row;
+     the OLED capture showed an edge on the jade row and nothing on the neutral
+     one, and the light capture showed both. That pair is what identifies the
+     ground compressing rather than the component failing.
+
+     graphite-7 reads 1.46 — parity with dark to within a twentieth again, and
+     one step, so subtle < default < strong keeps its shape. */
+  --border-default: var(--graphite-7);
 }
 
 /* ─────────────────────────────────────────────────────────────

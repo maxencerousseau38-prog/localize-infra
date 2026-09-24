@@ -127,7 +127,21 @@ test.describe('usage', () => {
     await page.goto(`${DB_URL}/acceptance/projects`, {
       waitUntil: 'networkidle',
     });
-    await page.getByRole('link', { name: 'Usage', exact: true }).click();
+    /*
+     * Matched on the word, not the whole name.
+     *
+     * This read `{ name: 'Usage', exact: true }` while the page offered a bare
+     * "Usage" link followed by a sentence of body copy explaining it. The
+     * redesign folded that sentence into the link — "Usage against the daily
+     * ceiling" — so the label carries its own meaning in a row of short links
+     * beside "Create a CLI token", and the loose paragraph is gone.
+     *
+     * The test's subject is that the page *offers a way there*, not what the
+     * way is called. Pinning the exact string made a copy edit look like a
+     * regression, which is the sort of coupling that teaches people to change
+     * tests rather than read them.
+     */
+    await page.getByRole('link', { name: /Usage/ }).click();
     await expect(page).toHaveURL(/\/acceptance\/usage$/, { timeout: 20_000 });
   });
 });

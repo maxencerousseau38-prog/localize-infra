@@ -14,16 +14,18 @@ import {
 } from '@/lib/runs/progress';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
+  Alert,
   Badge,
   Button,
   PIPELINE_STAGES,
   type Tone,
   localeDisplayName,
 } from '@localize-infra/ui';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { RunStatusBand } from './run-status';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -32,14 +34,60 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return { title: `Run ${id.slice(0, 8)}` };
 }
 
-const RUN_STATE: Record<RunStatus, { tone: Tone; label: string }> = {
-  queued: { tone: 'neutral', label: 'Queued' },
-  running: { tone: 'neutral', label: 'Running' },
-  awaiting_review: { tone: 'ambiguous', label: 'Needs your call' },
-  succeeded: { tone: 'confident', label: 'Succeeded' },
-  partial: { tone: 'degraded', label: 'Partial' },
-  failed: { tone: 'failed', label: 'Failed' },
-  no_changes: { tone: 'neutral', label: 'No changes needed' },
+/**
+ * `meaning` is what the status band says under the label.
+ *
+ * A sentence per state, and each one is a claim, so each is narrower than the
+ * obvious phrasing. `failed` does not say "nothing was committed": a run can
+ * stop at `open_pr` with translations already recorded, and the only honest
+ * statement is where it stopped. `succeeded` has two readings because a
+ * succeeded run may or may not have been asked to open a pull request, and the
+ * page knows which from the URL rather than from the status.
+ */
+const RUN_STATE: Record<
+  RunStatus,
+  { tone: Tone; label: string; meaning: string }
+> = {
+  queued: {
+    tone: 'neutral',
+    label: 'Queued',
+    meaning: 'Waiting to start. Nothing has been extracted yet.',
+  },
+  running: {
+    tone: 'neutral',
+    label: 'Running',
+    meaning:
+      'In progress. This page does not refresh itself — reload to see where it reached.',
+  },
+  awaiting_review: {
+    tone: 'ambiguous',
+    label: 'Needs your call',
+    // Replaced at render with the question count. Kept non-empty so the map
+    // stays exhaustive and a missing branch is a blank line, not a crash.
+    meaning: 'The run stopped to ask something before it could finish.',
+  },
+  succeeded: {
+    tone: 'confident',
+    label: 'Succeeded',
+    meaning: 'Every target language came back translated.',
+  },
+  partial: {
+    tone: 'degraded',
+    label: 'Partial',
+    meaning:
+      'Some languages did not come back. The ones that did are recorded below.',
+  },
+  failed: {
+    tone: 'failed',
+    label: 'Failed',
+    meaning: 'The run stopped before finishing. What it recorded is below.',
+  },
+  no_changes: {
+    tone: 'neutral',
+    label: 'No changes needed',
+    meaning:
+      'Every key already had a translation, so there was nothing to commit.',
+  },
 };
 
 /**
@@ -198,6 +246,25 @@ export default async function RunDetailPage({ params }: Params) {
   const shortfall =
     run.status === 'no_changes' ? 0 : Math.max(0, owed - run.keys_translated);
 
+  /*
+   * The sentence under the status label.
+   *
+   * Two states know more than the map can: `awaiting_review` knows how many
+   * questions are open, and this is the copy the separate Iris notice used to
+   * carry — moved here rather than reworded, so the page says it once instead
+   * of stating the state in the band and restating it in a box underneath.
+   * `succeeded` knows whether a pull request exists, which the status alone
+   * does not: a run can translate everything and never be asked to open one.
+   */
+  const meaning =
+    run.status === 'awaiting_review'
+      ? openQuestions.length === 0
+        ? 'Every question is answered. This run is ready to approve. Answering and approving happen on the run’s project page, where the proposal it will commit is shown alongside the questions.'
+        : `${openQuestions.length} question${openQuestions.length === 1 ? '' : 's'} waiting on you. Answering and approving happen on the run’s project page, where the proposal it will commit is shown alongside the questions.`
+      : run.status === 'succeeded' && !prHref
+        ? 'Every target language came back translated. No pull request was opened for this run.'
+        : state.meaning;
+
   return (
     <Page>
       <div className="pt-6">
@@ -212,9 +279,14 @@ export default async function RunDetailPage({ params }: Params) {
       <PageHeader
         title={`Run ${run.id.slice(0, 8)}`}
         purpose={run.framework ?? undefined}
+        /*
+         * `Status` is gone from here. It was one of five labelled facts,
+         * indistinguishable from the timestamp, and it is now the band below —
+         * with a rule, a tone and a sentence. What is left in this row is
+         * measurements, which is what a metadata row is for.
+         */
         meta={
           <>
-            <PageMeta label="Status">{state?.label}</PageMeta>
             <PageMeta label="Duration">{duration(elapsed)}</PageMeta>
             {/* Distinct source strings. Deliberately not "translated of
                 extracted": those two columns count different things, and a
@@ -234,64 +306,92 @@ export default async function RunDetailPage({ params }: Params) {
             </PageMeta>
           </>
         }
-        action={
-          prHref ? (
-            <Button variant="primary" size="sm" asChild>
-              <a href={prHref} target="_blank" rel="noreferrer noopener">
-                Pull request #{run.pr_number}
-                <ExternalLink aria-hidden="true" />
-              </a>
-            </Button>
-          ) : null
-        }
       />
 
-      {/* The next action, when there is one. A run waiting on a person is the
-          one state where the page should say what to do about it. */}
-      {run.status === 'awaiting_review' ? (
-        <div className="mt-6 rounded-lg border border-ambiguous bg-ambiguous-bg px-4 py-3">
-          <p className="text-body font-medium text-primary">
-            {openQuestions.length === 0
-              ? 'Every question is answered. This run is ready to approve.'
-              : `${openQuestions.length} question${openQuestions.length === 1 ? '' : 's'} waiting on you.`}
-          </p>
-          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
-            Answering and approving happen on the run’s project page, where the
-            proposal it will commit is shown alongside the questions.
-          </p>
-        </div>
+      <RunStatusBand
+        tone={state.tone}
+        label={state.label}
+        detail={meaning}
+        prHref={prHref}
+        prNumber={run.pr_number}
+      />
+
+      {/*
+        The failure, immediately after the state that reports it.
+        ────────────────────────────────────────────────────────
+        It was the last section on the page, below the pipeline, the locales and
+        a table of every proposal — justified at the time as "the reason to stop
+        reading". For a run that failed it is the reason to *start*: a reader
+        who came to find out why has to scroll past three sections of what did
+        work, one of which can be hundreds of rows.
+
+        Verbatim, per §8, and unchanged: the provider's own wording is what a
+        customer will search for. One error per run, not per locale — that is
+        what the pipeline records.
+      */}
+      {run.error ? (
+        <PageSection
+          title="What failed"
+          description="Reported exactly as the provider returned it."
+        >
+          <pre className="overflow-x-auto rounded-lg border border-failed bg-failed-bg px-4 py-3 font-mono text-caption leading-5 text-secondary">
+            {run.error}
+          </pre>
+        </PageSection>
       ) : null}
 
+      {/*
+        The Iris notice that stood here is gone, and its copy is not.
+        ─────────────────────────────────────────────────────────────
+        It said "N questions waiting on you" in a box directly beneath a status
+        row that already said "Needs your call" — the state twice, in two
+        registers, neither of them dominant. The band above now carries both the
+        state and the sentence, so the page makes the claim once.
+
+        Nothing was reworded: the same count and the same "project page"
+        pointer, which is what the end-to-end suite asserts and, more to the
+        point, what a reader needs. This surface cannot resolve an ambiguity; it
+        can only say where that happens.
+      */}
+
       {progress.kind === 'stalled' ? (
-        <div className="mt-6 rounded-lg border border-degraded bg-degraded-bg px-4 py-3">
-          <p className="text-body font-medium text-primary">
-            This run stopped reporting{' '}
-            {Math.round(progress.silentForMs / 60000)} minutes ago
-          </p>
-          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
-            The request that was carrying it probably ended. Nothing was
-            committed. Start another run.
-          </p>
-        </div>
+        <Alert
+          tone="degraded"
+          size="section"
+          className="mt-6"
+          heading={
+            <>
+              This run stopped reporting{' '}
+              {Math.round(progress.silentForMs / 60000)} minutes ago
+            </>
+          }
+        >
+          The request that was carrying it probably ended. Nothing was
+          committed. Start another run.
+        </Alert>
       ) : null}
 
       {/* A shortfall is not a failure and is not a success, and the status word
           says neither. Stated here because the pull request this run opened is
           missing these strings, and the reviewer is about to approve it. */}
       {shortfall > 0 ? (
-        <div className="mt-6 rounded-lg border border-degraded bg-degraded-bg px-4 py-3">
-          <p className="text-body font-medium text-primary">
-            {shortfall} translation{shortfall === 1 ? '' : 's'} missing across
-            the {run.locales_succeeded} language
-            {run.locales_succeeded === 1 ? '' : 's'} that answered
-          </p>
-          <p className="mt-1 max-w-[68ch] text-small leading-6 text-secondary">
-            {owed} were expected — {run.keys_extracted} string
-            {run.keys_extracted === 1 ? '' : 's'} in each. The missing ones are
-            absent from the files this run proposed, not translated badly.
-            Running again attempts only what is still missing.
-          </p>
-        </div>
+        <Alert
+          tone="degraded"
+          size="section"
+          className="mt-6"
+          heading={
+            <>
+              {shortfall} translation{shortfall === 1 ? '' : 's'} missing across
+              the {run.locales_succeeded} language
+              {run.locales_succeeded === 1 ? '' : 's'} that answered
+            </>
+          }
+        >
+          {owed} were expected — {run.keys_extracted} string
+          {run.keys_extracted === 1 ? '' : 's'} in each. The missing ones are
+          absent from the files this run proposed, not translated badly. Running
+          again attempts only what is still missing.
+        </Alert>
       ) : null}
 
       <PageSection
@@ -332,22 +432,35 @@ export default async function RunDetailPage({ params }: Params) {
                 return (
                   <li
                     key={locale}
-                    className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-subtle py-3 first:border-t-0"
+                    /*
+                     * Columns, not `justify-between`.
+                     *
+                     * Three children spread across the full width put the badge
+                     * at a different x on every row — its position was a
+                     * function of how long the language name happened to be, so
+                     * a reader scanning states had to read each row instead of
+                     * the column. Fixed widths from `sm` up align them; below
+                     * it they wrap, which is what §12 asks for rather than
+                     * shrinking a desktop row.
+                     */
+                    className="flex flex-wrap items-baseline gap-x-4 gap-y-1.5 border-t border-subtle py-3 first:border-t-0"
                   >
-                    <span className="font-medium text-primary">
+                    <span className="min-w-0 flex-1 truncate font-medium text-primary">
                       {localeDisplayName(locale)}{' '}
                       <span className="font-mono text-caption text-tertiary">
                         {locale}
                       </span>
                     </span>
-                    {waiting > 0 ? (
-                      <Badge tone="ambiguous">
-                        {waiting} question{waiting === 1 ? '' : 's'}
-                      </Badge>
-                    ) : (
-                      <Badge tone="confident">Translated</Badge>
-                    )}
-                    <span className="font-mono text-caption tabular-nums text-secondary">
+                    <span className="shrink-0 sm:w-[10rem]">
+                      {waiting > 0 ? (
+                        <Badge tone="ambiguous">
+                          {waiting} question{waiting === 1 ? '' : 's'}
+                        </Badge>
+                      ) : (
+                        <Badge tone="confident">Translated</Badge>
+                      )}
+                    </span>
+                    <span className="shrink-0 font-mono text-caption tabular-nums text-secondary sm:w-[4.5rem] sm:text-end">
                       {count} key{count === 1 ? '' : 's'}
                     </span>
                   </li>
@@ -361,16 +474,18 @@ export default async function RunDetailPage({ params }: Params) {
             {unattempted.sort().map((locale) => (
               <li
                 key={locale}
-                className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-subtle py-3 first:border-t-0"
+                className="flex flex-wrap items-baseline gap-x-4 gap-y-1.5 border-t border-subtle py-3 first:border-t-0"
               >
-                <span className="font-medium text-primary">
+                <span className="min-w-0 flex-1 truncate font-medium text-primary">
                   {localeDisplayName(locale)}{' '}
                   <span className="font-mono text-caption text-tertiary">
                     {locale}
                   </span>
                 </span>
-                <Badge tone="failed">No proposals</Badge>
-                <span className="font-mono text-caption tabular-nums text-secondary">
+                <span className="shrink-0 sm:w-[10rem]">
+                  <Badge tone="failed">No proposals</Badge>
+                </span>
+                <span className="shrink-0 font-mono text-caption tabular-nums text-secondary sm:w-[4.5rem] sm:text-end">
                   0 keys
                 </span>
               </li>
@@ -389,20 +504,6 @@ export default async function RunDetailPage({ params }: Params) {
           description="Every string this run would write, exactly as it would write it."
         >
           <ProposalsTable proposals={proposals} />
-        </PageSection>
-      ) : null}
-
-      {/* Verbatim, per DESIGN.md §8: the provider's own wording is what a
-          customer will search for. One error per run, not per locale — that is
-          what the pipeline records. */}
-      {run.error ? (
-        <PageSection
-          title="What failed"
-          description="Reported exactly as the provider returned it."
-        >
-          <pre className="overflow-x-auto rounded-lg border border-failed bg-failed-bg px-4 py-3 font-mono text-caption leading-5 text-secondary">
-            {run.error}
-          </pre>
         </PageSection>
       ) : null}
     </Page>

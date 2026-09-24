@@ -8,7 +8,7 @@ import {
 } from '@/lib/data/workspace';
 import { readGitHubApp } from '@/lib/github/config';
 import { loadFunnel } from '@/lib/metrics/load';
-import { Badge } from '@localize-infra/ui';
+
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import Link from 'next/link';
@@ -18,6 +18,7 @@ import { DeletedToast } from './deleted-toast';
 import { GitHubConnection } from './github-connection';
 import { GitHubResult } from './github-result';
 import { NewProject } from './new-project';
+import { ProjectList } from './project-list';
 
 export const metadata: Metadata = { title: 'Projects' };
 
@@ -95,58 +96,22 @@ export default async function ProjectsPage({
       <DeletedToast slug={deleted} />
       <GitHubResult reason={github} />
 
-      <GitHubConnection
-        organizationId={organization.id}
-        appSlug={appSlug}
-        appOrigin={appOrigin}
-        connected={installation}
-      />
-
       {/*
-        Offered only until the workspace has opened a pull request. A guided
-        path that keeps advertising itself after it is finished is chrome, and
-        DESIGN.md §9 charges rent for chrome on every screen forever.
+        The page leads with its subject.
+        ────────────────────────────────
+        It used to open with the GitHub panel, then two link paragraphs, then an
+        activation funnel, and reach the projects fourth — three bordered
+        surfaces at one weight before the thing the page is named after. §4.6
+        prices vertical density; the cost here was ordering, paid on every visit
+        by every reader who already finished setup.
+
+        Setup now sits below the work, and the activation funnel below that.
+        Nothing is deleted: every number the page reported, it still reports.
       */}
-      {funnel.activated ? (
-        <p className="mt-3 text-small text-secondary">
-          Working from the command line?{' '}
-          <Link
-            href={`/${org}/tokens`}
-            className="text-link underline underline-offset-2 hover:text-link-hover"
-          >
-            Create a personal CLI token
-          </Link>
-          .
-        </p>
-      ) : (
-        <p className="mt-3 text-small text-secondary" data-testid="start-here">
-          New here?{' '}
-          <Link
-            href={`/${org}/start`}
-            className="text-link underline underline-offset-2 hover:text-link-hover"
-          >
-            Follow the guided path to your first pull request
-          </Link>{' '}
-          — it says which step is next and what each refusal means.
-        </p>
-      )}
-
-      <p className="mt-3 text-small text-secondary">
-        <Link
-          href={`/${org}/usage`}
-          className="text-link underline underline-offset-2 hover:text-link-hover"
-        >
-          Usage
-        </Link>{' '}
-        — what this workspace has spent against the hosted API's daily ceiling.
-      </p>
-
-      <Activation funnel={funnel} />
-
       {projects.length === 0 ? (
         // Names what is missing and offers exactly one way to create it
         // (DESIGN.md §8).
-        <div className="mt-6 rounded-lg border border-line bg-surface/40 px-6 py-12 text-center">
+        <div className="mt-8 rounded-lg border border-line bg-surface/40 px-6 py-12 text-center">
           <p className="text-subtitle font-semibold text-primary">
             No projects yet
           </p>
@@ -159,33 +124,54 @@ export default async function ProjectsPage({
           </div>
         </div>
       ) : (
-        <ul className="mt-6 border-t border-subtle">
-          {projects.map((project) => (
-            <li key={project.id} className="border-b border-subtle">
-              <Link
-                href={`/${org}/projects/${project.slug}`}
-                className="flex items-baseline gap-4 px-1 py-3.5 transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-body font-medium text-primary">
-                    {project.name}
-                  </span>
-                  <span className="mt-0.5 block font-mono text-caption text-tertiary">
-                    {project.slug}
-                  </span>
-                </span>
-                <span className="shrink-0">
-                  <Badge tone="neutral">{project.source_locale}</Badge>
-                </span>
-                <span className="hidden shrink-0 font-mono text-micro text-tertiary sm:inline">
-                  {project.target_locales.length} target
-                  {project.target_locales.length === 1 ? '' : 's'}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <ProjectList orgSlug={org} projects={projects} />
       )}
+
+      {/*
+        One line where there were two paragraphs.
+        ─────────────────────────────────────────
+        `Working from the command line?` and `Usage —` were separate blocks of
+        body copy, each carrying a link and an explanation, stacked between
+        panels. §9 charges rent for chrome on every screen forever, and prose is
+        the most expensive way to offer a link. Same destinations, same
+        conditions, one scannable row.
+      */}
+      <nav
+        aria-label="Workspace"
+        className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-subtle pt-4 text-small"
+      >
+        {funnel.activated ? (
+          <Link
+            href={`/${org}/tokens`}
+            className="text-link underline-offset-4 hover:underline"
+          >
+            Create a CLI token
+          </Link>
+        ) : (
+          <Link
+            href={`/${org}/start`}
+            data-testid="start-here"
+            className="text-link underline-offset-4 hover:underline"
+          >
+            Follow the guided path to your first pull request
+          </Link>
+        )}
+        <Link
+          href={`/${org}/usage`}
+          className="text-link underline-offset-4 hover:underline"
+        >
+          Usage against the daily ceiling
+        </Link>
+      </nav>
+
+      <GitHubConnection
+        organizationId={organization.id}
+        appSlug={appSlug}
+        appOrigin={appOrigin}
+        connected={installation}
+      />
+
+      <Activation funnel={funnel} />
     </Page>
   );
 }

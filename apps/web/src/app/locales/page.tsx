@@ -4,8 +4,9 @@ import {
   listLocaleCoverageForViewer,
   requireSession,
 } from '@/lib/data/workspace';
+import { summariseCoverage } from '@/lib/locales/summary';
 import { isSupabaseConfigured } from '@/lib/supabase/env';
-import { EmptyState } from '@localize-infra/ui';
+import { EmptyState, StateRule } from '@localize-infra/ui';
 import type { Metadata } from 'next';
 import { LocaleCoverageList } from './locale-coverage-list';
 
@@ -46,7 +47,7 @@ export default async function LocalesPage() {
   await requireSession();
   const coverage = await listLocaleCoverageForViewer();
 
-  const behind = coverage.filter((l) => l.translated < l.total).length;
+  const summary = summariseCoverage(coverage);
   const sourceStrings = coverage[0]?.total ?? 0;
 
   return (
@@ -59,7 +60,6 @@ export default async function LocalesPage() {
             <>
               <PageMeta label="Languages">{coverage.length}</PageMeta>
               <PageMeta label="Source strings">{sourceStrings}</PageMeta>
-              <PageMeta label="Behind">{behind}</PageMeta>
             </>
           ) : null
         }
@@ -73,9 +73,51 @@ export default async function LocalesPage() {
           />
         </div>
       ) : (
-        <div className="mt-6">
-          <LocaleCoverageList items={coverage} />
-        </div>
+        <>
+          {/*
+            The answer, before the arithmetic.
+            ──────────────────────────────────
+            The page opened with `Languages · Source strings · Behind` — three
+            numbers at one weight — and then a list. A reader arrives asking
+            whether their product is current everywhere, and was handed the
+            operands. §3.5: the surface had no dominant element.
+
+            Derived from the same rows the list renders, so the band and the
+            list cannot disagree; there is nothing stored to drift.
+          */}
+          {summary ? (
+            <StateRule
+              tone={summary.tone}
+              className="mt-6 rounded-e-lg bg-surface/40 py-5 pe-5"
+            >
+              <p className="text-title font-semibold text-primary">
+                {summary.headline}
+              </p>
+              <p className="mt-1.5 max-w-[68ch] text-small leading-6 text-secondary">
+                {summary.detail}
+              </p>
+            </StateRule>
+          ) : null}
+
+          {/*
+            Said once, not once per language.
+            `listLocaleCoverageForViewer` takes `limit(1)`: every row on this
+            page comes from the same run, and each row used to repeat its date.
+          */}
+          {coverage[0]?.lastRunAt ? (
+            <p className="mt-6 text-caption text-tertiary">
+              Coverage from the run of{' '}
+              <span className="font-mono">
+                {new Date(coverage[0].lastRunAt).toISOString().slice(0, 10)}
+              </span>
+              , the most recent one that extracted anything.
+            </p>
+          ) : null}
+
+          <div className="mt-3">
+            <LocaleCoverageList items={coverage} />
+          </div>
+        </>
       )}
     </Page>
   );

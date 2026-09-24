@@ -260,9 +260,35 @@
   été relue**, d'où les tests e2e lancés avec les deux valeurs de
   `CLI_PERSONAL_TOKENS_LIVE`.
 
-- `apps/web` (propriétaire) — coquille applicative : barre latérale 240 px
-  (feuille latérale sous 1024 px), barre supérieure 48 px, palette de commandes
-  ⌘K, et la galerie `/design` qui rend toute la bibliothèque de composants.
+- `apps/web` (propriétaire) — coquille applicative : barre latérale **256 px**
+  (feuille latérale de 288 px sous 768 px, rail de 48 px repliée), barre
+  supérieure 48 px, palette de commandes ⌘K, et la galerie `/design` qui rend
+  toute la bibliothèque de composants.
+
+  **Ce point disait « 240 px, feuille latérale sous 1024 px ». Les deux
+  chiffres étaient faux.** Mesurée dans le navigateur pendant l'audit visuel du
+  2026-09-20 : 256 px. La source est `SIDEBAR_WIDTH = '16rem'`
+  (`components/ui/sidebar.tsx`) et le basculement est `MOBILE_BREAKPOINT = 768`,
+  la barre desktop étant en `md:block`. Ni 240 ni 1024 n'y figurent nulle part —
+  ils décrivaient la coquille écrite à la main que shadcn a remplacée, et ils
+  ont survécu au remplacement, dans la même phrase, sans que personne les
+  relise. C'est l'écart qu'aucun test n'attrape : personne n'écrit d'assertion
+  sur une phrase.
+
+  **La palette n'offrait pas l'OLED.** `ThemeToggle` proposait quatre schémas
+  depuis la livraison de #110, la palette trois — deux contrôles à quelques
+  pixels l'un de l'autre, en désaccord sur le nombre de thèmes du produit, et
+  celui qui manquait était le plus récent. Rien ne pouvait le voir : deux
+  tableaux littéraux, aucun n'important l'autre, et appeler `setTheme` trois
+  fois sur quatre n'est pas une erreur de type. Un test compare désormais les
+  deux listes.
+
+  **`/login` déconnectée rendait toute la coquille** — navigation de workspace,
+  badge « 3 » sur Review, note de pied sur les données d'exemple — autour du
+  formulaire de connexion, pour un visiteur dont chaque lien renvoyait au
+  formulaire qu'il regardait. Le layout racine le sait désormais par un
+  en-tête `x-pathname` posé par le proxy, lu contre `isPublicPath` — la même
+  liste blanche que le proxy applique, exportée plutôt que recopiée.
   **Ce point disait « six de ses sept routes déclarent qu'elles ne sont pas
   construites », et qu'un test e2e vérifiait que chacune le dit. Les deux sont
   périmés.** Il en reste **une**, `/[org]/billing`, et le test qui gardait la
